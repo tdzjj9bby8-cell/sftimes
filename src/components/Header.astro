@@ -6,32 +6,34 @@ export interface Props {
 const { variant = 'solid', current = '' } = Astro.props;
 
 const nav = [
-  { label: 'Stories', href: '/stories' },
-  { label: 'Best Of', href: '/best-of' },
-  { label: 'Hidden Spots', href: '/hidden-spots' },
-  { label: 'Quizzes', href: '/quizzes' },
-  { label: 'About', href: '/about' },
-  { label: 'Support', href: '/support' },
+  { label: 'stories', href: '/stories' },
+  { label: 'best of', href: '/best-of' },
+  { label: 'hidden spots', href: '/hidden-spots' },
+  { label: 'quizzes', href: '/quizzes' },
+  { label: 'about', href: '/about' },
+  { label: 'support', href: '/support' },
 ];
 ---
 
 <header class={`site-header site-header--${variant}`} data-variant={variant}>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="site-header__inner container">
-    <a class="site-header__wordmark" href="/" aria-label="SF Times. The Keepers.">
-      <span class="wordmark-text">SF Times.</span>
-      <span class="wordmark-sub">The Keepers.</span>
+    <a class="site-header__wordmark" href="/" aria-label="the keepers. — SF Times">
+      <span class="wordmark-text">the keepers.</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
       <ul class="site-nav__list">
-        {nav.map((item) => (
-          <li>
-            <a
-              href={item.href}
-              class={`site-nav__link ${current === item.label.toLowerCase() ? 'is-active' : ''}`}
-            >{item.label}</a>
-          </li>
-        ))}
+        {nav.map((item) => {
+          const slug = item.label.replace(' ', '-');
+          return (
+            <li>
+              <a
+                href={item.href}
+                class={`site-nav__link ${current === slug || current === item.label ? 'is-active' : ''}`}
+              >{item.label}</a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
     <button class="site-header__menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -55,18 +57,30 @@ const nav = [
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: background var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
+    transition: background var(--t-fast) var(--ease-out),
+                border-color var(--t-fast) var(--ease-out),
+                color var(--t-fast) var(--ease-out),
+                padding var(--t-fast) var(--ease-out);
   }
   .site-header--solid {
     background: var(--bg);
+    color: var(--ink);
     border-bottom: 1px solid var(--rule);
   }
+  /* Transparent variant lifts out of flow entirely so the hero photo runs
+     edge-to-edge from the top of the viewport. On scroll past 60px the
+     is-scrolled class flips it solid. */
   .site-header--transparent {
+    position: fixed;
+    left: 0;
+    right: 0;
     background: transparent;
+    color: var(--bg);
     border-bottom: 1px solid transparent;
   }
   .site-header--transparent.is-scrolled {
     background: var(--bg);
+    color: var(--ink);
     border-bottom-color: var(--rule);
   }
   .site-header__inner {
@@ -76,25 +90,23 @@ const nav = [
     gap: var(--s-5);
     padding-block: var(--s-4);
   }
+  .site-header--transparent .site-header__inner { padding-block: var(--s-5); }
+  .site-header--transparent.is-scrolled .site-header__inner { padding-block: var(--s-3); }
+
   .site-header__wordmark {
     display: inline-flex;
-    flex-direction: column;
-    line-height: 1;
+    align-items: baseline;
+    color: inherit;
   }
   .wordmark-text {
     font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
-  .wordmark-sub {
-    font-family: var(--font-ui);
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--fog);
-    margin-top: 2px;
-  }
+
   .site-nav__list {
     list-style: none;
     margin: 0;
@@ -105,19 +117,21 @@ const nav = [
   }
   .site-nav__link {
     font-family: var(--font-ui);
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ink);
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    color: inherit;
     position: relative;
     padding-block: 4px;
+    opacity: 0.85;
+    transition: opacity var(--t-fast) var(--ease-out);
   }
+  .site-nav__link:hover, .site-nav__link.is-active { opacity: 1; }
   .site-nav__link::after {
     content: '';
     position: absolute;
     inset: auto 50% -2px 50%;
     height: 1px;
-    background: var(--ink);
+    background: currentColor;
     transition: inset var(--t-fast) var(--ease-out);
   }
   .site-nav__link:hover::after,
@@ -134,19 +148,21 @@ const nav = [
     justify-content: center;
     align-items: center;
     gap: 5px;
+    color: inherit;
   }
   .site-header__menu-toggle span {
     display: block;
     width: 22px;
     height: 1.5px;
-    background: var(--ink);
+    background: currentColor;
     transition: transform var(--t-fast) var(--ease-out), opacity var(--t-fast) var(--ease-out);
   }
   .mobile-menu {
     position: fixed;
     inset: 0 0 0 auto;
-    width: min(80vw, 360px);
+    width: min(82vw, 380px);
     background: var(--bg);
+    color: var(--ink);
     transform: translateX(100%);
     transition: transform 300ms var(--ease-out);
     z-index: 99;
@@ -157,8 +173,11 @@ const nav = [
   .mobile-menu li + li { margin-top: var(--s-3); }
   .mobile-menu a {
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-weight: 400;
+    font-size: 1.875rem;
     color: var(--ink);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
 
   @media (max-width: 880px) {

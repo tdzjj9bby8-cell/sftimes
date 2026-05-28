@@ -1,39 +1,539 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-const quizzes = [
-  { slug: 'mbti', name: 'MBTI', deck: '60 questions across 4 axes. Result links to your reading list.' },
-  { slug: 'enneagram', name: 'Enneagram', deck: '36 questions. 9 types. Top-three breakdown at the end.' },
-  { slug: 'blood-type', name: 'Blood type', deck: '20 forced-choice questions. The Japanese personality system.' },
-  { slug: 'love-languages', name: 'Love languages', deck: 'Five-language inventory. Three minutes.' },
-  { slug: 'strengths', name: 'Strengths', deck: 'Character strengths inventory tied to a reading list.' },
+
+// "Guess the keeper" is the headline experience; the five personality
+// quizzes carry forward from the prior site as more-quizzes tiles below.
+const questions = [
+  {
+    kicker: 'banchan, eleven dishes, every morning',
+    q: 'this keeper has run an unnamed restaurant on geary since 1987. what corner of the city is it in?',
+    opts: [
+      { letter: 'a', text: 'inner richmond', correct: true },
+      { letter: 'b', text: 'outer sunset' },
+      { letter: 'c', text: 'japantown' },
+      { letter: 'd', text: 'mission' },
+    ],
+    reveal: {
+      right: 'inner richmond. the basement walk-in on geary is the answer.',
+      body: 'Mrs. Kim opened the place in 1987 a block off the boulevard. She never put up a sign. The fridge fits eleven banchan dishes and that is the menu.',
+    },
+    photo: 'food',
+  },
+  {
+    kicker: 'sourdough starter, kept alive since 1979',
+    q: 'arno deleon has been baking the same loaf for forty-six years on which street?',
+    opts: [
+      { letter: 'a', text: 'irving' },
+      { letter: 'b', text: 'noriega' },
+      { letter: 'c', text: 'judah', correct: true },
+      { letter: 'd', text: 'taraval' },
+    ],
+    reveal: {
+      right: 'judah. the bakery sits between 39th and 40th and opens at 5am.',
+      body: 'The starter is older than most of his customers. He keeps it in a tupperware in a fridge that has not been cleaned out since the carter administration.',
+    },
+    photo: 'bread',
+  },
+  {
+    kicker: 'a bell, rung at noon, every sunday',
+    q: 'sister thien rings the bell at noon at which mission corner?',
+    opts: [
+      { letter: 'a', text: '24th and york' },
+      { letter: 'b', text: '22nd and shotwell', correct: true },
+      { letter: 'c', text: '16th and valencia' },
+      { letter: 'd', text: '20th and folsom' },
+    ],
+    reveal: {
+      right: '22nd and shotwell. you can hear it from three blocks over if the wind is right.',
+      body: 'She has rung the bell every sunday at noon since 1992. The parish has tried to automate it twice. She has refused twice.',
+    },
+    photo: 'street',
+  },
 ];
+
+const moreQuizzes = [
+  { slug: 'mbti', kicker: 'quiz №2', name: 'which keeper are you?', name_em: 'are you', deck: '60 questions across 4 axes. The result writes you a reading list.' },
+  { slug: 'enneagram', kicker: 'quiz №4', name: 'name the neighborhood from the front door', name_em: 'neighborhood', deck: '10 photographs, 5 minutes. Bring local knowledge.' },
+  { slug: 'love-languages', kicker: 'quiz №5', name: 'which kitchen made this dish?', name_em: 'kitchen', deck: '8 photos. Salty, sweet, savory, sour. Three minutes.' },
+];
+
+function withEm(text: string, em?: string) {
+  if (!em) return text;
+  return text.replace(em, `<em>${em}</em>`);
+}
 ---
-<BaseLayout title="Quizzes — SF Times" description="Five personality quizzes. Each result writes a reading list." current="quizzes">
-  <div class="container container-narrow page">
-    <p class="ui-label">Quizzes</p>
-    <h1>Find out what kind of San Franciscan you are.</h1>
-    <p class="lead">Five short personality quizzes in SF Times voice. Each result writes a custom reading list of stories and Best Of lists that match. Three to five minutes each.</p>
-    <ul class="quiz-list">
-      {quizzes.map((q) => (
-        <li class="quiz-item">
-          <a href={`/quizzes/${q.slug}`}>
-            <h2>{q.name}</h2>
-            <p>{q.deck}</p>
-            <span class="ui-label">Take the quiz →</span>
-          </a>
-        </li>
+
+<BaseLayout
+  title="quizzes — the keepers."
+  description="Guess the keeper. Five photographs, five questions. We tell you what they hold."
+  current="quizzes"
+>
+
+  <section class="qz-hero container">
+    <p class="ui-label qz-hero__eyebrow">quiz №3 · the identify series</p>
+    <h1 class="qz-hero__title">guess the <em>keeper</em>.</h1>
+    <p class="qz-hero__sub">
+      Three photographs, three questions. We tell you what they keep. You tell us who they are and which corner of the city they hold.
+    </p>
+  </section>
+
+  <section class="qz-stage container" id="qz-stage" data-questions={JSON.stringify(questions)}>
+    <div class="qz-bar">
+      <div class="qz-bar__progress" id="qz-progress"></div>
+      <div class="qz-bar__count"><span id="qz-num">1</span> of <span id="qz-tot">{questions.length}</span></div>
+    </div>
+
+    <div class="qz-card" id="qz-card"></div>
+
+    <div class="qz-final" id="qz-final">
+      <p class="qz-final__score"><span id="qz-scoreNum">0</span><em> / {questions.length}</em></p>
+      <p class="qz-final__verdict" id="qz-verdict">a fair guesser.</p>
+      <button class="qz-final__restart" id="qz-restart" type="button">try again →</button>
+    </div>
+  </section>
+
+  <section class="qz-more container">
+    <h2 class="qz-more__head">more quizzes.</h2>
+    <div class="qz-grid">
+      {moreQuizzes.map((q) => (
+        <a class="qz-tile" href={`/quizzes/${q.slug}`}>
+          <p class="qz-tile__kicker">{q.kicker}</p>
+          <h3 class="qz-tile__name" set:html={withEm(q.name, q.name_em)} />
+          <p class="qz-tile__deck">{q.deck}</p>
+          <span class="qz-tile__cta">take the quiz →</span>
+        </a>
       ))}
-    </ul>
-    <p class="ui-label">Quiz pages port forward from the current site in v1.1.</p>
-  </div>
+    </div>
+    <p class="qz-more__legacy">
+      Looking for the legacy personality quizzes?
+      <a href="/quizzes/mbti">mbti</a> ·
+      <a href="/quizzes/enneagram">enneagram</a> ·
+      <a href="/quizzes/blood-type">blood type</a> ·
+      <a href="/quizzes/love-languages">love languages</a> ·
+      <a href="/quizzes/strengths">strengths</a>.
+    </p>
+  </section>
+
 </BaseLayout>
 
 <style>
-  .page { padding-block: var(--s-9); }
-  .page h1 { margin-block: var(--s-3) var(--s-5); }
-  .page .lead { font-size: 1.125rem; color: var(--ink-soft); margin-bottom: var(--s-7); }
-  .quiz-list { list-style: none; padding: 0; display: grid; gap: var(--s-4); }
-  .quiz-item a { display: block; padding: var(--s-5); background: var(--paper); color: var(--ink); }
-  .quiz-item h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 0; }
-  .quiz-item p { margin: var(--s-2) 0 var(--s-3); color: var(--ink-soft); }
+  /* HERO — slim, paper, text-led */
+  .qz-hero {
+    padding-top: var(--s-9);
+    padding-bottom: var(--s-6);
+    border-bottom: 1px solid var(--rule);
+  }
+  .qz-hero__eyebrow { margin-bottom: var(--s-4); color: var(--ink-soft); }
+  .qz-hero__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 5.5vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.022em;
+    margin: 0 0 var(--s-4);
+    max-width: 20ch;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .qz-hero__title em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-hero__sub {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  /* STAGE */
+  .qz-stage { padding-block: var(--s-7); }
+  .qz-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--s-5);
+  }
+  .qz-bar__progress { display: flex; gap: 8px; }
+  .qz-bar__progress .dot {
+    width: 32px; height: 4px;
+    background: var(--rule);
+    transition: background var(--t-fast) var(--ease-out);
+  }
+  .qz-bar__progress .dot.is-done { background: var(--terracotta); }
+  .qz-bar__progress .dot.is-current { background: var(--ink); }
+  .qz-bar__count {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    color: var(--fog);
+  }
+
+  .qz-card {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .qz-photo {
+    aspect-ratio: 4/5;
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .qz-photo svg { width: 100%; height: 100%; display: block; }
+  .qz-photo__stamp {
+    position: absolute;
+    top: 18px; left: 18px;
+    border: 1px solid rgba(244,241,234,0.55);
+    padding: 6px 11px 5px;
+    font-family: var(--font-ui);
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    color: var(--bg);
+  }
+
+  .qz-q__kicker {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    color: var(--fog);
+    margin: 0 0 var(--s-3);
+  }
+  .qz-q__question {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: 0 0 var(--s-6);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .qz-q__question :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-options { display: grid; gap: 10px; }
+  .qz-option {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-4) var(--s-5);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    color: var(--ink);
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .qz-option:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: var(--paper);
+  }
+  .qz-option:disabled { cursor: default; }
+  .qz-option__letter {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.375rem;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+    line-height: 1;
+    min-width: 22px;
+  }
+  .qz-option.is-correct {
+    background: #e8efe2;
+    border-color: #5e7053;
+    color: #2a3624;
+  }
+  .qz-option.is-correct .qz-option__letter { color: #5e7053; }
+  .qz-option.is-wrong {
+    background: #f3e3df;
+    border-color: var(--terracotta);
+    color: #5a2516;
+  }
+  .qz-option.is-wrong .qz-option__letter { color: var(--terracotta); }
+
+  .qz-reveal {
+    margin-top: var(--s-5);
+    padding: var(--s-5);
+    background: var(--paper);
+    border-left: 3px solid var(--terracotta);
+    display: none;
+  }
+  .qz-reveal.is-on { display: block; }
+  .qz-reveal__verdict {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.25rem;
+    margin: 0 0 var(--s-2);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-reveal__verdict.is-right { color: #5e7053; }
+  .qz-reveal__verdict.is-wrong { color: var(--terracotta); }
+  .qz-reveal__body {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 var(--s-4);
+  }
+  .qz-reveal__next {
+    background: var(--ink);
+    color: var(--bg);
+    border: 0;
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background var(--t-fast) var(--ease-out);
+  }
+  .qz-reveal__next:hover { background: var(--terracotta); }
+
+  /* FINAL */
+  .qz-final {
+    display: none;
+    text-align: center;
+    padding: var(--s-9) 0;
+  }
+  .qz-final.is-on { display: block; }
+  .qz-final__score {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(4rem, 10vw, 8rem);
+    line-height: 1;
+    margin: 0 0 var(--s-4);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .qz-final__score em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-final__verdict {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    margin: 0 0 var(--s-6);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-final__restart {
+    background: var(--ink);
+    color: var(--bg);
+    border: 0;
+    padding: var(--s-4) var(--s-6);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background var(--t-fast) var(--ease-out);
+  }
+  .qz-final__restart:hover { background: var(--terracotta); }
+
+  /* MORE QUIZZES */
+  .qz-more {
+    padding-block: var(--s-8);
+    border-top: 1px solid var(--rule);
+  }
+  .qz-more__head {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    margin: 0 0 var(--s-6);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-5);
+  }
+  .qz-tile {
+    display: block;
+    padding: var(--s-6) var(--s-5);
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    transition: border-color var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+    color: var(--ink);
+  }
+  .qz-tile:hover { border-color: var(--ink); background: var(--paper); }
+  .qz-tile__kicker {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    color: var(--terracotta);
+    margin: 0 0 var(--s-3);
+  }
+  .qz-tile__name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.375rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--s-3);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .qz-tile__name :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-tile__deck {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0 0 var(--s-3);
+  }
+  .qz-tile__cta {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+  }
+  .qz-tile:hover .qz-tile__cta { color: var(--terracotta); border-color: var(--terracotta); }
+  .qz-more__legacy {
+    margin-top: var(--s-6);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--fog);
+  }
+  .qz-more__legacy a { color: var(--ink-soft); border-bottom: 1px solid var(--rule); padding-bottom: 1px; }
+  .qz-more__legacy a:hover { color: var(--terracotta); border-color: var(--terracotta); }
+
+  @media (max-width: 880px) {
+    .qz-hero { padding-top: var(--s-7); }
+    .qz-card { grid-template-columns: 1fr; gap: var(--s-5); }
+    .qz-grid { grid-template-columns: 1fr; }
+  }
 </style>
+
+<script>
+  // Pull questions JSON from the stage element to avoid SSR/CSR mismatches
+  const stage = document.getElementById('qz-stage');
+  if (stage) {
+    const questions = JSON.parse(stage.dataset.questions || '[]');
+    const card = document.getElementById('qz-card');
+    const final = document.getElementById('qz-final');
+    const progress = document.getElementById('qz-progress');
+    const qnum = document.getElementById('qz-num');
+    let idx = 0;
+    let score = 0;
+
+    function buildProgress() {
+      if (!progress) return;
+      progress.innerHTML = '';
+      questions.forEach((_: any, i: number) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i < idx ? ' is-done' : (i === idx ? ' is-current' : ''));
+        progress.appendChild(d);
+      });
+    }
+
+    function photoSvg(kind: string, seed: number) {
+      const filt = `<defs><filter id="qg${seed}"><feTurbulence baseFrequency="0.9" numOctaves="2" seed="${seed}"/><feColorMatrix values="0 0 0 0 0.93  0 0 0 0 0.9  0 0 0 0 0.83  0 0 0 0.55 0"/></filter></defs>`;
+      if (kind === 'food') {
+        return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">${filt}<rect width="400" height="500" fill="#2a201a"/><circle cx="200" cy="240" r="120" fill="#5d4a37"/><circle cx="150" cy="220" r="22" fill="#3a2a20"/><circle cx="220" cy="240" r="22" fill="#2a3624"/><circle cx="180" cy="280" r="22" fill="#5a2820"/><circle cx="240" cy="200" r="22" fill="#4a3a20"/><rect width="400" height="500" filter="url(#qg${seed})" opacity="0.55"/></svg>`;
+      }
+      if (kind === 'bread') {
+        return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">${filt}<rect width="400" height="500" fill="#2a2218"/><ellipse cx="200" cy="280" rx="150" ry="100" fill="#8a6840"/><ellipse cx="200" cy="265" rx="135" ry="85" fill="#a07a4a"/><path d="M 140 240 L 260 240 M 150 270 L 250 270 M 145 295 L 255 295" stroke="#5a3a20" stroke-width="2" opacity="0.5"/><rect width="400" height="500" filter="url(#qg${seed})" opacity="0.55"/></svg>`;
+      }
+      return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">${filt}<rect width="400" height="500" fill="#1f2820"/><rect x="60" y="120" width="120" height="280" fill="#3a4a3a"/><rect x="220" y="80" width="140" height="320" fill="#2a3424"/><rect x="0" y="380" width="400" height="120" fill="#181c14"/><rect width="400" height="500" filter="url(#qg${seed})" opacity="0.55"/></svg>`;
+    }
+
+    function render() {
+      if (!card) return;
+      if (idx >= questions.length) {
+        card.style.display = 'none';
+        const bar = document.querySelector<HTMLElement>('.qz-bar');
+        if (bar) bar.style.display = 'none';
+        final?.classList.add('is-on');
+        const scoreNum = document.getElementById('qz-scoreNum');
+        const verdict = document.getElementById('qz-verdict');
+        if (scoreNum) scoreNum.textContent = String(score);
+        if (verdict) {
+          const v = score === questions.length ? 'a true keeper.' :
+                    score >= Math.ceil(questions.length / 2) ? 'a fair guesser.' :
+                    'visitor permit. try again.';
+          verdict.textContent = v;
+        }
+        return;
+      }
+      const q = questions[idx];
+      buildProgress();
+      if (qnum) qnum.textContent = String(idx + 1);
+      const nextLabel = idx + 1 === questions.length ? 'see your score →' : 'next question →';
+      card.innerHTML = `
+        <div class="qz-photo">
+          ${photoSvg(q.photo, idx * 7 + 3)}
+          <div class="qz-photo__stamp">question ${String(idx + 1).padStart(2,'0')}</div>
+        </div>
+        <div class="qz-q">
+          <p class="qz-q__kicker">${q.kicker}</p>
+          <h2 class="qz-q__question">${q.q}</h2>
+          <div class="qz-options">
+            ${q.opts.map((o: any, i: number) => `<button class="qz-option" data-i="${i}" type="button"><span class="qz-option__letter">${o.letter}.</span><span>${o.text}</span></button>`).join('')}
+          </div>
+          <div class="qz-reveal" id="qz-reveal">
+            <p class="qz-reveal__verdict" id="qz-rv"></p>
+            <p class="qz-reveal__body" id="qz-rb"></p>
+            <button class="qz-reveal__next" id="qz-next" type="button">${nextLabel}</button>
+          </div>
+        </div>
+      `;
+      card.querySelectorAll<HTMLButtonElement>('.qz-option').forEach((btn) => {
+        btn.addEventListener('click', () => answer(parseInt(btn.dataset.i || '0', 10)));
+      });
+      const next = document.getElementById('qz-next');
+      next?.addEventListener('click', () => { idx++; render(); });
+    }
+
+    function answer(i: number) {
+      const q = questions[idx];
+      const correctIdx = q.opts.findIndex((o: any) => o.correct);
+      const buttons = card?.querySelectorAll<HTMLButtonElement>('.qz-option') || [];
+      buttons.forEach((b, bi) => {
+        b.disabled = true;
+        if (bi === correctIdx) b.classList.add('is-correct');
+        if (bi === i && bi !== correctIdx) b.classList.add('is-wrong');
+      });
+      const reveal = document.getElementById('qz-reveal');
+      const rv = document.getElementById('qz-rv');
+      const rb = document.getElementById('qz-rb');
+      if (i === correctIdx) {
+        score++;
+        if (rv) { rv.textContent = 'correct.'; rv.className = 'qz-reveal__verdict is-right'; }
+      } else {
+        if (rv) { rv.textContent = 'not quite.'; rv.className = 'qz-reveal__verdict is-wrong'; }
+      }
+      if (rb) rb.innerHTML = `<strong>${q.reveal.right}</strong><br>${q.reveal.body}`;
+      reveal?.classList.add('is-on');
+    }
+
+    const restart = document.getElementById('qz-restart');
+    restart?.addEventListener('click', () => {
+      idx = 0; score = 0;
+      if (card) card.style.display = 'grid';
+      const bar = document.querySelector<HTMLElement>('.qz-bar');
+      if (bar) bar.style.display = 'flex';
+      final?.classList.remove('is-on');
+      render();
+    });
+
+    render();
+  }
+</script>

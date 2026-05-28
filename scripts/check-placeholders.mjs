@@ -51,6 +51,15 @@ if (mode === '--post') {
   const offenders = [];
   const skipExt = new Set(['.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif', '.ico', '.woff', '.woff2', '.ttf', '.otf']);
 
+  // What this guard actually cares about: a visible green placeholder rendered
+  // on the page. The Placeholder.astro component marks every visible block with
+  // data-placeholder="true" — that's the canonical signal.
+  //
+  // The literal color value lives in :root as --placeholder-green and gets
+  // inlined into compiled CSS bundles regardless of whether any block renders.
+  // Flagging that would fail every build forever, so the hex/rgb checks are
+  // scoped to .html files only (where a stray inline style would be a real
+  // problem).
   const walk = (dir) => {
     for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, ent.name);
@@ -61,13 +70,16 @@ if (mode === '--post') {
         if (skipExt.has(ext)) continue;
         let txt;
         try { txt = fs.readFileSync(full, 'utf8'); } catch { continue; }
+        const isHtml = ext === '.html' || ext === '.htm';
+        if (!isHtml) continue; // Only rendered HTML is reader-facing.
         const lower = txt.toLowerCase();
-        if (
+        const hasMarker = txt.includes('data-placeholder="true"');
+        const hasLiteral = (
           lower.includes(PLACEHOLDER_HEX_LOWER) ||
           lower.includes(PLACEHOLDER_RGB) ||
-          lower.includes(PLACEHOLDER_RGB_NO_SPACE) ||
-          txt.includes('data-placeholder="true"')
-        ) {
+          lower.includes(PLACEHOLDER_RGB_NO_SPACE)
+        );
+        if (hasMarker || hasLiteral) {
           offenders.push(full.replace(projectRoot + path.sep, ''));
         }
       }

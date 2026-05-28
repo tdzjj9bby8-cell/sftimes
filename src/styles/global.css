@@ -38,10 +38,17 @@
   font-display: swap;
 }
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Variable.woff2') format('woff2-variations');
-  font-weight: 100 900;
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Variable.woff2') format('woff2-variations');
+  font-weight: 100 1000;
   font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Variable-Italic.woff2') format('woff2-variations');
+  font-weight: 100 1000;
+  font-style: italic;
   font-display: swap;
 }
 @font-face {
@@ -57,12 +64,14 @@
   /* Color */
   --bg: #f4f1ea;
   --paper: #ebe6d8;
+  --paper-deep: #e3dcca;
   --ink: #181612;
   --ink-soft: #3a3530;
   --fog: #8a8478;
-  --rule: rgba(24, 22, 18, 0.12);
+  --rule: rgba(24, 22, 18, 0.15);
   --terracotta: #c8542c;
   --pacific: #2c5582;
+  --accent: var(--terracotta);
 
   /* THE NEON-GREEN PLACEHOLDER.
    * Single source of truth. The production build guard scans dist/ for this
@@ -75,7 +84,7 @@
   /* Type */
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Newsreader', Georgia, serif;
-  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-ui: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Type scale */
@@ -112,6 +121,15 @@
   --t-fast: 200ms;
   --t-med: 400ms;
   --t-slow: 700ms;
+
+  /* Breakpoints (mobile-first standard).
+   * Use min-width media queries in components: 480 / 768 / 1024 / 1440.
+   * Existing 880 breakpoint is the historic tablet threshold and still used
+   * by templates that haven't been migrated. */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1440px;
 }
 
 /* ---------- Reset ---------- */
@@ -155,9 +173,24 @@ h4 { font-size: var(--t-h4); }
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--fog);
+}
+/* Keepers utility: italic WONK accent. Drop on any element you want to feel
+ * hand-set and a little off-kilter. Pairs with em inside headlines. */
+.wonk {
+  font-style: italic;
+  font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+}
+/* Keepers utility: lowercase serif stamp ("a keepers essay") */
+.keepers-stamp {
+  display: inline-block;
+  border: 1px solid currentColor;
+  padding: 6px 12px 5px;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
 }
 .mono {
   font-family: var(--font-mono);
@@ -168,12 +201,14 @@ h4 { font-size: var(--t-h4); }
 p { margin: 0 0 var(--s-5); }
 
 /* ---------- Layout primitives ---------- */
-.container {
+.container,
+.container-narrow,
+.container-prose {
   width: 100%;
-  max-width: var(--max);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
+.container { max-width: var(--max); }
 .container-narrow { max-width: var(--max-narrow); }
 .container-prose { max-width: var(--max-prose); }
 .stack > * + * { margin-top: var(--s-5); }

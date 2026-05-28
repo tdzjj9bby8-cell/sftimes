@@ -10,7 +10,12 @@ const { story, size = 'md' } = Astro.props;
 const { data } = story;
 const url = `/stories/${data.url_slug}`;
 const aspect = size === 'lg' ? '5:4' : size === 'sm' ? '4:3' : '5:4';
-const dateStr = data.published.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const dateStr = data.published
+  .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  .toLowerCase();
+const titleHtml = data.title_em
+  ? data.title.replace(data.title_em, `<em>${data.title_em}</em>`)
+  : data.title;
 ---
 
 <a class={`story-card story-card--${size} reveal`} href={url}>
@@ -23,9 +28,9 @@ const dateStr = data.published.toLocaleDateString('en-US', { month: 'short', day
     />
   </div>
   <div class="story-card__meta">
-    <span class="ui-label">Issue {data.issue} · {dateStr} · By {data.author}</span>
+    <span class="ui-label">issue {data.issue} · {dateStr} · by {data.author.toLowerCase()}</span>
   </div>
-  <h3 class="story-card__title">{data.title}</h3>
+  <h3 class="story-card__title" set:html={titleHtml}></h3>
   {data.deck && <p class="story-card__deck">{data.deck}</p>}
 </a>
 
@@ -49,10 +54,17 @@ const dateStr = data.published.toLocaleDateString('en-US', { month: 'short', day
   .story-card__meta { color: var(--fog); }
   .story-card__title {
     font-family: var(--font-display);
-    font-size: clamp(1rem, 1.3vw, 1.25rem);
-    line-height: 1.2;
-    font-weight: 500;
+    font-size: clamp(1.125rem, 1.4vw, 1.375rem);
+    line-height: 1.15;
+    font-weight: 400;
+    letter-spacing: -0.015em;
     margin: 0;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .story-card__title :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
   .story-card__deck {
     font-size: 1rem;

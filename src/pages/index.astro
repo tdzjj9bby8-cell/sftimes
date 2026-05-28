@@ -11,19 +11,21 @@ const featured = stories.find((s) => s.data.is_featured) || stories[0];
 const past = stories.filter((s) => s.slug !== featured.slug).slice(0, 12);
 
 const bestOf = (await getCollection('best-of'));
-const dateLong = featured.data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const dateLong = featured.data.published
+  .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  .toLowerCase();
 const titleHtml = featured.data.title_em
   ? featured.data.title.replace(featured.data.title_em, `<em>${featured.data.title_em}</em>`)
   : featured.data.title;
 ---
 
 <BaseLayout
-  title="SF Times — The Keepers"
+  title="the keepers. — sf times"
   description="One San Francisco keeper every Saturday. The people holding something the city would lose without them. Reader-funded, no parent company, no AI bylines."
   headerVariant="transparent"
   current=""
 >
-  <!-- HERO -->
+  <!-- FULL-BLEED HERO. Photo IS the top of the page. Headline lives inside it. -->
   <section class="home-hero">
     <a class="home-hero__link" href={`/stories/${featured.data.url_slug}`}>
       <div class="home-hero__media">
@@ -34,30 +36,33 @@ const titleHtml = featured.data.title_em
           showLabel={true}
           class="home-hero__placeholder"
         />
+        <div class="home-hero__veil" aria-hidden="true"></div>
       </div>
-      <div class="home-hero__inner container">
-        <p class="ui-label home-hero__eyebrow">
-          This week's feature · Issue {featured.data.issue} · {dateLong}
-        </p>
+      <span class="home-hero__stamp">a keepers essay · №{featured.data.issue}</span>
+      <div class="home-hero__overlay container">
+        <p class="home-hero__eyebrow">issue {featured.data.issue} · {dateLong} · {featured.data.read_minutes}-min read</p>
         <h1 class="home-hero__title" set:html={titleHtml} />
-        <p class="home-hero__deck">{featured.data.deck}</p>
-        <p class="ui-label home-hero__byline">
-          By <strong>{featured.data.author}</strong>
-          {featured.data.photographer && featured.data.photographer !== 'Staff' && (
-            <> · Photographs by <strong>{featured.data.photographer}</strong></>
-          )}
-          · {featured.data.read_minutes}-min read
-        </p>
-        <span class="home-hero__cta">Read the full story →</span>
       </div>
     </a>
+  </section>
+
+  <!-- DECK BLOCK — under the hero, on paper -->
+  <section class="home-deck container">
+    <p class="home-deck__text">{featured.data.deck}</p>
+    <p class="home-deck__byline">
+      by <strong>{featured.data.author}</strong>
+      {featured.data.photographer && featured.data.photographer !== 'Staff' && (
+        <> · photographs by <strong>{featured.data.photographer}</strong></>
+      )}
+    </p>
+    <a class="home-deck__cta" href={`/stories/${featured.data.url_slug}`}>read the full essay →</a>
   </section>
 
   <!-- ARCHIVE GRID -->
   <section class="home-archive container">
     <div class="home-archive__header">
-      <h2 class="section-title">From the archive</h2>
-      <a class="home-archive__view-all" href="/stories">Browse every story →</a>
+      <h2 class="section-title">more keepers</h2>
+      <a class="home-archive__view-all" href="/stories">browse every story →</a>
     </div>
     <div class="home-archive__grid" id="archive-grid">
       {past.map((s, i) => (
@@ -67,16 +72,16 @@ const titleHtml = featured.data.title_em
       ))}
     </div>
     <div class="home-archive__more">
-      <a class="btn-ghost" href="/stories">Load more stories</a>
+      <a class="btn-ghost" href="/stories">load more stories</a>
     </div>
   </section>
 
   <!-- BEST OF -->
   <section class="home-bestof container">
     <div class="home-bestof__header">
-      <h2 class="section-title">Best Of</h2>
+      <h2 class="section-title">best of</h2>
       <p class="home-bestof__intro">
-        Hand-picked lists, refreshed quarterly. Named editors, conflict-of-interest disclosed, no affiliate links.
+        Hand-picked lists, refreshed quarterly. Named editors, conflict of interest disclosed, no affiliate links.
       </p>
     </div>
     <div class="home-bestof__grid">
@@ -90,7 +95,7 @@ const titleHtml = featured.data.title_em
             class="bestof-card__media"
           />
           <h3 class="bestof-card__title">{c.data.title}</h3>
-          <p class="ui-label">Refreshed {c.data.last_refreshed.toLocaleDateString('en-US',{month:'short',year:'numeric'})}</p>
+          <p class="ui-label">refreshed {c.data.last_refreshed.toLocaleDateString('en-US',{month:'short',year:'numeric'}).toLowerCase()}</p>
         </a>
       ))}
     </div>
@@ -100,14 +105,14 @@ const titleHtml = featured.data.title_em
   <section class="home-hidden">
     <div class="container">
       <div class="home-hidden__header">
-        <h2 class="section-title">Hidden Spots</h2>
+        <h2 class="section-title">hidden spots</h2>
         <p class="home-hidden__intro">
           Reader-submitted. Editor-vetted. We protect the place over the page view. If a spot can't handle the traffic, we describe it without naming it.
         </p>
       </div>
       <div class="home-hidden__empty">
         <p>No published hidden spots yet. Be the first.</p>
-        <a class="btn-ghost" href="/submit">Submit a spot</a>
+        <a class="btn-ghost" href="/submit">submit a spot</a>
       </div>
     </div>
   </section>
@@ -115,85 +120,156 @@ const titleHtml = featured.data.title_em
   <!-- NEWSLETTER -->
   <section class="home-newsletter container">
     <div class="home-newsletter__inner">
-      <h2 class="section-title">Saturday letter</h2>
+      <h2 class="section-title">saturday letter</h2>
       <p class="home-newsletter__copy">
         One profile every Saturday. Free for every reader. No spam, no tracking, no parent company.
       </p>
       <form class="home-newsletter__form" action="#" method="post" data-newsletter>
         <label class="visually-hidden" for="newsletter-email">Email address</label>
         <input id="newsletter-email" type="email" name="email" placeholder="you@email.com" required />
-        <button type="submit" class="btn-primary">Subscribe</button>
+        <button type="submit" class="btn-primary">subscribe</button>
       </form>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  /* HERO */
+  /* FULL-BLEED HERO. No top margin trickery. The hero IS the top of the page,
+     and the transparent header floats over it until you scroll. */
   .home-hero {
     position: relative;
-    isolation: isolate;
-    margin-top: calc(-1 * var(--s-7));
-  }
-  .home-hero__link { display: block; color: var(--ink); }
-  .home-hero__media {
-    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    max-height: 900px;
     overflow: hidden;
+    background: var(--ink);
+    isolation: isolate;
+  }
+  .home-hero__link {
+    display: block;
+    height: 100%;
+    color: var(--bg);
+  }
+  .home-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
   }
   .home-hero__media :global(.placeholder) {
+    height: 100%;
+    aspect-ratio: auto !important;
     transition: transform 700ms var(--ease-out);
   }
   .home-hero__link:hover .home-hero__media :global(.placeholder) {
     transform: scale(1.02);
   }
-  .home-hero__inner {
-    margin-top: var(--s-7);
-    padding-bottom: var(--s-9);
+  /* Soft bottom-to-top veil so the headline sits readable on any photo */
+  .home-hero__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.7) 0%,
+      rgba(0,0,0,0.35) 35%,
+      rgba(0,0,0,0.05) 65%,
+      rgba(0,0,0,0.25) 100%
+    );
+    pointer-events: none;
   }
-  .home-hero__eyebrow { margin: 0 0 var(--s-4); color: var(--ink-soft); }
+  .home-hero__stamp {
+    position: absolute;
+    top: calc(var(--s-9) + var(--s-2));
+    right: var(--gutter);
+    z-index: 3;
+    border: 1px solid rgba(244,241,234,0.55);
+    padding: var(--s-2) var(--s-3);
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    color: var(--bg);
+  }
+  .home-hero__overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    padding-bottom: var(--s-9);
+    color: var(--bg);
+  }
+  .home-hero__eyebrow {
+    color: rgba(244,241,234,0.78);
+    margin: 0 0 var(--s-4);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+  }
   .home-hero__title {
-    font-size: var(--t-display);
-    margin: 0 0 var(--s-5);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.022em;
+    margin: 0;
     max-width: 18ch;
+    color: var(--bg);
     font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
   .home-hero__title :global(em) {
     font-style: italic;
+    color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
-  .home-hero__deck {
-    font-size: clamp(1.125rem, 2vw, 1.5rem);
-    line-height: 1.45;
+
+  /* DECK BLOCK — on paper, under the hero */
+  .home-deck {
+    padding-top: var(--s-7);
+    padding-bottom: var(--s-7);
+    border-bottom: 1px solid var(--rule);
+  }
+  .home-deck__text {
+    font-family: var(--font-body);
+    font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+    line-height: 1.5;
+    color: var(--ink-soft);
     max-width: 56ch;
     margin: 0 0 var(--s-5);
-    color: var(--ink-soft);
+    font-variation-settings: 'opsz' 16;
   }
-  .home-hero__byline { margin: 0 0 var(--s-5); color: var(--ink-soft); }
-  .home-hero__cta {
+  .home-deck__byline {
     font-family: var(--font-ui);
-    font-size: 0.875rem;
-    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--fog);
+    margin: 0 0 var(--s-5);
+  }
+  .home-deck__byline strong { color: var(--ink); font-weight: 500; }
+  .home-deck__cta {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
     letter-spacing: 0.12em;
     border-bottom: 1px solid var(--ink);
     padding-bottom: 2px;
+    color: var(--ink);
+    transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
   }
+  .home-deck__cta:hover { color: var(--terracotta); border-color: var(--terracotta); }
 
   /* ARCHIVE */
   .home-archive { margin-top: var(--s-9); }
   .home-archive__header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: baseline;
     margin-bottom: var(--s-7);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
   }
   .home-archive__view-all {
     color: var(--ink-soft);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
     padding-bottom: 2px;
   }
-  .home-archive__view-all:hover { color: var(--ink); border-color: var(--ink); }
+  .home-archive__view-all:hover { color: var(--terracotta); }
   .home-archive__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -206,9 +282,12 @@ const titleHtml = featured.data.title_em
 
   .section-title {
     font-family: var(--font-display);
-    font-size: var(--t-h2);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
     margin: 0;
-    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
 
   .btn-ghost {
@@ -216,9 +295,8 @@ const titleHtml = featured.data.title_em
     padding: var(--s-3) var(--s-5);
     border: 1px solid var(--ink);
     font-family: var(--font-ui);
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
     transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
   }
   .btn-ghost:hover { background: var(--ink); color: var(--bg); }
@@ -228,16 +306,22 @@ const titleHtml = featured.data.title_em
     color: var(--bg);
     padding: var(--s-3) var(--s-5);
     font-family: var(--font-ui);
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
     border: 0;
     cursor: pointer;
+    transition: background var(--t-fast) var(--ease-out);
   }
+  .btn-primary:hover { background: var(--terracotta); }
 
   /* BEST OF */
   .home-bestof { margin-top: var(--s-9); }
-  .home-bestof__header { margin-bottom: var(--s-6); max-width: 60ch; }
+  .home-bestof__header {
+    margin-bottom: var(--s-6);
+    max-width: 60ch;
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
   .home-bestof__intro { margin-top: var(--s-3); color: var(--ink-soft); }
   .home-bestof__grid {
     display: grid;
@@ -254,8 +338,11 @@ const titleHtml = featured.data.title_em
   .bestof-card:hover .bestof-card__media { transform: scale(1.03); }
   .bestof-card__title {
     font-family: var(--font-display);
-    font-size: 1.25rem;
+    font-weight: 400;
+    font-size: 1.5rem;
     margin: var(--s-3) 0 0;
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
 
   /* HIDDEN SPOTS */
@@ -265,7 +352,7 @@ const titleHtml = featured.data.title_em
   .home-hidden__empty { display: flex; flex-direction: column; gap: var(--s-3); align-items: flex-start; }
 
   /* NEWSLETTER */
-  .home-newsletter { margin-top: var(--s-9); }
+  .home-newsletter { margin-top: var(--s-9); margin-bottom: var(--s-9); }
   .home-newsletter__inner {
     max-width: var(--max-narrow);
     margin-inline: auto;
@@ -292,8 +379,21 @@ const titleHtml = featured.data.title_em
     clip: rect(0,0,0,0); white-space: nowrap; border: 0;
   }
 
+  @media (max-width: 1024px) {
+    .home-archive__grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 880px) {
+    .home-hero { height: 88vh; min-height: 540px; }
+    .home-hero__stamp { top: calc(var(--s-8) + var(--s-2)); right: var(--s-4); padding: 5px 9px; font-size: 0.625rem; }
+    .home-hero__overlay { padding-bottom: var(--s-7); }
     .home-archive__grid { grid-template-columns: 1fr; }
     .home-bestof__grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .home-hero { height: 80vh; min-height: 480px; }
+    .home-hero__title { font-size: 2rem; max-width: 16ch; }
+    .home-hero__eyebrow { font-size: 0.6875rem; margin-bottom: var(--s-3); }
+    .home-hero__overlay { padding-bottom: var(--s-6); }
+    .home-deck__text { font-size: 1.0625rem; }
   }
 </style>

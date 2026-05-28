@@ -19,7 +19,7 @@ const readNext = allStories
   .sort(() => Math.random() - 0.5)
   .slice(0, 3);
 
-const dateLong = data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const dateLong = data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toLowerCase();
 const titleHtml = data.title_em
   ? data.title.replace(data.title_em, `<em>${data.title_em}</em>`)
   : data.title;
@@ -71,20 +71,20 @@ const articleSchema = {
       </div>
       <div class="article-hero__inner container container-narrow">
         <p class="ui-label article-hero__eyebrow">
-          Issue {data.issue} · {dateLong} · {data.read_minutes}-min read
+          a keepers essay · №{data.issue} · {dateLong} · {data.read_minutes}-min read
         </p>
         <h1 class="article-hero__title" set:html={titleHtml} />
         <p class="article-hero__deck">{data.deck}</p>
         <p class="ui-label article-hero__byline">
-          By <strong>{data.author}</strong>
+          by <strong>{data.author}</strong>
           {data.photographer && data.photographer !== 'Staff' && (
-            <> · Photographs by <strong>{data.photographer}</strong></>
+            <> · photographs by <strong>{data.photographer}</strong></>
           )}
         </p>
       </div>
     </header>
 
-    <div class="article-body container-prose">
+    <div class="article-body container container-prose">
       <Content components={{ blockquote: PullQuote }} />
     </div>
 
@@ -94,21 +94,21 @@ const articleSchema = {
       </PullQuote>
     )}
 
-    <footer class="article-footer container-narrow">
+    <footer class="article-footer container container-narrow">
       <div class="article-credits">
-        <p class="ui-label">Photographs by</p>
+        <p class="ui-label">photographs by</p>
         <p class="article-credits__name">{data.photographer}</p>
       </div>
 
       <div class="article-support">
-        <h2 class="article-support__title">Reading SF Times every Saturday is free.</h2>
-        <p>Funding the reporting is how we stay free. $10/mo pays for one hour of student journalism.</p>
-        <a class="btn-primary" href="/support">Support SF Times</a>
+        <h2 class="article-support__title">reading the keepers every saturday is free.</h2>
+        <p>Funding the reporting is how we stay free. $10 a month pays for one hour of student journalism.</p>
+        <a class="btn-primary" href="/support">support the keepers →</a>
       </div>
     </footer>
 
     <section class="article-read-next container">
-      <h2 class="section-title">Read next</h2>
+      <h2 class="section-title">read next</h2>
       <div class="article-read-next__grid">
         {readNext.map((s) => <StoryCard story={s} size="sm" />)}
       </div>
@@ -120,12 +120,14 @@ const articleSchema = {
   .article-immersive { padding-bottom: var(--s-9); }
   .article-hero {
     position: relative;
-    min-height: 92vh;
+    height: 100vh;
+    min-height: 640px;
+    max-height: 900px;
     display: flex;
     align-items: flex-end;
     overflow: hidden;
+    background: var(--ink);
     isolation: isolate;
-    margin-top: calc(-1 * var(--s-7));
   }
   .article-hero__media {
     position: absolute;
@@ -136,35 +138,52 @@ const articleSchema = {
     height: 100%;
     aspect-ratio: auto !important;
   }
+  /* Dark bottom-up veil so title reads on any photo, bright or dark. */
+  .article-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.78) 0%,
+      rgba(0,0,0,0.45) 30%,
+      rgba(0,0,0,0.05) 60%,
+      rgba(0,0,0,0.3) 100%
+    );
+    pointer-events: none;
+  }
   .article-hero__inner {
     position: relative;
     z-index: 2;
-    color: var(--ink);
-    background: linear-gradient(to top, var(--bg) 5%, rgba(244,241,234,0.9) 30%, transparent 60%);
-    padding-top: var(--s-9);
-    padding-bottom: var(--s-7);
+    color: var(--bg);
+    padding-top: var(--s-7);
+    padding-bottom: var(--s-9);
     width: 100%;
   }
-  .article-hero__eyebrow { color: var(--ink-soft); margin: 0 0 var(--s-4); }
+  .article-hero__eyebrow { color: rgba(244,241,234,0.78); margin: 0 0 var(--s-4); }
   .article-hero__title {
     font-size: var(--t-display);
     margin: 0 0 var(--s-5);
     max-width: 18ch;
+    color: var(--bg);
     font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
   .article-hero__title :global(em) {
     font-style: italic;
+    color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
   .article-hero__deck {
     font-family: var(--font-body);
-    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-size: clamp(1.125rem, 1.8vw, 1.5rem);
     line-height: 1.45;
     max-width: 50ch;
     margin: 0 0 var(--s-5);
-    color: var(--ink-soft);
+    color: rgba(244,241,234,0.9);
   }
-  .article-hero__byline { color: var(--ink-soft); margin: 0; }
+  .article-hero__byline { color: rgba(244,241,234,0.78); margin: 0; }
+  .article-hero__byline :global(strong) { color: var(--bg); }
 
   .article-body {
     margin-top: var(--s-9);
@@ -228,10 +247,14 @@ const articleSchema = {
   .article-read-next { margin-top: var(--s-7); }
   .section-title {
     font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
     font-size: var(--t-h3);
     margin-bottom: var(--s-6);
     padding-bottom: var(--s-3);
     border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
   .article-read-next__grid {
     display: grid;

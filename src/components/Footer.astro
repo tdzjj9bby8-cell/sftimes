@@ -5,43 +5,45 @@ const year = new Date().getFullYear();
 <footer class="site-footer">
   <div class="container site-footer__inner">
     <div class="site-footer__brand">
-      <span class="wordmark">SF Times</span>
-      <p class="tagline">One San Francisco keeper every Saturday. Reader-funded. No parent company. No paywall. No AI bylines.</p>
+      <p class="site-footer__sign">a saturday letter from <em>the keepers.</em></p>
+      <p class="site-footer__tagline">
+        One San Francisco keeper every Saturday. Reader-funded. No parent company. No paywall. No AI bylines.
+      </p>
     </div>
-    <nav class="site-footer__nav" aria-label="Footer primary">
-      <h4 class="ui-label">Read</h4>
+    <nav class="site-footer__nav" aria-label="Footer read">
+      <h4 class="site-footer__head">read.</h4>
       <ul>
-        <li><a href="/stories">Stories</a></li>
-        <li><a href="/best-of">Best Of</a></li>
-        <li><a href="/hidden-spots">Hidden Spots</a></li>
-        <li><a href="/quizzes">Quizzes</a></li>
+        <li><a href="/stories">stories</a></li>
+        <li><a href="/best-of">best of</a></li>
+        <li><a href="/hidden-spots">hidden spots</a></li>
+        <li><a href="/quizzes">quizzes</a></li>
       </ul>
     </nav>
     <nav class="site-footer__nav" aria-label="Footer trust">
-      <h4 class="ui-label">Trust</h4>
+      <h4 class="site-footer__head">trust.</h4>
       <ul>
-        <li><a href="/standards">Standards</a></li>
-        <li><a href="/corrections">Corrections</a></li>
-        <li><a href="/partners">Partners</a></li>
-        <li><a href="/about">About</a></li>
+        <li><a href="/standards">standards</a></li>
+        <li><a href="/corrections">corrections</a></li>
+        <li><a href="/partners">partners</a></li>
+        <li><a href="/about">about</a></li>
       </ul>
     </nav>
     <nav class="site-footer__nav" aria-label="Footer support">
-      <h4 class="ui-label">Support</h4>
+      <h4 class="site-footer__head">support.</h4>
       <ul>
-        <li><a href="/support">Donate</a></li>
-        <li><a href="/submit">Submit a spot</a></li>
-        <li><a href="/team">Team</a></li>
-        <li><a href="/rss.xml">RSS</a></li>
+        <li><a href="/support">become a supporter</a></li>
+        <li><a href="/submit">send a spot</a></li>
+        <li><a href="/team">team</a></li>
+        <li><a href="/rss.xml">rss</a></li>
       </ul>
     </nav>
   </div>
   <div class="site-footer__bottom container">
-    <p class="mono">© {year} SF Times · Independent · Reader-supported · Made in San Mateo</p>
-    <p class="mono">
-      <a href="/privacy">Privacy</a>
+    <p>© {year} sf times · independent · reader-supported · made in san mateo.</p>
+    <p>
+      <a href="/privacy">privacy</a>
       <span>·</span>
-      <a href="/terms">Terms</a>
+      <a href="/terms">terms</a>
     </p>
   </div>
 </footer>
@@ -55,29 +57,47 @@ const year = new Date().getFullYear();
   }
   .site-footer__inner {
     display: grid;
-    grid-template-columns: 1.5fr repeat(3, 1fr);
+    grid-template-columns: 1.6fr repeat(3, 1fr);
     gap: var(--s-7);
     padding-bottom: var(--s-8);
   }
-  .site-footer__brand .wordmark {
+  .site-footer__sign {
     font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 600;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    line-height: 1.1;
+    margin: 0 0 var(--s-3);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
-  .site-footer__brand .tagline {
-    margin-top: var(--s-3);
+  .site-footer__sign em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .site-footer__tagline {
     max-width: 36ch;
+    font-family: var(--font-body);
     font-size: 0.9375rem;
-    line-height: 1.5;
+    line-height: 1.55;
     color: var(--ink-soft);
+    margin: 0;
   }
-  .site-footer__nav h4 { margin-bottom: var(--s-3); }
+  .site-footer__head {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+    margin: 0 0 var(--s-3);
+  }
   .site-footer__nav ul { list-style: none; margin: 0; padding: 0; }
   .site-footer__nav li + li { margin-top: var(--s-2); }
   .site-footer__nav a {
     font-family: var(--font-body);
     font-size: 1rem;
-    color: var(--ink);
+    color: var(--ink-soft);
+    transition: color var(--t-fast) var(--ease-out);
   }
   .site-footer__nav a:hover { color: var(--terracotta); }
   .site-footer__bottom {
@@ -87,8 +107,15 @@ const year = new Date().getFullYear();
     padding-block: var(--s-5);
     border-top: 1px solid var(--rule);
     color: var(--fog);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
   }
-  .site-footer__bottom a { color: var(--fog); }
+  .site-footer__bottom p { margin: 0; }
+  .site-footer__bottom a {
+    color: var(--fog);
+    transition: color var(--t-fast) var(--ease-out);
+  }
   .site-footer__bottom a:hover { color: var(--ink); }
   .site-footer__bottom span { margin-inline: var(--s-2); }
 
