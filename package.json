@@ -15,7 +15,7 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.7",
     "@astrojs/sitemap": "^3.2.0",
-    "@rollup/rollup-linux-arm64-gnu": "^4.60.4",
+
     "astro": "^4.16.0"
   }
 }
