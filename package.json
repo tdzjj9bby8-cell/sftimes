@@ -1,0 +1,21 @@
+{
+  "name": "sftimes-astro",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "SF Times — static publication, built with Astro, deploys to SiteGround.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/check-placeholders.mjs --pre && astro build && node scripts/check-placeholders.mjs --post",
+    "build:dev": "astro build",
+    "preview": "astro preview",
+    "migrate": "node scripts/migrate-articles.mjs",
+    "guard": "node scripts/check-placeholders.mjs --post"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.7",
+    "@astrojs/sitemap": "^3.2.0",
+    "@rollup/rollup-linux-arm64-gnu": "^4.60.4",
+    "astro": "^4.16.0"
+  }
+}

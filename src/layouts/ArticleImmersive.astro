@@ -1,0 +1,245 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import PullQuote from '../components/PullQuote.astro';
+import ReadingProgress from '../components/ReadingProgress.astro';
+import StoryCard from '../components/StoryCard.astro';
+import { getCollection } from 'astro:content';
+
+export interface Props {
+  story: any;
+}
+const { story } = Astro.props;
+const { data } = story;
+const { Content } = await story.render();
+
+const allStories = await getCollection('stories');
+const readNext = allStories
+  .filter((s) => s.slug !== story.slug)
+  .sort(() => Math.random() - 0.5)
+  .slice(0, 3);
+
+const dateLong = data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const titleHtml = data.title_em
+  ? data.title.replace(data.title_em, `<em>${data.title_em}</em>`)
+  : data.title;
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: data.title,
+  description: data.deck,
+  datePublished: data.published.toISOString(),
+  author: { '@type': 'Person', name: data.author },
+  publisher: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    logo: { '@type': 'ImageObject', url: 'https://sftimes.com/logo.png' },
+  },
+  mainEntityOfPage: `https://sftimes.com/stories/${data.url_slug}`,
+};
+---
+
+<BaseLayout
+  title={`${data.title} — SF Times`}
+  description={data.deck}
+  ogType="article"
+  canonical={`https://sftimes.com/stories/${data.url_slug}`}
+  headerVariant="transparent"
+  current="stories"
+  articleMeta={{
+    publishedTime: data.published.toISOString(),
+    author: data.author,
+    section: 'Features',
+    tags: [data.neighborhood, data.keeper_type].filter(Boolean),
+  }}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)}/>
+
+  <ReadingProgress />
+
+  <article class="article-immersive">
+    <header class="article-hero">
+      <div class="article-hero__media">
+        <Placeholder
+          alt={data.hero_alt}
+          filenameHint={data.hero_filename_hint}
+          aspect="21:9"
+          showLabel={true}
+          class="article-hero__placeholder"
+        />
+      </div>
+      <div class="article-hero__inner container">
+        <p class="ui-label article-hero__eyebrow">
+          Issue {data.issue} · {dateLong} · {data.read_minutes}-min read
+        </p>
+        <h1 class="article-hero__title" set:html={titleHtml} />
+        <p class="article-hero__deck">{data.deck}</p>
+        <p class="ui-label article-hero__byline">
+          By <strong>{data.author}</strong>
+          {data.photographer && data.photographer !== 'Staff' && (
+            <> · Photographs by <strong>{data.photographer}</strong></>
+          )}
+        </p>
+      </div>
+    </header>
+
+    <div class="article-body container-prose">
+      <Content components={{ blockquote: PullQuote }} />
+    </div>
+
+    {data.pull_quote && (
+      <PullQuote attribution={data.pull_quote_attr}>
+        {data.pull_quote}
+      </PullQuote>
+    )}
+
+    <footer class="article-footer container-narrow">
+      <div class="article-credits">
+        <p class="ui-label">Photographs by</p>
+        <p class="article-credits__name">{data.photographer}</p>
+      </div>
+
+      <div class="article-support">
+        <h2 class="article-support__title">Reading SF Times every Saturday is free.</h2>
+        <p>Funding the reporting is how we stay free. $10/mo pays for one hour of student journalism.</p>
+        <a class="btn-primary" href="/support">Support SF Times</a>
+      </div>
+    </footer>
+
+    <section class="article-read-next container">
+      <h2 class="section-title">Read next</h2>
+      <div class="article-read-next__grid">
+        {readNext.map((s) => <StoryCard story={s} size="sm" />)}
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-immersive { padding-bottom: var(--s-9); }
+  .article-hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    isolation: isolate;
+    margin-top: calc(-1 * var(--s-7));
+  }
+  .article-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .article-hero__media :global(.placeholder) {
+    height: 100%;
+    aspect-ratio: auto !important;
+  }
+  .article-hero__inner {
+    position: relative;
+    z-index: 2;
+    color: var(--ink);
+    background: linear-gradient(to top, var(--bg) 5%, rgba(244,241,234,0.9) 30%, transparent 60%);
+    padding-top: var(--s-9);
+    padding-bottom: var(--s-7);
+    width: 100%;
+  }
+  .article-hero__eyebrow { color: var(--ink-soft); margin: 0 0 var(--s-4); }
+  .article-hero__title {
+    font-size: var(--t-display);
+    margin: 0 0 var(--s-5);
+    max-width: 18ch;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .article-hero__title :global(em) {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .article-hero__deck {
+    font-family: var(--font-body);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    line-height: 1.45;
+    max-width: 50ch;
+    margin: 0 0 var(--s-5);
+    color: var(--ink-soft);
+  }
+  .article-hero__byline { color: var(--ink-soft); margin: 0; }
+
+  .article-body {
+    margin-top: var(--s-9);
+    font-size: 1.1875rem;
+    line-height: 1.78;
+  }
+  .article-body :global(p) { margin: 0 0 var(--s-5); }
+  .article-body :global(p:first-of-type::first-letter) {
+    font-family: var(--font-display);
+    font-size: 4.5em;
+    font-weight: 500;
+    float: left;
+    line-height: 0.85;
+    padding-right: var(--s-3);
+    padding-top: var(--s-1);
+  }
+  .article-body :global(h2) {
+    margin-top: var(--s-8);
+    margin-bottom: var(--s-4);
+    font-size: var(--t-h3);
+  }
+  .article-body :global(img),
+  .article-body :global(.bleed) {
+    margin-block: var(--s-7);
+  }
+
+  .article-footer { margin-top: var(--s-9); display: grid; gap: var(--s-7); }
+  .article-credits {
+    text-align: center;
+    padding-block: var(--s-6);
+    border-block: 1px solid var(--rule);
+  }
+  .article-credits__name {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    margin: var(--s-2) 0 0;
+  }
+  .article-support {
+    background: var(--paper);
+    padding: var(--s-7);
+    text-align: center;
+  }
+  .article-support__title {
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-3);
+  }
+  .btn-primary {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--bg);
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: var(--s-4);
+    transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+  }
+  .btn-primary:hover { transform: translateY(-1px); background: var(--terracotta); }
+
+  .article-read-next { margin-top: var(--s-10); }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-6);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .article-read-next__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-6);
+  }
+  @media (max-width: 880px) {
+    .article-read-next__grid { grid-template-columns: 1fr; }
+    .article-hero { min-height: 85vh; }
+  }
+</style>

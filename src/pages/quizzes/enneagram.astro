@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Which SF Enneagram type are you? — SF Times"
+  description="36-item Enneagram inventory in SF Times voice. Nine types, top-three breakdown, reading list per type."
+  canonical="https://sftimes.com/quizzes/enneagram"
+  current="quizzes"
+>
+  <div class="quiz-page container">
+    <noscript>
+      <h1>Which SF Enneagram type are you?</h1>
+      <p>This quiz requires JavaScript. Please enable it to take the inventory.</p>
+    </noscript>
+    <div id="quiz-root">
+      <h1 style="position: absolute; left: -9999px;">Which SF Enneagram type are you?</h1>
+    </div>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/quizzes/quiz.css" />
+<script src="/quizzes/enneagram.config.js" is:inline></script>
+<script src="/quizzes/quiz-engine.js" is:inline></script>
+
+<style>
+  .quiz-page { padding-block: var(--s-7) var(--s-9); }
+</style>

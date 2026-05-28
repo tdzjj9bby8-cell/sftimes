@@ -1,0 +1,170 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Placeholder from '../../components/Placeholder.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const cats = await getCollection('best-of');
+  return cats.map((c) => ({
+    params: { slug: c.data.url_slug },
+    props: { category: c },
+  }));
+}
+
+const { category } = Astro.props;
+const { data } = category;
+const { Content } = await category.render();
+
+const refreshDate = data.last_refreshed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+
+<BaseLayout
+  title={`${data.title} — SF Times Best Of`}
+  description={data.intro}
+  canonical={`https://sftimes.com/best-of/${data.url_slug}`}
+  current="best of"
+>
+  <div class="container container-narrow guide-head">
+    <p class="ui-label">SF Times Best Of</p>
+    <h1>{data.title}</h1>
+    <p class="guide-head__intro">{data.intro}</p>
+    <div class="guide-head__meta">
+      <span class="ui-label">Last refreshed {refreshDate}</span>
+      <span class="ui-label">Editor: <strong>{data.editor}</strong></span>
+    </div>
+    <div class="guide-head__firewall">
+      <p>
+        Every entry on this list is named by the editor above. No affiliate links. No credit-card-partner inventory.
+        Promoted entries appear with a labeled badge. <a href="/standards">Our standards →</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="container guide-filters" aria-label="Filters">
+    <span class="ui-label">Filter:</span>
+    <button class="chip is-active" data-filter="all">All</button>
+    <button class="chip" data-filter="mission">Mission</button>
+    <button class="chip" data-filter="richmond">Richmond</button>
+    <button class="chip" data-filter="sunset">Sunset</button>
+    <button class="chip" data-filter="east-bay">East Bay</button>
+  </div>
+
+  <div class="container guide-entries">
+    <article class="guide-entry">
+      <span class="guide-entry__num">1</span>
+      <Placeholder alt={`Entry photo for ${data.title} #1`} filenameHint={`best-of/${data.url_slug}/01.jpg`} aspect="4:3" showLabel={false} class="guide-entry__media" />
+      <div class="guide-entry__body">
+        <h3 class="guide-entry__name">Entry name goes here</h3>
+        <p class="ui-label">Neighborhood · $$ · Editor's pick</p>
+        <p class="guide-entry__blurb">One paragraph in SF Times voice about why this entry made the list, who runs it, and what to order. Real entries will live in /src/content/best-of-entries/ in v1.1.</p>
+      </div>
+    </article>
+    <article class="guide-entry guide-entry--promoted">
+      <span class="guide-entry__num">2</span>
+      <Placeholder alt={`Entry photo for ${data.title} #2`} filenameHint={`best-of/${data.url_slug}/02.jpg`} aspect="4:3" showLabel={false} class="guide-entry__media" />
+      <div class="guide-entry__body">
+        <h3 class="guide-entry__name">Entry name with the promoted badge example</h3>
+        <span class="promoted-badge">Promoted</span>
+        <p class="ui-label">Neighborhood · $$ · Reader favorite</p>
+        <p class="guide-entry__blurb">Promoted entries appear with the badge above. The editorial firewall holds: a promoted entry must still meet the list's editorial bar to appear at all.</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="container guide-sponsor">
+    <Placeholder alt="Sponsorship placement on the Best Of page" filenameHint={`sponsor/${data.url_slug}.jpg`} aspect="16:9" showLabel={true} class="guide-sponsor__media" />
+  </div>
+
+  <div class="container container-narrow guide-body">
+    <Content />
+  </div>
+</BaseLayout>
+
+<style>
+  .guide-head { padding-block: var(--s-9); }
+  .guide-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .guide-head__intro { font-size: 1.25rem; color: var(--ink-soft); max-width: 56ch; }
+  .guide-head__meta { display: flex; gap: var(--s-5); margin-top: var(--s-5); color: var(--fog); }
+  .guide-head__firewall {
+    margin-top: var(--s-5);
+    padding: var(--s-4) var(--s-5);
+    background: var(--paper);
+    border-left: 2px solid var(--terracotta);
+    font-size: 0.9375rem;
+  }
+  .guide-head__firewall a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
+
+  .guide-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    align-items: center;
+    padding-block: var(--s-5);
+    border-block: 1px solid var(--rule);
+  }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 6px var(--s-3);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .chip:hover { border-color: var(--ink); }
+  .chip.is-active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .guide-entries { padding-block: var(--s-7); }
+  .guide-entry {
+    display: grid;
+    grid-template-columns: 56px 1fr 2fr;
+    gap: var(--s-5);
+    align-items: start;
+    padding-block: var(--s-6);
+    border-bottom: 1px solid var(--rule);
+  }
+  .guide-entry__num {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--fog);
+  }
+  .guide-entry__media { width: 100%; }
+  .guide-entry__name {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    margin: 0 0 var(--s-2);
+  }
+  .guide-entry__blurb { margin-top: var(--s-3); color: var(--ink-soft); }
+  .promoted-badge {
+    display: inline-block;
+    background: var(--terracotta);
+    color: var(--bg);
+    padding: 3px var(--s-2);
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: var(--s-2);
+  }
+
+  .guide-sponsor { margin-block: var(--s-7); }
+
+  .guide-body { padding-block: var(--s-7); color: var(--ink-soft); }
+
+  @media (max-width: 880px) {
+    .guide-entry { grid-template-columns: 1fr; }
+    .guide-entry__num { font-size: 2rem; }
+  }
+</style>
+
+<script>
+  // Tiny no-frills filter toggle: only the chip's active state for now.
+  // Real filtering lands when entries collection is populated.
+  const chips = document.querySelectorAll<HTMLButtonElement>('.chip');
+  chips.forEach((c) => c.addEventListener('click', () => {
+    chips.forEach((x) => x.classList.remove('is-active'));
+    c.classList.add('is-active');
+  }));
+</script>

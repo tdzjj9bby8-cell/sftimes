@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const quizzes = [
+  { slug: 'mbti', name: 'MBTI', deck: '60 questions across 4 axes. Result links to your reading list.' },
+  { slug: 'enneagram', name: 'Enneagram', deck: '36 questions. 9 types. Top-three breakdown at the end.' },
+  { slug: 'blood-type', name: 'Blood type', deck: '20 forced-choice questions. The Japanese personality system.' },
+  { slug: 'love-languages', name: 'Love languages', deck: 'Five-language inventory. Three minutes.' },
+  { slug: 'strengths', name: 'Strengths', deck: 'Character strengths inventory tied to a reading list.' },
+];
+---
+<BaseLayout title="Quizzes — SF Times" description="Five personality quizzes. Each result writes a reading list." current="quizzes">
+  <div class="container container-narrow page">
+    <p class="ui-label">Quizzes</p>
+    <h1>Find out what kind of San Franciscan you are.</h1>
+    <p class="lead">Five short personality quizzes in SF Times voice. Each result writes a custom reading list of stories and Best Of lists that match. Three to five minutes each.</p>
+    <ul class="quiz-list">
+      {quizzes.map((q) => (
+        <li class="quiz-item">
+          <a href={`/quizzes/${q.slug}`}>
+            <h2>{q.name}</h2>
+            <p>{q.deck}</p>
+            <span class="ui-label">Take the quiz →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="ui-label">Quiz pages port forward from the current site in v1.1.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page h1 { margin-block: var(--s-3) var(--s-5); }
+  .page .lead { font-size: 1.125rem; color: var(--ink-soft); margin-bottom: var(--s-7); }
+  .quiz-list { list-style: none; padding: 0; display: grid; gap: var(--s-4); }
+  .quiz-item a { display: block; padding: var(--s-5); background: var(--paper); color: var(--ink); }
+  .quiz-item h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 0; }
+  .quiz-item p { margin: var(--s-2) 0 var(--s-3); color: var(--ink-soft); }
+</style>

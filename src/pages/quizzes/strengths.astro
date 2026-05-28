@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Which SF character strengths are yours? — SF Times"
+  description="Character strengths inventory tied to a SF Times reading list."
+  canonical="https://sftimes.com/quizzes/strengths"
+  current="quizzes"
+>
+  <div class="quiz-page container">
+    <noscript>
+      <h1>Which SF character strengths are yours?</h1>
+      <p>This quiz requires JavaScript. Please enable it to take the inventory.</p>
+    </noscript>
+    <div id="quiz-root">
+      <h1 style="position: absolute; left: -9999px;">Which SF character strengths are yours?</h1>
+    </div>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/quizzes/quiz.css" />
+<script src="/quizzes/strengths.config.js" is:inline></script>
+<script src="/quizzes/quiz-engine.js" is:inline></script>
+
+<style>
+  .quiz-page { padding-block: var(--s-7) var(--s-9); }
+</style>

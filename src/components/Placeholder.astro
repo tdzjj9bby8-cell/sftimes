@@ -1,0 +1,105 @@
+---
+/**
+ * Placeholder.astro
+ * Flat neon-green block used everywhere a real photo will later live.
+ *
+ * The block carries:
+ *   - data-placeholder="true" so the build guard can find it.
+ *   - data-alt: alt text the real photo will use (also rendered as visible
+ *     label so reviewers see what's missing).
+ *   - data-filename-hint: the eventual file path/name for the real photo.
+ *   - aspect: enforced via CSS to keep layouts honest before photos arrive.
+ *
+ * Replace these with real images at launch. The production build will hard-fail
+ * if any neon-green color value remains in dist/ (see scripts/check-placeholders.mjs).
+ */
+export interface Props {
+  alt: string;
+  filenameHint: string;
+  aspect?: '5:4' | '4:3' | '3:4' | '16:9' | '1:1' | '21:9';
+  rounded?: boolean;
+  showLabel?: boolean;
+  /** Optional CSS class for additional layout control. */
+  class?: string;
+}
+
+const {
+  alt,
+  filenameHint,
+  aspect = '5:4',
+  rounded = false,
+  showLabel = true,
+  class: className = '',
+} = Astro.props;
+
+const aspectMap: Record<string, string> = {
+  '5:4': '5 / 4',
+  '4:3': '4 / 3',
+  '3:4': '3 / 4',
+  '16:9': '16 / 9',
+  '1:1': '1 / 1',
+  '21:9': '21 / 9',
+};
+const aspectRatio = aspectMap[aspect];
+---
+
+<figure
+  class={`placeholder ${rounded ? 'placeholder--rounded' : ''} ${className}`}
+  data-placeholder="true"
+  data-alt={alt}
+  data-filename-hint={filenameHint}
+  data-aspect={aspect}
+  role="img"
+  aria-label={alt}
+  style={`aspect-ratio: ${aspectRatio};`}
+>
+  {showLabel && (
+    <figcaption class="placeholder__label">
+      <span class="placeholder__label-tag">PHOTO MISSING</span>
+      <span class="placeholder__label-alt">{alt}</span>
+      <span class="placeholder__label-hint">{filenameHint}</span>
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .placeholder {
+    margin: 0;
+    background: var(--placeholder-green);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    color: #000;
+    font-family: var(--font-ui);
+  }
+  .placeholder--rounded { border-radius: 999px; }
+  .placeholder__label {
+    width: 100%;
+    padding: var(--s-3) var(--s-4);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.05));
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+  }
+  .placeholder__label-tag {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .placeholder__label-alt {
+    font-weight: 500;
+    color: #000;
+    opacity: 0.78;
+  }
+  .placeholder__label-hint {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: #000;
+    opacity: 0.6;
+  }
+</style>

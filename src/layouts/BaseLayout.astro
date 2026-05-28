@@ -1,0 +1,99 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import RevealObserver from '../components/RevealObserver.astro';
+import { ViewTransitions } from 'astro:transitions';
+
+export interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  canonical?: string;
+  headerVariant?: 'transparent' | 'solid';
+  current?: string;
+  articleMeta?: {
+    publishedTime: string;
+    modifiedTime?: string;
+    author: string;
+    section?: string;
+    tags?: string[];
+  };
+}
+const {
+  title,
+  description = 'SF Times publishes one keeper every Saturday: a San Franciscan holding something the city would lose without them.',
+  ogImage = '/og-image.svg',
+  ogType = 'website',
+  canonical,
+  headerVariant = 'solid',
+  current = '',
+  articleMeta,
+} = Astro.props;
+
+const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).toString();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f1ea" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="SF Times RSS" href="/rss.xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="SF Times" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()} />
+
+    {articleMeta && (
+      <>
+        <meta property="article:published_time" content={articleMeta.publishedTime} />
+        {articleMeta.modifiedTime && (
+          <meta property="article:modified_time" content={articleMeta.modifiedTime} />
+        )}
+        <meta property="article:author" content={articleMeta.author} />
+        {articleMeta.section && <meta property="article:section" content={articleMeta.section} />}
+        {articleMeta.tags?.map((t) => <meta property="article:tag" content={t} />)}
+      </>
+    )}
+
+    <!-- NewsMediaOrganization schema -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'NewsMediaOrganization',
+      name: 'SF Times',
+      url: 'https://sftimes.com',
+      logo: 'https://sftimes.com/logo.png',
+      description: 'San Francisco profile publication. One keeper every Saturday.',
+      sameAs: [],
+      ethicsPolicy: 'https://sftimes.com/standards',
+      correctionsPolicy: 'https://sftimes.com/corrections',
+    })}/>
+
+    <ViewTransitions />
+  </head>
+  <body>
+    <Header variant={headerVariant} current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <RevealObserver />
+  </body>
+</html>

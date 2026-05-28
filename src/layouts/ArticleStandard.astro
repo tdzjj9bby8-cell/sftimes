@@ -1,0 +1,214 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+import PullQuote from '../components/PullQuote.astro';
+import ReadingProgress from '../components/ReadingProgress.astro';
+import StoryCard from '../components/StoryCard.astro';
+import { getCollection } from 'astro:content';
+
+export interface Props {
+  story: any;
+}
+const { story } = Astro.props;
+const { data } = story;
+const { Content } = await story.render();
+
+const allStories = await getCollection('stories');
+const readNext = allStories
+  .filter((s: any) => s.slug !== story.slug)
+  .sort(() => Math.random() - 0.5)
+  .slice(0, 3);
+
+const dateLong = data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const titleHtml = data.title_em
+  ? data.title.replace(data.title_em, `<em>${data.title_em}</em>`)
+  : data.title;
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: data.title,
+  description: data.deck,
+  datePublished: data.published.toISOString(),
+  author: { '@type': 'Person', name: data.author },
+  publisher: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    logo: { '@type': 'ImageObject', url: 'https://sftimes.com/logo.png' },
+  },
+  mainEntityOfPage: `https://sftimes.com/stories/${data.url_slug}`,
+};
+---
+
+<BaseLayout
+  title={`${data.title} — SF Times`}
+  description={data.deck}
+  ogType="article"
+  canonical={`https://sftimes.com/stories/${data.url_slug}`}
+  headerVariant="solid"
+  current="stories"
+  articleMeta={{
+    publishedTime: data.published.toISOString(),
+    author: data.author,
+    section: 'Features',
+    tags: [data.neighborhood, data.keeper_type].filter(Boolean),
+  }}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <ReadingProgress />
+
+  <article class="article-standard">
+    <header class="article-standard__head container container-narrow">
+      <p class="ui-label">
+        Issue {data.issue} · {dateLong} · {data.read_minutes}-min read
+      </p>
+      <h1 class="article-standard__title" set:html={titleHtml} />
+      <p class="article-standard__deck">{data.deck}</p>
+      <p class="ui-label article-standard__byline">
+        By <strong>{data.author}</strong>
+        {data.photographer && data.photographer !== 'Staff' && (
+          <> · Photographs by <strong>{data.photographer}</strong></>
+        )}
+      </p>
+    </header>
+
+    <div class="container container-narrow article-standard__hero">
+      <Placeholder
+        alt={data.hero_alt}
+        filenameHint={data.hero_filename_hint}
+        aspect="5:4"
+        showLabel={true}
+      />
+      {data.caption && <p class="article-standard__caption ui-label">{data.caption}</p>}
+    </div>
+
+    <div class="article-body container-prose">
+      <Content components={{ blockquote: PullQuote }} />
+    </div>
+
+    {data.pull_quote && (
+      <PullQuote attribution={data.pull_quote_attr}>{data.pull_quote}</PullQuote>
+    )}
+
+    <footer class="article-footer container-narrow">
+      <div class="article-credits">
+        <p class="ui-label">Photographs by</p>
+        <p class="article-credits__name">{data.photographer}</p>
+      </div>
+      <div class="article-support">
+        <h2 class="article-support__title">Reading SF Times every Saturday is free.</h2>
+        <p>Funding the reporting is how we stay free. $10/mo pays for one hour of student journalism.</p>
+        <a class="btn-primary" href="/support">Support SF Times</a>
+      </div>
+    </footer>
+
+    <section class="article-read-next container">
+      <h2 class="section-title">Read next</h2>
+      <div class="article-read-next__grid">
+        {readNext.map((s: any) => <StoryCard story={s} size="sm" />)}
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-standard { padding-block: var(--s-7) var(--s-9); }
+  .article-standard__head { padding-block: var(--s-5) var(--s-6); }
+  .article-standard__title {
+    font-size: var(--t-h1);
+    margin: var(--s-4) 0 var(--s-4);
+    max-width: 22ch;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .article-standard__title :global(em) {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 70, 'WONK' 1;
+  }
+  .article-standard__deck {
+    font-family: var(--font-body);
+    font-size: clamp(1.0625rem, 1.6vw, 1.375rem);
+    line-height: 1.5;
+    max-width: 56ch;
+    color: var(--ink-soft);
+    margin: 0 0 var(--s-5);
+  }
+  .article-standard__byline { color: var(--ink-soft); margin: 0; }
+
+  .article-standard__hero { margin-block: var(--s-5) var(--s-7); }
+  .article-standard__caption {
+    margin: var(--s-3) 0 0;
+    color: var(--fog);
+  }
+
+  .article-body {
+    margin-top: var(--s-6);
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+  .article-body :global(p) { margin: 0 0 var(--s-5); }
+  .article-body :global(p:first-of-type::first-letter) {
+    font-family: var(--font-display);
+    font-size: 3.5em;
+    font-weight: 500;
+    float: left;
+    line-height: 0.9;
+    padding-right: var(--s-3);
+    padding-top: var(--s-1);
+  }
+  .article-body :global(h2) {
+    margin-top: var(--s-7);
+    margin-bottom: var(--s-3);
+    font-size: var(--t-h3);
+  }
+  .article-body :global(img),
+  .article-body :global(.bleed) { margin-block: var(--s-6); }
+
+  .article-footer { margin-top: var(--s-9); display: grid; gap: var(--s-6); }
+  .article-credits {
+    text-align: center;
+    padding-block: var(--s-5);
+    border-block: 1px solid var(--rule);
+  }
+  .article-credits__name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin: var(--s-2) 0 0;
+  }
+  .article-support {
+    background: var(--paper);
+    padding: var(--s-6);
+    text-align: center;
+  }
+  .article-support__title { font-size: var(--t-h3); margin-bottom: var(--s-3); }
+  .btn-primary {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--bg);
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: var(--s-3);
+    transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+  }
+  .btn-primary:hover { transform: translateY(-1px); background: var(--terracotta); }
+
+  .article-read-next { margin-top: var(--s-9); }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--t-h3);
+    margin-bottom: var(--s-5);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .article-read-next__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-6);
+  }
+  @media (max-width: 880px) {
+    .article-read-next__grid { grid-template-columns: 1fr; }
+  }
+</style>

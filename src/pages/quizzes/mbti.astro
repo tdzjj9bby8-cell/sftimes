@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Which of the 16 SF reader types are you? MBTI quiz — SF Times"
+  description="60-item Myers-Briggs personality inventory in SF Times voice. Sixteen types, each written as a San Franciscan, with a reading list."
+  canonical="https://sftimes.com/quizzes/mbti"
+  current="quizzes"
+>
+  <link rel="stylesheet" slot="head" href="/quizzes/quiz.css" />
+  <div class="quiz-page container">
+    <noscript>
+      <h1>SF Times MBTI quiz: Which of the 16 SF reader types are you?</h1>
+      <p>This quiz requires JavaScript. Please enable it to take the 60-item personality inventory.</p>
+    </noscript>
+    <div id="quiz-root">
+      <h1 style="position: absolute; left: -9999px;">SF Times MBTI quiz</h1>
+    </div>
+  </div>
+</BaseLayout>
+
+<link rel="stylesheet" href="/quizzes/quiz.css" />
+<script src="/quizzes/mbti.config.js" is:inline></script>
+<script src="/quizzes/quiz-engine.js" is:inline></script>
+
+<style>
+  .quiz-page { padding-block: var(--s-7) var(--s-9); }
+</style>

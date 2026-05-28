@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Placeholder from '../components/Placeholder.astro';
+
+// Hidden Spots are reader-submitted and editor-vetted. None published yet in v1.
+const spots: any[] = [];
+---
+
+<BaseLayout title="Hidden Spots — SF Times" description="Reader-submitted, editor-vetted. The places locals kept to themselves." current="hidden spots">
+  <div class="container container-narrow page-head">
+    <p class="ui-label">Hidden Spots</p>
+    <h1>The places locals kept to themselves.</h1>
+    <p class="page-head__deck">
+      Reader-submitted. Editor-vetted. We protect the place over the page view. If a spot can't handle the traffic, we describe it without naming it. New one every week.
+    </p>
+    <a class="btn-primary" href="/submit">Submit a spot →</a>
+  </div>
+
+  <div class="container hidden-filters" aria-label="Filters">
+    <span class="ui-label">Filter:</span>
+    <button class="chip is-active" data-filter="all">All</button>
+    <button class="chip" data-filter="north">North SF</button>
+    <button class="chip" data-filter="south">South SF</button>
+    <button class="chip" data-filter="east-bay">East Bay</button>
+    <button class="chip" data-filter="peninsula">Peninsula</button>
+  </div>
+
+  {spots.length > 0 ? (
+    <div class="container hidden-grid">
+      {spots.map((s) => (
+        <article class="hidden-card reveal">
+          <Placeholder alt={s.alt} filenameHint={s.hint} aspect="4:3" showLabel={false} class="hidden-card__media" />
+          <h3 class="hidden-card__name">{s.name}</h3>
+          <p class="ui-label">{s.neighborhood} · Submitted {s.date}</p>
+          <p class="hidden-card__blurb">{s.blurb}</p>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="container hidden-empty">
+      <p class="hidden-empty__copy">
+        No spots published yet. The pipeline is open and the first ones land Saturday after submissions clear the editorial review.
+      </p>
+      <a class="btn-ghost" href="/submit">Submit the first spot</a>
+    </div>
+  )}
+</BaseLayout>
+
+<style>
+  .page-head { padding-block: var(--s-9); }
+  .page-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .page-head__deck { font-size: 1.125rem; color: var(--ink-soft); max-width: 60ch; margin-bottom: var(--s-5); }
+
+  .hidden-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    align-items: center;
+    padding-block: var(--s-5);
+    border-block: 1px solid var(--rule);
+  }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 6px var(--s-3);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .chip:hover { border-color: var(--ink); }
+  .chip.is-active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .hidden-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-7) var(--s-6);
+    padding-block: var(--s-7);
+  }
+  .hidden-card { display: flex; flex-direction: column; gap: var(--s-2); }
+  .hidden-card__media { overflow: hidden; }
+  .hidden-card__name { font-family: var(--font-display); font-size: 1.5rem; margin: var(--s-3) 0 0; }
+  .hidden-card__blurb { color: var(--ink-soft); margin: 0; }
+
+  .hidden-empty {
+    padding: var(--s-9) 0;
+    text-align: center;
+    background: var(--paper);
+    margin-top: var(--s-5);
+  }
+  .hidden-empty__copy { max-width: 48ch; margin-inline: auto; color: var(--ink-soft); }
+
+  .btn-primary, .btn-ghost {
+    display: inline-block;
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .btn-primary { background: var(--ink); color: var(--bg); margin-top: var(--s-3); }
+  .btn-ghost { border: 1px solid var(--ink); margin-top: var(--s-4); }
+
+  @media (max-width: 880px) {
+    .hidden-grid { grid-template-columns: 1fr; }
+  }
+</style>

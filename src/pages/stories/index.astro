@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StoryCard from '../../components/StoryCard.astro';
+import { getCollection } from 'astro:content';
+
+const stories = (await getCollection('stories')).sort(
+  (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+);
+---
+
+<BaseLayout title="Stories — SF Times" description="Every story we have published, back to issue one." current="stories">
+  <div class="container container-narrow page-head">
+    <p class="ui-label">The archive</p>
+    <h1>Every story SF Times has published.</h1>
+    <p class="page-head__deck">Weekly profiles, back to issue one. Every Saturday letter, sortable by neighborhood and beat.</p>
+  </div>
+
+  <div class="container stories-grid">
+    {stories.map((s) => <StoryCard story={s} size="md" />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head { padding-block: var(--s-9); text-align: left; }
+  .page-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .page-head__deck {
+    font-size: 1.125rem;
+    color: var(--ink-soft);
+    max-width: 56ch;
+  }
+  .stories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-7) var(--s-6);
+    padding-bottom: var(--s-10);
+  }
+  @media (max-width: 880px) {
+    .stories-grid { grid-template-columns: 1fr; }
+  }
+</style>

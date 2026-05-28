@@ -1,0 +1,54 @@
+# SF Times — SiteGround static deploy
+# Force HTTPS, gzip, cache headers, security headers, basic redirects.
+
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# Pretty URLs already produced by Astro (trailing-slash directory format).
+# Old query-string story URLs map to new pretty URLs.
+RewriteCond %{QUERY_STRING} ^slug=([^&]+)$
+RewriteRule ^story\.html$ /stories/%1/? [R=301,L]
+RewriteCond %{QUERY_STRING} ^slug=([^&]+)$
+RewriteRule ^best-of-category\.html$ /best-of/%1/? [R=301,L]
+
+# Drop .html on direct hits to legacy paths.
+RewriteRule ^stories\.html$ /stories/ [R=301,L]
+RewriteRule ^best-of\.html$ /best-of/ [R=301,L]
+RewriteRule ^hidden-spots\.html$ /hidden-spots/ [R=301,L]
+RewriteRule ^about\.html$ /about/ [R=301,L]
+RewriteRule ^support\.html$ /support/ [R=301,L]
+RewriteRule ^standards\.html$ /standards/ [R=301,L]
+RewriteRule ^corrections\.html$ /corrections/ [R=301,L]
+RewriteRule ^team\.html$ /team/ [R=301,L]
+RewriteRule ^submit\.html$ /submit/ [R=301,L]
+RewriteRule ^partners\.html$ /partners/ [R=301,L]
+RewriteRule ^privacy\.html$ /privacy/ [R=301,L]
+RewriteRule ^terms\.html$ /terms/ [R=301,L]
+
+# Gzip / Brotli where supported.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# Cache headers.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 6 months"
+  ExpiresByType image/webp "access plus 6 months"
+  ExpiresByType image/avif "access plus 6 months"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType text/html "access plus 5 minutes"
+</IfModule>
+
+# Security headers.
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "interest-cohort=()"
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+</IfModule>
+
+ErrorDocument 404 /404/index.html

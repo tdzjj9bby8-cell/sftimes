@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Not found — SF Times" current="">
+  <div class="container container-narrow page">
+    <p class="ui-label">404</p>
+    <h1>This page hasn't been written yet.</h1>
+    <p class="lead">Or maybe it has and the link got tangled. Either way, here's where to go from here.</p>
+    <ul class="links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/stories">Every story</a></li>
+      <li><a href="/best-of">Best Of</a></li>
+      <li><a href="/submit">Submit a spot</a></li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-10); }
+  .page h1 { margin-block: var(--s-3) var(--s-5); max-width: 22ch; }
+  .page .lead { font-size: 1.125rem; color: var(--ink-soft); margin-bottom: var(--s-6); }
+  .links { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+  .links a {
+    font-family: var(--font-display); font-size: 1.5rem; color: var(--ink);
+    border-bottom: 1px solid var(--rule); padding-bottom: var(--s-2); display: inline-block;
+  }
+  .links a:hover { color: var(--terracotta); border-color: currentColor; }
+</style>

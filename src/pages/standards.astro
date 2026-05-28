@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Standards — SF Times" description="How SF Times sources, names names, handles conflicts, and corrects errors." current="standards">
+  <div class="container container-narrow page">
+    <p class="ui-label">Editorial standards</p>
+    <h1>How we report. Who we name. What we will not do.</h1>
+    <h2>Sourcing</h2>
+    <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are verbatim unless marked otherwise.</p>
+    <h2>Naming</h2>
+    <p>We name a landlord, a chain, a public official, or a corporate party when their action is the public-interest hinge of the story and we can independently verify the claim. We do not name a subject's family member, employer, or address without their consent unless that information is already public and material.</p>
+    <h2>Conflicts of interest</h2>
+    <p>Sponsored entries on Best Of lists carry a labeled badge. Sponsors do not pick stories or entries. The editor who names a list is named on the list. We do not run affiliate links. We do not accept gifts above $25 from subjects.</p>
+    <h2>AI</h2>
+    <p>No SF Times byline is AI-generated. No SF Times article is partially or substantially written by AI. Editing tools (spell check, grammar suggestions) are allowed. Generation tools are not.</p>
+    <h2>Corrections</h2>
+    <p>Errors are corrected on the article page with a dated note. All corrections are also logged at <a href="/corrections">/corrections</a>.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page h1 { margin-block: var(--s-3) var(--s-5); max-width: 22ch; }
+  .page h2 { margin-block: var(--s-7) var(--s-3); font-size: var(--t-h3); }
+  .page p { margin-bottom: var(--s-4); }
+  .page a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
+</style>

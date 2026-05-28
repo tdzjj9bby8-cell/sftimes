@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Support SF Times" description="How reader funding keeps SF Times free. 75% to operations. 25% to local charities." current="support">
+  <div class="container container-narrow page">
+    <p class="ui-label">Support SF Times</p>
+    <h1>Reading is free. Funding the reporting is how we stay free.</h1>
+    <p class="lead">No banner ads. No tracking. No paywall. $10 per month pays for one hour of student journalism.</p>
+
+    <h2>Where the money goes</h2>
+    <div class="split">
+      <div class="split__bar"><span class="split__fill" style="width:75%">75%</span></div>
+      <p><strong>75%</strong> to operations: student stipends, editor pay, hosting, photography.</p>
+      <div class="split__bar"><span class="split__fill split__fill--alt" style="width:25%">25%</span></div>
+      <p><strong>25%</strong> to local Bay Area charities. Named, listed, audited annually.</p>
+    </div>
+
+    <h2>The charities</h2>
+    <ul class="orgs">
+      <li><strong>SF-Marin Food Bank</strong> — feeds 53,000 households a week.</li>
+      <li><strong>La Cocina</strong> — Mission incubator for immigrant women food entrepreneurs.</li>
+      <li><strong>826 Valencia</strong> — youth writing programs across the city.</li>
+      <li><strong>Larkin Street Youth Services</strong> — housing for unhoused young people.</li>
+      <li><strong>Self-Help for the Elderly</strong> — citywide senior services in three languages.</li>
+    </ul>
+
+    <h2>Tiers</h2>
+    <div class="tiers">
+      <div class="tier"><h3>Reader+</h3><p class="tier__price">$5 /mo</p><p>Keeps the lights on.</p></div>
+      <div class="tier"><h3>Sustainer</h3><p class="tier__price">$10 /mo</p><p>One hour of student reporting each month.</p></div>
+      <div class="tier"><h3>Patron</h3><p class="tier__price">$25 /mo</p><p>Named in the masthead. Annual print zine.</p></div>
+      <div class="tier"><h3>Custom</h3><p class="tier__price">You decide</p><p>One-time or recurring, your number.</p></div>
+    </div>
+    <p><a class="btn-primary" href="mailto:support@sftimes.com">Set up support →</a></p>
+    <p class="ui-label">Stripe Checkout wiring lands before public launch.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page h1 { margin-block: var(--s-3) var(--s-5); max-width: 22ch; }
+  .page h2 { margin-block: var(--s-7) var(--s-4); font-size: var(--t-h3); }
+  .page .lead { font-size: 1.25rem; line-height: 1.5; color: var(--ink-soft); margin-bottom: var(--s-6); }
+  .split { display: grid; gap: var(--s-2); }
+  .split__bar { background: var(--paper); height: 28px; position: relative; }
+  .split__fill {
+    display: block; height: 100%; background: var(--ink); color: var(--bg);
+    padding-left: var(--s-3); font-family: var(--font-ui); font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.12em; line-height: 28px;
+  }
+  .split__fill--alt { background: var(--terracotta); }
+  .orgs { list-style: none; padding: 0; }
+  .orgs li { padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
+  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); margin-block: var(--s-5); }
+  .tier { background: var(--paper); padding: var(--s-5); }
+  .tier h3 { font-family: var(--font-display); font-size: 1.25rem; margin: 0; }
+  .tier__price { font-family: var(--font-display); font-size: 2rem; margin: var(--s-3) 0; }
+  .btn-primary {
+    display: inline-block; background: var(--ink); color: var(--bg);
+    padding: var(--s-3) var(--s-5); font-family: var(--font-ui); font-size: 0.875rem;
+    text-transform: uppercase; letter-spacing: 0.12em; margin-top: var(--s-5);
+  }
+  @media (max-width: 880px) { .tiers { grid-template-columns: 1fr 1fr; } }
+</style>

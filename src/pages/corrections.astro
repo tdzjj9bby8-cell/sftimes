@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const corrections: Array<{date: string; story: string; note: string}> = [];
+---
+<BaseLayout title="Corrections — SF Times" description="Every correction SF Times has made, dated and named." current="corrections">
+  <div class="container container-narrow page">
+    <p class="ui-label">Corrections log</p>
+    <h1>What we got wrong, and what we changed.</h1>
+    <p class="lead">Every correction is dated. The story is named. The change is described. This page exists because we will eventually make a mistake, and the alternative to a public log is hiding it.</p>
+    {corrections.length === 0
+      ? <p><em>No corrections to date.</em></p>
+      : <ul class="corrections">{corrections.map((c) => (
+          <li><strong>{c.date}</strong> · <a href="#">{c.story}</a><p>{c.note}</p></li>
+        ))}</ul>}
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page h1 { margin-block: var(--s-3) var(--s-5); }
+  .page .lead { font-size: 1.125rem; color: var(--ink-soft); margin-bottom: var(--s-6); max-width: 56ch; }
+  .corrections { list-style: none; padding: 0; }
+  .corrections li { padding-block: var(--s-4); border-bottom: 1px solid var(--rule); }
+</style>

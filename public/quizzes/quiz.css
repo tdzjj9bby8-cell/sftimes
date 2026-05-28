@@ -1,0 +1,808 @@
+/* SF Times quiz styles. Shared across MBTI, Enneagram, Blood Type. */
+
+.quiz-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 24px 72px;
+}
+
+.quiz-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.quiz-title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.quiz-deck {
+  font-family: var(--serif);
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.55;
+  color: var(--ink-muted);
+  margin-bottom: 24px;
+}
+
+.quiz-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  margin-bottom: 28px;
+}
+
+.quiz-start {
+  margin-bottom: 24px;
+}
+
+.quiz-disclaimer {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+/* Question screen */
+
+.quiz-progress {
+  position: relative;
+  height: 4px;
+  background: var(--fog-light);
+  margin-bottom: 24px;
+}
+.quiz-progress-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--ink);
+  transition: width 0.25s var(--ease);
+}
+.quiz-progress-label {
+  position: absolute;
+  right: 0;
+  top: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.quiz-q-text {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(22px, 3vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 28px 0 24px;
+  color: var(--ink);
+}
+
+.quiz-options {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quiz-option {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 14px;
+  align-items: start;
+  text-align: left;
+  padding: 16px 18px;
+  background: transparent;
+  border: 1px solid var(--fog-light);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+  min-height: 56px;
+}
+.quiz-option:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+}
+.quiz-option:focus-visible {
+  outline: 2px solid var(--pacific);
+  outline-offset: 2px;
+}
+
+.quiz-option-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.quiz-option-label {
+  font-family: var(--serif);
+}
+
+.quiz-back {
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-weight: 600;
+}
+.quiz-back:hover { color: var(--ink); }
+.quiz-back:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Result screen */
+
+.quiz-result-name {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(36px, 6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin-bottom: 18px;
+  color: var(--ink);
+}
+
+.quiz-result-blurb {
+  font-family: var(--serif);
+  font-size: clamp(17px, 2vw, 19px);
+  line-height: 1.6;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+
+.quiz-result-reads {
+  border-top: 1px solid var(--fog-light);
+  padding-top: 20px;
+  margin-bottom: 28px;
+}
+.quiz-result-reads h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+}
+.quiz-result-reads ul {
+  list-style: none;
+  padding: 0;
+}
+.quiz-result-reads li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--fog-light);
+}
+.quiz-result-reads li:last-child { border-bottom: 0; }
+.quiz-result-reads a {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s var(--ease);
+}
+.quiz-result-reads a:hover {
+  border-bottom-color: var(--ink);
+}
+.quiz-result-reads .reads-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ink-muted);
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* Cross-promo block at the bottom of every result page: links to the
+   four other quizzes. Same visual treatment as quiz-result-reads so the
+   page reads as one continuous reading list. */
+.quiz-result-cross {
+  margin: 24px 0 24px;
+  padding: 22px 0;
+  border-top: 1px solid var(--fog-light);
+  border-bottom: 1px solid var(--fog-light);
+}
+.quiz-result-cross h3 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0 0 12px;
+  letter-spacing: -0.015em;
+}
+.quiz-result-cross-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.quiz-result-cross-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--fog-light);
+}
+.quiz-result-cross-list li:last-child { border-bottom: 0; }
+.quiz-result-cross-list a {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s var(--ease);
+}
+.quiz-result-cross-list a:hover { border-bottom-color: var(--ink); }
+.quiz-result-cross-list .reads-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ink-muted);
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+/* Sponsorship slot on the quiz result page. Terracotta left rail.
+   Links out to partners and ad-samples. Editorial firewall: always
+   labeled as available, never disguised. */
+.quiz-result-ad {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border-left: 3px solid var(--terracotta);
+  background: rgba(194, 85, 49, 0.04);
+}
+.quiz-result-ad-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--terracotta);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.quiz-result-ad p {
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  margin: 0;
+}
+.quiz-result-ad a {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px solid var(--ink);
+  text-decoration: none;
+}
+.quiz-result-ad a:hover { color: var(--pacific); border-bottom-color: var(--pacific); }
+
+.quiz-result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.quiz-restart {
+  margin-left: auto;
+}
+
+.quiz-result-newsletter {
+  margin: 32px 0 24px;
+}
+
+.quiz-result-disclaimer {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .quiz-page { padding: 32px 16px 48px; }
+  .quiz-q-text { font-size: 20px; }
+  .quiz-option { padding: 14px 14px; min-height: 60px; }
+  .quiz-result-actions { flex-direction: column; align-items: stretch; }
+  .quiz-restart { margin-left: 0; margin-top: 8px; }
+}
+
+/* ===========================================================
+   LIKERT-MODE STYLES
+   Multi-item paged questionnaire (MBTI / Enneagram long form).
+   =========================================================== */
+
+.quiz-likert .quiz-q-text {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--fog-light);
+  padding-bottom: 14px;
+  margin: 24px 0 4px;
+}
+
+.quiz-likert-list {
+  list-style: decimal;
+  padding-left: 28px;
+  margin: 0;
+}
+
+.quiz-likert-item {
+  padding: 22px 0 24px;
+  border-bottom: 1px solid var(--fog-light);
+}
+.quiz-likert-item:last-child { border-bottom: 0; }
+
+.quiz-likert-text {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
+.quiz-likert-scale {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.quiz-likert-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+  text-align: center;
+}
+.quiz-likert-opt:hover { background: var(--paper); border-color: var(--fog-light); }
+.quiz-likert-opt input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.quiz-likert-dot {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  transition: background 0.15s var(--ease);
+}
+.quiz-likert-opt input[type="radio"]:checked ~ .quiz-likert-dot {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3px var(--bg);
+}
+.quiz-likert-opt:has(input:checked) {
+  border-color: var(--ink);
+  background: var(--paper);
+}
+.quiz-likert-opt-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ink-muted);
+  font-weight: 600;
+  line-height: 1.3;
+  min-height: 24px;
+}
+
+.quiz-page-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--fog-light);
+  flex-wrap: wrap;
+}
+.quiz-page-nav .quiz-back {
+  background: transparent;
+  border: 1px solid var(--fog-light);
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 44px;
+}
+.quiz-page-nav .quiz-back:disabled { opacity: 0.4; cursor: not-allowed; }
+.quiz-page-nav .quiz-back:hover:not(:disabled) { border-color: var(--ink); }
+.quiz-page-incomplete {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--terracotta);
+  font-weight: 700;
+}
+
+/* MOBILE LIKERT REDESIGN
+   At 600px and below the per-option text labels become unreadable and
+   the dots shrink. The standard short-form inventory mobile pattern is:
+   end-cap labels (Disagree / Agree) above the row, then five numbered
+   dots big enough to tap. Each dot is a real 50px+ tap target. */
+@media (max-width: 600px) {
+  .quiz-likert-list { padding-left: 22px; }
+  .quiz-likert-text { font-size: 16px; }
+  .quiz-likert-scale {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    position: relative;
+    padding-top: 18px;
+  }
+  /* End-cap labels positioned outside the dot row. */
+  .quiz-likert-scale::before,
+  .quiz-likert-scale::after {
+    position: absolute;
+    top: 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--ink-muted);
+    font-weight: 700;
+  }
+  .quiz-likert-scale::before {
+    content: "Disagree";
+    left: 0;
+  }
+  .quiz-likert-scale::after {
+    content: "Agree";
+    right: 0;
+  }
+  .quiz-likert-opt {
+    padding: 8px 0;
+    gap: 0;
+    min-height: 50px;
+  }
+  /* Hide the per-option text label and replace with the 1-5 number
+     inside the dot itself. The dot grows to 36px so it's a real
+     tap target. */
+  .quiz-likert-opt-label { display: none; }
+  .quiz-likert-dot {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: background 0.15s var(--ease), color 0.15s var(--ease);
+  }
+  /* Inject the number into each dot via the radio's value (set by JS) */
+  .quiz-likert-opt:nth-child(1) .quiz-likert-dot::after { content: "1"; }
+  .quiz-likert-opt:nth-child(2) .quiz-likert-dot::after { content: "2"; }
+  .quiz-likert-opt:nth-child(3) .quiz-likert-dot::after { content: "3"; }
+  .quiz-likert-opt:nth-child(4) .quiz-likert-dot::after { content: "4"; }
+  .quiz-likert-opt:nth-child(5) .quiz-likert-dot::after { content: "5"; }
+  .quiz-likert-opt input[type="radio"]:checked ~ .quiz-likert-dot {
+    background: var(--ink);
+    color: var(--bg);
+    box-shadow: none;
+  }
+  .quiz-likert-opt input[type="radio"]:checked ~ .quiz-likert-dot::after {
+    color: var(--bg);
+  }
+  /* Active state on tap (mobile feedback) */
+  .quiz-likert-opt:active .quiz-likert-dot {
+    transform: scale(0.95);
+  }
+}
+
+/* Even tighter on the narrowest phones. */
+@media (max-width: 380px) {
+  .quiz-likert-dot { width: 32px; height: 32px; font-size: 11px; }
+  .quiz-likert-text { font-size: 15px; }
+  .quiz-likert-scale::before,
+  .quiz-likert-scale::after { font-size: 9px; letter-spacing: 0.1em; }
+}
+
+/* ===========================================================
+   RESULT BREAKDOWN
+   =========================================================== */
+
+.quiz-result-breakdown {
+  margin: 32px 0 28px;
+  padding: 22px 24px;
+  border: 1px solid var(--fog-light);
+  background: var(--paper);
+}
+.quiz-result-breakdown h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--ink-muted);
+  margin-bottom: 18px;
+}
+.quiz-breakdown-list {
+  list-style: none;
+  padding: 0;
+}
+.quiz-breakdown-row {
+  margin-bottom: 16px;
+}
+.quiz-breakdown-row:last-child { margin-bottom: 0; }
+.quiz-breakdown-axis-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ink-muted);
+  font-weight: 500;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.quiz-breakdown-axis-label .is-strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.quiz-breakdown-axis-label .quiz-breakdown-vs {
+  color: var(--fog-light);
+  font-weight: 400;
+}
+.quiz-breakdown-axis-label .quiz-breakdown-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 8px;
+}
+.quiz-breakdown-bar {
+  height: 6px;
+  background: var(--bg);
+  border: 1px solid var(--fog-light);
+  position: relative;
+  overflow: hidden;
+}
+.quiz-breakdown-bar-fill {
+  height: 100%;
+  background: var(--ink);
+  transition: width 0.4s var(--ease);
+}
+
+/* ===========================================================
+   FUN PASS
+   Stamps, loading state, fade-in, loudest-answer callback,
+   variable button copy supporting visuals.
+   =========================================================== */
+
+/* Page transition: gentle fade-in on each new page render. */
+.quiz-fade-in {
+  animation: quizFadeIn 0.35s ease-out both;
+}
+@keyframes quizFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Per-page aside line above the question header. Smaller, italic,
+   muted, low-stakes. */
+.quiz-page-aside {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: 18px 0 0;
+}
+
+/* Loading screen: three concentric rings expanding in a loop, with
+   a small text line that cycles through honest progress lines. */
+.quiz-loading {
+  text-align: center;
+  padding: 80px 20px;
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: quizFadeIn 0.4s ease-out both;
+}
+.quiz-loading-rings {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 28px;
+}
+.quiz-loading-rings .ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  opacity: 0;
+  animation: quizRing 1.4s var(--ease) infinite;
+}
+.quiz-loading-rings .ring-2 { animation-delay: 0.4s; }
+.quiz-loading-rings .ring-3 { animation-delay: 0.8s; }
+@keyframes quizRing {
+  0% { transform: scale(0.4); opacity: 0; border-color: var(--ink); }
+  35% { opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; border-color: var(--ink-muted); }
+}
+.quiz-loading-line {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  font-weight: 600;
+  min-height: 1.2em;
+  transition: opacity 0.2s var(--ease);
+}
+
+/* Result type stamp. Big serif italic type code with a magazine masthead
+   feel. Uses a subtle border + paper background. The faux-issue-number
+   adds character without claiming any actual data. */
+.quiz-stamp {
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  padding: 14px 20px 18px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.quiz-stamp::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--ink);
+  pointer-events: none;
+}
+.quiz-stamp-header,
+.quiz-stamp-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink);
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+.quiz-stamp-label {
+  letter-spacing: 0.2em;
+}
+.quiz-stamp-date {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.quiz-stamp-code {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(56px, 12vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  text-align: center;
+  margin: 14px 0 12px;
+  position: relative;
+  z-index: 1;
+}
+.quiz-stamp-footer {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+.quiz-stamp-footer .quiz-stamp-issue {
+  font-family: var(--mono);
+  letter-spacing: 0.2em;
+}
+
+/* "Your loudest answer" callback. The personalization moment that makes the
+   result feel like it was about you specifically. */
+.quiz-result-loudest {
+  margin: 24px 0 28px;
+  padding: 18px 22px;
+  border-left: 3px solid var(--ink);
+  background: var(--paper);
+}
+.quiz-result-loudest .loudest-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.quiz-result-loudest .loudest-text {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+.quiz-result-loudest .loudest-text em {
+  font-style: italic;
+}
+
+/* Likert option scale — restyle the picker so the dot pulses gently when
+   selected, and the labels hover-lift. Keeps the item snappy without
+   distracting. */
+.quiz-likert-opt input[type="radio"]:checked ~ .quiz-likert-dot {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3px var(--bg), 0 0 0 0 rgba(24, 22, 18, 0.4);
+  animation: quizDotPulse 0.5s ease-out both;
+}
+@keyframes quizDotPulse {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.15); box-shadow: inset 0 0 0 3px var(--bg), 0 0 0 6px rgba(24, 22, 18, 0.18); }
+  100% { transform: scale(1); box-shadow: inset 0 0 0 3px var(--bg), 0 0 0 0 rgba(24, 22, 18, 0); }
+}
+
+/* Progress bar gets a small jump animation on width change. */
+.quiz-progress-bar {
+  transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@media (max-width: 600px) {
+  .quiz-stamp { padding: 12px 16px 14px; margin-bottom: 24px; }
+  .quiz-stamp::before { inset: 3px; }
+  .quiz-stamp-code { font-size: 56px; margin: 10px 0 8px; }
+  .quiz-result-loudest { padding: 16px 18px; }
+  .quiz-result-loudest .loudest-text { font-size: 16px; }
+  .quiz-page-aside { font-size: 13px; }
+  .quiz-loading { padding: 56px 20px; min-height: 40vh; }
+}

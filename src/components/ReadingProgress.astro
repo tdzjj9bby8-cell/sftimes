@@ -1,0 +1,22 @@
+---
+// Reading progress bar. CSS var driven, ~6 lines of JS.
+---
+<div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress__fill" id="reading-progress-fill"></div>
+</div>
+
+<script>
+  const fill = document.getElementById('reading-progress-fill');
+  if (fill) {
+    const update = () => {
+      const h = document.documentElement;
+      const total = h.scrollHeight - h.clientHeight;
+      const pct = total > 0 ? (h.scrollTop / total) * 100 : 0;
+      fill.style.setProperty('--progress', pct + '%');
+      fill.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  }
+</script>

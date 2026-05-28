@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Placeholder from '../../components/Placeholder.astro';
+import { getCollection } from 'astro:content';
+
+const cats = await getCollection('best-of');
+---
+
+<BaseLayout title="Best Of — SF Times" description="Hand-picked lists. Named editors. No affiliate links." current="best of">
+  <div class="container container-narrow page-head">
+    <p class="ui-label">Best Of</p>
+    <h1>The lists we'd actually send a friend.</h1>
+    <p class="page-head__deck">
+      Quarterly refresh. Named editor on every list. No affiliate links. No credit-card-partner inventory. No chain restaurants.
+    </p>
+  </div>
+
+  <div class="container best-of-grid">
+    {cats.map((c) => (
+      <a class="bestof-card reveal" href={`/best-of/${c.data.url_slug}`}>
+        <Placeholder
+          alt={c.data.hero_alt}
+          filenameHint={c.data.hero_filename_hint}
+          aspect="4:3"
+          showLabel={false}
+          class="bestof-card__media"
+        />
+        <h2 class="bestof-card__title">{c.data.title}</h2>
+        <p class="ui-label">Refreshed {c.data.last_refreshed.toLocaleDateString('en-US',{month:'short',year:'numeric'})} · Editor: {c.data.editor}</p>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head { padding-block: var(--s-9); }
+  .page-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .page-head__deck {
+    font-size: 1.125rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+  .best-of-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-7);
+    padding-bottom: var(--s-10);
+  }
+  .bestof-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    color: var(--ink);
+  }
+  .bestof-card__media { transition: transform var(--t-med) var(--ease-out); overflow: hidden; }
+  .bestof-card:hover .bestof-card__media { transform: scale(1.03); }
+  .bestof-card__title { font-family: var(--font-display); font-size: var(--t-h3); margin: 0; }
+  @media (max-width: 880px) {
+    .best-of-grid { grid-template-columns: 1fr; }
+  }
+</style>

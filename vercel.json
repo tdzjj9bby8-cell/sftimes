@@ -1,0 +1,43 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "astro",
+  "redirects": [
+    { "source": "/story.html", "destination": "/stories/:slug", "permanent": true, "has": [{ "type": "query", "key": "slug", "value": "(?<slug>.*)" }] },
+    { "source": "/best-of-category.html", "destination": "/best-of/:slug", "permanent": true, "has": [{ "type": "query", "key": "slug", "value": "(?<slug>.*)" }] },
+    { "source": "/stories.html", "destination": "/stories", "permanent": true },
+    { "source": "/best-of.html", "destination": "/best-of", "permanent": true },
+    { "source": "/hidden-spots.html", "destination": "/hidden-spots", "permanent": true },
+    { "source": "/about.html", "destination": "/about", "permanent": true },
+    { "source": "/support.html", "destination": "/support", "permanent": true },
+    { "source": "/standards.html", "destination": "/standards", "permanent": true },
+    { "source": "/corrections.html", "destination": "/corrections", "permanent": true },
+    { "source": "/team.html", "destination": "/team", "permanent": true },
+    { "source": "/submit.html", "destination": "/submit", "permanent": true },
+    { "source": "/partners.html", "destination": "/partners", "permanent": true },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/terms.html", "destination": "/terms", "permanent": true }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "interest-cohort=()" }
+      ]
+    }
+  ]
+}

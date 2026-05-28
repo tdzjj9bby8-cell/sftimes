@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Submit — SF Times" description="Pitch a hidden spot, a story tip, or a person we should profile." current="submit">
+  <div class="container container-narrow page">
+    <p class="ui-label">Submit</p>
+    <h1>Tell us about a place, a person, or a story.</h1>
+    <p class="lead">Reader tips are the editorial pipeline. Anonymity is honored if you ask for it. Editor reviews before anything publishes.</p>
+
+    <form class="submit-form" method="post" action="mailto:submit@sftimes.com" enctype="text/plain">
+      <fieldset>
+        <legend class="ui-label">What are you submitting?</legend>
+        <label><input type="radio" name="kind" value="spot" checked /> A hidden spot</label>
+        <label><input type="radio" name="kind" value="pitch" /> A story pitch</label>
+        <label><input type="radio" name="kind" value="tip" /> A tip</label>
+      </fieldset>
+      <label>Your name (optional)
+        <input type="text" name="name" />
+      </label>
+      <label>Your email
+        <input type="email" name="email" required />
+      </label>
+      <label>Subject / spot name
+        <input type="text" name="subject" required />
+      </label>
+      <label>Tell us about it
+        <textarea name="body" rows="8" required></textarea>
+      </label>
+      <button type="submit" class="btn-primary">Send to the editor</button>
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page h1 { margin-block: var(--s-3) var(--s-5); max-width: 26ch; }
+  .page .lead { font-size: 1.125rem; color: var(--ink-soft); margin-bottom: var(--s-7); max-width: 56ch; }
+  .submit-form { display: grid; gap: var(--s-4); }
+  fieldset { border: 0; padding: 0; display: flex; gap: var(--s-5); flex-wrap: wrap; }
+  legend { margin-bottom: var(--s-3); }
+  label { display: flex; flex-direction: column; gap: var(--s-2); font-family: var(--font-ui); font-size: 0.875rem; }
+  fieldset label { flex-direction: row; align-items: center; gap: var(--s-2); }
+  input[type=text], input[type=email], textarea {
+    font-family: var(--font-body); font-size: 1rem; padding: var(--s-3); background: var(--bg);
+    border: 1px solid var(--rule);
+  }
+  textarea { resize: vertical; }
+  .btn-primary {
+    background: var(--ink); color: var(--bg); padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.12em;
+    border: 0; cursor: pointer; justify-self: start;
+  }
+</style>
