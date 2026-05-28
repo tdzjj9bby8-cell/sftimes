@@ -104,9 +104,14 @@ const titleLower = data.title.toLowerCase().replace(/^best /, '');
     inset: 0;
     z-index: 0;
   }
-  .bo-hero__media :global(.placeholder) {
+  .bo-hero__media :global(.placeholder),
+  .bo-hero__media :global(.real-image),
+  .bo-hero__media :global(img) {
+    width: 100%;
     height: 100%;
+    object-fit: cover;
     aspect-ratio: auto !important;
+    display: block;
   }
   .bo-hero__veil {
     position: absolute;

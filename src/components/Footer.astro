@@ -64,22 +64,26 @@ const year = new Date().getFullYear();
   .site-footer__sign {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(1.5rem, 2.5vw, 2rem);
-    line-height: 1.1;
-    margin: 0 0 var(--s-3);
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+    line-height: 1.25;
+    margin: 0 0 var(--s-5);
     letter-spacing: -0.015em;
     font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    max-width: 22ch;
   }
   .site-footer__sign em {
     font-style: italic;
     color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+    /* Keep "the keepers." together so the italic name never splits across
+       two lines. The phrase will wrap as a unit if the container narrows. */
+    white-space: nowrap;
   }
   .site-footer__tagline {
-    max-width: 36ch;
+    max-width: 38ch;
     font-family: var(--font-body);
     font-size: 0.9375rem;
-    line-height: 1.55;
+    line-height: 1.6;
     color: var(--ink-soft);
     margin: 0;
   }

@@ -187,21 +187,29 @@ const nav = [
 </style>
 
 <script>
-  // Transparent-header scroll detection
-  const header = document.querySelector('.site-header[data-variant="transparent"]');
-  if (header) {
-    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 60);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+  // Re-binds on every astro:page-load too. View Transitions don't re-run
+  // inline scripts, so without this the scroll handler never attaches to the
+  // newly-rendered header and the transparent variant stays white-text on a
+  // paper body when you scroll down.
+  function initHeader() {
+    const header = document.querySelector<HTMLElement>('.site-header[data-variant="transparent"]');
+    if (header && !header.dataset.scrollBound) {
+      header.dataset.scrollBound = '1';
+      const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 60);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+    const toggle = document.querySelector<HTMLButtonElement>('.site-header__menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    if (toggle && menu && !toggle.dataset.menuBound) {
+      toggle.dataset.menuBound = '1';
+      toggle.addEventListener('click', () => {
+        const open = menu.getAttribute('aria-hidden') === 'false';
+        menu.setAttribute('aria-hidden', open ? 'true' : 'false');
+        toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+    }
   }
-  // Mobile menu toggle
-  const toggle = document.querySelector<HTMLButtonElement>('.site-header__menu-toggle');
-  const menu = document.getElementById('mobile-menu');
-  if (toggle && menu) {
-    toggle.addEventListener('click', () => {
-      const open = menu.getAttribute('aria-hidden') === 'false';
-      menu.setAttribute('aria-hidden', open ? 'true' : 'false');
-      toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
-    });
-  }
+  initHeader();
+  document.addEventListener('astro:page-load', initHeader);
 </script>

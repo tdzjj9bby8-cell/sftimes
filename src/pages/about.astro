@@ -5,7 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="About — SF Times" description="What SF Times is, who runs it, how it stays free." current="about">
   <div class="container container-narrow page">
     <p class="ui-label">About</p>
-    <h1>SF Times. The Keepers.</h1>
+    <h1 class="about-title"><span>SF Times.</span><span>The Keepers.</span></h1>
     <p class="lead">
       SF Times publishes one keeper every Saturday: a San Franciscan holding a recipe, a routine, a room, a record, or a refusal the city would lose without them. Reader-funded, no parent company, no paywall, no AI bylines.
     </p>
@@ -36,6 +36,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <style>
   .page { padding-block: var(--s-9); }
   .page h1 { margin-block: var(--s-3) var(--s-5); }
+  .about-title span { display: block; }
+  .about-title span + span {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
   .page h2 { margin-block: var(--s-7) var(--s-3); font-size: var(--t-h3); }
   .page .lead { font-size: 1.25rem; line-height: 1.5; color: var(--ink-soft); margin-bottom: var(--s-6); }
   .page p { margin-bottom: var(--s-4); }
