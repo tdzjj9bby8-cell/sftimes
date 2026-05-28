@@ -1,5 +1,8 @@
 import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
+// import sitemap from '@astrojs/sitemap';
+// Sitemap temporarily disabled — @astrojs/sitemap 3.x crashes on Vercel
+// with "Cannot read properties of undefined (reading 'reduce')".
+// Re-enable after upgrading to a compatible version.
 
 export default defineConfig({
   site: 'https://sftimes.com',
@@ -10,11 +13,7 @@ export default defineConfig({
     inlineStylesheets: 'auto',
     assets: 'assets',
   },
-  integrations: [
-    sitemap({
-      filter: (page) => !page.includes('/admin'),
-    }),
-  ],
+  integrations: [],
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
