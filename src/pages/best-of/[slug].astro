@@ -82,7 +82,7 @@ const refreshDate = data.last_refreshed.toLocaleDateString('en-US', { month: 'lo
 
 <style>
   .guide-head { padding-block: var(--s-9); }
-  .guide-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .guide-head h1 { margin-block: var(--s-3) var(--s-4); font-size: clamp(2rem, 4.5vw, 3.5rem); }
   .guide-head__intro { font-size: 1.25rem; color: var(--ink-soft); max-width: 56ch; }
   .guide-head__meta { display: flex; gap: var(--s-5); margin-top: var(--s-5); color: var(--fog); }
   .guide-head__firewall {
@@ -100,7 +100,7 @@ const refreshDate = data.last_refreshed.toLocaleDateString('en-US', { month: 'lo
     gap: var(--s-2);
     align-items: center;
     padding-block: var(--s-5);
-    border-block: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
   }
   .chip {
     background: transparent;

@@ -57,7 +57,7 @@ const titleHtml = featured.data.title_em
   <section class="home-archive container">
     <div class="home-archive__header">
       <h2 class="section-title">From the archive</h2>
-      <a class="ui-label home-archive__view-all" href="/stories">Browse every story →</a>
+      <a class="home-archive__view-all" href="/stories">Browse every story →</a>
     </div>
     <div class="home-archive__grid" id="archive-grid">
       {past.map((s, i) => (
@@ -186,7 +186,14 @@ const titleHtml = featured.data.title_em
     align-items: flex-end;
     margin-bottom: var(--s-7);
   }
-  .home-archive__view-all { color: var(--ink); border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+  .home-archive__view-all {
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 2px;
+  }
+  .home-archive__view-all:hover { color: var(--ink); border-color: var(--ink); }
   .home-archive__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -234,8 +241,8 @@ const titleHtml = featured.data.title_em
   .home-bestof__intro { margin-top: var(--s-3); color: var(--ink-soft); }
   .home-bestof__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--s-5);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-7);
   }
   .bestof-card {
     color: var(--ink);
@@ -278,7 +285,7 @@ const titleHtml = featured.data.title_em
     font-size: 1rem;
     border: 1px solid var(--ink);
     background: var(--bg);
-    min-width: 280px;
+    min-width: min(280px, 100%);
   }
   .visually-hidden {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
@@ -287,6 +294,6 @@ const titleHtml = featured.data.title_em
 
   @media (max-width: 880px) {
     .home-archive__grid { grid-template-columns: 1fr; }
-    .home-bestof__grid { grid-template-columns: 1fr 1fr; }
+    .home-bestof__grid { grid-template-columns: 1fr; }
   }
 </style>
