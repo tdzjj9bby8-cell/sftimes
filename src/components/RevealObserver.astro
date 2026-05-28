@@ -1,10 +1,15 @@
 ---
-// Tiny IntersectionObserver that lights up .reveal elements when they enter view.
-// Inline script, runs once per page.
+// IntersectionObserver that lights up .reveal elements when they enter view.
+// Re-attaches on Astro View Transitions navigation so cards on new pages also reveal.
 ---
 <script>
-  const els = document.querySelectorAll('.reveal');
-  if ('IntersectionObserver' in window && els.length) {
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal:not(.is-visible)');
+    if (!els.length) return;
+    if (!('IntersectionObserver' in window)) {
+      els.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
     const io = new IntersectionObserver((entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
@@ -12,9 +17,9 @@
           io.unobserve(e.target);
         }
       }
-    }, { rootMargin: '0px 0px -15% 0px', threshold: 0.1 });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
     els.forEach((el) => io.observe(el));
-  } else {
-    els.forEach((el) => el.classList.add('is-visible'));
   }
+  initReveal();
+  document.addEventListener('astro:page-load', initReveal);
 </script>

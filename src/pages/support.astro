@@ -1,64 +1,298 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Support SF Times" description="How reader funding keeps SF Times free. 75% to operations. 25% to local charities." current="support">
-  <div class="container container-narrow page">
-    <p class="ui-label">Support SF Times</p>
-    <h1>Reading is free. Funding the reporting is how we stay free.</h1>
-    <p class="lead">No banner ads. No tracking. No paywall. $10 per month pays for one hour of student journalism.</p>
+<BaseLayout title="Support SF Times" description="Reader-funded. 75% to operations. 25% to local Bay Area charities. Named, listed, audited." current="support">
 
-    <h2>Where the money goes</h2>
+  <section class="support-hero">
+    <div class="container container-narrow">
+      <p class="ui-label">Support</p>
+      <h1>You read it free.<br/><em>Someone</em> has to fund it.</h1>
+      <p class="lead">No banner ads. No tracking. No paywall. Just readers who think a Saturday letter about the city is worth something.</p>
+      <a class="btn-jumbo" href="mailto:support@sftimes.com">Become a supporter →</a>
+      <p class="ui-label support-hero__note">Stripe checkout wiring lands before public launch.</p>
+    </div>
+  </section>
+
+  <section class="container container-narrow support-tiers">
+    <div class="tier">
+      <p class="tier__label">$5 a month</p>
+      <h2 class="tier__name">Reader<em>+</em></h2>
+      <p class="tier__what">Keeps the lights on. Newsletter. Our thanks, by name, on the supporters page.</p>
+    </div>
+    <div class="tier tier--featured">
+      <span class="tier__badge">Most chosen</span>
+      <p class="tier__label">$10 a month</p>
+      <h2 class="tier__name">Sustainer</h2>
+      <p class="tier__what">One hour of student reporting, every month, paid for by you. Newsletter, supporters page, plus the SF Times reader-only quarterly note.</p>
+    </div>
+    <div class="tier">
+      <p class="tier__label">$25 a month</p>
+      <h2 class="tier__name">Patron</h2>
+      <p class="tier__what">Named in the masthead. The annual print zine, mailed. An open invite to the once-a-year reader dinner.</p>
+    </div>
+    <div class="tier">
+      <p class="tier__label">You decide</p>
+      <h2 class="tier__name">Custom</h2>
+      <p class="tier__what">One-time or recurring, your number. Helpful if you want to underwrite a single Saturday issue.</p>
+    </div>
+  </section>
+
+  <section class="support-split container container-narrow">
+    <h2 class="section-title">Where every dollar goes</h2>
     <div class="split">
-      <div class="split__bar"><span class="split__fill" style="width:75%">75%</span></div>
-      <p><strong>75%</strong> to operations: student stipends, editor pay, hosting, photography.</p>
-      <div class="split__bar"><span class="split__fill split__fill--alt" style="width:25%">25%</span></div>
-      <p><strong>25%</strong> to local Bay Area charities. Named, listed, audited annually.</p>
+      <div class="split__row split__row--ops">
+        <span class="split__pct">75%</span>
+        <span class="split__label">Operations</span>
+        <span class="split__detail">Student stipends, editor pay, hosting, photography.</span>
+      </div>
+      <div class="split__row split__row--charity">
+        <span class="split__pct">25%</span>
+        <span class="split__label">Local Bay Area charities</span>
+        <span class="split__detail">Named below. Audited annually. Reported on the corrections page.</span>
+      </div>
     </div>
+  </section>
 
-    <h2>The charities</h2>
-    <ul class="orgs">
-      <li><strong>SF-Marin Food Bank</strong> — feeds 53,000 households a week.</li>
-      <li><strong>La Cocina</strong> — Mission incubator for immigrant women food entrepreneurs.</li>
-      <li><strong>826 Valencia</strong> — youth writing programs across the city.</li>
-      <li><strong>Larkin Street Youth Services</strong> — housing for unhoused young people.</li>
-      <li><strong>Self-Help for the Elderly</strong> — citywide senior services in three languages.</li>
-    </ul>
+  <section class="support-orgs container container-narrow">
+    <h2 class="section-title">The five orgs your 25% goes to</h2>
+    <ol class="orgs">
+      <li>
+        <span class="orgs__num">01</span>
+        <div class="orgs__body">
+          <h3 class="orgs__name">SF-Marin Food Bank</h3>
+          <p class="orgs__what">Feeds 53,000 households a week across SF and Marin.</p>
+        </div>
+      </li>
+      <li>
+        <span class="orgs__num">02</span>
+        <div class="orgs__body">
+          <h3 class="orgs__name">La Cocina</h3>
+          <p class="orgs__what">Mission incubator for immigrant women food entrepreneurs.</p>
+        </div>
+      </li>
+      <li>
+        <span class="orgs__num">03</span>
+        <div class="orgs__body">
+          <h3 class="orgs__name">826 Valencia</h3>
+          <p class="orgs__what">Youth writing programs across the city, free, with named tutors.</p>
+        </div>
+      </li>
+      <li>
+        <span class="orgs__num">04</span>
+        <div class="orgs__body">
+          <h3 class="orgs__name">Larkin Street Youth Services</h3>
+          <p class="orgs__what">Housing and case work for young people without a bed.</p>
+        </div>
+      </li>
+      <li>
+        <span class="orgs__num">05</span>
+        <div class="orgs__body">
+          <h3 class="orgs__name">Self-Help for the Elderly</h3>
+          <p class="orgs__what">Citywide senior services, delivered in English, Cantonese, and Mandarin.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
 
-    <h2>Tiers</h2>
-    <div class="tiers">
-      <div class="tier"><h3>Reader+</h3><p class="tier__price">$5 /mo</p><p>Keeps the lights on.</p></div>
-      <div class="tier"><h3>Sustainer</h3><p class="tier__price">$10 /mo</p><p>One hour of student reporting each month.</p></div>
-      <div class="tier"><h3>Patron</h3><p class="tier__price">$25 /mo</p><p>Named in the masthead. Annual print zine.</p></div>
-      <div class="tier"><h3>Custom</h3><p class="tier__price">You decide</p><p>One-time or recurring, your number.</p></div>
-    </div>
-    <p><a class="btn-primary" href="mailto:support@sftimes.com">Set up support →</a></p>
-    <p class="ui-label">Stripe Checkout wiring lands before public launch.</p>
-  </div>
+  <section class="support-foot container container-narrow">
+    <p class="support-foot__line">Ten dollars a month pays for one hour of student journalism. Twenty-five pays for an editor's afternoon. A hundred pays for a Saturday issue, start to finish.</p>
+    <a class="btn-jumbo" href="mailto:support@sftimes.com">Become a supporter →</a>
+  </section>
+
 </BaseLayout>
 
 <style>
-  .page { padding-block: var(--s-9); }
-  .page h1 { margin-block: var(--s-3) var(--s-5); max-width: 22ch; }
-  .page h2 { margin-block: var(--s-7) var(--s-4); font-size: var(--t-h3); }
-  .page .lead { font-size: 1.25rem; line-height: 1.5; color: var(--ink-soft); margin-bottom: var(--s-6); }
+  /* HERO */
+  .support-hero {
+    background: var(--paper);
+    padding-block: var(--s-9) var(--s-8);
+    margin-top: calc(-1 * var(--s-7));
+  }
+  .support-hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    margin: var(--s-3) 0 var(--s-5);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .support-hero h1 em {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .support-hero .lead {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 48ch;
+    margin: 0 0 var(--s-6);
+  }
+  .support-hero__note { display: block; color: var(--fog); margin-top: var(--s-3); }
+
+  /* JUMBO CTA */
+  .btn-jumbo {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--bg);
+    padding: var(--s-4) var(--s-7);
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+  }
+  .btn-jumbo:hover { background: var(--terracotta); transform: translateY(-2px); }
+
+  /* TIERS */
+  .support-tiers {
+    margin-top: var(--s-9);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+  .tier {
+    padding: var(--s-6);
+    border: 1px solid var(--rule);
+    position: relative;
+    transition: border-color var(--t-fast) var(--ease-out);
+  }
+  .tier:hover { border-color: var(--ink); }
+  .tier--featured {
+    border-color: var(--terracotta);
+    border-width: 2px;
+    background: var(--paper);
+  }
+  .tier__badge {
+    position: absolute;
+    top: -12px;
+    left: var(--s-5);
+    background: var(--terracotta);
+    color: var(--bg);
+    padding: 4px var(--s-3);
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 500;
+  }
+  .tier__label {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fog);
+    margin: 0 0 var(--s-2);
+  }
+  .tier__name {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1;
+    margin: 0 0 var(--s-4);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .tier__name em {
+    font-style: italic;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .tier__what {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  /* SPLIT */
+  .support-split { margin-top: var(--s-10); }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    margin: 0 0 var(--s-5);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
   .split { display: grid; gap: var(--s-2); }
-  .split__bar { background: var(--paper); height: 28px; position: relative; }
-  .split__fill {
-    display: block; height: 100%; background: var(--ink); color: var(--bg);
-    padding-left: var(--s-3); font-family: var(--font-ui); font-size: 0.75rem;
-    text-transform: uppercase; letter-spacing: 0.12em; line-height: 28px;
+  .split__row {
+    display: grid;
+    grid-template-columns: 120px 220px 1fr;
+    align-items: baseline;
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--rule);
+    gap: var(--s-4);
   }
-  .split__fill--alt { background: var(--terracotta); }
-  .orgs { list-style: none; padding: 0; }
-  .orgs li { padding-block: var(--s-3); border-bottom: 1px solid var(--rule); }
-  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); margin-block: var(--s-5); }
-  .tier { background: var(--paper); padding: var(--s-5); }
-  .tier h3 { font-family: var(--font-display); font-size: 1.25rem; margin: 0; }
-  .tier__price { font-family: var(--font-display); font-size: 2rem; margin: var(--s-3) 0; }
-  .btn-primary {
-    display: inline-block; background: var(--ink); color: var(--bg);
-    padding: var(--s-3) var(--s-5); font-family: var(--font-ui); font-size: 0.875rem;
-    text-transform: uppercase; letter-spacing: 0.12em; margin-top: var(--s-5);
+  .split__pct {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 1;
+    color: var(--ink);
+    font-variation-settings: 'opsz' 144;
   }
-  @media (max-width: 880px) { .tiers { grid-template-columns: 1fr 1fr; } }
+  .split__row--charity .split__pct { color: var(--terracotta); }
+  .split__label {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+  .split__detail {
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* ORGS */
+  .support-orgs { margin-top: var(--s-9); }
+  .orgs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0;
+  }
+  .orgs li {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: var(--s-5);
+    padding-block: var(--s-4);
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .orgs__num {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--fog);
+    letter-spacing: 0.04em;
+  }
+  .orgs__name {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    margin: 0 0 var(--s-2);
+  }
+  .orgs__what { color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+  /* FOOT */
+  .support-foot {
+    margin-top: var(--s-9);
+    padding: var(--s-7);
+    background: var(--ink);
+    color: var(--bg);
+    text-align: center;
+  }
+  .support-foot__line {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    line-height: 1.4;
+    max-width: 50ch;
+    margin: 0 auto var(--s-5);
+    color: var(--bg);
+  }
+  .support-foot .btn-jumbo {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .support-foot .btn-jumbo:hover { background: var(--terracotta); color: var(--bg); }
+
+  /* MOBILE */
+  @media (max-width: 880px) {
+    .support-tiers { grid-template-columns: 1fr; }
+    .split__row { grid-template-columns: 80px 1fr; }
+    .split__row .split__detail { grid-column: 2; }
+    .split__label { grid-column: 2; }
+  }
 </style>

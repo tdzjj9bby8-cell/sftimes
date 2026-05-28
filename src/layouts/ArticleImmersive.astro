@@ -69,7 +69,7 @@ const articleSchema = {
           class="article-hero__placeholder"
         />
       </div>
-      <div class="article-hero__inner container">
+      <div class="article-hero__inner container container-narrow">
         <p class="ui-label article-hero__eyebrow">
           Issue {data.issue} · {dateLong} · {data.read_minutes}-min read
         </p>
@@ -191,20 +191,20 @@ const articleSchema = {
     margin-block: var(--s-7);
   }
 
-  .article-footer { margin-top: var(--s-9); display: grid; gap: var(--s-7); }
+  .article-footer { margin-top: var(--s-7); display: grid; gap: var(--s-5); }
   .article-credits {
     text-align: center;
-    padding-block: var(--s-6);
+    padding-block: var(--s-4);
     border-block: 1px solid var(--rule);
   }
   .article-credits__name {
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     margin: var(--s-2) 0 0;
   }
   .article-support {
     background: var(--paper);
-    padding: var(--s-7);
+    padding: var(--s-6);
     text-align: center;
   }
   .article-support__title {
@@ -225,7 +225,7 @@ const articleSchema = {
   }
   .btn-primary:hover { transform: translateY(-1px); background: var(--terracotta); }
 
-  .article-read-next { margin-top: var(--s-10); }
+  .article-read-next { margin-top: var(--s-7); }
   .section-title {
     font-family: var(--font-display);
     font-size: var(--t-h3);
