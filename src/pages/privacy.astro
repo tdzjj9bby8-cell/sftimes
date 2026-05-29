@@ -1,15 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Privacy — SF Times" current="privacy">
+<BaseLayout title="privacy — the keepers." current="privacy">
   <div class="container container-narrow page">
-    <p class="ui-label">Privacy</p>
-    <h1>What we collect, what we don't.</h1>
-    <p>We don't track you. No analytics on individual pages. No third-party ad pixels. No social-media trackers. Newsletter subscribers give us their email, which we store with our newsletter provider and use only to send the Saturday issue. That's it.</p>
+    <p class="ui-label">privacy</p>
+    <h1>what we collect. what we <em>don't</em>.</h1>
+    <p>We don't track you. No analytics on individual pages. No third-party ad pixels. No social-media trackers. Newsletter subscribers give us their email, which we store with our newsletter provider and use only to send the saturday issue. That's it.</p>
   </div>
 </BaseLayout>
 
 <style>
   .page { padding-block: var(--s-9); }
-  .page h1 { margin-block: var(--s-3) var(--s-5); }
+  .page h1 {
+    margin-block: var(--s-3) var(--s-5);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
 </style>

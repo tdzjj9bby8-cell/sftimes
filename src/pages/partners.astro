@@ -1,37 +1,59 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Partners — SF Times" description="Sponsorship options and the editorial firewall." current="partners">
+<BaseLayout title="partners — the keepers." description="Sponsorship options and the editorial firewall." current="partners">
   <div class="container container-narrow page">
-    <p class="ui-label">Sponsorship</p>
-    <h1>Reach a Saturday-morning Bay Area readership.</h1>
-    <p class="lead">5,000 newsletter subscribers and growing. One issue every Saturday. Caps on sponsor count per year so your placement matters.</p>
+    <p class="ui-label">sponsorship · capped, named, audited</p>
+    <h1>reach a <em>saturday-morning</em> bay area readership.</h1>
+    <p class="lead">Five thousand newsletter subscribers and growing. One issue every saturday. Caps on sponsor count per year so your placement matters.</p>
 
-    <h2>The editorial firewall</h2>
-    <p>Sponsors do not pick stories. The editor who writes a Best Of list is named on the list. Promoted entries appear with a labeled badge and must still meet the editorial bar.</p>
+    <h2>the editorial firewall.</h2>
+    <p>Sponsors do <em>not</em> pick stories. The editor who writes a best of list is named on the list. Promoted entries appear with a labeled badge and must still meet the editorial bar.</p>
 
-    <h2>What we offer</h2>
+    <h2>what we offer.</h2>
     <p>Four products. Specific pricing on request. We gate rates behind a conversation so we can match the placement to the partner.</p>
     <ul class="products">
-      <li><strong>Featured Listing</strong> — quarterly placement on a Best Of list. Foot-in-the-door tier.</li>
-      <li><strong>Sponsored Profile</strong> — one Saturday issue, your story told in SF Times voice. Cap 2 per quarter.</li>
-      <li><strong>Personal Brand Profile</strong> — bespoke package: durable article, newsletter feature, social, listing inclusion. Cap 1 per quarter.</li>
-      <li><strong>Newsletter Sponsorship</strong> — sole sponsor of one Saturday issue. 4-issue bundle minimum.</li>
+      <li><strong>featured listing.</strong> Quarterly placement on a best of list. Foot-in-the-door tier.</li>
+      <li><strong>sponsored profile.</strong> One saturday issue, your story told in the keeper voice. Cap two per quarter.</li>
+      <li><strong>personal brand profile.</strong> Bespoke package: durable article, newsletter feature, social, listing inclusion. Cap one per quarter.</li>
+      <li><strong>newsletter sponsorship.</strong> Sole sponsor of one saturday issue. Four-issue bundle minimum.</li>
     </ul>
-    <p><a class="btn-primary" href="mailto:partners@sftimes.com">Start a conversation →</a></p>
+    <p><a class="btn-primary" href="mailto:partners@sftimes.com">start a conversation →</a></p>
   </div>
 </BaseLayout>
 
 <style>
   .page { padding-block: var(--s-9); }
-  .page h1 { margin-block: var(--s-3) var(--s-5); }
-  .page h2 { margin-block: var(--s-7) var(--s-3); font-size: var(--t-h3); }
+  .page h1 {
+    margin-block: var(--s-3) var(--s-5);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .page h2 {
+    margin-block: var(--s-7) var(--s-3);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .page p em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 16, 'WONK' 1;
+  }
   .page .lead { font-size: 1.25rem; color: var(--ink-soft); margin-bottom: var(--s-6); max-width: 56ch; }
   .products { list-style: none; padding: 0; }
   .products li { padding: var(--s-4) 0; border-bottom: 1px solid var(--rule); }
   .btn-primary {
     display: inline-block; background: var(--ink); color: var(--bg);
-    padding: var(--s-3) var(--s-5); font-family: var(--font-ui); font-size: 0.875rem;
-    text-transform: uppercase; letter-spacing: 0.12em; margin-top: var(--s-5);
+    padding: var(--s-3) var(--s-5); font-family: var(--font-ui); font-size: 0.75rem;
+    letter-spacing: 0.14em; margin-top: var(--s-5);
+    transition: background var(--t-fast) var(--ease-out);
   }
+  .btn-primary:hover { background: var(--terracotta); }
 </style>

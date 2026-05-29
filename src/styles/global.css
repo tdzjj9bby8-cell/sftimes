@@ -51,13 +51,6 @@
   font-style: italic;
   font-display: swap;
 }
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2-variations');
-  font-weight: 100 800;
-  font-style: normal;
-  font-display: swap;
-}
 
 /* ---------- Design tokens ---------- */
 :root {
@@ -85,7 +78,7 @@
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Newsreader', Georgia, serif;
   --font-ui: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Type scale */
   --t-base: 18px;

@@ -53,7 +53,7 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).toStri
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:site_name" content="SF Times" />
+    <meta property="og:site_name" content="the keepers." />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -77,10 +77,11 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).toStri
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'NewsMediaOrganization',
-      name: 'SF Times',
+      name: 'the keepers.',
+      alternateName: 'SF Times',
       url: 'https://sftimes.com',
       logo: 'https://sftimes.com/logo.png',
-      description: 'San Francisco profile publication. One keeper every Saturday.',
+      description: 'San Francisco profile publication. One keeper every saturday.',
       sameAs: [],
       ethicsPolicy: 'https://sftimes.com/standards',
       correctionsPolicy: 'https://sftimes.com/corrections',
@@ -95,5 +96,44 @@ const canonicalUrl = canonical || new URL(Astro.url.pathname, Astro.site).toStri
     </main>
     <Footer />
     <RevealObserver />
+    <script is:inline>
+      // Lightweight client error capture. Logs the last 20 errors per session
+      // to localStorage so Eric can read them via console:
+      //   console.table(JSON.parse(localStorage.getItem('keepers-errors')))
+      // Replace with Sentry / Vercel Analytics / etc when a real provider lands.
+      (function () {
+        if (window.__keepersErrInit) return;
+        window.__keepersErrInit = true;
+        var KEY = 'keepers-errors';
+        var MAX = 20;
+        function record(entry) {
+          try {
+            var arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+            arr.push(entry);
+            while (arr.length > MAX) arr.shift();
+            localStorage.setItem(KEY, JSON.stringify(arr));
+          } catch (e) {}
+        }
+        window.addEventListener('error', function (e) {
+          record({
+            at: new Date().toISOString(),
+            kind: 'error',
+            msg: (e && e.message) || String(e),
+            src: (e && e.filename) || '',
+            line: (e && e.lineno) || 0,
+            url: location.pathname,
+          });
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          var reason = e && e.reason;
+          record({
+            at: new Date().toISOString(),
+            kind: 'rejection',
+            msg: reason && (reason.message || String(reason)),
+            url: location.pathname,
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

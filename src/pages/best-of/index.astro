@@ -6,39 +6,58 @@ import { getCollection } from 'astro:content';
 const cats = await getCollection('best-of');
 ---
 
-<BaseLayout title="Best Of — SF Times" description="Hand-picked lists. Named editors. No affiliate links." current="best of">
+<BaseLayout title="best of — the keepers." description="Hand-picked lists. Named editors. No affiliate links." current="best of">
   <div class="container container-narrow page-head">
-    <p class="ui-label">Best Of</p>
-    <h1>The lists we'd actually send a friend.</h1>
+    <p class="ui-label">best of · quarterly</p>
+    <h1>the lists we'd <em>actually</em> send a friend.</h1>
     <p class="page-head__deck">
       Quarterly refresh. Named editor on every list. No affiliate links. No credit-card-partner inventory. No chain restaurants.
     </p>
   </div>
 
   <div class="container best-of-grid">
-    {cats.map((c) => (
-      <a class="bestof-card reveal" href={`/best-of/${c.data.url_slug}`}>
-        <Placeholder
-          alt={c.data.hero_alt}
-          filenameHint={c.data.hero_filename_hint}
-          aspect="4:3"
-          showLabel={false}
-          class="bestof-card__media"
-        />
-        <h2 class="bestof-card__title">{c.data.title}</h2>
-        <p class="ui-label">Refreshed {c.data.last_refreshed.toLocaleDateString('en-US',{month:'short',year:'numeric'})} · Editor: {c.data.editor}</p>
-      </a>
-    ))}
+    {cats.map((c) => {
+      const refreshed = c.data.last_refreshed
+        .toLocaleDateString('en-US',{month:'short',year:'numeric'})
+        .toLowerCase();
+      const editor = c.data.editor.toLowerCase();
+      return (
+        <a class="bestof-card reveal" href={`/best-of/${c.data.url_slug}`}>
+          <Placeholder
+            alt={c.data.hero_alt}
+            filenameHint={c.data.hero_filename_hint}
+            aspect="4:3"
+            showLabel={false}
+            class="bestof-card__media"
+          />
+          <h2 class="bestof-card__title">{c.data.title.toLowerCase()}</h2>
+          <p class="ui-label">refreshed {refreshed} · edited by <strong>{editor}</strong></p>
+        </a>
+      );
+    })}
   </div>
 </BaseLayout>
 
 <style>
   .page-head { padding-block: var(--s-9); }
-  .page-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .page-head h1 {
+    margin-block: var(--s-3) var(--s-4);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page-head h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
   .page-head__deck {
     font-size: 1.125rem;
     color: var(--ink-soft);
     max-width: 60ch;
+  }
+  .bestof-card__title :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
   .best-of-grid {
     display: grid;

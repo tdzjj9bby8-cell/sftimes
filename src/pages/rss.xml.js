@@ -6,8 +6,8 @@ export async function GET(context) {
     (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
   );
   return rss({
-    title: 'SF Times — The Keepers',
-    description: 'One San Francisco keeper every Saturday. Reader-funded.',
+    title: 'the keepers. — sf times',
+    description: 'One San Francisco keeper every saturday. Reader-funded.',
     site: context.site,
     items: stories.map((s) => ({
       title: s.data.title,

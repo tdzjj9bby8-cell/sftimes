@@ -5,6 +5,10 @@ const stories = defineCollection({
   schema: z.object({
     title: z.string(),
     title_em: z.string().optional(),
+    // Optional SEO title for search/social. If absent, ArticleImmersive
+    // derives a short title from the headline. Keep under ~50 chars so the
+    // full string + brand suffix fits Google's ~60-char display limit.
+    seo_title: z.string().max(60).optional(),
     deck: z.string(),
     author: z.enum(['Eric', 'Nicholas', 'Daisy']),
     photographer: z.string().default('Staff'),

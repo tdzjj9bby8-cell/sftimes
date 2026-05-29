@@ -1,27 +1,48 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Standards — SF Times" description="How SF Times sources, names names, handles conflicts, and corrects errors." current="standards">
+<BaseLayout title="standards — the keepers." description="How we source, name names, handle conflicts, and correct errors." current="standards">
   <div class="container container-narrow page">
-    <p class="ui-label">Editorial standards</p>
-    <h1>How we report. Who we name. What we will not do.</h1>
-    <h2>Sourcing</h2>
-    <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are verbatim unless marked otherwise.</p>
-    <h2>Naming</h2>
-    <p>We name a landlord, a chain, a public official, or a corporate party when their action is the public-interest hinge of the story and we can independently verify the claim. We do not name a subject's family member, employer, or address without their consent unless that information is already public and material.</p>
-    <h2>Conflicts of interest</h2>
-    <p>Sponsored entries on Best Of lists carry a labeled badge. Sponsors do not pick stories or entries. The editor who names a list is named on the list. We do not run affiliate links. We do not accept gifts above $25 from subjects.</p>
-    <h2>AI</h2>
-    <p>No SF Times byline is AI-generated. No SF Times article is partially or substantially written by AI. Editing tools (spell check, grammar suggestions) are allowed. Generation tools are not.</p>
-    <h2>Corrections</h2>
+    <p class="ui-label">editorial standards</p>
+    <h1>how we report. who we <em>name</em>. what we will not do.</h1>
+    <h2>sourcing.</h2>
+    <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are <em>verbatim</em> unless marked otherwise.</p>
+    <h2>naming.</h2>
+    <p>We name a landlord, a chain, a public official, or a corporate party when their action is the public-interest hinge of the story and we can independently verify the claim. We do <em>not</em> name a subject's family member, employer, or address without their consent unless that information is already public and material.</p>
+    <h2>conflicts of interest.</h2>
+    <p>Sponsored entries on best of lists carry a labeled badge. Sponsors do not pick stories or entries. The editor who names a list is named on the list. We do not run affiliate links. We do not accept gifts above <em>twenty-five</em> dollars from subjects.</p>
+    <h2>ai.</h2>
+    <p>No byline on this site is AI-generated. No article is partially or substantially written by AI. Editing tools (spell check, grammar suggestions) are allowed. Generation tools are not.</p>
+    <h2>corrections.</h2>
     <p>Errors are corrected on the article page with a dated note. All corrections are also logged at <a href="/corrections">/corrections</a>.</p>
   </div>
 </BaseLayout>
 
 <style>
   .page { padding-block: var(--s-9); }
-  .page h1 { margin-block: var(--s-3) var(--s-5); max-width: 22ch; }
-  .page h2 { margin-block: var(--s-7) var(--s-3); font-size: var(--t-h3); }
+  .page h1 {
+    margin-block: var(--s-3) var(--s-5);
+    max-width: 22ch;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .page h2 {
+    margin-block: var(--s-7) var(--s-3);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
   .page p { margin-bottom: var(--s-4); }
+  .page p em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 16, 'WONK' 1;
+  }
   .page a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
 </style>

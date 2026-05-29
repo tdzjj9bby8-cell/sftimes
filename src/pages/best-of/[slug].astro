@@ -5,18 +5,33 @@ import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const cats = await getCollection('best-of');
+  // Stable sequential numbering by alphabetical slug, so a fresh category
+  // dropping later gets a meaningful number rather than a slug-prefix glyph.
+  const sorted = [...cats].sort((a, b) =>
+    a.data.url_slug.localeCompare(b.data.url_slug)
+  );
   return cats.map((c) => ({
     params: { slug: c.data.url_slug },
-    props: { category: c },
+    props: {
+      category: c,
+      number: sorted.findIndex((x) => x.data.url_slug === c.data.url_slug) + 1,
+    },
   }));
 }
 
-const { category } = Astro.props;
+const { category, number } = Astro.props;
 const { data } = category;
 const { Content } = await category.render();
+const stampNum = String(number).padStart(2, '0');
 
 const refreshDate = data.last_refreshed
   .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  .toLowerCase();
+// Quarterly cadence: next drop is roughly 3 months after the last refresh.
+const nextDrop = new Date(data.last_refreshed);
+nextDrop.setMonth(nextDrop.getMonth() + 3);
+const nextDropDate = nextDrop
+  .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   .toLowerCase();
 const editorLower = data.editor.toLowerCase();
 const titleLower = data.title.toLowerCase().replace(/^best /, '');
@@ -38,10 +53,11 @@ const titleLower = data.title.toLowerCase().replace(/^best /, '');
         filenameHint={data.hero_filename_hint}
         aspect="21:9"
         showLabel={true}
+        priority={true}
       />
       <div class="bo-hero__veil" aria-hidden="true"></div>
     </div>
-    <span class="bo-hero__stamp">a keepers best-of · №{(data.url_slug || '').slice(0, 2).toUpperCase()}</span>
+    <span class="bo-hero__stamp">a keepers best-of · №{stampNum}</span>
     <div class="bo-hero__overlay container">
       <p class="bo-hero__eyebrow">best of · refreshed {refreshDate}</p>
       <h1 class="bo-hero__title">{titleLower}.</h1>
@@ -66,7 +82,7 @@ const titleLower = data.title.toLowerCase().replace(/^best /, '');
   <section class="bo-list container">
     <div class="bo-list__head">
       <h2 class="bo-list__title">the list.</h2>
-      <span class="ui-label">in progress · drops {refreshDate}</span>
+      <span class="ui-label">in progress · drops {nextDropDate}</span>
     </div>
 
     <div class="bo-empty">
@@ -77,7 +93,13 @@ const titleLower = data.title.toLowerCase().replace(/^best /, '');
         Picks land with photos, addresses, what to order, who runs it. No screenshots, no scraped reviews, no AI bylines.
         Reader tips are welcome and credited.
       </p>
-      <a class="bo-empty__cta" href="/submit">send a pick →</a>
+      <p class="bo-empty__when">
+        expected drop · <strong>{nextDropDate}</strong>
+      </p>
+      <div class="bo-empty__ctas">
+        <a class="bo-empty__cta" href="/submit">send a pick →</a>
+        <a class="bo-empty__cta-ghost" href="/support">know when it lands</a>
+      </div>
     </div>
 
     {/* Long-form intro markdown if present */}
@@ -238,6 +260,20 @@ const titleLower = data.title.toLowerCase().replace(/^best /, '');
     margin: 0 auto var(--s-5);
     line-height: 1.5;
   }
+  .bo-empty__when {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    color: var(--fog);
+    margin: 0 0 var(--s-5);
+  }
+  .bo-empty__when strong { color: var(--ink); font-weight: 500; }
+  .bo-empty__ctas {
+    display: flex;
+    gap: var(--s-3);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
   .bo-empty__cta {
     display: inline-block;
     background: var(--ink);
@@ -249,6 +285,21 @@ const titleLower = data.title.toLowerCase().replace(/^best /, '');
     transition: background var(--t-fast) var(--ease-out);
   }
   .bo-empty__cta:hover { background: var(--terracotta); }
+  .bo-empty__cta-ghost {
+    display: inline-block;
+    background: transparent;
+    color: var(--ink);
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    letter-spacing: 0.14em;
+    border: 1px solid var(--ink);
+    transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+  }
+  .bo-empty__cta-ghost:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
 
   /* Optional markdown body */
   .bo-body { margin-top: var(--s-7); color: var(--ink-soft); max-width: 680px; }

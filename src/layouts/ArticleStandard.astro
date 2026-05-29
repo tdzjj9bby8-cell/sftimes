@@ -19,10 +19,23 @@ const readNext = allStories
   .sort(() => Math.random() - 0.5)
   .slice(0, 3);
 
-const dateLong = data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const dateLong = data.published.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toLowerCase();
 const titleHtml = data.title_em
   ? data.title.replace(data.title_em, `<em>${data.title_em}</em>`)
   : data.title;
+
+// Same SEO title pattern as ArticleImmersive.
+const BRAND_SUFFIX = '— the keepers.';
+const MAX_TITLE = 60 - BRAND_SUFFIX.length - 1;
+function deriveShortTitle(t: string) {
+  if (t.length <= MAX_TITLE) return t;
+  const m = t.match(/^([^,;:—]+)[\s]*[,;:—]/);
+  if (m && m[1].length <= MAX_TITLE) return m[1].trim();
+  const cut = t.slice(0, MAX_TITLE);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > MAX_TITLE * 0.6 ? cut.slice(0, lastSpace) : cut).trim() + '…';
+}
+const pageTitle = `${data.seo_title || deriveShortTitle(data.title)} ${BRAND_SUFFIX}`;
 
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -33,7 +46,7 @@ const articleSchema = {
   author: { '@type': 'Person', name: data.author },
   publisher: {
     '@type': 'NewsMediaOrganization',
-    name: 'SF Times',
+    name: 'the keepers.',
     logo: { '@type': 'ImageObject', url: 'https://sftimes.com/logo.png' },
   },
   mainEntityOfPage: `https://sftimes.com/stories/${data.url_slug}`,
@@ -41,7 +54,7 @@ const articleSchema = {
 ---
 
 <BaseLayout
-  title={`${data.title} — SF Times`}
+  title={pageTitle}
   description={data.deck}
   ogType="article"
   canonical={`https://sftimes.com/stories/${data.url_slug}`}
@@ -61,14 +74,14 @@ const articleSchema = {
   <article class="article-standard">
     <header class="article-standard__head container container-narrow">
       <p class="ui-label">
-        Issue {data.issue} · {dateLong} · {data.read_minutes}-min read
+        a keepers essay · №{data.issue} · {dateLong} · {data.read_minutes}-min read
       </p>
       <h1 class="article-standard__title" set:html={titleHtml} />
       <p class="article-standard__deck">{data.deck}</p>
       <p class="ui-label article-standard__byline">
-        By <strong>{data.author}</strong>
+        by <strong>{data.author}</strong>
         {data.photographer && data.photographer !== 'Staff' && (
-          <> · Photographs by <strong>{data.photographer}</strong></>
+          <> · photographs by <strong>{data.photographer}</strong></>
         )}
       </p>
     </header>
@@ -79,11 +92,12 @@ const articleSchema = {
         filenameHint={data.hero_filename_hint}
         aspect="5:4"
         showLabel={true}
+        priority={true}
       />
       {data.caption && <p class="article-standard__caption ui-label">{data.caption}</p>}
     </div>
 
-    <div class="article-body container-prose">
+    <div class="article-body container container-prose">
       <Content components={{ blockquote: PullQuote }} />
     </div>
 
@@ -91,20 +105,20 @@ const articleSchema = {
       <PullQuote attribution={data.pull_quote_attr}>{data.pull_quote}</PullQuote>
     )}
 
-    <footer class="article-footer container-narrow">
+    <footer class="article-footer container container-narrow">
       <div class="article-credits">
-        <p class="ui-label">Photographs by</p>
+        <p class="ui-label">photographs by</p>
         <p class="article-credits__name">{data.photographer}</p>
       </div>
       <div class="article-support">
-        <h2 class="article-support__title">Reading SF Times every Saturday is free.</h2>
-        <p>Funding the reporting is how we stay free. $10/mo pays for one hour of student journalism.</p>
-        <a class="btn-primary" href="/support">Support SF Times</a>
+        <h2 class="article-support__title">reading the keepers every saturday is free.</h2>
+        <p>Funding the reporting is how we stay free. $10 a month pays for one hour of student journalism.</p>
+        <a class="btn-primary" href="/support">support the keepers →</a>
       </div>
     </footer>
 
     <section class="article-read-next container">
-      <h2 class="section-title">Read next</h2>
+      <h2 class="section-title">read next</h2>
       <div class="article-read-next__grid">
         {readNext.map((s: any) => <StoryCard story={s} size="sm" />)}
       </div>
@@ -198,10 +212,19 @@ const articleSchema = {
   .article-read-next { margin-top: var(--s-9); }
   .section-title {
     font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
     font-size: var(--t-h3);
     margin-bottom: var(--s-5);
     padding-bottom: var(--s-3);
     border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .btn-primary {
+    font-size: 0.75rem !important;
+    text-transform: none !important;
+    letter-spacing: 0.14em !important;
   }
   .article-read-next__grid {
     display: grid;

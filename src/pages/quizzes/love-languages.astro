@@ -3,26 +3,71 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="Which SF love language is yours? — SF Times"
+  title="love languages quiz — the keepers."
   description="Five-language inventory. The way you give and want care, written as a San Franciscan."
   canonical="https://sftimes.com/quizzes/love-languages"
   current="quizzes"
 >
+  <link rel="stylesheet" slot="head" href="/quizzes/quiz.css" />
+
+  <section class="qz-sub-hero container">
+    <p class="ui-label">quiz №6 · the identify series</p>
+    <h1>how do you <em>give</em> care?</h1>
+    <p class="qz-sub-hero__deck">
+      Five love languages: words, time, touch, gifts, acts of service. We tell you which ones you reach for first and which ones you forget.
+    </p>
+    <p class="qz-sub-hero__meta">25 items · ~3 minutes · one page.</p>
+  </section>
+
   <div class="quiz-page container">
     <noscript>
-      <h1>Which SF love language is yours?</h1>
-      <p>This quiz requires JavaScript. Please enable it to take the inventory.</p>
+      <p class="qz-sub-noscript">This quiz needs JavaScript. Please enable it to take the inventory.</p>
     </noscript>
-    <div id="quiz-root">
-      <h1 style="position: absolute; left: -9999px;">Which SF love language is yours?</h1>
-    </div>
+    <div id="quiz-root"></div>
+    <p class="qz-sub-foot">Based on Gary Chapman's framework. For curiosity, not therapy.</p>
   </div>
 </BaseLayout>
 
-<link rel="stylesheet" href="/quizzes/quiz.css" />
 <script src="/quizzes/love-languages.config.js" is:inline></script>
 <script src="/quizzes/quiz-engine.js" is:inline></script>
 
 <style>
+  .qz-sub-hero { padding-top: var(--s-9); padding-bottom: var(--s-6); border-bottom: 1px solid var(--rule); }
+  .qz-sub-hero .ui-label { color: var(--ink-soft); margin-bottom: var(--s-4); }
+  .qz-sub-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 5.5vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.022em;
+    margin: 0 0 var(--s-4);
+    max-width: 22ch;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .qz-sub-hero h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .qz-sub-hero__deck {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 56ch;
+    margin: 0 0 var(--s-4);
+  }
+  .qz-sub-hero__meta {
+    font-family: var(--font-ui); font-size: 0.75rem; letter-spacing: 0.14em; color: var(--fog); margin: 0;
+  }
   .quiz-page { padding-block: var(--s-7) var(--s-9); }
+  .qz-sub-noscript {
+    font-family: var(--font-body); color: var(--ink-soft);
+    padding: var(--s-5); background: var(--paper);
+    border-left: 3px solid var(--terracotta);
+  }
+  .qz-sub-foot {
+    margin-top: var(--s-7); font-family: var(--font-ui);
+    font-size: 0.75rem; letter-spacing: 0.08em; color: var(--fog);
+  }
 </style>

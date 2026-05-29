@@ -34,6 +34,7 @@ const titleHtml = featured.data.title_em
           filenameHint={featured.data.hero_filename_hint}
           aspect="21:9"
           showLabel={true}
+          priority={true}
           class="home-hero__placeholder"
         />
         <div class="home-hero__veil" aria-hidden="true"></div>
@@ -90,7 +91,7 @@ const titleHtml = featured.data.title_em
           <Placeholder
             alt={c.data.hero_alt}
             filenameHint={c.data.hero_filename_hint}
-            aspect="4:3"
+            aspect="16:9"
             showLabel={false}
             class="bestof-card__media"
           />
@@ -119,7 +120,7 @@ const titleHtml = featured.data.title_em
 
   <!-- NEWSLETTER -->
   <section class="home-newsletter container">
-    <div class="home-newsletter__inner">
+    <div class="home-newsletter__inner" data-newsletter-root>
       <h2 class="section-title">saturday letter</h2>
       <p class="home-newsletter__copy">
         One profile every Saturday. Free for every reader. No spam, no tracking, no parent company.
@@ -129,9 +130,44 @@ const titleHtml = featured.data.title_em
         <input id="newsletter-email" type="email" name="email" placeholder="you@email.com" required />
         <button type="submit" class="btn-primary">subscribe</button>
       </form>
+      <div class="home-newsletter__thanks" data-newsletter-thanks hidden>
+        <p class="home-newsletter__thanks-line"><em>thanks.</em></p>
+        <p class="home-newsletter__thanks-sub">Saturday morning, in your inbox. If we don't hit your inbox by next saturday, check spam, then write to <a href="mailto:hello@sftimes.com">hello@sftimes.com</a>.</p>
+      </div>
     </div>
   </section>
 </BaseLayout>
+
+<script is:inline>
+  // Capture-on-submit until the real provider lands. Stores entries in
+  // localStorage so Eric can export later; shows a friendly thank-you state
+  // either way. Re-runs on astro:page-load so View Transitions don't break it.
+  function initNewsletter() {
+    const form = document.querySelector('[data-newsletter]');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input[type=email]');
+      const email = (input && input.value || '').trim();
+      if (!email) return;
+      try {
+        const key = 'keepers-newsletter';
+        const existing = JSON.parse(localStorage.getItem(key) || '[]');
+        existing.push({ email, at: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(existing));
+      } catch (err) { /* ignore */ }
+      const root = form.closest('[data-newsletter-root]');
+      const thanks = root && root.querySelector('[data-newsletter-thanks]');
+      form.setAttribute('hidden', '');
+      const copy = root && root.querySelector('.home-newsletter__copy');
+      if (copy) copy.setAttribute('hidden', '');
+      if (thanks) thanks.removeAttribute('hidden');
+    });
+  }
+  initNewsletter();
+  document.addEventListener('astro:page-load', initNewsletter);
+</script>
 
 <style>
   /* FULL-BLEED HERO. No top margin trickery. The hero IS the top of the page,
@@ -323,11 +359,14 @@ const titleHtml = featured.data.title_em
   .home-bestof { margin-top: var(--s-9); }
   .home-bestof__header {
     margin-bottom: var(--s-6);
-    max-width: 60ch;
     padding-bottom: var(--s-3);
     border-bottom: 1px solid var(--rule);
   }
-  .home-bestof__intro { margin-top: var(--s-3); color: var(--ink-soft); }
+  .home-bestof__intro {
+    margin-top: var(--s-3);
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
   .home-bestof__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -352,8 +391,16 @@ const titleHtml = featured.data.title_em
 
   /* HIDDEN SPOTS */
   .home-hidden { background: var(--paper); padding-block: var(--s-8); margin-top: var(--s-9); }
-  .home-hidden__header { max-width: 60ch; margin-bottom: var(--s-6); }
-  .home-hidden__intro { margin-top: var(--s-3); color: var(--ink-soft); }
+  .home-hidden__header {
+    margin-bottom: var(--s-6);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .home-hidden__intro {
+    margin-top: var(--s-3);
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
   .home-hidden__empty { display: flex; flex-direction: column; gap: var(--s-3); align-items: flex-start; }
 
   /* NEWSLETTER */
@@ -379,6 +426,29 @@ const titleHtml = featured.data.title_em
     background: var(--bg);
     min-width: min(280px, 100%);
   }
+  .home-newsletter__thanks {
+    margin-top: var(--s-4);
+  }
+  .home-newsletter__thanks-line {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: -0.015em;
+    color: var(--terracotta);
+    margin: 0 0 var(--s-3);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .home-newsletter__thanks-sub {
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 48ch;
+    margin: 0 auto;
+  }
+  .home-newsletter__thanks-sub a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
   .visually-hidden {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
     clip: rect(0,0,0,0); white-space: nowrap; border: 0;

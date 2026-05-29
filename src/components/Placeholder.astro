@@ -14,6 +14,8 @@ export interface Props {
   rounded?: boolean;
   showLabel?: boolean;
   class?: string;
+  /** Above-the-fold hero. Renders the img eager + fetchpriority high. */
+  priority?: boolean;
 }
 
 const {
@@ -23,6 +25,7 @@ const {
   rounded = false,
   showLabel = true,
   class: className = '',
+  priority = false,
 } = Astro.props;
 
 const aspectMap: Record<string, string> = {
@@ -42,23 +45,73 @@ const aspectRatio = aspectMap[aspect];
 const hintBase = filenameHint.replace(/\.[^.]+$/, '');
 const imgSrc = `/${hintBase}.jpg`;
 
-// At build time, check if the file exists in public/
+// At build time, check what assets exist in public/.
+// If responsive variants exist (480/960/1440/2400 in webp + jpg) we emit a
+// <picture> with srcset so phones don't download the full 2400px hero.
 import fs from 'node:fs';
 import path from 'node:path';
 const publicDir = path.resolve(process.cwd(), 'public');
 const imgPath = path.join(publicDir, `${hintBase}.jpg`);
 const hasRealImage = fs.existsSync(imgPath);
+
+// hintBase like "heroes/2026-04-25-mrs-kim-tofu-house" — responsive variants
+// live in /heroes/responsive/2026-04-25-mrs-kim-tofu-house-480.webp etc.
+const dir = path.posix.dirname(hintBase);
+const base = path.posix.basename(hintBase);
+const respDir = path.join(publicDir, dir, 'responsive');
+const widths = [480, 960, 1440, 2400] as const;
+const hasResponsive = hasRealImage && fs.existsSync(
+  path.join(respDir, `${base}-480.webp`)
+);
+const webpSrcset = widths
+  .filter((w) => fs.existsSync(path.join(respDir, `${base}-${w}.webp`)))
+  .map((w) => `/${dir}/responsive/${base}-${w}.webp ${w}w`)
+  .join(', ');
+const jpgSrcset = widths
+  .filter((w) => fs.existsSync(path.join(respDir, `${base}-${w}.jpg`)))
+  .map((w) => `/${dir}/responsive/${base}-${w}.jpg ${w}w`)
+  .join(', ');
+
+// Sensible default sizes for full-bleed heroes: phones get viewport-width,
+// tablets get viewport-width, desktops get up to 1440. Override via prop if
+// the image renders smaller (e.g., team headshots are 220x220 fixed).
+const aspectSizes: Record<string, string> = {
+  '1:1': '(max-width: 880px) 50vw, 220px',  // headshots
+  '21:9': '100vw',                            // full-bleed heroes
+  '16:9': '(max-width: 1440px) 100vw, 1440px',
+  '5:4': '(max-width: 880px) 100vw, 880px',
+  '4:3': '(max-width: 880px) 100vw, 440px',
+  '3:4': '(max-width: 880px) 100vw, 440px',
+};
+const sizes = aspectSizes[aspect] || '100vw';
 ---
 
 {hasRealImage ? (
-  <img
-    class={`real-image ${rounded ? 'real-image--rounded' : ''} ${className}`}
-    src={imgSrc}
-    alt={alt}
-    loading="lazy"
-    decoding="async"
-    style={`aspect-ratio: ${aspectRatio}; object-fit: cover; width: 100%;`}
-  />
+  hasResponsive ? (
+    <picture>
+      {webpSrcset && <source type="image/webp" srcset={webpSrcset} sizes={sizes} />}
+      {jpgSrcset && <source type="image/jpeg" srcset={jpgSrcset} sizes={sizes} />}
+      <img
+        class={`real-image ${rounded ? 'real-image--rounded' : ''} ${className}`}
+        src={imgSrc}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : 'auto'}
+        decoding="async"
+        style={`aspect-ratio: ${aspectRatio}; object-fit: cover; width: 100%;`}
+      />
+    </picture>
+  ) : (
+    <img
+      class={`real-image ${rounded ? 'real-image--rounded' : ''} ${className}`}
+      src={imgSrc}
+      alt={alt}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      decoding="async"
+      style={`aspect-ratio: ${aspectRatio}; object-fit: cover; width: 100%;`}
+    />
+  )
 ) : (
   <figure
     class={`placeholder ${rounded ? 'placeholder--rounded' : ''} ${className}`}

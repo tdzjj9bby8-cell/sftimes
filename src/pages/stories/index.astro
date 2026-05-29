@@ -8,31 +8,64 @@ const stories = (await getCollection('stories')).sort(
 );
 ---
 
-<BaseLayout title="Stories — SF Times" description="Every story we have published, back to issue one." current="stories">
+<BaseLayout title="stories — the keepers." description="Every story we have published, back to issue one." current="stories">
   <div class="container container-narrow page-head">
-    <p class="ui-label">The archive</p>
-    <h1>Every story SF Times has published.</h1>
-    <p class="page-head__deck">Weekly profiles, back to issue one. Every Saturday letter, sortable by neighborhood and beat.</p>
+    <p class="ui-label">the archive · all keepers, every saturday</p>
+    <h1>every <em>keeper</em> we have ever held.</h1>
+    <p class="page-head__deck">Weekly profiles, back to issue one. Sortable by neighborhood and beat. One saturday letter at a time.</p>
   </div>
 
-  <div class="container stories-grid">
-    {stories.map((s) => <StoryCard story={s} size="md" />)}
-  </div>
+  <section class="container stories-section">
+    <h2 class="stories-section__head">
+      <span>{stories.length} saturdays.</span> <em>each one a keeper.</em>
+    </h2>
+    <div class="stories-grid">
+      {stories.map((s) => <StoryCard story={s} size="md" />)}
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
   .page-head { padding-block: var(--s-9); text-align: left; }
-  .page-head h1 { margin-block: var(--s-3) var(--s-4); }
+  .page-head h1 {
+    margin-block: var(--s-3) var(--s-4);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page-head h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
   .page-head__deck {
     font-size: 1.125rem;
     color: var(--ink-soft);
     max-width: 56ch;
   }
+  .stories-section { padding-bottom: var(--s-10); }
+  .stories-section__head {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    line-height: 1.3;
+    margin: 0 0 var(--s-6);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.015em;
+    color: var(--ink-soft);
+  }
+  .stories-section__head span { color: var(--ink); }
+  .stories-section__head em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
   .stories-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--s-7) var(--s-6);
-    padding-bottom: var(--s-10);
+  }
+  @media (max-width: 1024px) {
+    .stories-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 880px) {
     .stories-grid { grid-template-columns: 1fr; }

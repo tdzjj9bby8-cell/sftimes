@@ -57,10 +57,14 @@ const nav = [
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: background var(--t-fast) var(--ease-out),
-                border-color var(--t-fast) var(--ease-out),
-                color var(--t-fast) var(--ease-out),
-                padding var(--t-fast) var(--ease-out);
+    /* Background and border paint FIRST (120ms) so a solid surface is in place
+       before the text color flips to dark (200ms). Eliminates the flicker
+       where dark text would otherwise hover over still-transparent bg during
+       the scroll-state transition. */
+    transition: background 120ms var(--ease-out),
+                border-color 120ms var(--ease-out),
+                color 200ms var(--ease-out),
+                padding 200ms var(--ease-out);
   }
   .site-header--solid {
     background: var(--bg);

@@ -24,6 +24,23 @@ const titleHtml = data.title_em
   ? data.title.replace(data.title_em, `<em>${data.title_em}</em>`)
   : data.title;
 
+// SEO title preference: explicit seo_title field, then a derived short version
+// of the headline (everything before the first comma, em-dash, or colon), then
+// the full title. Brand suffix is always "the keepers." Goal: ~60 chars total.
+const BRAND_SUFFIX = '— the keepers.';
+const MAX_TITLE = 60 - BRAND_SUFFIX.length - 1; // leave a space
+function deriveShortTitle(t: string) {
+  if (t.length <= MAX_TITLE) return t;
+  // Try first clause break
+  const m = t.match(/^([^,;:—]+)[\s]*[,;:—]/);
+  if (m && m[1].length <= MAX_TITLE) return m[1].trim();
+  // Hard truncate on word boundary
+  const cut = t.slice(0, MAX_TITLE);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > MAX_TITLE * 0.6 ? cut.slice(0, lastSpace) : cut).trim() + '…';
+}
+const pageTitle = `${data.seo_title || deriveShortTitle(data.title)} ${BRAND_SUFFIX}`;
+
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'NewsArticle',
@@ -33,7 +50,7 @@ const articleSchema = {
   author: { '@type': 'Person', name: data.author },
   publisher: {
     '@type': 'NewsMediaOrganization',
-    name: 'SF Times',
+    name: 'the keepers.',
     logo: { '@type': 'ImageObject', url: 'https://sftimes.com/logo.png' },
   },
   mainEntityOfPage: `https://sftimes.com/stories/${data.url_slug}`,
@@ -41,7 +58,7 @@ const articleSchema = {
 ---
 
 <BaseLayout
-  title={`${data.title} — SF Times`}
+  title={pageTitle}
   description={data.deck}
   ogType="article"
   canonical={`https://sftimes.com/stories/${data.url_slug}`}
@@ -66,6 +83,7 @@ const articleSchema = {
           filenameHint={data.hero_filename_hint}
           aspect="21:9"
           showLabel={true}
+          priority={true}
           class="article-hero__placeholder"
         />
       </div>

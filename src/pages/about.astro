@@ -2,34 +2,39 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="About — SF Times" description="What SF Times is, who runs it, how it stays free." current="about">
+<BaseLayout title="about — the keepers." description="What the keepers is, who runs it, how it stays free." current="about">
   <div class="container container-narrow page">
-    <p class="ui-label">About</p>
+    <p class="ui-label">about</p>
     <h1 class="about-title"><span>SF Times.</span><span>The Keepers.</span></h1>
     <p class="lead">
-      SF Times publishes one keeper every Saturday: a San Franciscan holding a recipe, a routine, a room, a record, or a refusal the city would lose without them. Reader-funded, no parent company, no paywall, no AI bylines.
+      One San Franciscan every Saturday. Someone holding a recipe, a routine, a room, a record, or a refusal the city would lose without them. Reader-funded. No parent company. No paywall. No AI bylines.
     </p>
 
-    <h2>What we publish</h2>
-    <p>One profile a week, every Saturday morning. Quarterly Best Of guides written by named editors. Reader-submitted Hidden Spots, vetted by the editor before they appear. Five personality quizzes that each end in a reading list. That's the whole publication.</p>
+    <h2>what we publish.</h2>
+    <p>One profile a week, every saturday morning. Quarterly best of guides written by <em>named</em> editors. Reader-submitted hidden spots, vetted by the editor before they appear. Five personality quizzes that each end in a reading list. That's the whole publication.</p>
 
-    <h2>How we stay free</h2>
-    <p>Readers fund the reporting. We don't run banner ads. We don't sell your data. We don't have a paywall. 75% of every donated dollar pays student journalists and editors. 25% goes to local Bay Area charities, named on the support page, audited annually.</p>
+    <h2>how we stay free.</h2>
+    <p>Readers fund the reporting. We don't run banner ads. We don't sell your data. We don't have a paywall. <em>Seventy-five</em> percent of every donated dollar pays student journalists and editors. <em>Twenty-five</em> percent goes to local bay area charities, named on the support page, audited annually.</p>
 
-    <h2>Five principles</h2>
+    <h2>five principles.</h2>
     <ol>
-      <li><strong>Named bylines, always.</strong> Every word on this site is written by a named human. No AI bylines, no syndicated filler, no aggregated reposts.</li>
-      <li><strong>One thing per page.</strong> The homepage curates. The article reads. The Best Of guides. We don't cross-breed.</li>
-      <li><strong>Specificity over abstraction.</strong> Real names, real prices, real dates. The shop owner is a person, not a stand-in for "small business."</li>
-      <li><strong>Editorial firewall.</strong> Sponsored entries are labeled. The list still has to meet the editorial bar. Sponsors do not pick stories.</li>
-      <li><strong>Protect the small.</strong> If a place can't handle traffic, we describe it without naming it. Hidden Spots are the proof.</li>
+      <li><strong>Named bylines, <em>always</em>.</strong> Every word on this site is written by a named human. No AI bylines, no syndicated filler, no aggregated reposts.</li>
+      <li><strong>One thing per <em>page</em>.</strong> The homepage curates. The article reads. The best of guides. We don't cross-breed.</li>
+      <li><strong>Specificity over <em>abstraction</em>.</strong> Real names, real prices, real dates. The shop owner is a person, not a stand-in for "small business."</li>
+      <li><strong>Editorial <em>firewall</em>.</strong> Sponsored entries are labeled. The list still has to meet the editorial bar. Sponsors do not pick stories.</li>
+      <li><strong>Protect the <em>small</em>.</strong> If a place can't handle traffic, we describe it without naming it. Hidden spots are the proof.</li>
     </ol>
 
-    <h2>Who runs it</h2>
+    <h2>who runs it.</h2>
     <p>Eric, founder and editor. Plus Nicholas and Daisy on the bylines. <a href="/team">Read the team page</a> for bios.</p>
 
-    <h2>Where the money goes</h2>
+    <h2>where the money goes.</h2>
     <p>Full revenue breakdown lives on the <a href="/support">support page</a>. Editorial standards on the <a href="/standards">standards page</a>. Public corrections log on the <a href="/corrections">corrections page</a>. If we get something wrong we say so.</p>
+
+    <p class="about-cta">
+      <a class="btn-ghost" href="/stories">read a saturday letter →</a>
+      <a class="btn-jumbo" href="/support">become a supporter →</a>
+    </p>
   </div>
 </BaseLayout>
 
@@ -42,10 +47,51 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
   }
-  .page h2 { margin-block: var(--s-7) var(--s-3); font-size: var(--t-h3); }
+  .page h2 {
+    margin-block: var(--s-7) var(--s-3);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
   .page .lead { font-size: 1.25rem; line-height: 1.5; color: var(--ink-soft); margin-bottom: var(--s-6); }
   .page p { margin-bottom: var(--s-4); }
+  .page p em, .page li em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 16, 'WONK' 1;
+  }
   .page ol { padding-left: 1.5em; }
   .page li { margin-bottom: var(--s-3); }
   .page a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
+  .about-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-8);
+  }
+  .about-cta .btn-ghost {
+    display: inline-block;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+  }
+  .about-cta .btn-ghost:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .about-cta .btn-jumbo {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--bg);
+    padding: var(--s-3) var(--s-5);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    border: 1px solid var(--ink);
+    transition: background var(--t-fast) var(--ease-out);
+  }
+  .about-cta .btn-jumbo:hover { background: var(--terracotta); border-color: var(--terracotta); }
 </style>
