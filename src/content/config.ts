@@ -21,6 +21,12 @@ const stories = defineCollection({
     photo_class: z.enum(['warm', 'cool', 'green', 'dusk']).default('warm'),
     hero_alt: z.string(),
     hero_filename_hint: z.string(),
+    /** Optional one-line clause for the homepage editor's paragraph.
+     *  Should pair naturally with the title as a continuation, e.g.
+     *  title: "Mrs. Kim's Tofu House" + lede_line: "still serving the same six bowls at 5:47 a.m."
+     *  → reads as: "Mrs. Kim's Tofu House still serving the same six bowls at 5:47 a.m."
+     *  Falls back to the first sentence of `deck` if absent. */
+    lede_line: z.string().optional(),
     /** Focal point for object-position on cropped thumbnails.
      *  Format: "<x> <y>" with % or keywords. Defaults to "center 25%" so
      *  faces (which usually sit in the upper third of journalistic portraits)

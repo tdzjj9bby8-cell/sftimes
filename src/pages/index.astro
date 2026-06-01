@@ -84,20 +84,22 @@ const nextIssue = (featured.data.issue || 0) + 1;
   </div>
 
   <!-- EDITOR'S PARAGRAPH — Drift-style hyperlinked landing block.
-       Each keeper title is a link inline. Connective prose carries Eric's voice.
-       Replaces the older asymmetric card grid. -->
+       Each title is a link inline. Connective text comes from each story's
+       own lede_line (preferred, hand-curated) or falls back to the first
+       sentence of the deck. -->
   <section class="lede">
     <p class="lede__eyebrow">FROM THE EDITOR · WHAT WE'VE BEEN KEEPING</p>
     <p class="lede__text">
-      {ledeStories[0] && (<><a href={`/stories/${ledeStories[0].data.url_slug}`}>{ledeStories[0].data.title}</a> is still pouring at the same prep counter she rented in 1987. </>)}
-      {ledeStories[1] && (<><a href={`/stories/${ledeStories[1].data.url_slug}`}>{ledeStories[1].data.title}</a> hand-stitches another trajes while his children argue about the shop. </>)}
-      {ledeStories[2] && (<><a href={`/stories/${ledeStories[2].data.url_slug}`}>{ledeStories[2].data.title}</a> opens the back door at 4:42 a.m., same as last week, same as next. </>)}
-      {ledeStories[3] && (<><a href={`/stories/${ledeStories[3].data.url_slug}`}>{ledeStories[3].data.title}</a> still puts the seasonal flavors at the back of the case where nobody looks. </>)}
-      {ledeStories[4] && (<><a href={`/stories/${ledeStories[4].data.url_slug}`}>{ledeStories[4].data.title}</a> twenty years on, still hosting the kids who keep coming back. </>)}
-      {ledeStories[5] && (<><a href={`/stories/${ledeStories[5].data.url_slug}`}>{ledeStories[5].data.title}</a> is the broth nobody put on a map. </>)}
-      {ledeStories[6] && (<><a href={`/stories/${ledeStories[6].data.url_slug}`}>{ledeStories[6].data.title}</a> climbed every morning before the parrots came through. </>)}
-      {ledeStories[7] && (<><a href={`/stories/${ledeStories[7].data.url_slug}`}>{ledeStories[7].data.title}</a> has been holding the basement annex since 1979. </>)}
-      Every byline is a real person. Every saturday is a real saturday. <a href="/stories">All {stories.length} issues →</a>
+      {ledeStories.map((s) => {
+        const clause = s.data.lede_line || (s.data.deck.split(/\.\s+/)[0] + '.');
+        return (
+          <>
+            <a href={`/stories/${s.data.url_slug}`}>{s.data.title}</a>
+            {' '}{clause}{' '}
+          </>
+        );
+      })}
+      <a href="/stories" class="lede__all">All {stories.length} issues →</a>
     </p>
   </section>
 
@@ -242,28 +244,36 @@ const nextIssue = (featured.data.issue || 0) + 1;
   .feat__dot.is-on { background: #fff; }
 
   /* === EDITOR'S PARAGRAPH (Drift-style hyperlinked lede) === */
-  .lede { padding: 80px 12px 64px; max-width: 1080px; margin: 0 auto; }
-  .lede__eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 28px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .lede { padding: 80px 24px 72px; max-width: 880px; margin: 0 auto; }
+  .lede__eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 32px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
   .lede__text {
-    font-family: var(--display);
-    font-size: clamp(24px, 2.6vw, 40px);
-    line-height: 1.25;
-    letter-spacing: -0.005em;
+    font-family: var(--ui);
+    font-size: clamp(17px, 1.6vw, 21px);
+    line-height: 1.65;
+    letter-spacing: 0;
     color: var(--ink);
     margin: 0;
-    text-wrap: balance;
+    text-wrap: pretty;
   }
   .lede__text a {
     color: var(--ink);
+    font-weight: 600;
     text-decoration: none;
-    background-image: linear-gradient(var(--ink), var(--ink));
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    background-size: 100% 2px;
-    padding-bottom: 2px;
-    transition: background-size 220ms cubic-bezier(0.16,1,0.3,1), opacity 200ms;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+    transition: border-bottom-width 180ms ease, opacity 180ms;
   }
-  .lede__text a:hover { background-size: 100% 6px; opacity: 0.85; }
+  .lede__text a:hover { border-bottom-width: 2px; opacity: 0.7; }
+  .lede__text .lede__all {
+    display: inline-block;
+    margin-top: 8px;
+    font-weight: 600;
+    border-bottom: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+  }
+  .lede__text .lede__all:hover { opacity: 0.7; }
 
   /* === VERTICAL BLOCK === */
   /* KEEPERS wordmark sits in its own column. Font cap and column width
