@@ -8,17 +8,17 @@
  * editable string.
  *
  * Usage:
- *   1. Render at http://localhost:4321/exhibition/_template after `npm run dev`
+ *   1. Render at http://localhost:4321/_template after `npm run dev`
  *   2. Copy any block (HTML between the BEGIN/END comments) into a new page
  *   3. Replace the [PLACEHOLDERS] with real content
  *   4. Delete blocks you don't need
  *
  * Don't ship this page. Filename starts with _ as a convention; it'll still
- * route at /exhibition/_template but it's clearly internal.
+ * route at /_template but it's clearly internal.
  */
-import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
-import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
-import Placeholder from '../../components/Placeholder.astro';
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import Placeholder from '../components/Placeholder.astro';
 ---
 <ExhibitionLayout
   title="[PAGE TITLE] · The Keepers · SF Times"
@@ -66,7 +66,7 @@ import Placeholder from '../../components/Placeholder.astro';
   <!-- BLOCK 7.6 · GIANT SECTION WORDMARK (section divider that links)  -->
   <!-- Use as a bold separator between major page sections.              -->
   <!-- =============================================================== -->
-  <a href="/exhibition/[DESTINATION-SLUG]" class="ex-colmark__link">
+  <a href="/[DESTINATION-SLUG]" class="ex-colmark__link">
     <section class="ex-colmark">
       <h2 class="ex-colmark__text">[DIVIDER WORDMARK]</h2>
     </section>

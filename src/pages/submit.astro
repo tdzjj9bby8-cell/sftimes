@@ -1,99 +1,108 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import PageMasthead from '../components/PageMasthead.astro';
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 ---
-<BaseLayout title="submit — the keepers." description="Pitch a hidden spot, a story tip, or a person we should profile." current="submit">
-
-  <PageMasthead
-    title="send us a tip."
-    eyebrow="submissions · anonymity honored"
-    subscript="THE KEEPERS"
+<ExhibitionLayout
+  title="SUBMIT · The Keepers · SF Times"
+  description="Pitch a hidden spot, a story tip, or a person we should profile."
+  active="home"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title="SUBMIT"
+    subscript="TIP LINE"
+    cutouts={[]}
   />
 
-  <div class="container container-narrow page">
-    <h2 class="page-subhead">tell us about a place, a <em>person</em>, or a story.</h2>
-    <p class="lead">Reader tips are the editorial pipeline. Anonymity is honored if you ask for it. Editor reads within seven days, replies only if there are follow-up questions.</p>
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">READER TIPS · ANONYMITY HONORED · EDITOR READS WITHIN 7 DAYS</p>
+    <h1 class="ex-prose__title">TELL US ABOUT<br>A PLACE, A PERSON,<br>OR A STORY.</h1>
+    <p>Reader tips are the editorial pipeline. Anonymity is honored if you ask for it. Editor reads within seven days, replies only if there are follow-up questions.</p>
+  </article>
 
-    <form class="submit-form" method="post" action="mailto:submit@sftimes.com" enctype="text/plain">
+  <section class="form-wrap">
+    <form id="submitForm" class="sub-form" method="post" action="mailto:eric@seod.com" enctype="text/plain">
       <fieldset>
-        <legend class="ui-label">what are you submitting?</legend>
-        <label><input type="radio" name="kind" value="spot" checked /> a hidden spot</label>
-        <label><input type="radio" name="kind" value="pitch" /> a story pitch</label>
-        <label><input type="radio" name="kind" value="tip" /> a tip</label>
+        <legend>WHAT ARE YOU SUBMITTING?</legend>
+        <label><input type="radio" name="kind" value="spot" checked> A HIDDEN SPOT</label>
+        <label><input type="radio" name="kind" value="pitch"> A STORY PITCH</label>
+        <label><input type="radio" name="kind" value="tip"> A TIP</label>
       </fieldset>
-      <label>your name (optional)
-        <input type="text" name="name" />
+      <label class="field">
+        <span>YOUR NAME (OPTIONAL)</span>
+        <input type="text" name="name">
       </label>
-      <label>your email
-        <input type="email" name="email" required />
+      <label class="field">
+        <span>YOUR EMAIL</span>
+        <input type="email" name="email" required>
       </label>
-      <label>subject or spot name
-        <input type="text" name="subject" required />
+      <label class="field">
+        <span>SUBJECT OR SPOT NAME</span>
+        <input type="text" name="subject" required>
       </label>
-      <label>tell us about it
+      <label class="field">
+        <span>TELL US ABOUT IT</span>
         <textarea name="body" rows="8" required></textarea>
       </label>
-      <button type="submit" class="btn-primary">send to the editor →</button>
+      <button type="submit">SEND TO THE EDITOR →</button>
     </form>
-  </div>
-</BaseLayout>
+    <div id="submitThanks" hidden>
+      <h3>THANKS. WE'LL READ IT.</h3>
+      <p>Editor reads within seven days. If we have follow-up questions, we'll write back.</p>
+    </div>
+  </section>
 
-<style>
-  .page { padding-block: var(--s-9); }
-  .page-subhead {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-    line-height: 1.1;
-    letter-spacing: -0.015em;
-    margin: var(--s-7) 0 var(--s-5);
-    max-width: 22ch;
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-  }
-  .page-subhead :global(em) {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .page .lead { font-size: 1.125rem; color: var(--ink-soft); margin-bottom: var(--s-7); max-width: 56ch; }
-  .submit-form { display: grid; gap: var(--s-4); max-width: 560px; }
-  fieldset { border: 0; padding: 0; display: flex; gap: var(--s-5); flex-wrap: wrap; }
-  legend { margin-bottom: var(--s-3); }
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: var(--s-2);
-    font-family: var(--font-ui);
-    font-size: 0.8125rem;
-    letter-spacing: 0.06em;
-    color: var(--ink-soft);
-  }
-  fieldset label { flex-direction: row; align-items: center; gap: var(--s-2); color: var(--ink); }
-  input[type=text], input[type=email], textarea {
-    font-family: var(--font-body);
-    font-size: 1rem;
-    padding: var(--s-3) var(--s-4);
-    background: var(--bg);
-    border: 1px solid var(--rule);
-    color: var(--ink);
-    transition: border-color var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
-  }
-  input[type=text]:focus, input[type=email]:focus, textarea:focus {
-    border-color: var(--ink);
-    outline: 0;
-  }
-  textarea { resize: vertical; min-height: 160px; }
-  .btn-primary {
-    background: var(--ink);
-    color: var(--bg);
-    padding: var(--s-3) var(--s-5);
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    border: 0;
-    cursor: pointer;
-    justify-self: start;
-    transition: background var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
-  }
-  .btn-primary:hover { background: var(--terracotta); transform: translateY(-1px); }
-</style>
+  <style>
+    .form-wrap { padding: 0 12px 80px; max-width: 720px; margin: 0 auto; }
+    .sub-form { display: grid; gap: 18px; }
+    fieldset { border: 1px solid var(--rule); padding: 18px; display: flex; flex-wrap: wrap; gap: 16px; }
+    legend { font-size: 11px; letter-spacing: 0.16em; padding: 0 8px; }
+    fieldset label { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: 0.06em; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field span { font-size: 11px; letter-spacing: 0.16em; color: var(--muted); }
+    .field input, .field textarea {
+      font-family: var(--ui);
+      font-size: 16px;
+      padding: 12px 14px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--ink); outline: 0; }
+    .field textarea { resize: vertical; min-height: 160px; }
+    button {
+      padding: 14px 28px;
+      background: var(--ink);
+      color: var(--paper);
+      border: 0;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      justify-self: start;
+      transition: opacity 200ms;
+    }
+    button:hover { opacity: 0.8; }
+    #submitThanks h3 { font-family: var(--display); font-size: clamp(36px, 5vw, 64px); text-transform: uppercase; margin: 0 0 12px; }
+    #submitThanks p { font-size: 14px; color: var(--muted); margin: 0; }
+  </style>
+
+  <script is:inline>
+    (function () {
+      const form = document.getElementById('submitForm');
+      const thanks = document.getElementById('submitThanks');
+      if (!form) return;
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        try {
+          const data = Object.fromEntries(new FormData(form).entries());
+          const KEY = 'keepers-submissions';
+          const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+          arr.push({ ...data, at: new Date().toISOString() });
+          localStorage.setItem(KEY, JSON.stringify(arr));
+        } catch (_) {}
+        form.hidden = true;
+        if (thanks) thanks.hidden = false;
+      });
+    })();
+  </script>
+</ExhibitionLayout>

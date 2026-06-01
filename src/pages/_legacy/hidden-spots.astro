@@ -1,0 +1,389 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
+
+// Initial editor's-cut spots. Reader submissions land via /submit and get
+// editor-vetted before showing up here. Schema is intentionally inline until
+// a content collection is wired in v1.2.
+const spots = [
+  {
+    n: '01',
+    kicker: 'a bench · presidio',
+    name: 'the fog bench above lobos creek',
+    name_em: 'fog',
+    what: "Concrete bench, no plaque, facing west. The fog rolls in from the right at 4:40pm most summer days. You hear the creek before you see it.",
+    how: 'Park at baker beach lot 3, walk south 8 minutes, take the unsigned trail at the cypress stand.',
+    when: 'presidio · 4:40pm',
+  },
+  {
+    n: '02',
+    kicker: 'a bookstore · richmond',
+    name: 'the basement at green apple after 9pm',
+    name_em: 'green apple',
+    what: "Everyone knows the upstairs. The basement is quieter. The annex behind the staircase has the only copies of Robert Hass's first chapbook anywhere in the city, last we checked.",
+    how: 'Open til 10:30 wed–sat. Ask for nobody, just walk down.',
+    when: 'richmond · after dark',
+  },
+  {
+    n: '03',
+    kicker: 'a kitchen · excelsior',
+    name: "the back counter at mitchell's, weekday afternoon",
+    name_em: "mitchell's",
+    what: "The line moves. The back of the freezer case has the seasonal flavors they don't list on the menu. Ube macapuno. Halo halo. Buko pandan if they made it that week.",
+    how: 'Best window tuesday or wednesday, 2–4pm. Ask what is in the back. They will tell you.',
+    when: 'excelsior · two scoops',
+  },
+  {
+    n: '04',
+    kicker: 'a stairwell · north beach',
+    name: 'the filbert steps at first light',
+    name_em: 'filbert',
+    what: 'The wild parrots come through around 6:50am most spring mornings. Bring coffee, not a camera. The light through the eucalyptus is the point.',
+    how: 'Park at sansome and filbert. Climb to the second landing, then sit.',
+    when: 'north beach · 6:50am',
+  },
+  {
+    n: '05',
+    kicker: 'a counter · tenderloin',
+    name: 'the second-floor pho place above turk and leavenworth',
+    name_em: 'turk',
+    what: 'No sign. Walk up the unmarked staircase between the laundromat and the corner store. Eight tables. Mrs. Tran has been making the broth here for twenty-three years.',
+    how: 'Cash only. Open 10am–8pm tues–sat. Order the dac biet, ask for extra basil.',
+    when: 'tenderloin · cash only',
+  },
+];
+
+function withEm(text: string, em?: string) {
+  if (!em) return text;
+  return text.replace(em, `<em>${em}</em>`);
+}
+---
+
+<BaseLayout
+  title="hidden spots — the keepers."
+  description="Editor-vetted field notes on the corners of San Francisco worth holding. No paid placements. No tourist boards."
+  current="hidden spots"
+>
+
+  <PageMasthead
+    title="hidden spots."
+    eyebrow={`${spots.length} places · editor-vetted · field notebook`}
+    subscript="THE KEEPERS"
+  />
+
+  <!-- HERO — full-bleed dark photo treatment, no real image yet -->
+  <section class="hs-hero">
+    <svg class="hs-hero__bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <filter id="hs-grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="13" stitchTiles="stitch"/>
+          <feColorMatrix values="0 0 0 0 0.95  0 0 0 0 0.92  0 0 0 0 0.86  0 0 0 0.6 0"/>
+          <feComposite in2="SourceGraphic" operator="in"/>
+        </filter>
+        <radialGradient id="hs-vig" cx="55%" cy="48%" r="80%">
+          <stop offset="0%" stop-color="#3a4a3a"/>
+          <stop offset="55%" stop-color="#1a221a"/>
+          <stop offset="100%" stop-color="#080c08"/>
+        </radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#hs-vig)"/>
+      <g opacity="0.55">
+        <path d="M 0 600 L 220 540 L 360 600 L 540 510 L 720 580 L 900 480 L 1080 560 L 1280 470 L 1440 540 L 1600 480 L 1600 900 L 0 900 Z" fill="#1c241c"/>
+        <path d="M 0 720 L 180 680 L 360 720 L 540 660 L 720 720 L 900 670 L 1080 720 L 1280 660 L 1440 700 L 1600 660 L 1600 900 L 0 900 Z" fill="#121812"/>
+      </g>
+      <g opacity="0.4">
+        <rect x="280" y="500" width="40" height="80" fill="#0a0c0a"/>
+        <rect x="640" y="470" width="50" height="120" fill="#0a0c0a"/>
+        <rect x="980" y="520" width="36" height="70" fill="#0a0c0a"/>
+        <rect x="1280" y="490" width="44" height="100" fill="#0a0c0a"/>
+      </g>
+      <rect width="1600" height="900" fill="#0a0c0a" opacity="0.3"/>
+      <rect width="1600" height="900" filter="url(#hs-grain)" opacity="0.65"/>
+    </svg>
+    <span class="hs-hero__stamp">hidden spots · field notes</span>
+    <div class="hs-hero__overlay container">
+      <p class="hs-hero__eyebrow">a working list · updated quarterly</p>
+      <h1 class="hs-hero__title">five places <em>nobody</em> tells you about.</h1>
+      <p class="hs-hero__sub">No paid placements, no tourist boards, no influencer tags. Things our writers actually go to when they want to be left alone.</p>
+    </div>
+  </section>
+
+  <!-- CHIPS — neighborhood filter, currently visual only -->
+  <div class="hs-chips container" aria-label="Filter by neighborhood">
+    <button class="chip is-on" data-filter="all">all neighborhoods</button>
+    <button class="chip" data-filter="richmond">richmond</button>
+    <button class="chip" data-filter="sunset">sunset</button>
+    <button class="chip" data-filter="mission">mission</button>
+    <button class="chip" data-filter="tenderloin">tenderloin</button>
+    <button class="chip" data-filter="north-beach">north beach</button>
+    <button class="chip" data-filter="excelsior">excelsior</button>
+    <button class="chip" data-filter="presidio">presidio</button>
+  </div>
+
+  <!-- LIST -->
+  <section class="hs-list container">
+    <h2 class="hs-list__head">{spots.length} spots, alphabetical.</h2>
+
+    {spots.map((s) => (
+      <article class="hs-spot">
+        <div class="hs-spot__num">{s.n}</div>
+        <div class="hs-spot__body">
+          <p class="hs-spot__kicker">{s.kicker}</p>
+          <h3 class="hs-spot__name" set:html={withEm(s.name, s.name_em)} />
+          <p class="hs-spot__what">{s.what}</p>
+          <p class="hs-spot__meta"><strong>how to get there.</strong> {s.how}</p>
+        </div>
+        <div class="hs-spot__photo">
+          <div class="hs-spot__photo-grain">
+            <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <filter id={`hs-g-${s.n}`}>
+                  <feTurbulence baseFrequency="0.9" numOctaves="2" seed={parseInt(s.n) * 5}/>
+                  <feColorMatrix values="0 0 0 0 0.93  0 0 0 0 0.9  0 0 0 0 0.83  0 0 0 0.5 0"/>
+                </filter>
+              </defs>
+              <rect width="400" height="300" fill="#2a241e"/>
+              <circle cx="200" cy="160" r="80" fill="#5a4633"/>
+              <rect x="100" y="240" width="200" height="60" fill="#3a2d22"/>
+              <rect width="400" height="300" filter={`url(#hs-g-${s.n})`} opacity="0.55"/>
+            </svg>
+          </div>
+          <span class="hs-spot__stamp">{s.when}</span>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <!-- NOTE BLOCK -->
+  <aside class="hs-note">
+    <div class="hs-note__inner container container-prose">
+      <h3 class="hs-note__title">a small ask, from the editors.</h3>
+      <p>These places work because the people who go there protect them. Don't geotag. Don't review-bomb. Don't bring a film crew.</p>
+      <p>If you find a sixth, seventh, eleventh spot worth holding, send us a postcard. Real one. Address is on the about page.</p>
+      <p class="hs-note__sign">— <strong>the keepers.</strong></p>
+    </div>
+  </aside>
+
+</BaseLayout>
+
+<style>
+  /* HERO */
+  .hs-hero {
+    position: relative;
+    height: 78vh;
+    min-height: 560px;
+    max-height: 820px;
+    overflow: hidden;
+    background: var(--ink);
+    isolation: isolate;
+  }
+  .hs-hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .hs-hero__stamp {
+    position: absolute;
+    top: calc(var(--s-9) + var(--s-2));
+    right: var(--gutter);
+    z-index: 3;
+    border: 1px solid rgba(244,241,234,0.55);
+    padding: var(--s-2) var(--s-3);
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    color: var(--bg);
+  }
+  .hs-hero__overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    padding-bottom: var(--s-9);
+    color: var(--bg);
+  }
+  .hs-hero__eyebrow {
+    color: rgba(244,241,234,0.78);
+    margin: 0 0 var(--s-4);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+  }
+  .hs-hero__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.022em;
+    margin: 0 0 var(--s-4);
+    max-width: 22ch;
+    color: var(--bg);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .hs-hero__title :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .hs-hero__sub {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    line-height: 1.5;
+    color: rgba(244,241,234,0.85);
+    margin: 0;
+    max-width: 42ch;
+  }
+
+  /* CHIPS */
+  .hs-chips {
+    padding-block: var(--s-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    border-bottom: 1px solid var(--rule);
+  }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 6px var(--s-3);
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .chip:hover { border-color: var(--ink); color: var(--ink); }
+  .chip.is-on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* LIST */
+  .hs-list { padding-block: var(--s-8); }
+  .hs-list__head {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    margin: 0 0 var(--s-6);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .hs-spot {
+    display: grid;
+    grid-template-columns: 64px 1.4fr 1fr;
+    gap: var(--s-6);
+    align-items: start;
+    padding-block: var(--s-6);
+    border-top: 1px solid var(--rule);
+  }
+  .hs-spot:last-child { border-bottom: 1px solid var(--rule); }
+  .hs-spot__num {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.875rem;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+    line-height: 1;
+  }
+  .hs-spot__kicker {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    color: var(--fog);
+    margin: 0 0 var(--s-2);
+  }
+  .hs-spot__name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.018em;
+    margin: 0 0 var(--s-3);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .hs-spot__name :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .hs-spot__what {
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 var(--s-4);
+    max-width: 48ch;
+  }
+  .hs-spot__meta {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    color: var(--fog);
+    margin: 0;
+    line-height: 1.55;
+  }
+  .hs-spot__meta strong { color: var(--ink); font-weight: 500; letter-spacing: 0.1em; }
+  .hs-spot__photo {
+    position: relative;
+    aspect-ratio: 4/3;
+    background: var(--ink);
+    overflow: hidden;
+  }
+  .hs-spot__photo-grain { width: 100%; height: 100%; }
+  .hs-spot__photo-grain svg { width: 100%; height: 100%; display: block; }
+  .hs-spot__stamp {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-family: var(--font-ui);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    color: rgba(244,241,234,0.78);
+    border: 1px solid rgba(244,241,234,0.4);
+    padding: 4px 8px;
+  }
+
+  /* NOTE BLOCK */
+  .hs-note {
+    background: var(--paper-deep);
+    padding-block: var(--s-8);
+    margin-top: var(--s-6);
+  }
+  .hs-note__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    margin: 0 0 var(--s-4);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .hs-note p {
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 var(--s-3);
+  }
+  .hs-note__sign {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+    color: var(--fog);
+    margin-top: var(--s-5);
+  }
+  .hs-note__sign strong { color: var(--ink); font-weight: 500; }
+
+  @media (max-width: 880px) {
+    .hs-hero { height: 70vh; min-height: 480px; }
+    .hs-hero__stamp { top: calc(var(--s-8) + var(--s-2)); right: var(--s-4); padding: 5px 9px; font-size: 0.625rem; }
+    .hs-hero__overlay { padding-bottom: var(--s-7); }
+    .hs-spot { grid-template-columns: 1fr; gap: var(--s-4); }
+    .hs-spot__num { font-size: 1.5rem; }
+  }
+</style>
+
+<script>
+  // Single-select chip toggle (filtering wires up when content collection lands)
+  const chips = document.querySelectorAll<HTMLButtonElement>('.hs-chips .chip');
+  chips.forEach((c) => c.addEventListener('click', () => {
+    chips.forEach((x) => x.classList.remove('is-on'));
+    c.classList.add('is-on');
+  }));
+</script>

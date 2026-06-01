@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
+---
+<BaseLayout title="privacy — the keepers." current="privacy">
+
+  <PageMasthead
+    title="privacy."
+    eyebrow="what we collect · what we don't"
+    subscript="THE KEEPERS"
+  />
+
+  <div class="container container-narrow page">
+    <p>We don't track you. No analytics on individual pages. No third-party ad pixels. No social-media trackers. Newsletter subscribers give us their email, which we store with our newsletter provider and use only to send the saturday issue. That's it.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page h1 {
+    margin-block: var(--s-3) var(--s-5);
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page h1 :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+</style>

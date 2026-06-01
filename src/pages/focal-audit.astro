@@ -1,18 +1,18 @@
 ---
 /**
- * /exhibition/focal-audit · dev helper
+ * /focal-audit · dev helper
  *
  * Renders every story's hero photo at the same 4:5 crop used in the homepage
  * grid, with a crosshair overlay marking where hero_focal currently sits.
  * Walk the page, screenshot any image whose subject isn't framed, and tell
  * Cowork the slug + roughly where the subject actually sits.
  *
- * This is a working tool, not a public destination. Lives at /exhibition/focal-audit
+ * This is a working tool, not a public destination. Lives at /focal-audit
  * because we want to view it in dev mode quickly. Don't link it from the nav.
  */
-import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
-import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
-import Placeholder from '../../components/Placeholder.astro';
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import Placeholder from '../components/Placeholder.astro';
 import { getCollection } from 'astro:content';
 
 const stories = (await getCollection('stories')).sort(
@@ -37,6 +37,8 @@ function parseFocal(focal: string): { x: string; y: string } {
   description="Walk every hero photo at its current crop. Screenshot bad ones, send the slug to Cowork."
   active="home"
 >
+  <meta name="robots" content="noindex, nofollow" slot="head" />
+  <meta name="googlebot" content="noindex, nofollow" slot="head" />
   <ExhibitionMasthead slot="masthead" title="FOCAL AUDIT" subscript="DEV TOOL" cutouts={[]} />
 
   <article class="ex-prose">

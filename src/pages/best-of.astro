@@ -1,7 +1,7 @@
 ---
-import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
-import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
-import Placeholder from '../../components/Placeholder.astro';
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import Placeholder from '../components/Placeholder.astro';
 import { getCollection } from 'astro:content';
 
 const cats = await getCollection('best-of');
@@ -27,7 +27,7 @@ const cutoutSrc = (c: any) => `/${c.data.hero_filename_hint.replace(/\.[^.]+$/, 
 
   <section class="ex-cards ex-cards--2">
     {cats.map((c, i) => (
-      <a class="ex-card" href={`/exhibition/best-of/${c.data.url_slug}`}>
+      <a class="ex-card" href={`/best-of/${c.data.url_slug}`}>
         <div class="ex-card__media">
           <Placeholder alt={c.data.hero_alt} filenameHint={c.data.hero_filename_hint} aspect="4:3" showLabel={false} />
         </div>
@@ -38,7 +38,7 @@ const cutoutSrc = (c: any) => `/${c.data.hero_filename_hint.replace(/\.[^.]+$/, 
     ))}
   </section>
 
-  <a href="/exhibition/partners" class="ex-colmark__link">
+  <a href="/partners" class="ex-colmark__link">
     <section class="ex-colmark">
       <h2 class="ex-colmark__text">SPONSOR A LIST</h2>
     </section>

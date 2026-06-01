@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
+---
+<BaseLayout title="standards — the keepers." description="How we source, name names, handle conflicts, and correct errors." current="standards">
+
+  <PageMasthead
+    title="standards."
+    eyebrow="how we source · who we name · what we will not do"
+    subscript="THE KEEPERS"
+  />
+
+  <div class="container container-narrow page">
+    <h2 class="page-subhead">how we report. who we <em>name</em>. what we will not do.</h2>
+    <h2>sourcing.</h2>
+    <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are <em>verbatim</em> unless marked otherwise.</p>
+    <h2>naming.</h2>
+    <p>We name a landlord, a chain, a public official, or a corporate party when their action is the public-interest hinge of the story and we can independently verify the claim. We do <em>not</em> name a subject's family member, employer, or address without their consent unless that information is already public and material.</p>
+    <h2>conflicts of interest.</h2>
+    <p>Sponsored entries on best of lists carry a labeled badge. Sponsors do not pick stories or entries. The editor who names a list is named on the list. We do not run affiliate links. We do not accept gifts above <em>twenty-five</em> dollars from subjects.</p>
+    <h2>ai.</h2>
+    <p>No byline on this site is AI-generated. No article is partially or substantially written by AI. Editing tools (spell check, grammar suggestions) are allowed. Generation tools are not.</p>
+    <h2>corrections.</h2>
+    <p>Errors are corrected on the article page with a dated note. All corrections are also logged at <a href="/corrections">/corrections</a>.</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page { padding-block: var(--s-9); }
+  .page-subhead {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: var(--s-7) 0 var(--s-5);
+    max-width: 22ch;
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+  }
+  .page-subhead :global(em) {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .page h2 {
+    margin-block: var(--s-7) var(--s-3);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    letter-spacing: -0.015em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
+  }
+  .page p { margin-bottom: var(--s-4); }
+  .page p em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 16, 'WONK' 1;
+  }
+  .page a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
+</style>

@@ -1,6 +1,6 @@
 ---
-import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
-import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
 const quizzes = [
   { slug: 'mbti',           kicker: '№02 · 60 ITEMS · 7 MIN', name: 'WHICH KEEPER ARE YOU?', deck: 'Sixty statements across 4 axes. The result names a coffee order, a neighborhood, and three saturday letters written for your type.' },
@@ -30,7 +30,7 @@ const quizzes = [
 
   <section class="ex-cards ex-cards--3">
     {quizzes.map((q) => (
-      <a class="ex-card qz-tile" href={`/exhibition/quizzes/${q.slug}`}>
+      <a class="ex-card qz-tile" href={`/quizzes/${q.slug}`}>
         <p class="ex-card__meta">{q.kicker}</p>
         <h3 class="ex-card__title">{q.name}</h3>
         <p class="ex-card__deck">{q.deck}</p>
@@ -39,7 +39,7 @@ const quizzes = [
     ))}
   </section>
 
-  <a href="/exhibition/stories" class="ex-colmark__link">
+  <a href="/stories" class="ex-colmark__link">
     <section class="ex-colmark">
       <h2 class="ex-colmark__text">OR JUST READ →</h2>
     </section>

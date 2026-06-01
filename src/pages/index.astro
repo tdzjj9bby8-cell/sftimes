@@ -1,960 +1,355 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Placeholder from '../components/Placeholder.astro';
-import StoryCard from '../components/StoryCard.astro';
+/**
+ * /exhibition, homepage in the Exhibition Magazine visual language.
+ * Pulls real data from the stories + best-of collections.
+ *
+ * Chrome (utility bar, drawer, section nav, newsletter, footer) comes from
+ * ExhibitionLayout, identical to every other /* page. Only the
+ * homepage-specific content blocks and the carousel rotation script live here.
+ */
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import { getCollection } from 'astro:content';
+import Placeholder from '../components/Placeholder.astro';
 
 const stories = (await getCollection('stories')).sort(
   (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
 );
 const featured = stories.find((s) => s.data.is_featured) || stories[0];
-const restAfterFeatured = stories.filter((s) => s.slug !== featured.slug);
+const carouselStories = [featured, ...stories.filter((s) => s.slug !== featured.slug).slice(0, 3)];
+// Drift-style editor's paragraph pulls the next 8 most recent stories.
+// Each title becomes an inline link; connective prose carries the editor's voice.
+const ledeStories = stories.filter((s) => s.slug !== featured.slug).slice(0, 8);
+const bodyStory = stories.find((s) => s.data.pull_quote) || featured;
+const bodyText = bodyStory.data.pull_quote || bodyStory.data.deck;
 
-// Asymmetric layout: 1 big spotlight + 2 stacked tall + standard 3-col grid.
-const spotlight = restAfterFeatured[0];
-const sideStack = restAfterFeatured.slice(1, 3);
-const gridStories = restAfterFeatured.slice(3, 12);
-
-// Issue ticker: last 16 issues, newest first
-const ticker = stories.slice(0, 16).map((s) => ({
-  issue: s.data.issue,
-  slug: s.data.url_slug,
-  date: s.data.published
-    .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    .toLowerCase(),
-}));
-
-// Keeper-flavor taxonomy: count by keeper_type
-const FLAVORS = [
-  { key: 'recipe',  label: 'a recipe',  note: 'something they cook, brew, or bake' },
-  { key: 'routine', label: 'a routine', note: 'something they do, every day, on time' },
-  { key: 'room',    label: 'a room',    note: 'a place they hold open' },
-  { key: 'record',  label: 'a record',  note: 'something they remember out loud' },
-  { key: 'refusal', label: 'a refusal', note: 'something they would not let go of' },
-];
-const flavorCounts = FLAVORS.map((f) => ({
-  ...f,
-  count: stories.filter((s) => s.data.keeper_type === f.key).length,
-}));
-
-// Pull quote of the week: the most recent story with a pull_quote, else featured deck
-const quoteStory = stories.find((s) => s.data.pull_quote) || featured;
-const quoteText = quoteStory.data.pull_quote || quoteStory.data.deck;
-const quoteAttr = quoteStory.data.pull_quote_attr || quoteStory.data.author;
-const quoteHref = `/stories/${quoteStory.data.url_slug}`;
-
-// Masthead photo cutouts: pick two recent keeper hero photos. They sit
-// inside the bowls of two of the e-letters in "the keepers."
-const mastheadPhotos = restAfterFeatured.slice(0, 2).map((s) => ({
-  src: `/${s.data.hero_filename_hint.replace(/\.[^.]+$/, '')}.jpg`,
-  alt: s.data.hero_alt,
-  href: `/stories/${s.data.url_slug}`,
-}));
-
-const bestOf = (await getCollection('best-of'));
-const dateLong = featured.data.published
-  .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-  .toLowerCase();
-const titleHtml = featured.data.title_em
-  ? featured.data.title.replace(featured.data.title_em, `<em>${featured.data.title_em}</em>`)
-  : featured.data.title;
----
-
-<BaseLayout
-  title="the keepers. — sf times"
-  description="One San Francisco keeper every Saturday. The people holding something the city would lose without them. Reader-funded, no parent company, no AI bylines."
-  headerVariant="transparent"
-  current=""
->
-  <!-- FULL-BLEED HERO. Photo IS the top of the page. Headline lives inside it. -->
-  <section class="home-hero">
-    <a class="home-hero__link" href={`/stories/${featured.data.url_slug}`}>
-      <div class="home-hero__media">
-        <Placeholder
-          alt={featured.data.hero_alt}
-          filenameHint={featured.data.hero_filename_hint}
-          aspect="21:9"
-          showLabel={true}
-          priority={true}
-          class="home-hero__placeholder"
-        />
-        <div class="home-hero__veil" aria-hidden="true"></div>
-      </div>
-      <span class="home-hero__stamp">a keepers essay · №{featured.data.issue}</span>
-      <div class="home-hero__overlay container">
-        <p class="home-hero__eyebrow">issue {featured.data.issue} · {dateLong} · {featured.data.read_minutes}-min read</p>
-        <h1 class="home-hero__title" set:html={titleHtml} />
-      </div>
-    </a>
-  </section>
-
-  <!-- MASTHEAD BAND — giant wordmark with keeper photos cut into the e-bowls.
-       Inspired by Exhibition Magazine's signature move. SVG renders the type
-       so cutout coordinates stay predictable across viewports. -->
-  <section class="home-masthead" aria-label="The keepers masthead">
-    <p class="home-masthead__date">issue №{featured.data.issue} · {dateLong} · weekly since 2025</p>
-    <div class="home-masthead__lockup" aria-hidden="true">
-      <svg viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet" class="home-masthead__svg">
-        <defs>
-          <clipPath id="masthead-cut-1"><circle cx="160" cy="115" r="34"/></clipPath>
-          <clipPath id="masthead-cut-2"><circle cx="525" cy="115" r="34"/></clipPath>
-        </defs>
-        <text
-          x="500" y="170"
-          text-anchor="middle"
-          font-family="Fraunces, Georgia, serif"
-          font-size="200"
-          font-weight="400"
-          fill="var(--ink)"
-          style="font-variation-settings: 'opsz' 144, 'SOFT' 30; letter-spacing: -0.025em;"
-        >the keepers.</text>
-        {mastheadPhotos[0] && (
-          <image
-            href={mastheadPhotos[0].src}
-            x="126" y="81" width="68" height="68"
-            preserveAspectRatio="xMidYMid slice"
-            clip-path="url(#masthead-cut-1)"
-          />
-        )}
-        {mastheadPhotos[1] && (
-          <image
-            href={mastheadPhotos[1].src}
-            x="491" y="81" width="68" height="68"
-            preserveAspectRatio="xMidYMid slice"
-            clip-path="url(#masthead-cut-2)"
-          />
-        )}
-      </svg>
-    </div>
-    <p class="home-masthead__tag">
-      one saturday letter · one san francisco keeper · {stories.length} issues · no parent company · no paywall
-    </p>
-  </section>
-
-  <!-- ISSUE TICKER — horizontal scroll of the last 16 issue numbers -->
-  <aside class="home-ticker" aria-label="Recent issues">
-    <div class="home-ticker__rail">
-      <span class="home-ticker__label">recent issues</span>
-      <ol class="home-ticker__list">
-        {ticker.map((t, i) => (
-          <li class={`home-ticker__item ${i === 0 ? 'is-current' : ''}`}>
-            <a href={`/stories/${t.slug}`}>
-              <span class="home-ticker__num">№{String(t.issue).padStart(2, '0')}</span>
-              <span class="home-ticker__date">{t.date}</span>
-            </a>
-          </li>
-        ))}
-        <li class="home-ticker__all">
-          <a href="/stories">view all <em>{stories.length}</em> →</a>
-        </li>
-      </ol>
-    </div>
-  </aside>
-
-  <!-- DECK BLOCK — under the hero, on paper -->
-  <section class="home-deck container">
-    <p class="home-deck__text">{featured.data.deck}</p>
-    <p class="home-deck__byline">
-      by <strong>{featured.data.author}</strong>
-      {featured.data.photographer && featured.data.photographer !== 'Staff' && (
-        <> · photographs by <strong>{featured.data.photographer}</strong></>
-      )}
-    </p>
-    <a class="home-deck__cta" href={`/stories/${featured.data.url_slug}`}>read the full essay →</a>
-  </section>
-
-  <!-- FLAVOR STRIP — keeper-type taxonomy with counts -->
-  <section class="home-flavors container">
-    <div class="home-flavors__head">
-      <h2 class="section-title">what we keep</h2>
-      <p class="home-flavors__sub">Every keeper holds one of five things. Tap a flavor to see only those stories.</p>
-    </div>
-    <ol class="home-flavors__list">
-      {flavorCounts.map((f, i) => (
-        <li class="home-flavors__cell">
-          <a href={`/stories?flavor=${f.key}`}>
-            <span class="home-flavors__num">{String(i + 1).padStart(2, '0')}</span>
-            <span class="home-flavors__label">{f.label}<em>.</em></span>
-            <span class="home-flavors__note">{f.note}</span>
-            <span class="home-flavors__count">
-              {f.count === 0
-                ? 'coming soon'
-                : `${f.count} ${f.count === 1 ? 'keeper' : 'keepers'} →`}
-            </span>
-          </a>
-        </li>
-      ))}
-    </ol>
-  </section>
-
-  <!-- SPOTLIGHT — asymmetric featured layout, then standard grid -->
-  <section class="home-archive container">
-    <div class="home-archive__header">
-      <h2 class="section-title">more keepers</h2>
-      <a class="home-archive__view-all" href="/stories">browse every story →</a>
-    </div>
-
-    {spotlight && (
-      <div class="home-spotlight">
-        <a class="home-spotlight__main" href={`/stories/${spotlight.data.url_slug}`}>
-          <div class="home-spotlight__media">
-            <Placeholder
-              alt={spotlight.data.hero_alt}
-              filenameHint={spotlight.data.hero_filename_hint}
-              aspect="5:4"
-              showLabel={false}
-            />
-          </div>
-          <p class="home-spotlight__eyebrow">issue {spotlight.data.issue} · {spotlight.data.read_minutes}-min read</p>
-          <h3 class="home-spotlight__title" set:html={
-            spotlight.data.title_em
-              ? spotlight.data.title.replace(spotlight.data.title_em, `<em>${spotlight.data.title_em}</em>`)
-              : spotlight.data.title
-          } />
-          {spotlight.data.deck && (
-            <p class="home-spotlight__deck">{spotlight.data.deck}</p>
-          )}
-        </a>
-        <div class="home-spotlight__side">
-          {sideStack.map((s) => (
-            <a class="home-spotlight__small" href={`/stories/${s.data.url_slug}`}>
-              <div class="home-spotlight__small-media">
-                <Placeholder
-                  alt={s.data.hero_alt}
-                  filenameHint={s.data.hero_filename_hint}
-                  aspect="4:3"
-                  showLabel={false}
-                />
-              </div>
-              <p class="home-spotlight__small-eyebrow">issue {s.data.issue}</p>
-              <h4 class="home-spotlight__small-title" set:html={
-                s.data.title_em
-                  ? s.data.title.replace(s.data.title_em, `<em>${s.data.title_em}</em>`)
-                  : s.data.title
-              } />
-            </a>
-          ))}
-        </div>
-      </div>
-    )}
-
-    <div class="home-archive__grid" id="archive-grid">
-      {gridStories.map((s, i) => (
-        <div class={`home-archive__cell home-archive__cell--${(i % 3) + 1}`}>
-          <StoryCard story={s} size="md" />
-        </div>
-      ))}
-    </div>
-    <div class="home-archive__more">
-      <a class="btn-ghost" href="/stories">load more stories</a>
-    </div>
-  </section>
-
-  <!-- PULL QUOTE OF THE WEEK — big editorial moment between sections -->
-  <aside class="home-quote">
-    <div class="container container-narrow home-quote__inner">
-      <p class="home-quote__mark">”</p>
-      <blockquote class="home-quote__text">
-        {quoteText}
-      </blockquote>
-      <p class="home-quote__attr">
-        <strong>{quoteAttr}</strong>
-        <span class="home-quote__sep">·</span>
-        <a href={quoteHref}>read the keeper →</a>
-      </p>
-    </div>
-  </aside>
-
-  <!-- BEST OF -->
-  <section class="home-bestof container">
-    <div class="home-bestof__header">
-      <h2 class="section-title">best of</h2>
-      <p class="home-bestof__intro">
-        Hand-picked lists, refreshed quarterly. Named editors, conflict of interest disclosed, no affiliate links.
-      </p>
-    </div>
-    <div class="home-bestof__grid">
-      {bestOf.map((c) => (
-        <a class="bestof-card reveal" href={`/best-of/${c.data.url_slug}`}>
-          <Placeholder
-            alt={c.data.hero_alt}
-            filenameHint={c.data.hero_filename_hint}
-            aspect="16:9"
-            showLabel={false}
-            class="bestof-card__media"
-          />
-          <h3 class="bestof-card__title">{c.data.title}</h3>
-          <p class="ui-label">refreshed {c.data.last_refreshed.toLocaleDateString('en-US',{month:'short',year:'numeric'}).toLowerCase()}</p>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <!-- HIDDEN SPOTS -->
-  <section class="home-hidden">
-    <div class="container">
-      <div class="home-hidden__header">
-        <h2 class="section-title">hidden spots</h2>
-        <p class="home-hidden__intro">
-          Reader-submitted. Editor-vetted. We protect the place over the page view. If a spot can't handle the traffic, we describe it without naming it.
-        </p>
-      </div>
-      <div class="home-hidden__empty">
-        <p>No published hidden spots yet. Be the first.</p>
-        <a class="btn-ghost" href="/submit">submit a spot</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- NEWSLETTER -->
-  <section class="home-newsletter container">
-    <div class="home-newsletter__inner" data-newsletter-root>
-      <h2 class="section-title">saturday letter</h2>
-      <p class="home-newsletter__copy">
-        One profile every Saturday. Free for every reader. No spam, no tracking, no parent company.
-      </p>
-      <form class="home-newsletter__form" action="#" method="post" data-newsletter>
-        <label class="visually-hidden" for="newsletter-email">Email address</label>
-        <input id="newsletter-email" type="email" name="email" placeholder="you@email.com" required />
-        <button type="submit" class="btn-primary">subscribe</button>
-      </form>
-      <div class="home-newsletter__thanks" data-newsletter-thanks hidden>
-        <p class="home-newsletter__thanks-line"><em>thanks.</em></p>
-        <p class="home-newsletter__thanks-sub">Saturday morning, in your inbox. If we don't hit your inbox by next saturday, check spam, then write to <a href="mailto:hello@sftimes.com">hello@sftimes.com</a>.</p>
-      </div>
-    </div>
-  </section>
-</BaseLayout>
-
-<script is:inline>
-  // Capture-on-submit until the real provider lands. Stores entries in
-  // localStorage so Eric can export later; shows a friendly thank-you state
-  // either way. Re-runs on astro:page-load so View Transitions don't break it.
-  function initNewsletter() {
-    const form = document.querySelector('[data-newsletter]');
-    if (!form || form.dataset.bound) return;
-    form.dataset.bound = '1';
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = form.querySelector('input[type=email]');
-      const email = (input && input.value || '').trim();
-      if (!email) return;
-      try {
-        const key = 'keepers-newsletter';
-        const existing = JSON.parse(localStorage.getItem(key) || '[]');
-        existing.push({ email, at: new Date().toISOString() });
-        localStorage.setItem(key, JSON.stringify(existing));
-      } catch (err) { /* ignore */ }
-      const root = form.closest('[data-newsletter-root]');
-      const thanks = root && root.querySelector('[data-newsletter-thanks]');
-      form.setAttribute('hidden', '');
-      const copy = root && root.querySelector('.home-newsletter__copy');
-      if (copy) copy.setAttribute('hidden', '');
-      if (thanks) thanks.removeAttribute('hidden');
-    });
+// Calendar timeline: next 5 Saturdays from today.
+function nextSaturdays(n: number) {
+  const out: Date[] = [];
+  const d = new Date();
+  const daysUntilSat = (6 - d.getDay() + 7) % 7 || 7;
+  d.setDate(d.getDate() + daysUntilSat);
+  for (let i = 0; i < n; i++) {
+    out.push(new Date(d));
+    d.setDate(d.getDate() + 7);
   }
-  initNewsletter();
-  document.addEventListener('astro:page-load', initNewsletter);
-</script>
+  return out;
+}
+function fmtSat(date: Date) {
+  return date
+    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: '2-digit', year: 'numeric' })
+    .toUpperCase();
+}
+const upcoming = nextSaturdays(5);
+const AUTHORS = ['ERIC', 'NICHOLAS', 'DAISY', 'ERIC', 'NICHOLAS'];
+const thisSaturday = upcoming[0];
+const thisSatLabel = thisSaturday
+  .toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })
+  .toUpperCase();
+const nextIssue = (featured.data.issue || 0) + 1;
+---
+<ExhibitionLayout
+  title="THE KEEPERS · SF TIMES"
+  description="One San Francisco keeper every Saturday. Reader-funded."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="THE KEEPERS" subscript="SF TIMES" cutouts={[]} />
+
+  <p class="ex-tagline">One San Francisco keeper, every Saturday morning. Reader-funded.</p>
+
+  <!-- FEATURED CAROUSEL -->
+  <div class="feat" id="featCarousel">
+    {carouselStories.map((s, i) => (
+      <div class={`feat__slide${i === 0 ? ' is-on' : ''}`} data-slide={i}>
+        <Placeholder
+          alt={s.data.hero_alt}
+          filenameHint={s.data.hero_filename_hint}
+          aspect="21:9"
+          showLabel={false}
+          priority={i === 0}
+          focal={s.data.hero_focal}
+        />
+        <div class="feat__overlay">
+          <h2 class="feat__title">{s.data.title.toUpperCase()}</h2>
+          <p class="feat__eyebrow">ISSUE №{s.data.issue} · BY {s.data.author.toUpperCase()} · {s.data.read_minutes}-MIN READ</p>
+          <a class="feat__cta" href={`/stories/${s.data.url_slug}`}>Read the Essay</a>
+        </div>
+      </div>
+    ))}
+    <div class="feat__dots" id="featDots">
+      {carouselStories.map((s, i) => (
+        <button class={`feat__dot${i === 0 ? ' is-on' : ''}`} data-dot={i} aria-label={`Slide ${i + 1}: ${s.data.title}`}></button>
+      ))}
+    </div>
+  </div>
+
+  <!-- EDITOR'S PARAGRAPH — Drift-style hyperlinked landing block.
+       Each keeper title is a link inline. Connective prose carries Eric's voice.
+       Replaces the older asymmetric card grid. -->
+  <section class="lede">
+    <p class="lede__eyebrow">FROM THE EDITOR · WHAT WE'VE BEEN KEEPING</p>
+    <p class="lede__text">
+      {ledeStories[0] && (<><a href={`/stories/${ledeStories[0].data.url_slug}`}>{ledeStories[0].data.title}</a> is still pouring at the same prep counter she rented in 1987. </>)}
+      {ledeStories[1] && (<><a href={`/stories/${ledeStories[1].data.url_slug}`}>{ledeStories[1].data.title}</a> hand-stitches another trajes while his children argue about the shop. </>)}
+      {ledeStories[2] && (<><a href={`/stories/${ledeStories[2].data.url_slug}`}>{ledeStories[2].data.title}</a> opens the back door at 4:42 a.m., same as last week, same as next. </>)}
+      {ledeStories[3] && (<><a href={`/stories/${ledeStories[3].data.url_slug}`}>{ledeStories[3].data.title}</a> still puts the seasonal flavors at the back of the case where nobody looks. </>)}
+      {ledeStories[4] && (<><a href={`/stories/${ledeStories[4].data.url_slug}`}>{ledeStories[4].data.title}</a> twenty years on, still hosting the kids who keep coming back. </>)}
+      {ledeStories[5] && (<><a href={`/stories/${ledeStories[5].data.url_slug}`}>{ledeStories[5].data.title}</a> is the broth nobody put on a map. </>)}
+      {ledeStories[6] && (<><a href={`/stories/${ledeStories[6].data.url_slug}`}>{ledeStories[6].data.title}</a> climbed every morning before the parrots came through. </>)}
+      {ledeStories[7] && (<><a href={`/stories/${ledeStories[7].data.url_slug}`}>{ledeStories[7].data.title}</a> has been holding the basement annex since 1979. </>)}
+      Every byline is a real person. Every saturday is a real saturday. <a href="/stories">All {stories.length} issues →</a>
+    </p>
+  </section>
+
+  <!-- MID-PAGE NEWSLETTER STRIP -->
+  <section class="ex-newsletter-strip" aria-label="Subscribe to the saturday letter">
+    <p class="ex-newsletter-strip__copy">5,000 readers get the saturday letter. Free. No ads.</p>
+    <form class="ex-newsletter-strip__form" id="exNlStripForm">
+      <input type="email" name="email" placeholder="ENTER YOUR E-MAIL" required>
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="ex-newsletter-strip__thanks" id="exNlStripThanks" hidden>THANKS. SATURDAY IN YOUR INBOX.</p>
+  </section>
+
+  <!-- KEEPERS VERTICAL BLOCK -->
+  <a href={`/stories/${bodyStory.data.url_slug}`} class="vbar" style="text-decoration:none;">
+    <div class="vbar__brand">KEEPERS</div>
+    <div class="vbar__copy">
+      <p>{bodyText}</p>
+      <p style="margin-top:18px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(244,241,234,0.6);">{(bodyStory.data.pull_quote_attr || bodyStory.data.author).toUpperCase()} · ISSUE №{bodyStory.data.issue} →</p>
+    </div>
+    <div class="vbar__img">
+      <Placeholder alt={bodyStory.data.hero_alt} filenameHint={bodyStory.data.hero_filename_hint} aspect="4:5" showLabel={false} focal={bodyStory.data.hero_focal} />
+    </div>
+  </a>
+
+  <!-- ARCHIVE STRIP — clean horizontal scroll of past issues -->
+  <section class="archive">
+    <div class="archive__head">
+      <div>
+        <p class="archive__label">THE ARCHIVE</p>
+        <p class="archive__sub">{stories.length} issues · Next saturday: {thisSatLabel.toLowerCase()}</p>
+      </div>
+      <a class="archive__viewall" href="/stories">VIEW ALL →</a>
+    </div>
+    <div class="archive__strip">
+      {stories.slice(0, 10).map((s) => (
+        <a class="archive__item" href={`/stories/${s.data.url_slug}`}>
+          <div class="archive__media">
+            <Placeholder alt={s.data.hero_alt} filenameHint={s.data.hero_filename_hint} aspect="4:5" showLabel={false} focal={s.data.hero_focal} />
+          </div>
+          <p class="archive__meta">ISSUE №{s.data.issue} · {fmtSat(new Date(s.data.published))}</p>
+          <p class="archive__title">{s.data.title}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+</ExhibitionLayout>
 
 <style>
-  /* FULL-BLEED HERO. No top margin trickery. The hero IS the top of the page,
-     and the transparent header floats over it until you scroll. */
-  .home-hero {
-    position: relative;
-    height: 100vh;
-    min-height: 600px;
-    max-height: 900px;
-    overflow: hidden;
-    background: var(--ink);
-    isolation: isolate;
-  }
-  .home-hero__link {
-    display: block;
-    height: 100%;
-    color: var(--bg);
-  }
-  .home-hero__media {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .home-hero__media :global(.placeholder),
-  .home-hero__media :global(.real-image),
-  .home-hero__media :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    aspect-ratio: auto !important;
-    display: block;
-    transition: transform 700ms var(--ease-out);
-  }
-  .home-hero__link:hover .home-hero__media :global(.placeholder) {
-    transform: scale(1.02);
-  }
-  /* Soft bottom-to-top veil so the headline sits readable on any photo */
-  .home-hero__veil {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: linear-gradient(
-      to top,
-      rgba(0,0,0,0.7) 0%,
-      rgba(0,0,0,0.35) 35%,
-      rgba(0,0,0,0.05) 65%,
-      rgba(0,0,0,0.25) 100%
-    );
-    pointer-events: none;
-  }
-  .home-hero__stamp {
-    position: absolute;
-    top: calc(var(--s-9) + var(--s-2));
-    right: var(--gutter);
-    z-index: 3;
-    border: 1px solid rgba(244,241,234,0.55);
-    padding: var(--s-2) var(--s-3);
-    font-family: var(--font-ui);
-    font-size: 0.6875rem;
-    letter-spacing: 0.16em;
-    color: var(--bg);
-  }
-  .home-hero__overlay {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    z-index: 2;
-    padding-bottom: var(--s-9);
-    color: var(--bg);
-  }
-  .home-hero__eyebrow {
-    color: rgba(244,241,234,0.78);
-    margin: 0 0 var(--s-4);
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.16em;
-  }
-  .home-hero__title {
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    line-height: 1.02;
-    letter-spacing: -0.022em;
-    margin: 0;
-    max-width: 18ch;
-    color: var(--bg);
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-  }
-  .home-hero__title :global(em) {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-
-  /* ISSUE TICKER — horizontal scroll right under the hero */
-  .home-ticker {
-    background: var(--ink);
-    color: var(--bg);
-    border-block: 1px solid rgba(244,241,234,0.08);
-    overflow: hidden;
-  }
-  .home-ticker__rail {
-    display: flex;
-    align-items: center;
-    gap: var(--s-5);
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: var(--s-3) var(--gutter);
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-  }
-  .home-ticker__rail::-webkit-scrollbar { display: none; }
-  .home-ticker__label {
-    font-family: var(--font-ui);
-    font-size: 0.625rem;
-    letter-spacing: 0.18em;
-    color: rgba(244,241,234,0.45);
-    flex-shrink: 0;
+  /* === TAGLINE (under masthead, above carousel) === */
+  .ex-tagline {
+    font-size: 11px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-  }
-  .home-ticker__list {
-    display: flex;
-    align-items: center;
-    gap: var(--s-5);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .home-ticker__item, .home-ticker__all { flex-shrink: 0; }
-  .home-ticker__item a {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    color: rgba(244,241,234,0.6);
-    transition: color var(--t-fast) var(--ease-out);
-  }
-  .home-ticker__item a:hover { color: var(--bg); }
-  .home-ticker__item.is-current a { color: var(--terracotta); }
-  .home-ticker__num {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: 0.9375rem;
-    line-height: 1;
-    letter-spacing: -0.01em;
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .home-ticker__date {
-    font-family: var(--font-ui);
-    font-size: 0.625rem;
-    letter-spacing: 0.14em;
-  }
-  .home-ticker__all a {
-    font-family: var(--font-ui);
-    font-size: 0.6875rem;
-    letter-spacing: 0.14em;
-    color: rgba(244,241,234,0.6);
-    transition: color var(--t-fast) var(--ease-out);
-  }
-  .home-ticker__all a:hover { color: var(--terracotta); }
-  .home-ticker__all em {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-
-  /* DECK BLOCK — on paper, under the hero */
-  .home-deck {
-    padding-top: var(--s-7);
-    padding-bottom: var(--s-7);
-    border-bottom: 1px solid var(--rule);
-  }
-  .home-deck__text {
-    font-family: var(--font-body);
-    font-size: clamp(1.125rem, 1.6vw, 1.5rem);
-    line-height: 1.5;
-    color: var(--ink-soft);
-    max-width: 56ch;
-    margin: 0 0 var(--s-5);
-    font-variation-settings: 'opsz' 16;
-  }
-  .home-deck__byline {
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    color: var(--fog);
-    margin: 0 0 var(--s-5);
-  }
-  .home-deck__byline strong { color: var(--ink); font-weight: 500; }
-  .home-deck__cta {
-    font-family: var(--font-ui);
-    font-size: 0.8125rem;
-    letter-spacing: 0.12em;
-    border-bottom: 1px solid var(--ink);
-    padding-bottom: 2px;
-    color: var(--ink);
-    transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
-  }
-  .home-deck__cta:hover { color: var(--terracotta); border-color: var(--terracotta); }
-
-  /* FLAVOR STRIP — keeper-type taxonomy */
-  .home-flavors {
-    margin-top: var(--s-9);
-    padding-block: var(--s-8);
-    border-block: 1px solid var(--rule);
-    background: var(--paper);
-  }
-  .home-flavors__head { max-width: 56ch; margin-bottom: var(--s-6); }
-  .home-flavors__sub {
-    margin-top: var(--s-3);
-    color: var(--ink-soft);
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-  .home-flavors__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0;
-    border-top: 1px solid var(--rule);
-  }
-  .home-flavors__cell {
-    border-right: 1px solid var(--rule);
-  }
-  .home-flavors__cell:last-child { border-right: 0; }
-  .home-flavors__cell a {
-    display: flex;
-    flex-direction: column;
-    gap: var(--s-3);
-    padding: var(--s-5);
-    height: 100%;
-    color: var(--ink);
-    transition: background var(--t-fast) var(--ease-out);
-  }
-  .home-flavors__cell a:hover { background: var(--paper-deep); }
-  .home-flavors__num {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: 1.125rem;
-    color: var(--fog);
-    line-height: 1;
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .home-flavors__cell a:hover .home-flavors__num { color: var(--terracotta); }
-  .home-flavors__label {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
-    line-height: 1;
-    letter-spacing: -0.015em;
-    color: var(--ink);
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-  }
-  .home-flavors__label em {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .home-flavors__note {
-    font-family: var(--font-body);
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--ink-soft);
-    flex: 1;
-  }
-  .home-flavors__count {
-    font-family: var(--font-ui);
-    font-size: 0.6875rem;
-    letter-spacing: 0.14em;
-    color: var(--fog);
-  }
-  .home-flavors__cell a:hover .home-flavors__count { color: var(--terracotta); }
-
-  /* SPOTLIGHT — asymmetric big + 2 stacked */
-  .home-spotlight {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: var(--s-6);
-    margin-bottom: var(--s-9);
-    padding-bottom: var(--s-7);
-    border-bottom: 1px solid var(--rule);
-  }
-  .home-spotlight__main { color: var(--ink); display: flex; flex-direction: column; gap: var(--s-3); }
-  .home-spotlight__media {
-    overflow: hidden;
-    margin-bottom: var(--s-3);
-  }
-  .home-spotlight__media :global(.real-image),
-  .home-spotlight__media :global(.placeholder) {
-    transition: transform 600ms var(--ease-out);
-  }
-  .home-spotlight__main:hover .home-spotlight__media :global(.real-image),
-  .home-spotlight__main:hover .home-spotlight__media :global(.placeholder) {
-    transform: scale(1.02);
-  }
-  .home-spotlight__eyebrow {
-    font-family: var(--font-ui);
-    font-size: 0.6875rem;
-    letter-spacing: 0.16em;
-    color: var(--terracotta);
-    margin: 0;
-  }
-  .home-spotlight__title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 1.05;
-    letter-spacing: -0.022em;
-    margin: 0;
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-  }
-  .home-spotlight__title :global(em) {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .home-spotlight__deck {
-    font-family: var(--font-body);
-    font-size: 1.0625rem;
-    line-height: 1.55;
-    color: var(--ink-soft);
-    margin: 0;
-    max-width: 50ch;
-  }
-  .home-spotlight__side {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: var(--s-5);
-  }
-  .home-spotlight__small {
-    color: var(--ink);
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: var(--s-4);
-    align-items: start;
-  }
-  .home-spotlight__small-media { overflow: hidden; }
-  .home-spotlight__small-media :global(.real-image),
-  .home-spotlight__small-media :global(.placeholder) {
-    transition: transform 600ms var(--ease-out);
-  }
-  .home-spotlight__small:hover .home-spotlight__small-media :global(.real-image),
-  .home-spotlight__small:hover .home-spotlight__small-media :global(.placeholder) {
-    transform: scale(1.04);
-  }
-  .home-spotlight__small-eyebrow {
-    font-family: var(--font-ui);
-    font-size: 0.625rem;
-    letter-spacing: 0.16em;
-    color: var(--fog);
-    margin: 0 0 var(--s-2);
-  }
-  .home-spotlight__small-title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1.125rem;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    margin: 0;
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-  }
-  .home-spotlight__small-title :global(em) {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-
-  /* PULL QUOTE OF THE WEEK */
-  .home-quote {
-    background: var(--ink);
-    color: var(--bg);
-    padding-block: var(--s-10);
-    margin-block: var(--s-9);
-  }
-  .home-quote__inner { text-align: center; position: relative; }
-  .home-quote__mark {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: clamp(6rem, 14vw, 12rem);
-    line-height: 0.6;
-    color: var(--terracotta);
-    margin: 0 0 var(--s-3);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-    opacity: 0.6;
-  }
-  .home-quote__text {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-style: italic;
-    font-size: clamp(1.75rem, 4vw, 3.25rem);
-    line-height: 1.2;
-    letter-spacing: -0.018em;
-    color: var(--bg);
-    margin: 0 0 var(--s-6);
-    max-width: 24ch;
-    margin-inline: auto;
-    font-variation-settings: 'opsz' 144, 'SOFT' 60, 'WONK' 1;
-  }
-  .home-quote__attr {
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.16em;
-    color: rgba(244,241,234,0.6);
-    margin: 0;
-  }
-  .home-quote__attr strong { color: var(--bg); font-weight: 500; }
-  .home-quote__sep { margin: 0 var(--s-3); color: var(--terracotta); }
-  .home-quote__attr a {
-    color: rgba(244,241,234,0.6);
-    border-bottom: 1px solid rgba(244,241,234,0.3);
-    padding-bottom: 1px;
-    transition: color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
-  }
-  .home-quote__attr a:hover { color: var(--terracotta); border-color: var(--terracotta); }
-
-  /* ARCHIVE */
-  .home-archive { margin-top: var(--s-9); }
-  .home-archive__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: var(--s-7);
-    padding-bottom: var(--s-3);
-    border-bottom: 1px solid var(--rule);
-  }
-  .home-archive__view-all {
-    color: var(--ink-soft);
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    padding-bottom: 2px;
-  }
-  .home-archive__view-all:hover { color: var(--terracotta); }
-  .home-archive__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--s-7) var(--s-6);
-  }
-  /* Homepage cards: image-first, hide the deck so the photo carries the cell.
-     The /stories archive page keeps the deck. */
-  .home-archive__grid :global(.story-card__deck) { display: none; }
-  .home-archive__more { text-align: center; margin-top: var(--s-9); }
-
-  .section-title {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(1.5rem, 2.5vw, 2rem);
-    margin: 0;
-    letter-spacing: -0.015em;
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-
-  .btn-ghost {
-    display: inline-block;
-    padding: var(--s-3) var(--s-5);
-    border: 1px solid var(--ink);
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
-  }
-  .btn-ghost:hover { background: var(--ink); color: var(--bg); }
-  .btn-primary {
-    display: inline-block;
-    background: var(--ink);
-    color: var(--bg);
-    padding: var(--s-3) var(--s-5);
-    font-family: var(--font-ui);
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    border: 0;
-    cursor: pointer;
-    transition: background var(--t-fast) var(--ease-out);
-  }
-  .btn-primary:hover { background: var(--terracotta); }
-
-  /* BEST OF */
-  .home-bestof { margin-top: var(--s-9); }
-  .home-bestof__header {
-    margin-bottom: var(--s-6);
-    padding-bottom: var(--s-3);
-    border-bottom: 1px solid var(--rule);
-  }
-  .home-bestof__intro {
-    margin-top: var(--s-3);
-    color: var(--ink-soft);
-    max-width: 60ch;
-  }
-  .home-bestof__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--s-7);
-  }
-  .bestof-card {
-    color: var(--ink);
-    display: flex;
-    flex-direction: column;
-    gap: var(--s-2);
-  }
-  .bestof-card__media { transition: transform var(--t-med) var(--ease-out); }
-  .bestof-card:hover .bestof-card__media { transform: scale(1.03); }
-  .bestof-card__title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1.5rem;
-    margin: var(--s-3) 0 0;
-    letter-spacing: -0.015em;
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-  }
-
-  /* HIDDEN SPOTS */
-  .home-hidden { background: var(--paper); padding-block: var(--s-8); margin-top: var(--s-9); }
-  .home-hidden__header {
-    margin-bottom: var(--s-6);
-    padding-bottom: var(--s-3);
-    border-bottom: 1px solid var(--rule);
-  }
-  .home-hidden__intro {
-    margin-top: var(--s-3);
-    color: var(--ink-soft);
-    max-width: 60ch;
-  }
-  .home-hidden__empty { display: flex; flex-direction: column; gap: var(--s-3); align-items: flex-start; }
-
-  /* NEWSLETTER */
-  .home-newsletter { margin-top: var(--s-9); margin-bottom: var(--s-9); }
-  .home-newsletter__inner {
-    max-width: var(--max-narrow);
-    margin-inline: auto;
+    color: var(--muted);
     text-align: center;
-  }
-  .home-newsletter__copy { margin-top: var(--s-4); color: var(--ink-soft); max-width: 48ch; margin-inline: auto; }
-  .home-newsletter__form {
-    margin-top: var(--s-5);
-    display: flex;
-    gap: var(--s-2);
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .home-newsletter__form input {
-    padding: var(--s-3) var(--s-4);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    border: 1px solid var(--ink);
-    background: var(--bg);
-    min-width: min(280px, 100%);
-  }
-  .home-newsletter__thanks {
-    margin-top: var(--s-4);
-  }
-  .home-newsletter__thanks-line {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(2rem, 4vw, 2.75rem);
-    line-height: 1;
-    letter-spacing: -0.015em;
-    color: var(--terracotta);
-    margin: 0 0 var(--s-3);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .home-newsletter__thanks-sub {
-    font-family: var(--font-body);
-    font-size: 1.0625rem;
-    line-height: 1.5;
-    color: var(--ink-soft);
-    max-width: 48ch;
-    margin: 0 auto;
-  }
-  .home-newsletter__thanks-sub a { color: var(--terracotta); border-bottom: 1px solid currentColor; }
-  .visually-hidden {
-    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
-    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    padding: 0 12px;
+    margin: 0 0 24px;
   }
 
-  @media (max-width: 1024px) {
-    .home-archive__grid { grid-template-columns: repeat(2, 1fr); }
-    .home-flavors__list { grid-template-columns: repeat(2, 1fr); }
-    .home-flavors__cell { border-bottom: 1px solid var(--rule); }
-    .home-flavors__cell:nth-child(2n) { border-right: 0; }
-    .home-flavors__cell:last-child { grid-column: 1 / -1; }
-    .home-spotlight { grid-template-columns: 1fr; }
+  /* === MID-PAGE NEWSLETTER STRIP === */
+  .ex-newsletter-strip {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 22px 28px;
+    margin: 64px 12px 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
   }
-  @media (max-width: 880px) {
-    .home-hero { height: 88vh; min-height: 540px; }
-    .home-hero__stamp { top: calc(var(--s-8) + var(--s-2)); right: var(--s-4); padding: 5px 9px; font-size: 0.625rem; }
-    .home-hero__overlay { padding-bottom: var(--s-7); }
-    .home-archive__grid { grid-template-columns: 1fr; }
-    .home-bestof__grid { grid-template-columns: 1fr; }
-    .home-spotlight__small { grid-template-columns: 100px 1fr; gap: var(--s-3); }
-    .home-quote { padding-block: var(--s-9); margin-block: var(--s-7); }
+  .ex-newsletter-strip__copy {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(244,241,234,0.85);
+    margin: 0;
   }
-  @media (max-width: 480px) {
-    .home-hero { height: 80vh; min-height: 480px; }
-    .home-hero__title { font-size: 2rem; max-width: 16ch; }
-    .home-hero__eyebrow { font-size: 0.6875rem; margin-bottom: var(--s-3); }
-    .home-hero__overlay { padding-bottom: var(--s-6); }
-    .home-deck__text { font-size: 1.0625rem; }
-    .home-flavors__list { grid-template-columns: 1fr; }
-    .home-flavors__cell { border-right: 0; }
-    .home-flavors__cell:last-child { grid-column: auto; border-bottom: 0; }
+  .ex-newsletter-strip__form { display: flex; gap: 0; }
+  .ex-newsletter-strip__form input {
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid rgba(244,241,234,0.3);
+    color: var(--paper);
+    font-family: var(--ui);
+    font-size: 13px;
+    border-radius: 0;
+    min-width: 260px;
+  }
+  .ex-newsletter-strip__form input::placeholder {
+    color: rgba(244,241,234,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+  }
+  .ex-newsletter-strip__form button {
+    padding: 10px 22px;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1px solid var(--paper);
+    transition: opacity 150ms;
+  }
+  .ex-newsletter-strip__form button:hover { opacity: 0.85; }
+  .ex-newsletter-strip__thanks {
+    font-family: var(--display);
+    font-size: 22px;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  @media (max-width: 720px) {
+    .ex-newsletter-strip { grid-template-columns: 1fr; gap: 14px; }
+    .ex-newsletter-strip__form input { min-width: 0; flex: 1; }
+  }
+
+  /* === FEATURED CAROUSEL === */
+  .feat { position: relative; margin: 12px 12px 0; aspect-ratio: 24/10; overflow: hidden; background: #2a2520; }
+  .feat__slide { position: absolute; inset: 0; opacity: 0; transition: opacity 500ms; pointer-events: none; }
+  .feat__slide.is-on { opacity: 1; pointer-events: auto; }
+  /* Placeholder renders the img in its own component scope, so target it
+     globally to make sure each slide's image fills the carousel container. */
+  .feat__slide :global(.real-image),
+  .feat__slide :global(.placeholder),
+  .feat__slide :global(img) {
+    width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block;
+  }
+  .feat__overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.65) 100%);
+  }
+  .feat__title { color: #fff; font-family: var(--ui); font-size: clamp(22px, 2.6vw, 36px); font-weight: 500; line-height: 1.1; letter-spacing: 0.02em; margin: 0 0 18px; max-width: 70%; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
+  .feat__eyebrow { color: rgba(255,255,255,0.85); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.55); width: 280px; margin: 0 0 22px; }
+  .feat__cta { color: #fff; font-size: 12px; letter-spacing: 0.04em; padding-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.7); transition: opacity 150ms; }
+  .feat__cta:hover { opacity: 0.7; }
+  .feat__dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 3; }
+  .feat__dot { width: 24px; height: 2px; background: rgba(255,255,255,0.4); cursor: pointer; transition: background 150ms; }
+  .feat__dot.is-on { background: #fff; }
+
+  /* === EDITOR'S PARAGRAPH (Drift-style hyperlinked lede) === */
+  .lede { padding: 80px 12px 64px; max-width: 1080px; margin: 0 auto; }
+  .lede__eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 28px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .lede__text {
+    font-family: var(--display);
+    font-size: clamp(24px, 2.6vw, 40px);
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .lede__text a {
+    color: var(--ink);
+    text-decoration: none;
+    background-image: linear-gradient(var(--ink), var(--ink));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 2px;
+    padding-bottom: 2px;
+    transition: background-size 220ms cubic-bezier(0.16,1,0.3,1), opacity 200ms;
+  }
+  .lede__text a:hover { background-size: 100% 6px; opacity: 0.85; }
+
+  /* === VERTICAL BLOCK === */
+  /* KEEPERS wordmark sits in its own column. Font cap and column width
+     are paired so the brand never bleeds into the copy column. */
+  .vbar { display: grid; grid-template-columns: 360px 1.1fr 1.4fr; margin: 64px 0 0; background: var(--ink); color: var(--paper); min-height: 360px; overflow: hidden; }
+  .vbar__brand { font-family: var(--display); font-size: clamp(40px, 4.4vw, 62px); line-height: 1; text-transform: uppercase; align-self: center; padding-left: 32px; letter-spacing: -0.01em; white-space: nowrap; }
+  .vbar__copy { padding: 64px 36px; font-size: 14px; line-height: 1.55; color: rgba(244,241,234,0.92); align-self: center; max-width: 36ch; min-width: 0; }
+  .vbar__img { background: #2a2520; overflow: hidden; }
+  .vbar__img :global(.real-image), .vbar__img :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+
+  /* === ARCHIVE STRIP === */
+  /* Replaces the awkward cal+strip pair. Horizontal scroll of past issues,
+     small photo + meta + title. Clean, no vertical text, no dead zones. */
+  .archive { background: var(--paper); padding: 64px 12px 80px; }
+  .archive__head { display: flex; align-items: flex-end; justify-content: space-between; margin: 0 0 28px; gap: 24px; }
+  .archive__label { font-family: var(--display); font-size: clamp(28px, 3.4vw, 48px); line-height: 1; letter-spacing: -0.005em; text-transform: uppercase; color: var(--ink); margin: 0 0 6px; }
+  .archive__sub { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  .archive__viewall { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); padding-bottom: 2px; border-bottom: 1px solid currentColor; transition: opacity 200ms; flex-shrink: 0; }
+  .archive__viewall:hover { opacity: 0.6; }
+  .archive__strip { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; scroll-behavior: smooth; }
+  .archive__strip::-webkit-scrollbar { height: 4px; }
+  .archive__strip::-webkit-scrollbar-track { background: var(--paper-2); }
+  .archive__strip::-webkit-scrollbar-thumb { background: var(--rule); }
+  .archive__item { flex: 0 0 auto; width: clamp(180px, 18vw, 220px); scroll-snap-align: start; color: var(--ink); transition: opacity 200ms; }
+  .archive__item:hover { opacity: 0.85; }
+  .archive__media { background: #2a2520; aspect-ratio: 4/5; overflow: hidden; margin-bottom: 12px; }
+  .archive__media :global(.real-image), .archive__media :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; transition: transform 500ms; }
+  .archive__item:hover .archive__media :global(.real-image) { transform: scale(1.05); }
+  .archive__meta { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .archive__title { font-size: 13px; line-height: 1.3; font-weight: 600; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  @media (max-width: 980px) {
+    .lede__text { font-size: clamp(20px, 4.2vw, 28px); }
+    .vbar { grid-template-columns: 1fr; }
+    .vbar__brand { padding: 32px 24px 0; }
+    .vbar__copy { padding: 24px; }
+    .archive__head { flex-direction: column; align-items: flex-start; gap: 8px; }
   }
 </style>
+
+<script is:inline>
+  // Mid-page newsletter strip — mirrors the footer form's localStorage handler.
+  (function () {
+    const form = document.getElementById('exNlStripForm');
+    const thanks = document.getElementById('exNlStripThanks');
+    if (!form) return;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = (form.querySelector('input[type=email]') || {}).value || '';
+      if (!email) return;
+      try {
+        const KEY = 'keepers-newsletter';
+        const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+        arr.push({ email: email.trim(), at: new Date().toISOString(), src: 'mid-page' });
+        localStorage.setItem(KEY, JSON.stringify(arr));
+      } catch (_) {}
+      form.hidden = true;
+      if (thanks) thanks.hidden = false;
+    });
+  })();
+
+  // Hero carousel, auto-rotate every 6s, dot click jumps to slide
+  (function () {
+    const car = document.getElementById('featCarousel');
+    const dots = document.getElementById('featDots');
+    if (!car || !dots) return;
+    const slides = car.querySelectorAll('.feat__slide');
+    const dotEls = dots.querySelectorAll('.feat__dot');
+    let i = 0;
+    let timer;
+    function show(n) {
+      slides.forEach((s, idx) => s.classList.toggle('is-on', idx === n));
+      dotEls.forEach((d, idx) => d.classList.toggle('is-on', idx === n));
+      i = n;
+    }
+    function next() { show((i + 1) % slides.length); }
+    function start() {
+      stop();
+      // WCAG 2.3.3 — respect prefers-reduced-motion. Dots still work for manual nav.
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      timer = setInterval(next, 6000);
+    }
+    function stop() { if (timer) clearInterval(timer); }
+    dotEls.forEach((d, idx) => d.addEventListener('click', () => { show(idx); start(); }));
+    car.addEventListener('mouseenter', stop);
+    car.addEventListener('mouseleave', start);
+    start();
+  })();
+</script>

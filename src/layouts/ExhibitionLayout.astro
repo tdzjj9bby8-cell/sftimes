@@ -1,7 +1,7 @@
 ---
 /**
  * ExhibitionLayout.astro
- * Shared chrome for every /exhibition/* sample page.
+ * Shared chrome for every /* sample page.
  * Provides: utility bar, hamburger drawer, section nav, newsletter section,
  *           dark footer, all CSS tokens and shared styles.
  * Page content slots in via the default <slot/>.
@@ -230,19 +230,19 @@ const {
 <div class="ex-util">
   <button class="ex-util__menu" id="exMenuToggle" aria-label="Menu" aria-expanded="false"><div><span></span><span></span><span></span></div></button>
   <div class="ex-util__spacer"></div>
-  <a class="ex-util__sub" href="/exhibition/partners#contact">Get in Touch <span aria-hidden="true">↗</span></a>
+  <a class="ex-util__sub" href="/partners#contact">Get in Touch <span aria-hidden="true">↗</span></a>
 </div>
 
 <aside class="ex-drawer" id="exDrawer" aria-hidden="true">
   <div class="ex-drawer__inner">
-    <a href="/exhibition">HOME</a>
-    <a href="/exhibition/stories">FEATURES</a>
-    <a href="/exhibition/best-of">TOP TIER</a>
-    <a href="/exhibition/hidden-spots">UNPUBLISHED</a>
-    <a href="/exhibition/quizzes">CHECKUPS</a>
-    <a href="/exhibition/about">WHO WE ARE</a>
-    <a href="/exhibition/support">KEEP IT ALIVE</a>
-    <a href="/exhibition/partners">WORK WITH US</a>
+    <a href="/">HOME</a>
+    <a href="/stories">FEATURES</a>
+    <a href="/best-of">TOP TIER</a>
+    <a href="/hidden-spots">UNPUBLISHED</a>
+    <a href="/quizzes">CHECKUPS</a>
+    <a href="/about">WHO WE ARE</a>
+    <a href="/support">KEEP IT ALIVE</a>
+    <a href="/partners">WORK WITH US</a>
     <p class="ex-drawer__hint">Press Esc or tap the X to close</p>
   </div>
 </aside>
@@ -251,13 +251,13 @@ const {
 
 <nav class="ex-secnav" aria-label="Sections">
   <div class="ex-secnav__pad"></div>
-  <a class={`ex-secnav__item${active === 'home' ? ' is-active' : ''}`} href="/exhibition">Home</a>
-  <a class={`ex-secnav__item${active === 'stories' ? ' is-active' : ''}`} href="/exhibition/stories">Features</a>
-  <a class={`ex-secnav__item${active === 'best-of' ? ' is-active' : ''}`} href="/exhibition/best-of">Top Tier</a>
-  <a class={`ex-secnav__item${active === 'hidden-spots' ? ' is-active' : ''}`} href="/exhibition/hidden-spots">Unpublished</a>
-  <a class={`ex-secnav__item${active === 'quizzes' ? ' is-active' : ''}`} href="/exhibition/quizzes">Checkups</a>
-  <a class={`ex-secnav__item${active === 'about' ? ' is-active' : ''}`} href="/exhibition/about">Who We Are</a>
-  <a class={`ex-secnav__item${active === 'support' ? ' is-active' : ''}`} href="/exhibition/support">Keep It Alive</a>
+  <a class={`ex-secnav__item${active === 'home' ? ' is-active' : ''}`} href="/">Home</a>
+  <a class={`ex-secnav__item${active === 'stories' ? ' is-active' : ''}`} href="/stories">Features</a>
+  <a class={`ex-secnav__item${active === 'best-of' ? ' is-active' : ''}`} href="/best-of">Top Tier</a>
+  <a class={`ex-secnav__item${active === 'hidden-spots' ? ' is-active' : ''}`} href="/hidden-spots">Unpublished</a>
+  <a class={`ex-secnav__item${active === 'quizzes' ? ' is-active' : ''}`} href="/quizzes">Checkups</a>
+  <a class={`ex-secnav__item${active === 'about' ? ' is-active' : ''}`} href="/about">Who We Are</a>
+  <a class={`ex-secnav__item${active === 'support' ? ' is-active' : ''}`} href="/support">Keep It Alive</a>
 </nav>
 
 <main>
@@ -276,11 +276,11 @@ const {
   <div class="ex-ft__row">
     <div><a href="mailto:hello@sftimes.com">EMAIL US</a></div>
     <div>READER-FUNDED · NO PARENT COMPANY</div>
-    <div><a href="/exhibition/standards">LEGAL</a></div>
+    <div><a href="/standards">LEGAL</a></div>
   </div>
   <div class="ex-ft__bottom">
     <div>©2026 | ALL RIGHTS RESERVED</div>
-    <div><a href="/exhibition">THE KEEPERS · SF TIMES</a></div>
+    <div><a href="/">THE KEEPERS · SF TIMES</a></div>
     <div><a href="#exNewsletter">SUBSCRIBE</a></div>
   </div>
 </footer>

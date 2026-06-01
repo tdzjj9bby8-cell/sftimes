@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleImmersive from '../../layouts/ArticleImmersive.astro';
+import ArticleStandard from '../../layouts/ArticleStandard.astro';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('stories');
+  return stories.map((story) => ({
+    params: { slug: story.data.url_slug },
+    props: { story },
+  }));
+}
+
+const { story } = Astro.props;
+const useImmersive = story.data.immersive !== false;
+---
+
+{useImmersive
+  ? <ArticleImmersive story={story} />
+  : <ArticleStandard story={story} />}

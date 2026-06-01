@@ -3,6 +3,8 @@
   "outputDirectory": "dist",
   "framework": "astro",
   "redirects": [
+    { "source": "/exhibition", "destination": "/", "permanent": true },
+    { "source": "/exhibition/:slug*", "destination": "/:slug*", "permanent": true },
     { "source": "/story.html", "destination": "/stories/:slug", "permanent": true, "has": [{ "type": "query", "key": "slug", "value": "(?<slug>.*)" }] },
     { "source": "/best-of-category.html", "destination": "/best-of/:slug", "permanent": true, "has": [{ "type": "query", "key": "slug", "value": "(?<slug>.*)" }] },
     { "source": "/stories.html", "destination": "/stories", "permanent": true },
