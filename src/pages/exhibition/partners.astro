@@ -1,0 +1,131 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+const articles = [
+  { price: 'FROM $1,500',  name: 'THE PROFILE',  sub: 'One feature, one backlink, one saturday newsletter.', features: ['1,200-word feature in our voice', 'One DoFollow backlink in the body', 'Lives at sftimes.com forever', 'Promoted in one saturday newsletter', 'One round of revisions', 'Editor-labeled "in collaboration with" tag'] },
+  { price: 'FROM $3,500',  name: 'THE FEATURE',  sub: 'Deeper reporting, multiple links, homepage rotation.', features: ['2,500-word in-depth piece', 'Up to 3 DoFollow backlinks', 'Lives forever, indexed in google', 'Featured slot on homepage for one week', 'Promoted in one saturday + tease', 'Three rounds of revisions, custom photography included'], featured: true },
+  { price: 'FROM $7,500',  name: 'THE BESPOKE',  sub: 'Personal brand piece, durable, multi-channel.', features: ['3,500-word durable article', 'Up to 5 DoFollow backlinks', 'Lives forever, fully customizable layout', 'Homepage hero slot for two weeks', 'Promoted in two saturday newsletters', 'Unlimited revisions, photography + video b-roll, advisory call'] },
+];
+const underwriting = [
+  { price: 'FROM $500 / SATURDAY',   name: 'THE PATRON',       sub: 'Named sponsor line at the close of one saturday letter.', features: ['Editor-written sponsor credit at issue close', 'Text only, no logos, no images, no banners', 'Same credit on the archived web version forever', 'Name on the supporters wall on the about page', 'One patron per saturday, four slots per month'] },
+  { price: 'FROM $1,200 / SATURDAY', name: 'THE CO-PRESENTED', sub: 'A full saturday issue, in collaboration with your name.', features: ['"Presented by" credit at the top of one issue', 'Editor-written 80-word sponsor blurb inside', 'Name on the homepage feature card that week', 'Inclusion in the print archive page', 'One co-presenter per saturday, four per month'], featured: true },
+  { price: 'FROM $18,000 / YEAR',    name: 'THE PILLAR',       sub: 'Annual partner, masthead recognition, print and event.', features: ['Annual masthead credit for 12 months', 'Four co-presented saturdays a year', 'Back cover credit on the annual print zine', 'Named as founding underwriter, perpetual', 'Co-host slot at the annual reader dinner', 'One pillar per year, exclusive'] },
+];
+---
+<ExhibitionLayout
+  title="WORK WITH US · The Keepers · SF Times"
+  description="Two ways into the keepers: editorial sponsorship and editorial underwriting. Six packages, capped, named, audited. No banner ads, ever."
+  active="support"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title="WORK WITH US"
+    subscript="SF TIMES"
+    cutouts={[]}
+  />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">PARTNERSHIPS · CAPPED · NAMED · AUDITED</p>
+    <h1 class="ex-prose__title">TELL YOUR STORY.<br>REACH SATURDAY<br>MORNING.</h1>
+    <p>Five thousand newsletter subscribers and growing. One issue every saturday. Readers who pay attention because we earn it. Two ways in.</p>
+  </article>
+
+  <section class="metrics">
+    <div><span>5,000</span><p>SATURDAY SUBSCRIBERS</p></div>
+    <div><span>57</span><p>ISSUES LIVE</p></div>
+    <div><span>100%</span><p>HUMAN BYLINES</p></div>
+    <div><span>0</span><p>BANNER ADS, EVER</p></div>
+  </section>
+
+  <a href="#articles" class="ex-colmark__link">
+    <section class="ex-colmark" id="articles">
+      <h2 class="ex-colmark__text">OPTION ONE: ARTICLES</h2>
+    </section>
+  </a>
+
+  <article class="ex-prose">
+    <p>We write the story. You keep the backlink, forever. Three article packages. Each one is reported and written by a named editor in our voice, with you as the subject. Lives on the keepers site forever. Includes a DoFollow backlink to your site. Customizable scope, tone, and length.</p>
+  </article>
+
+  <section class="pkgs">
+    {articles.map((p) => (
+      <article class={`pkg${p.featured ? ' pkg--featured' : ''}`}>
+        {p.featured && <span class="pkg__badge">MOST CHOSEN</span>}
+        <p class="pkg__price">{p.price}</p>
+        <h3 class="pkg__name">{p.name}</h3>
+        <p class="pkg__sub">{p.sub}</p>
+        <ul>{p.features.map((f) => <li>{f}</li>)}</ul>
+      </article>
+    ))}
+  </section>
+
+  <a href="#underwriting" class="ex-colmark__link">
+    <section class="ex-colmark" id="underwriting">
+      <h2 class="ex-colmark__text">OPTION TWO: UNDERWRITING</h2>
+    </section>
+  </a>
+
+  <article class="ex-prose">
+    <p>No banner ads. Ever. We promised readers no banner ads, no tracking pixels, no paywall. We meant it. So we built underwriting products that put your name in front of readers the way public radio does: stated plainly, by the editor, in the keepers voice.</p>
+  </article>
+
+  <section class="pkgs">
+    {underwriting.map((p) => (
+      <article class={`pkg${p.featured ? ' pkg--featured' : ''}`}>
+        {p.featured && <span class="pkg__badge">MOST CHOSEN</span>}
+        <p class="pkg__price">{p.price}</p>
+        <h3 class="pkg__name">{p.name}</h3>
+        <p class="pkg__sub">{p.sub}</p>
+        <ul>{p.features.map((f) => <li>{f}</li>)}</ul>
+      </article>
+    ))}
+  </section>
+
+  <section class="contact" id="contact">
+    <h2>START A CONVERSATION.</h2>
+    <p>All starting prices above are a floor. We gate the real number behind a conversation so we can match the package to your business. Tell us what you're working on, what you want readers to know, and what success looks like. We reply within two business days.</p>
+    <div class="contact__methods">
+      <a href="mailto:eric@seod.com?subject=keepers%20partnership%20inquiry">
+        <span>EMAIL</span>
+        <strong>eric@seod.com</strong>
+      </a>
+      <a href="tel:+17077183579">
+        <span>PHONE OR TEXT</span>
+        <strong>707·718·3579</strong>
+      </a>
+    </div>
+  </section>
+
+  <style>
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 0 12px 48px; border-bottom: 1px solid var(--rule); }
+    .metrics > div { padding: 16px 0; }
+    .metrics span { font-family: var(--display); font-size: clamp(40px, 5vw, 64px); line-height: 1; display: block; }
+    .metrics p { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); margin: 8px 0 0; }
+    @media (max-width: 640px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+
+    .pkgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 12px 48px; }
+    @media (max-width: 980px) { .pkgs { grid-template-columns: 1fr; } }
+    .pkg { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); position: relative; display: flex; flex-direction: column; gap: 14px; }
+    .pkg--featured { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .pkg--featured .pkg__price, .pkg--featured .pkg__sub, .pkg--featured ul li { color: rgba(244,241,234,0.85); }
+    .pkg__badge { position: absolute; top: -12px; left: 16px; background: var(--ink); color: var(--paper); padding: 5px 12px; font-size: 10px; letter-spacing: 0.18em; }
+    .pkg--featured .pkg__badge { background: var(--paper); color: var(--ink); }
+    .pkg__price { font-size: 11px; letter-spacing: 0.18em; margin: 0; }
+    .pkg__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; margin: 0; text-transform: uppercase; }
+    .pkg__sub { font-size: 14px; line-height: 1.45; margin: 0; }
+    .pkg ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid currentColor; padding-top: 14px; }
+    .pkg li { font-size: 13px; line-height: 1.5; padding: 4px 0 4px 16px; position: relative; }
+    .pkg li::before { content: '·'; position: absolute; left: 4px; font-weight: bold; }
+
+    .contact { background: var(--ink); color: var(--paper); padding: 56px 28px; }
+    .contact h2 { font-family: var(--display); font-size: clamp(40px, 6vw, 80px); line-height: 1; text-transform: uppercase; margin: 0 0 16px; letter-spacing: -0.005em; }
+    .contact > p { font-size: 16px; line-height: 1.55; color: rgba(244,241,234,0.85); margin: 0 0 32px; max-width: 56ch; }
+    .contact__methods { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .contact__methods { grid-template-columns: 1fr; } }
+    .contact__methods a { display: flex; flex-direction: column; gap: 8px; padding: 24px; border: 1px solid rgba(244,241,234,0.3); color: var(--paper); transition: background 200ms; }
+    .contact__methods a:hover { background: rgba(244,241,234,0.08); }
+    .contact__methods span { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.6); }
+    .contact__methods strong { font-family: var(--display); font-size: clamp(22px, 2.4vw, 32px); font-weight: 400; letter-spacing: -0.005em; }
+  </style>
+</ExhibitionLayout>

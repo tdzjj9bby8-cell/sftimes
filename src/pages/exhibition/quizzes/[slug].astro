@@ -1,0 +1,43 @@
+---
+import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
+
+// One page per quiz. The legacy engine (public/quizzes/quiz-engine.js) reads
+// window.SFTIMES_QUIZ from the per-slug config and renders into #quiz-root.
+export function getStaticPaths() {
+  return [
+    { params: { slug: 'mbti' },           props: { title: 'MBTI CHECKUP',        sub: 'WHICH KEEPER ARE YOU?',          meta: '№02 · 60 ITEMS · 7 MIN' } },
+    { params: { slug: 'enneagram' },      props: { title: 'ENNEAGRAM CHECKUP',   sub: 'WHICH OF THE NINE ARE YOU?',     meta: '№04 · 36 ITEMS · 5 MIN' } },
+    { params: { slug: 'blood-type' },     props: { title: 'BLOOD TYPE',          sub: 'WHICH OF THE FOUR ARE YOU?',     meta: '№05 · 20 ITEMS · 3 MIN' } },
+    { params: { slug: 'love-languages' }, props: { title: 'LOVE LANGUAGES',      sub: 'HOW DO YOU GIVE CARE?',          meta: '№06 · 25 ITEMS · 3 MIN' } },
+    { params: { slug: 'strengths' },      props: { title: 'CHARACTER STRENGTHS', sub: "WHAT'S YOUR STRONGEST BEAT?",    meta: '№07 · 24 ITEMS · 4 MIN' } },
+  ];
+}
+const { slug } = Astro.params;
+const { title, sub, meta } = Astro.props;
+---
+<ExhibitionLayout
+  title={`${title} · The Keepers · SF Times`}
+  description={`${sub} A short personality quiz that writes you a custom reading list. For curiosity, not diagnosis.`}
+  active="quizzes"
+>
+  <link rel="stylesheet" slot="head" href="/quizzes/quiz.css" />
+
+  <ExhibitionMasthead slot="masthead" title={title} subscript={meta} cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">THE IDENTIFY SERIES · {meta}</p>
+    <h1 class="ex-prose__title">{sub}</h1>
+    <p>Modeled on standard inventories. For curiosity, not diagnosis.</p>
+  </article>
+
+  <div class="quiz-page" style="padding: 0 12px 80px;">
+    <noscript>
+      <p style="padding: 24px; background: var(--paper-2); border-left: 3px solid var(--ink);">This quiz needs JavaScript. Please enable it to take the inventory.</p>
+    </noscript>
+    <div id="quiz-root"></div>
+  </div>
+</ExhibitionLayout>
+
+<script src={`/quizzes/${slug}.config.js`} is:inline></script>
+<script src="/quizzes/quiz-engine.js" is:inline></script>

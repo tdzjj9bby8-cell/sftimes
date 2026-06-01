@@ -1,0 +1,107 @@
+---
+import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import Placeholder from '../../../components/Placeholder.astro';
+import { getCollection } from 'astro:content';
+
+// One Exhibition-styled article page per story. Body comes from the markdown
+// via s.render(); read-next cards come from the three next most-recent stories.
+export async function getStaticPaths() {
+  const all = (await getCollection('stories')).sort(
+    (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+  );
+  return all.map((s) => ({
+    params: { slug: s.data.url_slug },
+    props: {
+      story: s,
+      more: all.filter((x) => x.slug !== s.slug).slice(0, 3),
+    },
+  }));
+}
+
+const { story: s, more } = Astro.props;
+const { Content } = await s.render();
+const dateLong = s.data.published
+  .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  .toUpperCase();
+---
+<ExhibitionLayout
+  title={`${(s.data.seo_title || s.data.title).toUpperCase()} · The Keepers · SF Times`}
+  description={s.data.deck}
+  active="stories"
+>
+  <!-- HERO PHOTO + TITLE -->
+  <section class="story-hero">
+    <div class="story-hero__media">
+      <Placeholder
+        alt={s.data.hero_alt}
+        filenameHint={s.data.hero_filename_hint}
+        aspect="21:9"
+        showLabel={false}
+        priority={true}
+      />
+    </div>
+    <div class="story-hero__overlay">
+      <p class="story-hero__eyebrow">ISSUE №{s.data.issue} · {dateLong} · {s.data.read_minutes}-MIN READ</p>
+      <h1 class="story-hero__title">{s.data.title.toUpperCase()}</h1>
+      <p class="story-hero__byline">BY {s.data.author.toUpperCase()} {s.data.photographer && s.data.photographer !== 'Staff' ? `· PHOTOGRAPHS BY ${s.data.photographer.toUpperCase()}` : ''}</p>
+    </div>
+  </section>
+
+  <!-- DECK -->
+  <article class="ex-prose">
+    <p class="story-deck">{s.data.deck}</p>
+  </article>
+
+  <!-- BODY (real markdown from the story file) -->
+  <article class="ex-prose">
+    <Content />
+  </article>
+
+  <!-- PULL QUOTE -->
+  {s.data.pull_quote && (
+    <article class="ex-prose">
+      <blockquote class="story-pull">
+        <p>"{s.data.pull_quote}"</p>
+        {s.data.pull_quote_attr && <cite>{s.data.pull_quote_attr.toUpperCase()}</cite>}
+      </blockquote>
+    </article>
+  )}
+
+  <!-- READ NEXT -->
+  <a href="/exhibition/stories" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">READ NEXT</h2>
+    </section>
+  </a>
+
+  <section class="ex-cards ex-cards--3">
+    {more.map((m) => (
+      <a class="ex-card" href={`/exhibition/stories/${m.data.url_slug}`}>
+        <div class="ex-card__media">
+          <Placeholder alt={m.data.hero_alt} filenameHint={m.data.hero_filename_hint} aspect="4:3" showLabel={false} />
+        </div>
+        <p class="ex-card__meta">ISSUE №{m.data.issue} · BY {m.data.author.toUpperCase()}</p>
+        <h3 class="ex-card__title">{m.data.title}</h3>
+      </a>
+    ))}
+  </section>
+
+  <style>
+    .story-hero { position: relative; aspect-ratio: 21/10; overflow: hidden; background: #2a2520; margin: 0 12px; }
+    .story-hero__media { position: absolute; inset: 0; }
+    .story-hero__media :global(.real-image), .story-hero__media :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+    .story-hero__overlay {
+      position: absolute; inset: auto 0 0 0;
+      padding: 32px 28px;
+      background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 70%, transparent);
+      color: var(--paper);
+    }
+    .story-hero__eyebrow { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0 0 12px; }
+    .story-hero__title { font-family: var(--display); font-size: clamp(36px, 6vw, 96px); line-height: 1; letter-spacing: -0.005em; margin: 0 0 12px; text-transform: uppercase; max-width: 20ch; }
+    .story-hero__byline { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0; }
+    .story-deck { font-family: var(--display); font-size: clamp(22px, 2.6vw, 38px); line-height: 1.2; text-transform: none; letter-spacing: -0.005em; margin: 0; max-width: 36ch; }
+    .story-pull { padding: 32px 0; border-block: 1px solid var(--rule); margin: 32px 0; text-align: center; }
+    .story-pull p { font-family: var(--display); font-size: clamp(28px, 4vw, 56px); line-height: 1.1; letter-spacing: -0.005em; margin: 0 0 12px; text-transform: uppercase; }
+    .story-pull cite { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); font-style: normal; }
+  </style>
+</ExhibitionLayout>

@@ -1,10 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 <BaseLayout title="standards — the keepers." description="How we source, name names, handle conflicts, and correct errors." current="standards">
+
+  <PageMasthead
+    title="standards."
+    eyebrow="how we source · who we name · what we will not do"
+    subscript="THE KEEPERS"
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">editorial standards</p>
-    <h1>how we report. who we <em>name</em>. what we will not do.</h1>
+    <h2 class="page-subhead">how we report. who we <em>name</em>. what we will not do.</h2>
     <h2>sourcing.</h2>
     <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are <em>verbatim</em> unless marked otherwise.</p>
     <h2>naming.</h2>
@@ -20,12 +27,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <style>
   .page { padding-block: var(--s-9); }
-  .page h1 {
-    margin-block: var(--s-3) var(--s-5);
+  .page-subhead {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: var(--s-7) 0 var(--s-5);
     max-width: 22ch;
     font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
-  .page h1 :global(em) {
+  .page-subhead :global(em) {
     font-style: italic;
     color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;

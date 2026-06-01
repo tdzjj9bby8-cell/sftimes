@@ -15,7 +15,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
+
+// sharp install can fail on cross-platform sandboxes (e.g. darwin install
+// loaded on linux-arm64). Skip gracefully so npm run build still passes.
+let sharp;
+try {
+  sharp = (await import('sharp')).default;
+} catch (e) {
+  console.warn('[responsive] sharp unavailable on this platform, skipping. (', e.message, ')');
+  process.exit(0);
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');

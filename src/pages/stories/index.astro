@@ -1,17 +1,31 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StoryCard from '../../components/StoryCard.astro';
+import PageMasthead from '../../components/PageMasthead.astro';
 import { getCollection } from 'astro:content';
 
 const stories = (await getCollection('stories')).sort(
   (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
 );
+
+// Pick two recent hero photos for masthead cutouts
+const cut1 = stories[0];
+const cut2 = stories[2] || stories[1];
 ---
 
 <BaseLayout title="stories — the keepers." description="Every story we have published, back to issue one." current="stories">
+
+  <PageMasthead
+    title="every keeper."
+    eyebrow={`the archive · ${stories.length} saturdays so far`}
+    subscript="THE KEEPERS"
+    cutouts={[
+      cut1 && { src: `/${cut1.data.hero_filename_hint.replace(/\.[^.]+$/, '')}.jpg`, alt: cut1.data.hero_alt, char: 'e', occurrence: 1 },
+      cut2 && { src: `/${cut2.data.hero_filename_hint.replace(/\.[^.]+$/, '')}.jpg`, alt: cut2.data.hero_alt, char: 'p', occurrence: 1 },
+    ].filter(Boolean)}
+  />
+
   <div class="container container-narrow page-head">
-    <p class="ui-label">the archive · all keepers, every saturday</p>
-    <h1>every <em>keeper</em> we have ever held.</h1>
     <p class="page-head__deck">Weekly profiles, back to issue one. Sortable by neighborhood and beat. One saturday letter at a time.</p>
   </div>
 

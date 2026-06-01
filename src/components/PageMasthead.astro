@@ -1,0 +1,217 @@
+---
+/**
+ * PageMasthead.astro
+ *
+ * Giant Exhibition-Magazine-style page wordmark. Used at the top of every
+ * interior page so each page has a strong magazine entrance. Lowercase
+ * Fraunces (keepers DNA) rendered at display size with optional photo
+ * cutouts inside round-bowl letters.
+ *
+ * Props:
+ *   title         the wordmark text (lowercase). Example: "about.", "stories."
+ *   eyebrow       small caps row above the wordmark (optional)
+ *   tag           tagline row below the wordmark (optional)
+ *   cutouts       array of { src, alt, char } describing which character
+ *                 should host a circular photo cutout. char is the 1-indexed
+ *                 occurrence to use (so char: 'e', occurrence: 2 picks the
+ *                 second e). Limit to 2 cutouts for visual clarity.
+ *   align         'center' | 'left' (default 'center')
+ *   variant       'paper' | 'ink' (default 'paper')
+ *   subscript     optional small label that sits flush-right below the
+ *                 wordmark, like Exhibition's "MAGAZINE" subscript
+ */
+
+export interface CutoutSpec {
+  src: string;
+  alt: string;
+  char: string;
+  occurrence?: number; // 1-indexed which instance of the char to use, default 1
+}
+
+export interface Props {
+  title: string;
+  eyebrow?: string;
+  tag?: string;
+  cutouts?: CutoutSpec[];
+  align?: 'center' | 'left';
+  variant?: 'paper' | 'ink';
+  subscript?: string;
+}
+
+const {
+  title,
+  eyebrow,
+  tag,
+  cutouts = [],
+  align = 'center',
+  variant = 'paper',
+  subscript,
+} = Astro.props;
+
+// Compute character positions for cutouts. We render the title with text-anchor
+// matching `align`, then for each cutout we measure approximate x-positions by
+// estimating proportional character widths against the title string. SVG with
+// text-length isn't precise across fonts so we use a simple heuristic that
+// works well for Fraunces at display sizes.
+
+// Average character width as a fraction of font-size, by letter category.
+// Fraunces tunings tuned by eye against 200px setting.
+const WIDTH: Record<string, number> = {
+  default: 0.52,
+  i: 0.22, l: 0.22, 'I': 0.32, '.': 0.20, ' ': 0.30,
+  f: 0.32, t: 0.36, r: 0.38, s: 0.46,
+  w: 0.74, m: 0.78, W: 0.92, M: 0.86,
+};
+
+function charWidth(c: string, size: number) {
+  return (WIDTH[c] ?? WIDTH.default) * size;
+}
+
+// Compute x-center of each character in the title at a given font-size,
+// using the title's left edge as origin (we'll shift in SVG transform).
+const fontSize = 220;
+const charPositions: Array<{ char: string; cx: number; index: number }> = [];
+let cursor = 0;
+for (let i = 0; i < title.length; i++) {
+  const c = title[i];
+  const w = charWidth(c, fontSize);
+  charPositions.push({ char: c, cx: cursor + w / 2, index: i });
+  cursor += w;
+}
+const titleWidth = cursor;
+
+// Apply cutouts
+const cutoutPlots = cutouts
+  .map((cut, idx) => {
+    const target = cut.char;
+    const occurrence = cut.occurrence ?? 1;
+    let count = 0;
+    let pick: typeof charPositions[number] | undefined;
+    for (const p of charPositions) {
+      if (p.char === target) {
+        count++;
+        if (count === occurrence) { pick = p; break; }
+      }
+    }
+    if (!pick) return null;
+    // Round-letter bowls sit slightly above the baseline center.
+    // Tuning here puts the cutout in the bowl of an e/o/p/d/b in Fraunces.
+    const r = fontSize * 0.21;
+    const cy = -fontSize * 0.30; // baseline is 0; bowl center sits above
+    return {
+      id: `cut-${idx}`,
+      cx: pick.cx,
+      cy,
+      r,
+      src: cut.src,
+      alt: cut.alt,
+    };
+  })
+  .filter(Boolean) as Array<{ id: string; cx: number; cy: number; r: number; src: string; alt: string }>;
+
+// Viewbox: account for title width + padding, height for baseline + descenders
+const padX = 40;
+const vbW = titleWidth + padX * 2;
+const vbH = fontSize * 1.15;
+const baselineY = fontSize * 0.85;
+const textX = align === 'center' ? vbW / 2 : padX;
+const cutoutShiftX = align === 'center' ? (vbW - titleWidth) / 2 : padX;
+---
+
+<section class={`pm pm--${variant} pm--${align}`}>
+  {eyebrow && <p class="pm__eyebrow">{eyebrow}</p>}
+  <div class="pm__lockup">
+    <svg
+      class="pm__svg"
+      viewBox={`0 0 ${vbW} ${vbH}`}
+      preserveAspectRatio="xMidYMid meet"
+      aria-label={title}
+    >
+      <defs>
+        {cutoutPlots.map((p) => (
+          <clipPath id={p.id}><circle cx={cutoutShiftX + p.cx} cy={baselineY + p.cy} r={p.r}/></clipPath>
+        ))}
+      </defs>
+      <text
+        x={textX}
+        y={baselineY}
+        text-anchor={align === 'center' ? 'middle' : 'start'}
+        font-family="Fraunces, Georgia, serif"
+        font-size={fontSize}
+        font-weight="400"
+        style="font-variation-settings: 'opsz' 144, 'SOFT' 30; letter-spacing: -0.025em;"
+        fill="currentColor"
+      >{title}</text>
+      {cutoutPlots.map((p) => (
+        <image
+          href={p.src}
+          x={cutoutShiftX + p.cx - p.r}
+          y={baselineY + p.cy - p.r}
+          width={p.r * 2}
+          height={p.r * 2}
+          preserveAspectRatio="xMidYMid slice"
+          clip-path={`url(#${p.id})`}
+        >
+          <title>{p.alt}</title>
+        </image>
+      ))}
+    </svg>
+    {subscript && <p class="pm__subscript">{subscript}</p>}
+  </div>
+  {tag && <p class="pm__tag">{tag}</p>}
+</section>
+
+<style>
+  .pm {
+    position: relative;
+    padding: var(--s-5) var(--gutter) var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .pm--ink {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .pm--ink { border-bottom-color: rgba(244,241,234,0.12); }
+  .pm__eyebrow {
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    color: var(--fog);
+    margin: 0 0 var(--s-2);
+    text-transform: lowercase;
+  }
+  .pm--ink .pm__eyebrow { color: rgba(244,241,234,0.55); }
+  .pm--center { text-align: center; }
+  .pm--left { text-align: left; }
+  .pm__lockup {
+    position: relative;
+    width: 100%;
+  }
+  .pm__svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    color: var(--ink);
+  }
+  .pm--ink .pm__svg { color: var(--bg); }
+  .pm__subscript {
+    position: absolute;
+    right: 4%;
+    bottom: -4px;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+  }
+  .pm--ink .pm__subscript { color: var(--bg); }
+  .pm__tag {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--fog);
+    margin: var(--s-4) 0 0;
+  }
+  .pm--ink .pm__tag { color: rgba(244,241,234,0.6); }
+</style>

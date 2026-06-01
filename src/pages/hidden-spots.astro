@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 
 // Initial editor's-cut spots. Reader submissions land via /submit and get
 // editor-vetted before showing up here. Schema is intentionally inline until
@@ -61,9 +62,14 @@ function withEm(text: string, em?: string) {
 <BaseLayout
   title="hidden spots — the keepers."
   description="Editor-vetted field notes on the corners of San Francisco worth holding. No paid placements. No tourist boards."
-  headerVariant="transparent"
   current="hidden spots"
 >
+
+  <PageMasthead
+    title="hidden spots."
+    eyebrow={`${spots.length} places · editor-vetted · field notebook`}
+    subscript="THE KEEPERS"
+  />
 
   <!-- HERO — full-bleed dark photo treatment, no real image yet -->
   <section class="hs-hero">

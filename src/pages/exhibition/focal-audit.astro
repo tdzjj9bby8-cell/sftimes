@@ -1,0 +1,104 @@
+---
+/**
+ * /exhibition/focal-audit · dev helper
+ *
+ * Renders every story's hero photo at the same 4:5 crop used in the homepage
+ * grid, with a crosshair overlay marking where hero_focal currently sits.
+ * Walk the page, screenshot any image whose subject isn't framed, and tell
+ * Cowork the slug + roughly where the subject actually sits.
+ *
+ * This is a working tool, not a public destination. Lives at /exhibition/focal-audit
+ * because we want to view it in dev mode quickly. Don't link it from the nav.
+ */
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import Placeholder from '../../components/Placeholder.astro';
+import { getCollection } from 'astro:content';
+
+const stories = (await getCollection('stories')).sort(
+  (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+);
+
+// Parse focal "center 25%" or "30% 40%" into x/y percent strings for the crosshair.
+function parseFocal(focal: string): { x: string; y: string } {
+  if (!focal) return { x: '50%', y: '25%' };
+  const parts = focal.trim().split(/\s+/);
+  const keywordMap: Record<string, string> = {
+    left: '0%', center: '50%', right: '100%',
+    top: '0%', bottom: '100%',
+  };
+  const x = keywordMap[parts[0]] || parts[0] || '50%';
+  const y = keywordMap[parts[1]] || parts[1] || '50%';
+  return { x, y };
+}
+---
+<ExhibitionLayout
+  title="FOCAL POINT AUDIT · dev tool"
+  description="Walk every hero photo at its current crop. Screenshot bad ones, send the slug to Cowork."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="FOCAL AUDIT" subscript="DEV TOOL" cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">CROP CHECK · {stories.length} HERO PHOTOS · DEFAULT IS CENTER 25%</p>
+    <h1 class="ex-prose__title">DOES THE SUBJECT<br>FRAME IN A 4:5 CROP?</h1>
+    <p>Each tile below uses the exact crop the homepage grid uses. The red crosshair marks where <code>hero_focal</code> currently points. If the subject is in the frame, leave it. If not, screenshot it, tell Cowork the slug + roughly where the subject sits ("upper-right," "middle-left, eye-level," "70% from left, 30% from top"), and we'll update the frontmatter.</p>
+  </article>
+
+  <section class="focal-grid">
+    {stories.map((s) => {
+      const { x, y } = parseFocal(s.data.hero_focal);
+      return (
+        <article class="focal-card">
+          <div class="focal-card__frame">
+            <Placeholder
+              alt={s.data.hero_alt}
+              filenameHint={s.data.hero_filename_hint}
+              aspect="3:4"
+              showLabel={false}
+              focal={s.data.hero_focal}
+            />
+            <div class="focal-card__crosshair" style={`left: ${x}; top: ${y};`} aria-hidden="true">
+              <span class="focal-card__dot"></span>
+              <span class="focal-card__h"></span>
+              <span class="focal-card__v"></span>
+            </div>
+          </div>
+          <p class="focal-card__slug">{s.data.url_slug}</p>
+          <p class="focal-card__focal">focal: <code>{s.data.hero_focal}</code></p>
+          <p class="focal-card__meta">ISSUE №{s.data.issue} · {s.data.title}</p>
+        </article>
+      );
+    })}
+  </section>
+
+  <style>
+    .ex-prose code { background: var(--paper-2); padding: 2px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+    .focal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; padding: 0 24px 80px; }
+    .focal-card { display: flex; flex-direction: column; gap: 6px; }
+    .focal-card__frame { position: relative; aspect-ratio: 3/4; background: #2a2520; overflow: hidden; }
+    .focal-card__frame :global(.real-image),
+    .focal-card__frame :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+    .focal-card__crosshair {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      width: 24px; height: 24px;
+      mix-blend-mode: difference;
+    }
+    .focal-card__dot {
+      position: absolute; inset: 50% 50%; width: 8px; height: 8px;
+      background: #ff1744; border: 2px solid #fff; border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .focal-card__h, .focal-card__v {
+      position: absolute; background: rgba(255,23,68,0.7);
+    }
+    .focal-card__h { left: -100px; right: -100px; top: 50%; height: 1px; transform: translateY(-50%); }
+    .focal-card__v { top: -100px; bottom: -100px; left: 50%; width: 1px; transform: translateX(-50%); }
+    .focal-card__slug { margin: 8px 0 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--ink); word-break: break-all; }
+    .focal-card__focal { margin: 0; font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+    .focal-card__focal code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--paper-2); padding: 1px 4px; }
+    .focal-card__meta { margin: 4px 0 0; font-size: 11px; line-height: 1.4; color: var(--muted); }
+  </style>
+</ExhibitionLayout>

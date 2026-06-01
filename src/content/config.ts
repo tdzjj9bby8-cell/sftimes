@@ -21,6 +21,12 @@ const stories = defineCollection({
     photo_class: z.enum(['warm', 'cool', 'green', 'dusk']).default('warm'),
     hero_alt: z.string(),
     hero_filename_hint: z.string(),
+    /** Focal point for object-position on cropped thumbnails.
+     *  Format: "<x> <y>" with % or keywords. Defaults to "center 25%" so
+     *  faces (which usually sit in the upper third of journalistic portraits)
+     *  stay in frame when the image is cropped to a tighter aspect ratio.
+     *  Override per-story when the subject is off-center, e.g. "30% 40%". */
+    hero_focal: z.string().default('center 25%'),
     caption: z.string().optional(),
     pull_quote: z.string().optional(),
     pull_quote_attr: z.string().optional(),

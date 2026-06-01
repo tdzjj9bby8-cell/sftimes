@@ -1,11 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 <BaseLayout title="not found — the keepers." current="">
+
+  <PageMasthead
+    title="page not found."
+    eyebrow="404 · the page that wasn't"
+    subscript="THE KEEPERS"
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">404 · the page that wasn't</p>
-    <h1>this page <em>hasn't</em> been written yet.</h1>
-    <p class="lead">Or maybe it has and the link got tangled. Either way, here's where to go from here.</p>
+    <p class="lead">Or maybe it has been written and the link got tangled. Either way, here's where to go from here.</p>
     <ul class="links">
       <li><a href="/">home</a></li>
       <li><a href="/stories">every story</a></li>

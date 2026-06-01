@@ -1,10 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 <BaseLayout title="privacy — the keepers." current="privacy">
+
+  <PageMasthead
+    title="privacy."
+    eyebrow="what we collect · what we don't"
+    subscript="THE KEEPERS"
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">privacy</p>
-    <h1>what we collect. what we <em>don't</em>.</h1>
     <p>We don't track you. No analytics on individual pages. No third-party ad pixels. No social-media trackers. Newsletter subscribers give us their email, which we store with our newsletter provider and use only to send the saturday issue. That's it.</p>
   </div>
 </BaseLayout>

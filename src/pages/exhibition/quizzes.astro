@@ -1,0 +1,54 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+const quizzes = [
+  { slug: 'mbti',           kicker: '№02 · 60 ITEMS · 7 MIN', name: 'WHICH KEEPER ARE YOU?', deck: 'Sixty statements across 4 axes. The result names a coffee order, a neighborhood, and three saturday letters written for your type.' },
+  { slug: 'enneagram',      kicker: '№04 · 36 ITEMS · 5 MIN', name: 'WHICH OF THE NINE ARE YOU?', deck: 'Thirty-six statements. Top-three breakdown at the end. Reading list shaped to your top type.' },
+  { slug: 'blood-type',     kicker: '№05 · 20 ITEMS · 3 MIN', name: 'WHICH OF THE FOUR ARE YOU?', deck: 'Twenty forced-choice questions. The Japanese blood-type personality system, written as San Franciscans.' },
+  { slug: 'love-languages', kicker: '№06 · 25 ITEMS · 3 MIN', name: 'HOW DO YOU GIVE CARE?', deck: 'Five love languages: words, time, touch, gifts, acts. We name the ones you reach for and the ones you forget.' },
+  { slug: 'strengths',      kicker: '№07 · 24 ITEMS · 4 MIN', name: "WHAT'S YOUR STRONGEST BEAT?", deck: 'Twenty-four character strengths from the VIA framework, ranked. Your top five plus a reading list.' },
+];
+---
+<ExhibitionLayout
+  title="CHECKUPS · The Keepers · SF Times"
+  description="Five short personality quizzes. Each result writes a reading list."
+  active="quizzes"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title="CHECKUPS"
+    subscript={`№${quizzes.length} CHECKUPS`}
+    cutouts={[]}
+  />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">THE IDENTIFY SERIES · FIVE CHECKUPS · ALL FREE</p>
+    <h1 class="ex-prose__title">GUESS THE<br>KEEPER. AND<br>YOURSELF.</h1>
+    <p>Photographs, questions, results. We tell you what they keep. You tell us who you are. Three to seven minutes each. Each one writes you a custom reading list.</p>
+  </article>
+
+  <section class="ex-cards ex-cards--3">
+    {quizzes.map((q) => (
+      <a class="ex-card qz-tile" href={`/exhibition/quizzes/${q.slug}`}>
+        <p class="ex-card__meta">{q.kicker}</p>
+        <h3 class="ex-card__title">{q.name}</h3>
+        <p class="ex-card__deck">{q.deck}</p>
+        <span class="qz-tile__cta">TAKE THE CHECKUP →</span>
+      </a>
+    ))}
+  </section>
+
+  <a href="/exhibition/stories" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">OR JUST READ →</h2>
+    </section>
+  </a>
+
+  <style>
+    .qz-tile { padding: 28px; background: var(--paper-2); display: flex; flex-direction: column; gap: 12px; min-height: 280px; transition: background 200ms; }
+    .qz-tile:hover { background: var(--ink); color: var(--paper); }
+    .qz-tile:hover .ex-card__meta, .qz-tile:hover .ex-card__deck { color: rgba(244,241,234,0.7); }
+    .qz-tile__cta { margin-top: auto; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+  </style>
+</ExhibitionLayout>

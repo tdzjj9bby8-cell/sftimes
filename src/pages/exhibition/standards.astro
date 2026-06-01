@@ -1,0 +1,31 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+---
+<ExhibitionLayout
+  title="STANDARDS · The Keepers · SF Times"
+  description="How we source, name names, handle conflicts, and correct errors."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="STANDARDS" subscript="EDITORIAL" cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">HOW WE SOURCE · WHO WE NAME · WHAT WE WILL NOT DO</p>
+    <h1 class="ex-prose__title">HOW WE REPORT.<br>WHO WE NAME.<br>WHAT WE WON'T DO.</h1>
+
+    <h2>SOURCING</h2>
+    <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are verbatim unless marked otherwise.</p>
+
+    <h2>NAMING</h2>
+    <p>We name a landlord, a chain, a public official, or a corporate party when their action is the public-interest hinge of the story and we can independently verify the claim. We do not name a subject's family member, employer, or address without their consent unless that information is already public and material.</p>
+
+    <h2>CONFLICTS OF INTEREST</h2>
+    <p>Sponsored entries on best of lists carry a labeled badge. Sponsors do not pick stories or entries. The editor who names a list is named on the list. We do not run affiliate links. We do not accept gifts above twenty-five dollars from subjects.</p>
+
+    <h2>AI</h2>
+    <p>No byline on this site is AI-generated. No article is partially or substantially written by AI. Editing tools (spell check, grammar suggestions) are allowed. Generation tools are not.</p>
+
+    <h2>CORRECTIONS</h2>
+    <p>Errors are corrected on the article page with a dated note. All corrections are also logged at <a href="/exhibition/corrections">/corrections</a>.</p>
+  </article>
+</ExhibitionLayout>

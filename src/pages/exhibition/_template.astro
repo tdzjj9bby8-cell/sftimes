@@ -1,0 +1,346 @@
+---
+/**
+ * _template.astro · Kitchen-sink reference for the Exhibition design system.
+ *
+ * Every block recipe from MASTER-EXHIBITION.md is included below in the
+ * order they appear in §7 of the spec. Each block has a header comment
+ * naming it and listing what to swap. [BRACKETED PLACEHOLDERS] mark every
+ * editable string.
+ *
+ * Usage:
+ *   1. Render at http://localhost:4321/exhibition/_template after `npm run dev`
+ *   2. Copy any block (HTML between the BEGIN/END comments) into a new page
+ *   3. Replace the [PLACEHOLDERS] with real content
+ *   4. Delete blocks you don't need
+ *
+ * Don't ship this page. Filename starts with _ as a convention; it'll still
+ * route at /exhibition/_template but it's clearly internal.
+ */
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import Placeholder from '../../components/Placeholder.astro';
+---
+<ExhibitionLayout
+  title="[PAGE TITLE] · The Keepers · SF Times"
+  description="[ONE-LINE PAGE DESCRIPTION FOR SEO]"
+  active="home"
+>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.3 · PAGE MASTHEAD (giant Anton wordmark)                 -->
+  <!-- Required on every page. One per page, at the top.                 -->
+  <!-- Swap:                                                              -->
+  <!--   title     → the page name in caps (e.g. "ABOUT US")             -->
+  <!--   subscript → small label flush-right under wordmark              -->
+  <!-- =============================================================== -->
+  <ExhibitionMasthead
+    slot="masthead"
+    title="[PAGE NAME]"
+    subscript="SF TIMES"
+    cutouts={[]}
+  />
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.11 · PROSE ARTICLE (eyebrow + big H1 + body + H2s)       -->
+  <!-- Use for: about, standards, privacy, terms, support intro, etc.   -->
+  <!-- Swap every [BRACKETED] string.                                   -->
+  <!-- =============================================================== -->
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">[EYEBROW · META · KICKER]</p>
+    <h1 class="ex-prose__title">[GIANT HEADLINE<br>ON TWO LINES.]</h1>
+    <p>[Opening paragraph. One to three sentences.]</p>
+    <p>[Optional second paragraph.]</p>
+
+    <h2>[SECTION HEADING ONE]</h2>
+    <p>[Body content for this section. Multiple sentences are fine.]</p>
+
+    <h2>[SECTION HEADING TWO]</h2>
+    <p>[More body content. <a href="/somewhere">Inline links</a> work.]</p>
+    <ol>
+      <li><strong>[List item lead.]</strong> [Description.]</li>
+      <li><strong>[Another lead.]</strong> [Description.]</li>
+    </ol>
+  </article>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.6 · GIANT SECTION WORDMARK (section divider that links)  -->
+  <!-- Use as a bold separator between major page sections.              -->
+  <!-- =============================================================== -->
+  <a href="/exhibition/[DESTINATION-SLUG]" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">[DIVIDER WORDMARK]</h2>
+    </section>
+  </a>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.12 · CARD GRID (2-col or 3-col photo cards)              -->
+  <!-- Add or remove .ex-card siblings. Use .ex-cards--2 for 2-col.     -->
+  <!-- =============================================================== -->
+  <section class="ex-cards ex-cards--3">
+    <a class="ex-card" href="/[STORY-URL]">
+      <div class="ex-card__media">
+        <Placeholder alt="[ALT TEXT]" filenameHint="heroes/[FILENAME].jpg" aspect="4:3" showLabel={false} />
+      </div>
+      <p class="ex-card__meta">[META · BYLINE · DATE]</p>
+      <h3 class="ex-card__title">[CARD TITLE]</h3>
+      <p class="ex-card__deck">[Optional one-line deck.]</p>
+    </a>
+    <!-- Repeat the <a class="ex-card"> block for each card -->
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.7 · ASYMMETRIC 5-PHOTO GRID                              -->
+  <!-- 2 small left + 1 large center + 2 small right.                   -->
+  <!-- Use on the homepage and major landing pages.                     -->
+  <!-- =============================================================== -->
+  <section class="grid">
+    <div class="grid__col">
+      <a class="grid__item" href="/[STORY-URL]">
+        <div class="grid__cell">
+          <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="3:4" showLabel={false} />
+        </div>
+        <div class="grid__cap">
+          <p class="grid__name">[NAME · ROLE]</p>
+          <p class="grid__blurb">[Two-line blurb about this person or place.]</p>
+        </div>
+      </a>
+      <a class="grid__item" href="/[STORY-URL]">
+        <div class="grid__cell">
+          <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="3:4" showLabel={false} />
+        </div>
+        <div class="grid__cap">
+          <p class="grid__name">[NAME]</p>
+          <p class="grid__blurb">[Blurb.]</p>
+        </div>
+      </a>
+    </div>
+    <a class="grid__item" href="/[STORY-URL]">
+      <div class="grid__center">
+        <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="4:5" showLabel={false} />
+      </div>
+    </a>
+    <div class="grid__col">
+      <a class="grid__item" href="/[STORY-URL]">
+        <div class="grid__cell">
+          <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="3:4" showLabel={false} />
+        </div>
+        <div class="grid__cap">
+          <p class="grid__name">[NAME]</p>
+          <p class="grid__blurb">[Blurb.]</p>
+        </div>
+      </a>
+      <a class="grid__item" href="/[STORY-URL]">
+        <div class="grid__cell">
+          <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="3:4" showLabel={false} />
+        </div>
+        <div class="grid__cap">
+          <p class="grid__name">[NAME]</p>
+          <p class="grid__blurb">[Blurb.]</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.8 · VERTICAL BRAND + BODY + PHOTO (dark 3-col block)     -->
+  <!-- Use as a major editorial moment with a pull quote or excerpt.    -->
+  <!-- =============================================================== -->
+  <a href="/[STORY-URL]" class="vbar">
+    <div class="vbar__brand">[WORDMARK]</div>
+    <div class="vbar__copy">
+      <p>[The body text or pull quote. Two to four sentences.]</p>
+      <p style="margin-top:18px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(244,241,234,0.6);">[ATTRIBUTION], [CONTEXT]</p>
+    </div>
+    <div class="vbar__img">
+      <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="4:5" showLabel={false} />
+    </div>
+  </a>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.9 · DARK GIANT STRIP WITH ARROW (single CTA divider)     -->
+  <!-- One bold CTA between content sections.                            -->
+  <!-- =============================================================== -->
+  <section class="strip">
+    <a class="strip__link" href="/[DESTINATION-URL]">
+      <h2 class="strip__text">[STRIP WORDMARK]</h2>
+      <span class="strip__arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.10 · CALENDAR TIMELINE                                   -->
+  <!-- Use on homepage to show upcoming saturdays.                       -->
+  <!-- Compute dates from the next 5 saturdays in your frontmatter.     -->
+  <!-- =============================================================== -->
+  <div class="cal">
+    <a class="cal__arrow" href="/[ARCHIVE-URL]" aria-label="View all">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+    <a class="cal__col" href="/[ARCHIVE-URL]">
+      <span class="cal__vertical">[SATURDAY, MONTH DAY, YEAR]</span>
+      <span class="cal__by">By [AUTHOR]</span>
+    </a>
+    <div class="cal__col">
+      <div class="cal__card">
+        <div class="cal__card-photo">
+          <Placeholder alt="[ALT]" filenameHint="heroes/[FILENAME].jpg" aspect="1:1" showLabel={false} />
+        </div>
+        <div>
+          <p class="cal__card-meta">[META · e.g. THIS SATURDAY]</p>
+          <p class="cal__card-title">[ISSUE №X, MONTH DAY, YEAR]</p>
+          <p class="cal__card-sub">[Sub-line, one short sentence.]</p>
+          <p class="cal__card-by">BY [AUTHOR]</p>
+        </div>
+      </div>
+    </div>
+    <a class="cal__col" href="/[ARCHIVE-URL]">
+      <span class="cal__vertical">[SATURDAY, MONTH DAY, YEAR]</span>
+      <span class="cal__by">By [AUTHOR]</span>
+    </a>
+    <a class="cal__col" href="/[ARCHIVE-URL]">
+      <span class="cal__vertical">[SATURDAY, MONTH DAY, YEAR]</span>
+      <span class="cal__by">By [AUTHOR]</span>
+    </a>
+    <a class="cal__col" href="/[ARCHIVE-URL]">
+      <span class="cal__vertical">[SATURDAY, MONTH DAY, YEAR]</span>
+      <span class="cal__by">By [AUTHOR]</span>
+    </a>
+    <a class="cal__col" href="/[ARCHIVE-URL]">
+      <span class="cal__vertical">[SATURDAY, MONTH DAY, YEAR]</span>
+      <span class="cal__by">By [AUTHOR]</span>
+    </a>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.13 · TIER PACKAGE CARDS (pricing pages)                  -->
+  <!-- Use on /support and /partners. .tier--featured inverts colors.   -->
+  <!-- =============================================================== -->
+  <section class="tiers">
+    <article class="tier">
+      <p class="tier__price">[$X / MONTH]</p>
+      <h3 class="tier__name">[TIER NAME]</h3>
+      <p class="tier__what">[What this tier gets you. One short paragraph.]</p>
+    </article>
+    <article class="tier tier--featured">
+      <span class="tier__badge">MOST CHOSEN</span>
+      <p class="tier__price">[$X / MONTH]</p>
+      <h3 class="tier__name">[TIER NAME]</h3>
+      <p class="tier__what">[Featured-tier description.]</p>
+    </article>
+    <article class="tier">
+      <p class="tier__price">[YOU DECIDE]</p>
+      <h3 class="tier__name">[TIER NAME]</h3>
+      <p class="tier__what">[Description.]</p>
+    </article>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- BLOCK 7.14 · NUMBERED LIST ROWS (hidden spots, orgs)             -->
+  <!-- Use for ranked/numbered editorial lists.                          -->
+  <!-- =============================================================== -->
+  <section class="hs-list">
+    <article class="hs-row">
+      <div class="hs-row__num">[01]</div>
+      <div class="hs-row__body">
+        <p class="hs-row__kicker">[KICKER · NEIGHBORHOOD]</p>
+        <h3 class="hs-row__name">[ROW NAME OR TITLE]</h3>
+        <p class="hs-row__what">[Description of the place or item. Two to three sentences.]</p>
+        <p class="hs-row__how"><strong>[META LABEL.]</strong> [Practical info, address, hours, etc.]</p>
+      </div>
+    </article>
+    <article class="hs-row">
+      <div class="hs-row__num">[02]</div>
+      <div class="hs-row__body">
+        <p class="hs-row__kicker">[KICKER]</p>
+        <h3 class="hs-row__name">[NAME]</h3>
+        <p class="hs-row__what">[Description.]</p>
+        <p class="hs-row__how"><strong>[LABEL.]</strong> [Info.]</p>
+      </div>
+    </article>
+    <!-- Add more <article class="hs-row"> as needed -->
+  </section>
+
+</ExhibitionLayout>
+
+<style>
+  /* Block 7.7 · Asymmetric grid (also used in homepage) */
+  .grid { display: grid; grid-template-columns: 1fr 2.6fr 1fr; gap: 12px; padding: 0 12px; }
+  .grid__col { display: grid; gap: 12px; }
+  .grid__cell { background: #2a2520; aspect-ratio: 3/4; overflow: hidden; }
+  .grid__cell :global(.real-image), .grid__cell :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; transition: transform 600ms; }
+  .grid__center { background: #2a2520; aspect-ratio: 4/5; overflow: hidden; }
+  .grid__center :global(.real-image), .grid__center :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; transition: transform 600ms; }
+  .grid__item { color: var(--ink); display: block; }
+  .grid__item:hover .grid__cell :global(.real-image), .grid__item:hover .grid__center :global(.real-image) { transform: scale(1.03); }
+  .grid__cap { margin-top: 8px; }
+  .grid__name { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 4px; }
+  .grid__blurb { font-size: 12px; line-height: 1.45; color: var(--muted); margin: 0; max-width: 28ch; }
+
+  /* Block 7.8 · Vertical brand block */
+  .vbar { display: grid; grid-template-columns: 320px 1fr 1.4fr; margin: 64px 0 0; background: var(--ink); color: var(--paper); min-height: 360px; text-decoration: none; }
+  .vbar__brand { font-family: var(--display); font-size: clamp(50px, 6vw, 92px); line-height: 1; text-transform: uppercase; align-self: center; padding-left: 24px; letter-spacing: -0.01em; }
+  .vbar__copy { padding: 64px 36px; font-size: 14px; line-height: 1.55; color: rgba(244,241,234,0.92); align-self: center; max-width: 36ch; }
+  .vbar__img { background: #2a2520; overflow: hidden; }
+  .vbar__img :global(.real-image), .vbar__img :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+
+  /* Block 7.9 · Dark giant strip */
+  .strip { background: var(--ink); color: var(--paper); padding: 28px 24px 36px; }
+  .strip__link { display: flex; align-items: flex-end; gap: 24px; color: var(--paper); transition: opacity 200ms; }
+  .strip__link:hover { opacity: 0.7; }
+  .strip__text { font-family: var(--display); font-size: clamp(48px, 9vw, 130px); line-height: 0.95; letter-spacing: -0.005em; text-transform: uppercase; margin: 0; color: var(--paper); }
+  .strip__arrow { width: 48px; height: 48px; border: 1px solid rgba(244,241,234,0.6); color: var(--paper); border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 8px; }
+
+  /* Block 7.10 · Calendar */
+  .cal { display: grid; grid-template-columns: 48px 80px minmax(260px, 320px) 80px 80px 80px 80px; border-block: 1px solid var(--rule); height: 380px; }
+  .cal__arrow { display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--rule); color: var(--ink); }
+  .cal__col { border-right: 1px solid var(--rule); position: relative; display: flex; align-items: center; justify-content: center; color: var(--ink); transition: background 150ms; }
+  .cal__col:hover { background: var(--paper-2); }
+  .cal__col:last-child { border-right: 0; }
+  .cal__vertical { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .cal__by { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%) rotate(-90deg); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .cal__card { display: grid; grid-template-rows: 1fr auto; padding: 16px; background: var(--paper); height: 100%; color: var(--ink); }
+  .cal__card-photo { background: #2a2520; overflow: hidden; margin-bottom: 12px; min-height: 0; }
+  .cal__card-photo :global(.real-image), .cal__card-photo :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+  .cal__card-meta { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .cal__card-title { font-size: 16px; font-weight: 600; line-height: 1.2; margin: 0 0 4px; }
+  .cal__card-sub { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  .cal__card-by { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 8px 0 0; }
+
+  /* Block 7.13 · Tier cards */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 12px 48px; }
+  .tier { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); position: relative; }
+  .tier--featured { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .tier--featured .tier__price, .tier--featured .tier__what { color: rgba(244,241,234,0.85); }
+  .tier__badge { position: absolute; top: -12px; left: 16px; background: var(--ink); color: var(--paper); padding: 5px 12px; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .tier--featured .tier__badge { background: var(--paper); color: var(--ink); }
+  .tier__price { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); margin: 0 0 12px; text-transform: uppercase; }
+  .tier__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 16px; }
+  .tier__what { font-size: 14px; line-height: 1.5; margin: 0; }
+
+  /* Block 7.14 · Numbered list rows */
+  .hs-list { padding: 0 12px 48px; border-top: 1px solid var(--rule); }
+  .hs-row { display: grid; grid-template-columns: 80px 1fr; gap: 24px; padding: 36px 0; border-bottom: 1px solid var(--rule); }
+  .hs-row__num { font-family: var(--display); font-size: clamp(40px, 5vw, 64px); line-height: 0.9; color: var(--ink); }
+  .hs-row__kicker { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  .hs-row__name { font-family: var(--display); font-size: clamp(22px, 3vw, 36px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 16px; }
+  .hs-row__what { font-size: 16px; line-height: 1.55; color: var(--ink); margin: 0 0 12px; max-width: 56ch; }
+  .hs-row__how { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 0; max-width: 56ch; }
+  .hs-row__how strong { color: var(--ink); font-weight: 600; letter-spacing: 0.06em; }
+
+  @media (max-width: 980px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .grid__center { grid-column: 1 / -1; aspect-ratio: 16/10; }
+    .vbar { grid-template-columns: 1fr; }
+    .vbar__brand { padding: 32px 24px 0; }
+    .vbar__copy { padding: 24px; }
+    .cal { grid-template-columns: 48px 60px 1fr 60px 60px; height: auto; }
+    .cal__col:nth-child(6), .cal__col:nth-child(7) { display: none; }
+    .tiers { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .hs-row { grid-template-columns: 1fr; gap: 12px; }
+    .hs-row__num { font-size: 32px; }
+  }
+</style>

@@ -1,11 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 
 <BaseLayout title="about — the keepers." description="What the keepers is, who runs it, how it stays free." current="about">
+
+  <PageMasthead
+    title="about us."
+    eyebrow="who we are · why this exists"
+    subscript="THE KEEPERS"
+    cutouts={[]}
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">about</p>
-    <h1 class="about-title"><span>SF Times.</span><span>The Keepers.</span></h1>
     <p class="lead">
       One San Franciscan every Saturday. Someone holding a recipe, a routine, a room, a record, or a refusal the city would lose without them. Reader-funded. No parent company. No paywall. No AI bylines.
     </p>

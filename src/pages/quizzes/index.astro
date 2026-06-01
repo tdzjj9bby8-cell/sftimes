@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageMasthead from '../../components/PageMasthead.astro';
 
 // "Guess the keeper" is the headline experience; the five personality
 // quizzes carry forward from the prior site as more-quizzes tiles below.
@@ -69,11 +70,15 @@ function withEm(text: string, em?: string) {
   current="quizzes"
 >
 
+  <PageMasthead
+    title="guess the keeper."
+    eyebrow="quiz №3 · the identify series · three photographs, three questions"
+    subscript="THE KEEPERS"
+  />
+
   <section class="qz-hero container">
-    <p class="ui-label qz-hero__eyebrow">quiz №3 · the identify series</p>
-    <h1 class="qz-hero__title">guess the <em>keeper</em>.</h1>
     <p class="qz-hero__sub">
-      Three photographs, three questions. We tell you what they keep. You tell us who they are and which corner of the city they hold.
+      We tell you what they keep. You tell us who they are and which corner of the city they hold.
     </p>
   </section>
 

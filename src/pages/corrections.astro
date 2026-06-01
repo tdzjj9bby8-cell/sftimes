@@ -1,12 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 const corrections: Array<{date: string; story: string; note: string}> = [];
 ---
 <BaseLayout title="corrections — the keepers." description="Every correction we have made, dated and named." current="corrections">
+
+  <PageMasthead
+    title="corrections."
+    eyebrow={`${corrections.length} corrections to date · dated · named · described`}
+    subscript="THE KEEPERS"
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">corrections log</p>
-    <h1>what we got <em>wrong</em>, and what we changed.</h1>
-    <p class="lead">Every correction is dated. The story is named. The change is described. This page exists because we will eventually make a mistake, and the alternative to a public log is hiding it.</p>
+    <p class="lead">what we got <em>wrong</em>, and what we changed. Every correction is dated. The story is named. The change is described. This page exists because we will eventually make a mistake, and the alternative to a public log is hiding it.</p>
     {corrections.length === 0
       ? <p class="corrections-empty"><em>no corrections to date.</em></p>
       : <ul class="corrections">{corrections.map((c) => (

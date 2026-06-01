@@ -1,17 +1,27 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Placeholder from '../../components/Placeholder.astro';
+import PageMasthead from '../../components/PageMasthead.astro';
 import { getCollection } from 'astro:content';
 
 const cats = await getCollection('best-of');
 ---
 
 <BaseLayout title="best of — the keepers." description="Hand-picked lists. Named editors. No affiliate links." current="best of">
+
+  <PageMasthead
+    title="best of."
+    eyebrow={`${cats.length} lists · quarterly refresh · named editors`}
+    subscript="THE KEEPERS"
+    cutouts={[
+      cats[0] && { src: cats[0].data.hero_filename_hint ? `/${cats[0].data.hero_filename_hint.replace(/\.[^.]+$/, '')}.jpg` : '', alt: cats[0].data.hero_alt, char: 'b', occurrence: 1 },
+      cats[1] && { src: cats[1].data.hero_filename_hint ? `/${cats[1].data.hero_filename_hint.replace(/\.[^.]+$/, '')}.jpg` : '', alt: cats[1].data.hero_alt, char: 'o', occurrence: 1 },
+    ].filter(Boolean)}
+  />
+
   <div class="container container-narrow page-head">
-    <p class="ui-label">best of · quarterly</p>
-    <h1>the lists we'd <em>actually</em> send a friend.</h1>
     <p class="page-head__deck">
-      Quarterly refresh. Named editor on every list. No affiliate links. No credit-card-partner inventory. No chain restaurants.
+      The lists we'd <em>actually</em> send a friend. Quarterly refresh. Named editor on every list. No affiliate links. No credit-card-partner inventory. No chain restaurants.
     </p>
   </div>
 
@@ -53,6 +63,11 @@ const cats = await getCollection('best-of');
     font-size: 1.125rem;
     color: var(--ink-soft);
     max-width: 60ch;
+  }
+  .page-head__deck em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 16, 'WONK' 1;
   }
   .bestof-card__title :global(em) {
     font-style: italic;

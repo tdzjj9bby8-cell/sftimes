@@ -1,0 +1,166 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
+import Placeholder from '../../../components/Placeholder.astro';
+
+// One Exhibition-styled detail page per best-of category. Long-form list body
+// comes from the markdown via c.render(); read-next pulls three other lists.
+export async function getStaticPaths() {
+  const cats = await getCollection('best-of');
+  const sorted = [...cats].sort((a, b) => a.data.url_slug.localeCompare(b.data.url_slug));
+  return cats.map((c) => ({
+    params: { slug: c.data.url_slug },
+    props: {
+      category: c,
+      more: sorted.filter((x) => x.slug !== c.slug).slice(0, 3),
+      num: sorted.findIndex((x) => x.data.url_slug === c.data.url_slug) + 1,
+    },
+  }));
+}
+
+const { category: c, more, num } = Astro.props;
+const { Content } = await c.render();
+const refreshed = c.data.last_refreshed
+  .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  .toUpperCase();
+
+// Next calendar quarter, for the in-progress drop line.
+function nextQuarterLabel() {
+  const d = new Date();
+  let q = Math.floor(d.getMonth() / 3) + 2; // current quarter + 1
+  let y = d.getFullYear();
+  if (q > 4) { q -= 4; y += 1; }
+  return `Q${q} ${y}`;
+}
+const nextQuarter = nextQuarterLabel();
+const hasBody = c.body && c.body.trim().length > 0;
+---
+<ExhibitionLayout
+  title={`${c.data.title.toUpperCase()} · The Keepers · SF Times`}
+  description={c.data.intro || `A hand-picked list, edited by ${c.data.editor}. No affiliate links.`}
+  active="best-of"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title={c.data.title.toUpperCase()}
+    subscript={`№${String(num).padStart(2, '0')}`}
+    cutouts={[]}
+  />
+
+  <!-- HERO PHOTO + TITLE -->
+  <section class="story-hero">
+    <div class="story-hero__media">
+      <Placeholder
+        alt={c.data.hero_alt}
+        filenameHint={c.data.hero_filename_hint}
+        aspect="21:9"
+        showLabel={false}
+        priority={true}
+      />
+    </div>
+    <div class="story-hero__overlay">
+      <p class="story-hero__eyebrow">TOP TIER · EDITED BY {c.data.editor.toUpperCase()}</p>
+      <h1 class="story-hero__title">{c.data.title.toUpperCase()}</h1>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">REFRESHED {refreshed} · EDITED BY {c.data.editor.toUpperCase()}</p>
+    <h1 class="ex-prose__title">{c.data.title.toUpperCase()}</h1>
+    {c.data.intro && <p>{c.data.intro}</p>}
+
+    <!-- EDITORIAL FIREWALL -->
+    <div class="bo-firewall">
+      Every entry is named by the editor above. No affiliate links. No credit-card-partner inventory. Promoted entries appear with a labeled badge.
+    </div>
+  </article>
+
+  <!-- LONG-FORM BODY (markdown, when present) -->
+  {hasBody && (
+    <article class="ex-prose">
+      <Content />
+    </article>
+  )}
+
+  <!-- EMPTY STATE (until the list is published) -->
+  {!hasBody && (
+    <section class="bo-empty">
+      <p class="bo-empty__kicker">THE LIST IS IN PROGRESS</p>
+      <p class="bo-empty__drop">DROPS {nextQuarter}</p>
+    </section>
+  )}
+
+  <!-- DUAL CTA (strip pattern) -->
+  <section class="strip strip--dual">
+    <a class="strip__link" href={`mailto:hello@sftimes.com?subject=Best of pick: ${c.data.title}`}>
+      <h2 class="strip__text">SEND A PICK</h2>
+      <span class="strip__arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+    <a class="strip__link" href="#exNewsletter">
+      <h2 class="strip__text">KNOW WHEN IT LANDS</h2>
+      <span class="strip__arrow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+  </section>
+
+  <!-- READ NEXT -->
+  <a href="/exhibition/best-of" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">MORE LISTS</h2>
+    </section>
+  </a>
+
+  <section class="ex-cards ex-cards--3">
+    {more.map((m) => (
+      <a class="ex-card" href={`/exhibition/best-of/${m.data.url_slug}`}>
+        <div class="ex-card__media">
+          <Placeholder alt={m.data.hero_alt} filenameHint={m.data.hero_filename_hint} aspect="4:3" showLabel={false} />
+        </div>
+        <p class="ex-card__meta">EDITED BY {m.data.editor.toUpperCase()}</p>
+        <h3 class="ex-card__title">{m.data.title.toUpperCase()}</h3>
+      </a>
+    ))}
+  </section>
+
+  <style>
+    .story-hero { position: relative; aspect-ratio: 21/10; overflow: hidden; background: #2a2520; margin: 0 12px; }
+    .story-hero__media { position: absolute; inset: 0; }
+    .story-hero__media :global(.real-image), .story-hero__media :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+    .story-hero__overlay {
+      position: absolute; inset: auto 0 0 0;
+      padding: 32px 28px;
+      background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 70%, transparent);
+      color: var(--paper);
+    }
+    .story-hero__eyebrow { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0 0 12px; }
+    .story-hero__title { font-family: var(--display); font-size: clamp(36px, 6vw, 96px); line-height: 1; letter-spacing: -0.005em; margin: 0; text-transform: uppercase; max-width: 20ch; }
+
+    .bo-firewall {
+      border-left: 3px solid var(--ink);
+      background: var(--paper-2);
+      padding: 16px 20px;
+      margin: 28px 0 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--ink);
+      max-width: 60ch;
+    }
+
+    .bo-empty { text-align: center; padding: 64px 12px; border-block: 1px solid var(--rule); }
+    .bo-empty__kicker { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+    .bo-empty__drop { font-family: var(--display); font-size: clamp(36px, 6vw, 88px); line-height: 1; text-transform: uppercase; margin: 0; color: var(--ink); }
+
+    /* Strip pattern, dual-CTA variant */
+    .strip { background: var(--ink); color: var(--paper); padding: 28px 24px 36px; }
+    .strip--dual { display: grid; gap: 20px; }
+    .strip__link { display: flex; align-items: flex-end; gap: 24px; color: var(--paper); transition: opacity 200ms; }
+    .strip__link:hover { opacity: 0.7; }
+    .strip__text { font-family: var(--display); font-size: clamp(32px, 6vw, 72px); line-height: 0.95; letter-spacing: -0.005em; text-transform: uppercase; margin: 0; color: var(--paper); }
+    .strip__arrow { width: 44px; height: 44px; border: 1px solid rgba(244,241,234,0.6); color: var(--paper); border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 8px; }
+  </style>
+</ExhibitionLayout>

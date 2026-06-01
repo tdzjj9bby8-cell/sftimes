@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 <BaseLayout
   title="support — the keepers."
@@ -7,9 +8,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   current="support"
 >
 
+  <PageMasthead
+    title="support."
+    eyebrow="reader-funded · 75% operations · 25% local charity"
+    subscript="THE KEEPERS"
+  />
+
   <section class="sp-hero container">
-    <p class="ui-label sp-hero__eyebrow">support</p>
-    <h1 class="sp-hero__title">you read it free.<br/><em>someone</em> has to fund it.</h1>
+    <h2 class="sp-hero__title">you read it free.<br/><em>someone</em> has to fund it.</h2>
     <p class="sp-hero__sub">
       No banner ads, no tracking, no paywall. Just readers who think a saturday letter about the city is worth ten dollars a month. Or twenty-five. Or whatever you decide.
     </p>

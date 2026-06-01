@@ -1,0 +1,56 @@
+---
+/**
+ * ExhibitionMasthead.astro
+ * Renders a giant Anton-gothic wordmark at the top of an /exhibition page,
+ * optionally with circular photo cutouts inside round-bowl letters.
+ *
+ * Props:
+ *   title    string to set in caps (e.g. "ABOUT US")
+ *   subscript text for the small label right-aligned below the wordmark
+ *            (default "SF TIMES" to mirror Exhibition's "MAGAZINE")
+ *   cutouts  optional array of { src, alt, x, y, r } absolute SVG coords
+ *            for photo cutouts. Caller controls positions because they
+ *            depend on the title's letter shapes.
+ */
+export interface CutoutSpec { src: string; alt: string; x: number; y: number; r: number; }
+export interface Props {
+  title: string;
+  subscript?: string;
+  cutouts?: CutoutSpec[];
+}
+const { title, subscript = 'SF TIMES', cutouts = [] } = Astro.props;
+const upper = title.toUpperCase();
+// Anton at font-size 240 takes about 130 viewBox units per character.
+// Generous horizontal padding so the text never overflows its viewBox,
+// which was causing the wordmark to clip and paint outside SVG bounds.
+const charBudget = upper.length * 140 + 240;
+const vbW = Math.max(1600, charBudget);
+const vbH = 280;
+---
+
+<section class="ex-masthead">
+  <svg class="ex-masthead__svg" viewBox={`0 0 ${vbW} ${vbH}`} preserveAspectRatio="xMidYMid meet" aria-label={title}>
+    <defs>
+      {cutouts.map((c, i) => (
+        <clipPath id={`exm-cut-${i}`}><circle cx={c.x} cy={c.y} r={c.r}/></clipPath>
+      ))}
+    </defs>
+    <text
+      x={vbW / 2} y={vbH - 40} text-anchor="middle"
+      font-family="Anton, Impact, sans-serif"
+      font-size="240" font-weight="400"
+      fill="#0a0a0a"
+      style="letter-spacing: -0.005em;"
+    >{upper}</text>
+    {cutouts.map((c, i) => (
+      <image
+        href={c.src}
+        x={c.x - c.r} y={c.y - c.r}
+        width={c.r * 2} height={c.r * 2}
+        preserveAspectRatio="xMidYMid slice"
+        clip-path={`url(#exm-cut-${i})`}
+      ><title>{c.alt}</title></image>
+    ))}
+  </svg>
+  {subscript && <p class="ex-masthead__sub">{subscript}</p>}
+</section>

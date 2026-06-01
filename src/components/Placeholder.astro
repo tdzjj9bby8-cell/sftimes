@@ -16,6 +16,10 @@ export interface Props {
   class?: string;
   /** Above-the-fold hero. Renders the img eager + fetchpriority high. */
   priority?: boolean;
+  /** object-position for the cropped image. e.g. "center 25%", "30% top".
+   *  Default "center 25%" favors faces in journalistic portraits.
+   *  Use story.data.hero_focal to override per-image when subject is off-center. */
+  focal?: string;
 }
 
 const {
@@ -26,6 +30,7 @@ const {
   showLabel = true,
   class: className = '',
   priority = false,
+  focal = 'center 25%',
 } = Astro.props;
 
 const aspectMap: Record<string, string> = {
@@ -98,7 +103,7 @@ const sizes = aspectSizes[aspect] || '100vw';
         loading={priority ? 'eager' : 'lazy'}
         fetchpriority={priority ? 'high' : 'auto'}
         decoding="async"
-        style={`aspect-ratio: ${aspectRatio}; object-fit: cover; width: 100%;`}
+        style={`aspect-ratio: ${aspectRatio}; object-fit: cover; object-position: ${focal}; width: 100%;`}
       />
     </picture>
   ) : (

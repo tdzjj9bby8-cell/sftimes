@@ -1,0 +1,148 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+const tiers = [
+  { price: '$5 / MONTH',  name: 'READER+',   what: 'Keeps the lights on. Newsletter. Our thanks, by name, on the supporters page.' },
+  { price: '$10 / MONTH', name: 'SUSTAINER', what: 'One hour of student reporting, every month, paid for by you. Plus the keepers-only quarterly note.', featured: true },
+  { price: '$25 / MONTH', name: 'PATRON',    what: 'Named in the masthead. The annual print zine, mailed. An open invite to the once-a-year reader dinner.' },
+  { price: 'YOU DECIDE',  name: 'CUSTOM',    what: 'One-time or recurring, your number. Helpful if you want to underwrite a single saturday issue.' },
+];
+const orgs = [
+  { n: '01', name: 'SF-MARIN FOOD BANK',     what: 'Feeds 53,000 households a week across SF and Marin.' },
+  { n: '02', name: 'LA COCINA',              what: 'Mission incubator for immigrant women food entrepreneurs.' },
+  { n: '03', name: '826 VALENCIA',           what: 'Youth writing programs across the city, free, with named tutors.' },
+  { n: '04', name: 'LARKIN STREET YOUTH',    what: 'Housing and case work for young people without a bed.' },
+  { n: '05', name: 'SELF-HELP FOR ELDERLY',  what: 'Citywide senior services, delivered in English, Cantonese, and Mandarin.' },
+];
+---
+<ExhibitionLayout
+  title="KEEP IT ALIVE · The Keepers · SF Times"
+  description="Reader-funded. 75% to operations. 25% to local Bay Area charities. Named, listed, audited."
+  active="support"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title="KEEP IT ALIVE"
+    subscript="75 / 25"
+    cutouts={[]}
+  />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">READER-FUNDED · NO BANNER ADS · NO PAYWALL</p>
+    <h1 class="ex-prose__title">YOU READ IT FREE.<br>SOMEONE HAS<br>TO FUND IT.</h1>
+    <p>No banner ads, no tracking, no paywall. Just readers who think a saturday letter about the city is worth ten dollars a month. Or twenty-five. Or whatever you decide. Stripe checkout lands before public launch.</p>
+    <a class="support-hero-cta" href="mailto:eric@seod.com?subject=keepers%20pledge">PLEDGE TO SUPPORT &rarr;</a>
+  </article>
+
+  <section class="tiers">
+    {tiers.map((t) => (
+      <article class={`tier${t.featured ? ' tier--featured' : ''}`}>
+        {t.featured && <span class="tier__badge">MOST CHOSEN</span>}
+        <p class="tier__price">{t.price}</p>
+        <h3 class="tier__name">{t.name}</h3>
+        <p class="tier__what">{t.what}</p>
+        <a class="tier__pledge" href={`mailto:eric@seod.com?subject=${encodeURIComponent(t.name)}%20pledge`}>PLEDGE THIS TIER &rarr;</a>
+      </article>
+    ))}
+  </section>
+
+  <a href="/exhibition/support" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">WHERE THE MONEY GOES</h2>
+    </section>
+  </a>
+
+  <section class="split">
+    <div class="split__row">
+      <span class="split__pct">75%</span>
+      <div>
+        <p class="split__label">OPERATIONS</p>
+        <p class="split__detail">Student stipends, editor pay, hosting, photography. The reporting, in other words.</p>
+      </div>
+    </div>
+    <div class="split__row">
+      <span class="split__pct">25%</span>
+      <div>
+        <p class="split__label">LOCAL BAY AREA CHARITIES</p>
+        <p class="split__detail">Named below. Audited annually. Reported on the corrections page so you can check our math.</p>
+      </div>
+    </div>
+  </section>
+
+  <a href="#orgs" class="ex-colmark__link">
+    <section class="ex-colmark" id="orgs">
+      <h2 class="ex-colmark__text">THE FIVE ORGS</h2>
+    </section>
+  </a>
+
+  <section class="orgs">
+    {orgs.map((o) => (
+      <article class="org">
+        <span class="org__num">{o.n}</span>
+        <div>
+          <h3 class="org__name">{o.name}</h3>
+          <p class="org__what">{o.what}</p>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <style>
+    .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 12px 48px; }
+    .tier { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); position: relative; }
+    .tier--featured { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .tier--featured .tier__price, .tier--featured .tier__what { color: rgba(244,241,234,0.85); }
+    .tier__badge { position: absolute; top: -12px; left: 16px; background: var(--ink); color: var(--paper); padding: 5px 12px; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+    .tier--featured .tier__badge { background: var(--paper); color: var(--ink); }
+    .tier__price { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); margin: 0 0 12px; text-transform: uppercase; }
+    .tier__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 16px; }
+    .tier__what { font-size: 14px; line-height: 1.5; margin: 0; }
+    .tier__pledge {
+      display: block;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      transition: opacity 150ms;
+    }
+    .tier__pledge:hover { opacity: 0.6; }
+    .tier--featured .tier__pledge {
+      border-top-color: rgba(244,241,234,0.3);
+      color: var(--paper);
+    }
+
+    .support-hero-cta {
+      display: inline-block;
+      margin-top: 28px;
+      padding: 16px 28px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      transition: opacity 200ms;
+    }
+    .support-hero-cta:hover { opacity: 0.85; }
+
+    .split { padding: 0 12px 48px; }
+    .split__row { display: grid; grid-template-columns: 220px 1fr; gap: 28px; padding: 36px 0; border-top: 1px solid var(--rule); align-items: baseline; }
+    .split__row:last-child { border-bottom: 1px solid var(--rule); }
+    .split__pct { font-family: var(--display); font-size: clamp(64px, 9vw, 130px); line-height: 0.9; }
+    .split__label { font-family: var(--display); font-size: 22px; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 8px; }
+    .split__detail { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; max-width: 56ch; }
+
+    .orgs { padding: 0 12px 48px; }
+    .org { display: grid; grid-template-columns: 80px 1fr; gap: 28px; padding: 28px 0; border-top: 1px solid var(--rule); align-items: baseline; }
+    .org:last-child { border-bottom: 1px solid var(--rule); }
+    .org__num { font-family: var(--display); font-size: 36px; line-height: 1; color: var(--ink); }
+    .org__name { font-family: var(--display); font-size: clamp(22px, 2.4vw, 32px); text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 6px; }
+    .org__what { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; }
+
+    @media (max-width: 980px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .tiers { grid-template-columns: 1fr; } .split__row { grid-template-columns: 1fr; } .org { grid-template-columns: 1fr; gap: 8px; } }
+  </style>
+</ExhibitionLayout>

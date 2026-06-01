@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Placeholder from '../components/Placeholder.astro';
 
+import PageMasthead from '../components/PageMasthead.astro';
+
 const team = [
   { name: 'Eric', role: 'founder, editor', bio: 'Saturday letter writer. Walks the blocks.' },
   { name: 'Nicholas', role: 'reporter', bio: 'Profiles, reported features, civic accountability.' },
@@ -10,9 +12,16 @@ const team = [
 ];
 ---
 <BaseLayout title="team — the keepers." description="Who writes, photographs, and edits the saturday letter." current="team">
+
+  <PageMasthead
+    title="the team."
+    eyebrow="four humans · named bylines · no AI"
+    subscript="THE KEEPERS"
+    cutouts={[]}
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">team · four humans, named</p>
-    <h1>the people <em>behind</em> the saturday letter.</h1>
+    <h2 class="page-subhead">the people <em>behind</em> the saturday letter.</h2>
     <div class="team-grid">
       {team.map((m) => (
         <article class="team-card">
@@ -28,11 +37,16 @@ const team = [
 
 <style>
   .page { padding-block: var(--s-9); }
-  .page h1 {
-    margin-block: var(--s-3) var(--s-7);
+  .page-subhead {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: var(--s-7) 0 var(--s-7);
     font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
-  .page h1 :global(em) {
+  .page-subhead :global(em) {
     font-style: italic;
     color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;

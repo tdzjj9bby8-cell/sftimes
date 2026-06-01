@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 <BaseLayout
   title="work with us — the keepers."
@@ -7,12 +8,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   current="partners"
 >
 
-  <!-- HERO -->
-  <section class="wwu-hero container container-narrow">
-    <p class="ui-label">work with us</p>
-    <h1>tell your story. reach <em>saturday</em> morning.</h1>
-    <p class="wwu-hero__lead">
-      Five thousand newsletter subscribers and growing. One issue every saturday. Readers who pay attention because we earn it. Two ways in.
+  <PageMasthead
+    title="work with us."
+    eyebrow="partnerships · two ways in"
+    subscript="THE KEEPERS"
+    cutouts={[]}
+  />
+
+  <!-- LEAD + METRICS -->
+  <section class="wwu-lead container container-narrow">
+    <p class="wwu-lead__text">
+      Tell your story. Reach <em>saturday</em> morning. Five thousand newsletter subscribers and growing. One issue every saturday. Readers who pay attention because we earn it. Two ways in.
     </p>
     <div class="wwu-hero__metrics">
       <div><span class="wwu-metric__num">5,000</span><span class="wwu-metric__label">saturday subscribers</span></div>
@@ -172,29 +178,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <style>
-  /* HERO */
-  .wwu-hero {
-    padding-top: var(--s-9);
+  /* LEAD block after the masthead */
+  .wwu-lead {
+    padding-top: var(--s-7);
     padding-bottom: var(--s-8);
     border-bottom: 1px solid var(--rule);
   }
-  .wwu-hero h1 {
-    margin-block: var(--s-3) var(--s-5);
-    font-variation-settings: 'opsz' 144, 'SOFT' 30;
-    max-width: 20ch;
-  }
-  .wwu-hero h1 :global(em) {
-    font-style: italic;
-    color: var(--terracotta);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;
-  }
-  .wwu-hero__lead {
+  .wwu-lead__text {
     font-family: var(--font-body);
     font-size: clamp(1.125rem, 1.6vw, 1.5rem);
     line-height: 1.5;
     color: var(--ink-soft);
     max-width: 56ch;
     margin: 0 0 var(--s-7);
+  }
+  .wwu-lead__text em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-variation-settings: 'opsz' 16, 'WONK' 1;
   }
   .wwu-hero__metrics {
     display: grid;

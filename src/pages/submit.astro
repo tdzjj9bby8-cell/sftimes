@@ -1,10 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageMasthead from '../components/PageMasthead.astro';
 ---
 <BaseLayout title="submit — the keepers." description="Pitch a hidden spot, a story tip, or a person we should profile." current="submit">
+
+  <PageMasthead
+    title="send us a tip."
+    eyebrow="submissions · anonymity honored"
+    subscript="THE KEEPERS"
+  />
+
   <div class="container container-narrow page">
-    <p class="ui-label">submit · reader tip line</p>
-    <h1>tell us about a place, a <em>person</em>, or a story.</h1>
+    <h2 class="page-subhead">tell us about a place, a <em>person</em>, or a story.</h2>
     <p class="lead">Reader tips are the editorial pipeline. Anonymity is honored if you ask for it. Editor reads within seven days, replies only if there are follow-up questions.</p>
 
     <form class="submit-form" method="post" action="mailto:submit@sftimes.com" enctype="text/plain">
@@ -33,12 +40,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <style>
   .page { padding-block: var(--s-9); }
-  .page h1 {
-    margin-block: var(--s-3) var(--s-5);
+  .page-subhead {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: var(--s-7) 0 var(--s-5);
     max-width: 22ch;
     font-variation-settings: 'opsz' 144, 'SOFT' 30;
   }
-  .page h1 :global(em) {
+  .page-subhead :global(em) {
     font-style: italic;
     color: var(--terracotta);
     font-variation-settings: 'opsz' 144, 'SOFT' 80, 'WONK' 1;

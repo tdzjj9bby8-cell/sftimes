@@ -1,0 +1,325 @@
+---
+/**
+ * ExhibitionLayout.astro
+ * Shared chrome for every /exhibition/* sample page.
+ * Provides: utility bar, hamburger drawer, section nav, newsletter section,
+ *           dark footer, all CSS tokens and shared styles.
+ * Page content slots in via the default <slot/>.
+ */
+export interface Props {
+  title: string;
+  description?: string;
+  active?: 'home' | 'stories' | 'best-of' | 'hidden-spots' | 'quizzes' | 'about' | 'support';
+}
+const {
+  title,
+  description = 'One San Francisco keeper every Saturday. Reader-funded.',
+  active = 'home',
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preload" href="/fonts/anton/anton-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-tight/inter-tight-variable.woff2" as="font" type="font/woff2" crossorigin>
+<style is:global>
+  /* Self-hosted display + UI faces. Replaces the previous jsDelivr CDN dependency. */
+  @font-face {
+    font-family: 'Anton';
+    src: url('/fonts/anton/anton-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Inter Tight Variable';
+    src: url('/fonts/inter-tight/inter-tight-variable.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    --paper: #ebe6da;
+    --paper-2: #e2ddcf;
+    --ink: #0a0a0a;
+    --ink-2: #1d1d1b;
+    --rule: #bdb6a4;
+    --muted: #6b6357;
+    --accent: #d9551f;
+    --display: 'Anton', 'Inter Tight Variable', sans-serif;
+    --ui: 'Inter Tight Variable', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: var(--ui); }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; padding: 0; }
+
+  /* === UTILITY TOP BAR === */
+  .ex-util { display: grid; grid-template-columns: 60px 1fr auto; align-items: stretch; height: 48px; border-bottom: 1px solid var(--rule); }
+  .ex-util__menu { display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--rule); }
+  .ex-util__menu div span { display: block; width: 18px; height: 1.5px; background: var(--ink); transition: transform 200ms; }
+  .ex-util__menu div span + span { margin-top: 4px; }
+  .ex-util__menu.is-open div span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .ex-util__menu.is-open div span:nth-child(2) { opacity: 0; }
+  .ex-util__menu.is-open div span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+  .ex-util__spacer { border-right: 1px solid var(--rule); }
+  .ex-util__sub { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--ink); color: var(--paper); font-size: 13px; padding: 0 24px; }
+
+  /* === DRAWER === */
+  /* visibility:hidden when closed guarantees the giant link text never paints
+     above the viewport edge as a phantom. transform alone isn't enough on
+     some browsers — the translated element can still leak a 1-pixel slice. */
+  .ex-drawer {
+    position: fixed; inset: 48px 0 0 0; z-index: 100;
+    background: var(--paper); overflow-y: auto;
+    transform: translateY(-100%);
+    visibility: hidden;
+    opacity: 0;
+    transition: transform 280ms cubic-bezier(0.16,1,0.3,1), opacity 220ms, visibility 0s linear 280ms;
+  }
+  .ex-drawer.is-open {
+    transform: translateY(0);
+    visibility: visible;
+    opacity: 1;
+    transition: transform 280ms cubic-bezier(0.16,1,0.3,1), opacity 220ms, visibility 0s linear 0s;
+  }
+  .ex-drawer__inner { padding: 64px 60px; display: grid; gap: 18px; max-width: 800px; }
+  .ex-drawer a { font-family: var(--display); font-size: clamp(36px, 6vw, 80px); line-height: 1; text-transform: uppercase; color: var(--ink); letter-spacing: -0.005em; transition: opacity 150ms; }
+  .ex-drawer a:hover { opacity: 0.5; }
+  .ex-drawer__hint { font-family: var(--ui); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 32px; }
+
+  /* === SECTION NAV === */
+  .ex-secnav { display: grid; grid-template-columns: 60px repeat(7, 1fr); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); height: 56px; align-items: center; }
+  .ex-secnav__pad { border-right: 1px solid var(--rule); height: 100%; }
+  .ex-secnav__item { padding: 0 20px; font-size: 14px; color: var(--ink); position: relative; transition: opacity 150ms; }
+  .ex-secnav__item:hover { opacity: 0.6; }
+  .ex-secnav__item.is-active::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: -1px; height: 2px; background: var(--ink); }
+
+  /* === SHARED GIANT-WORDMARK BAND (used by ExhibitionMasthead) === */
+  .ex-masthead {
+    padding: 16px 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;             /* contain any SVG text spill */
+  }
+  .ex-masthead__svg {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 12px;
+    overflow: hidden;             /* explicit; Chrome treats SVG overflow inconsistently */
+    /* Big and dominant. Eric wants the wordmark to own the top of the page. */
+    max-height: clamp(180px, 24vw, 320px);
+    height: auto;
+  }
+  .ex-masthead__sub {
+    align-self: flex-end;
+    margin: 0 28px 0 0;
+    padding: 0;
+    font-family: var(--display);
+    font-size: clamp(16px, 2vw, 28px);
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--ink);
+    /* Anton has no italic axis. Skew gives editorial slant. */
+    transform: skewX(-10deg);
+    transform-origin: right baseline;
+  }
+
+  /* === GIANT WORDMARK STRIP (used inside pages as section divider) === */
+  .ex-colmark { padding: 56px 12px 28px; }
+  .ex-colmark__text { font-family: var(--display); font-size: clamp(48px, 9vw, 130px); line-height: 0.95; letter-spacing: -0.005em; text-transform: uppercase; margin: 0; color: var(--ink); }
+  .ex-colmark__link { color: var(--ink); display: block; transition: opacity 200ms; }
+  .ex-colmark__link:hover { opacity: 0.7; }
+
+  /* === GENERIC PROSE CONTENT BLOCK (used by text-heavy pages) === */
+  .ex-prose { padding: 56px 12px; max-width: 880px; margin: 0 auto; }
+  .ex-prose__eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 16px; }
+  .ex-prose__title {
+    font-family: var(--display);
+    font-size: clamp(36px, 5vw, 72px);
+    line-height: 1; text-transform: uppercase;
+    letter-spacing: -0.005em;
+    margin: 0 0 24px;
+  }
+  .ex-prose p {
+    font-size: clamp(16px, 1.2vw, 18px);
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0 0 18px;
+    max-width: 64ch;
+  }
+  .ex-prose h2 {
+    font-family: var(--display);
+    font-size: clamp(28px, 3vw, 44px);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    margin: 56px 0 18px;
+  }
+  .ex-prose h3 {
+    font-family: var(--ui);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    margin: 32px 0 12px;
+  }
+  .ex-prose ol, .ex-prose ul { padding-left: 1.4em; }
+  .ex-prose li { font-size: 16px; line-height: 1.6; color: var(--ink); margin: 0 0 8px; }
+  .ex-prose a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+  .ex-prose a:hover { opacity: 0.7; }
+
+  /* === SHARED CARD GRID === */
+  .ex-cards { display: grid; gap: 12px; padding: 0 12px 48px; }
+  .ex-cards--3 { grid-template-columns: repeat(3, 1fr); }
+  .ex-cards--2 { grid-template-columns: repeat(2, 1fr); }
+  .ex-card { color: var(--ink); display: block; }
+  .ex-card__media { background: #2a2520; aspect-ratio: 4/3; overflow: hidden; }
+  .ex-card__media :global(.real-image),
+  .ex-card__media :global(.placeholder) {
+    width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block;
+    transition: transform 500ms;
+  }
+  .ex-card:hover .ex-card__media :global(.real-image),
+  .ex-card:hover .ex-card__media :global(.placeholder) { transform: scale(1.03); }
+  .ex-card__meta { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
+  .ex-card__title { font-family: var(--ui); font-size: 18px; font-weight: 600; line-height: 1.2; margin: 0 0 6px; }
+  .ex-card__deck { font-size: 13px; line-height: 1.45; color: var(--muted); margin: 0; }
+
+  /* === NEWSLETTER === */
+  .ex-nl { background: var(--ink); color: var(--paper); padding: 28px; }
+  .ex-nl form { display: flex; align-items: stretch; gap: 0; }
+  .ex-nl input { flex: 1; padding: 14px 18px; background: transparent; border: 1px solid rgba(244,241,234,0.3); color: var(--paper); font-family: var(--ui); font-size: 14px; border-radius: 0; }
+  .ex-nl input::placeholder { color: rgba(244,241,234,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; }
+  .ex-nl button { padding: 14px 28px; background: var(--paper); color: var(--ink); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--paper); transition: opacity 150ms; }
+  .ex-nl button:hover { opacity: 0.85; }
+  .ex-nl__thanks { font-family: var(--display); font-size: 28px; text-transform: uppercase; padding: 12px 0; }
+
+  /* === FOOTER === */
+  .ex-ft { background: var(--ink); color: var(--paper); }
+  .ex-ft__row { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 28px; border-top: 1px solid rgba(244,241,234,0.12); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .ex-ft__row > div:nth-child(2) { text-align: center; color: rgba(244,241,234,0.6); }
+  .ex-ft__row > div:last-child { text-align: right; }
+  .ex-ft__bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 18px 28px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(244,241,234,0.7); }
+  .ex-ft__bottom > div:nth-child(2) { text-align: center; text-decoration: underline; }
+  .ex-ft__bottom > div:last-child { text-align: right; }
+
+  @media (max-width: 980px) {
+    .ex-util { grid-template-columns: 48px 1fr auto; }
+    .ex-secnav { grid-template-columns: 48px repeat(7, 1fr); }
+    .ex-secnav__item { padding: 0 10px; font-size: 12px; }
+    .ex-drawer__inner { padding: 40px 24px; }
+    .ex-cards--3 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .ex-cards--3, .ex-cards--2 { grid-template-columns: 1fr; }
+  }
+</style>
+<slot name="head" />
+</head>
+<body>
+
+<div class="ex-util">
+  <button class="ex-util__menu" id="exMenuToggle" aria-label="Menu" aria-expanded="false"><div><span></span><span></span><span></span></div></button>
+  <div class="ex-util__spacer"></div>
+  <a class="ex-util__sub" href="/exhibition/partners#contact">Get in Touch <span aria-hidden="true">↗</span></a>
+</div>
+
+<aside class="ex-drawer" id="exDrawer" aria-hidden="true">
+  <div class="ex-drawer__inner">
+    <a href="/exhibition">HOME</a>
+    <a href="/exhibition/stories">FEATURES</a>
+    <a href="/exhibition/best-of">TOP TIER</a>
+    <a href="/exhibition/hidden-spots">UNPUBLISHED</a>
+    <a href="/exhibition/quizzes">CHECKUPS</a>
+    <a href="/exhibition/about">WHO WE ARE</a>
+    <a href="/exhibition/support">KEEP IT ALIVE</a>
+    <a href="/exhibition/partners">WORK WITH US</a>
+    <p class="ex-drawer__hint">Press Esc or tap the X to close</p>
+  </div>
+</aside>
+
+<slot name="masthead" />
+
+<nav class="ex-secnav" aria-label="Sections">
+  <div class="ex-secnav__pad"></div>
+  <a class={`ex-secnav__item${active === 'home' ? ' is-active' : ''}`} href="/exhibition">Home</a>
+  <a class={`ex-secnav__item${active === 'stories' ? ' is-active' : ''}`} href="/exhibition/stories">Features</a>
+  <a class={`ex-secnav__item${active === 'best-of' ? ' is-active' : ''}`} href="/exhibition/best-of">Top Tier</a>
+  <a class={`ex-secnav__item${active === 'hidden-spots' ? ' is-active' : ''}`} href="/exhibition/hidden-spots">Unpublished</a>
+  <a class={`ex-secnav__item${active === 'quizzes' ? ' is-active' : ''}`} href="/exhibition/quizzes">Checkups</a>
+  <a class={`ex-secnav__item${active === 'about' ? ' is-active' : ''}`} href="/exhibition/about">Who We Are</a>
+  <a class={`ex-secnav__item${active === 'support' ? ' is-active' : ''}`} href="/exhibition/support">Keep It Alive</a>
+</nav>
+
+<main>
+  <slot />
+</main>
+
+<section class="ex-nl" id="exNewsletter">
+  <form id="exNlForm">
+    <input type="email" name="email" placeholder="ENTER YOUR E-MAIL" required>
+    <button type="submit">Subscribe</button>
+  </form>
+  <p class="ex-nl__thanks" id="exNlThanks" hidden>THANKS. SATURDAY MORNING IN YOUR INBOX.</p>
+</section>
+
+<footer class="ex-ft">
+  <div class="ex-ft__row">
+    <div><a href="mailto:hello@sftimes.com">EMAIL US</a></div>
+    <div>READER-FUNDED · NO PARENT COMPANY</div>
+    <div><a href="/exhibition/standards">LEGAL</a></div>
+  </div>
+  <div class="ex-ft__bottom">
+    <div>©2026 | ALL RIGHTS RESERVED</div>
+    <div><a href="/exhibition">THE KEEPERS · SF TIMES</a></div>
+    <div><a href="#exNewsletter">SUBSCRIBE</a></div>
+  </div>
+</footer>
+
+<script is:inline>
+  (function () {
+    const toggle = document.getElementById('exMenuToggle');
+    const drawer = document.getElementById('exDrawer');
+    if (!toggle || !drawer) return;
+    function setOpen(open) {
+      drawer.classList.toggle('is-open', open);
+      toggle.classList.toggle('is-open', open);
+      drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    toggle.addEventListener('click', () => setOpen(!drawer.classList.contains('is-open')));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+    drawer.addEventListener('click', (e) => { if (e.target.tagName === 'A') setOpen(false); });
+  })();
+
+  (function () {
+    const form = document.getElementById('exNlForm');
+    const thanks = document.getElementById('exNlThanks');
+    if (!form) return;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = (form.querySelector('input[type=email]') || {}).value || '';
+      if (!email) return;
+      try {
+        const KEY = 'keepers-newsletter';
+        const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+        arr.push({ email: email.trim(), at: new Date().toISOString() });
+        localStorage.setItem(KEY, JSON.stringify(arr));
+      } catch (_) {}
+      form.hidden = true;
+      if (thanks) thanks.hidden = false;
+    });
+  })();
+
+</script>
+</body>
+</html>

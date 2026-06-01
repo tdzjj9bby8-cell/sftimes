@@ -1,0 +1,83 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+const spots = [
+  { n: '01', kicker: 'A BENCH · PRESIDIO', name: 'THE FOG BENCH ABOVE LOBOS CREEK', what: 'Concrete bench, no plaque, facing west. The fog rolls in from the right at 4:40pm most summer days. You hear the creek before you see it.', how: 'Park at baker beach lot 3, walk south 8 minutes, take the unsigned trail at the cypress stand.' },
+  { n: '02', kicker: 'A BOOKSTORE · RICHMOND', name: 'THE BASEMENT AT GREEN APPLE AFTER 9PM', what: "Everyone knows the upstairs. The basement is quieter. The annex behind the staircase has the only copies of Robert Hass's first chapbook anywhere in the city, last we checked.", how: 'Open til 10:30 wed–sat. Ask for nobody, just walk down.' },
+  { n: '03', kicker: 'A KITCHEN · EXCELSIOR', name: "THE BACK COUNTER AT MITCHELL'S, WEEKDAY AFTERNOON", what: "The line moves. The back of the freezer case has the seasonal flavors they don't list on the menu. Ube macapuno. Halo halo. Buko pandan if they made it that week.", how: 'Best window tuesday or wednesday, 2–4pm. Ask what is in the back.' },
+  { n: '04', kicker: 'A STAIRWELL · NORTH BEACH', name: 'THE FILBERT STEPS AT FIRST LIGHT', what: 'The wild parrots come through around 6:50am most spring mornings. Bring coffee, not a camera. The light through the eucalyptus is the point.', how: 'Park at sansome and filbert. Climb to the second landing, then sit.' },
+  { n: '05', kicker: 'A COUNTER · TENDERLOIN', name: 'THE SECOND-FLOOR PHO PLACE ABOVE TURK AND LEAVENWORTH', what: 'No sign. Walk up the unmarked staircase between the laundromat and the corner store. Eight tables. Mrs. Tran has been making the broth here for twenty-three years.', how: 'Cash only. Open 10am–8pm tues–sat. Order the dac biet, ask for extra basil.' },
+];
+---
+<ExhibitionLayout
+  title="UNPUBLISHED · The Keepers · SF Times"
+  description="Editor-vetted field notes on the corners of San Francisco worth holding."
+  active="hidden-spots"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title="UNPUBLISHED"
+    subscript={`№${spots.length} PLACES`}
+    cutouts={[]}
+  />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">A WORKING LIST · UPDATED QUARTERLY · NO PAID PLACEMENTS</p>
+    <h1 class="ex-prose__title">{spots.length} PLACES<br>NOBODY TELLS<br>YOU ABOUT.</h1>
+    <p>No paid placements, no tourist boards, no influencer tags. Things our writers actually go to when they want to be left alone. Don't geotag. Don't review-bomb. Don't bring a film crew.</p>
+  </article>
+
+  <section class="hs-list">
+    {spots.map((s) => (
+      <article class="hs-row">
+        <div class="hs-row__num">{s.n}</div>
+        <div class="hs-row__body">
+          <p class="hs-row__kicker">{s.kicker}</p>
+          <h3 class="hs-row__name">{s.name}</h3>
+          <p class="hs-row__what">{s.what}</p>
+          <p class="hs-row__how"><strong>HOW TO GET THERE.</strong> {s.how}</p>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <a href="/exhibition/submit" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">SEND A SPOT →</h2>
+    </section>
+  </a>
+
+  <style>
+    .hs-list { padding: 0 12px 48px; border-top: 1px solid var(--rule); }
+    .hs-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 24px;
+      padding: 36px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .hs-row__num {
+      font-family: var(--display);
+      font-size: clamp(40px, 5vw, 64px);
+      line-height: 0.9;
+      color: var(--ink);
+    }
+    .hs-row__kicker { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+    .hs-row__name {
+      font-family: var(--display);
+      font-size: clamp(22px, 3vw, 36px);
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: -0.005em;
+      margin: 0 0 16px;
+    }
+    .hs-row__what { font-size: 16px; line-height: 1.55; color: var(--ink); margin: 0 0 12px; max-width: 56ch; }
+    .hs-row__how { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 0; max-width: 56ch; }
+    .hs-row__how strong { color: var(--ink); font-weight: 600; letter-spacing: 0.06em; }
+    @media (max-width: 640px) {
+      .hs-row { grid-template-columns: 1fr; gap: 12px; }
+      .hs-row__num { font-size: 32px; }
+    }
+  </style>
+</ExhibitionLayout>
