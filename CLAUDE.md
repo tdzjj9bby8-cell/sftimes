@@ -23,7 +23,7 @@ Static publication built with Astro 4.16. Content is 57+ markdown story files pl
 
 `/Users/eric/projects/sftimes/MASTER-EXHIBITION.md` is the single source of truth for the Exhibition design system. Read it before making design changes. If the spec contradicts the code, fix the spec first then align the code.
 
-There used to be a kitchen-sink template page (`exhibition/_template.astro`) — Astro's underscore-prefix convention excludes it from routing. Copy any block from it into a new page. The file is at `src/pages/_template.astro` post-migration; view its source for reference, not via URL.
+There used to be a kitchen-sink template page (`exhibition/_template.astro`). Astro's underscore-prefix convention excludes it from routing. Copy any block from it into a new page. The file is at `src/pages/_template.astro` post-migration; view its source for reference, not via URL.
 
 ---
 
@@ -57,7 +57,7 @@ When in doubt: if it's a 1-file edit Eric describes in plain language, you do it
 ### 1. Build a new page
 
 ```bash
-# Open the kitchen-sink template for reference (do NOT visit a URL — it's not routed)
+# Open the kitchen-sink template for reference (do NOT visit a URL, it's not routed)
 src/pages/_template.astro
 
 # Create new page at the desired path
@@ -124,7 +124,7 @@ hero_focal: "30% 40%"   # 30% from left, 40% from top
 hero_focal: "right top"
 hero_focal: "center 25%"
 ```
-Default is `"center 25%"` which favors faces in the upper third. Use the dev-only page at `http://localhost:4321/focal-audit` to walk every photo at its current focal setting with a red crosshair overlay — handy for spotting bad crops at a glance. That page has `noindex` + robots disallow so it doesn't leak to production search.
+Default is `"center 25%"` which favors faces in the upper third. Use the dev-only page at `http://localhost:4321/focal-audit` to walk every photo at its current focal setting with a red crosshair overlay, handy for spotting bad crops at a glance. That page has `noindex` + robots disallow so it doesn't leak to production search.
 
 ---
 
@@ -141,9 +141,9 @@ Default is `"center 25%"` which favors faces in the upper third. Use the dev-onl
 Slot availability counts are hardcoded; update as real bookings come in. The live countdown to the first of next month is computed client-side from `Date()` so it always shows real numbers.
 
 Homepage sponsor surfaces:
-- **Presented-By strip** at the top — single line, links to `/partners#saturday`
-- **Sponsored Article slot** — dynamic, pulls the most recent story with `sponsor` frontmatter set
-- **Classifieds strip** at the bottom — six text-only slot lines
+- **Presented-By strip** at the top: single line, links to `/partners#saturday`
+- **Sponsored Article slot**: dynamic, pulls the most recent story with `sponsor` frontmatter set
+- **Classifieds strip** at the bottom: six text-only slot lines
 
 When sponsor slots are empty, copy promotes `/partners` instead of going dark.
 
@@ -163,12 +163,12 @@ From `/Users/eric/projects/sftimes/cowork-rules.md`:
 End-of-session report format (when you do a chunk of work, summarize like this):
 
 ```
-Status — one line: project, % complete, current phase
-TL;DR — 2–4 lines, what got done this turn
-Progress moved — what % was, what % is, why
-Cowork next — short prompt for what Cowork should pick up
-Code next — ready-to-run prompt for the next code task, or "no Code needed"
-For you — anything Eric needs to do (ranked, urgent first)
+Status (one line): project, % complete, current phase
+TL;DR (2-4 lines): what got done this turn
+Progress moved: what % was, what % is, why
+Cowork next: short prompt for what Cowork should pick up
+Code next: ready-to-run prompt for the next code task, or "no Code needed"
+For you: anything Eric needs to do (ranked, urgent first)
 ```
 
 ---
