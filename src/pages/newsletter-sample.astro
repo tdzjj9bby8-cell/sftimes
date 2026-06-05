@@ -60,7 +60,7 @@ const issueDate = featured.data.published
         <p class="email__label">FROM THE EDITOR</p>
         <p>Good morning. The block was quiet at 5:48 a.m. and Mrs. Kim was already at the press. This week's letter is about her and the tofu house she has held on Geary Street since 1992. It is also about her block, which has not held her back so much as not held still.</p>
         <p>If you can spare 12 minutes today, this is the one to read. If not, save it for the walk home. The piece will be at the same URL forever.</p>
-        <p class="email__sign">— Eric</p>
+        <p class="email__sign">Eric</p>
       </section>
 
       <!-- THE FEATURE -->
@@ -89,7 +89,7 @@ const issueDate = featured.data.published
         {featured.data.pull_quote && (
           <blockquote class="email__pull">
             <p>&ldquo;{featured.data.pull_quote}&rdquo;</p>
-            <cite>— {(featured.data.pull_quote_attr || featured.data.author).toUpperCase()}</cite>
+            <cite>{(featured.data.pull_quote_attr || featured.data.author).toUpperCase()}</cite>
           </blockquote>
         )}
 
@@ -110,7 +110,7 @@ const issueDate = featured.data.published
 
       <!-- PATRON SLOT (close of issue) -->
       <section class="email__patron">
-        <p class="email__patron-text">— TODAY'S LETTER IS SUPPORTED BY —</p>
+        <p class="email__patron-text">· TODAY'S LETTER IS SUPPORTED BY ·</p>
         <p class="email__patron-name"><strong>[YOUR NAME HERE]</strong></p>
         <p class="email__patron-line">Patron slot open · text only, no logos, no banners. <a href="/partners#saturday">Book it for $400 →</a></p>
       </section>

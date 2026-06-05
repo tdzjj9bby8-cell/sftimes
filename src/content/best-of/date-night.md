@@ -39,4 +39,4 @@ Late lunch into dinner. The bread program is the point but the small plates are 
 
 A couple of well-loved restaurants did not make this list. One has gotten so loud it is harder to talk than to dance. One has slipped in execution since the chef left in 2024. Both might come back next refresh. We do not punish a restaurant permanently for one bad quarter.
 
-— Eric
+Eric.

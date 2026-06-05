@@ -41,4 +41,4 @@ A few used bookstores did not make this list. Some have shrunk their used sectio
 
 Send a pick to [hello@sftimes.com](mailto:hello@sftimes.com). I read every email.
 
-— Daisy
+Daisy.

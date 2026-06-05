@@ -41,4 +41,4 @@ I went to twelve places. Five made the list. The seven that did not get the cut 
 
 Last refreshed May 2026. The next refresh is in August. If a place on this list drops off, the change will be logged on the [corrections page](/corrections).
 
-— Eric
+Eric.

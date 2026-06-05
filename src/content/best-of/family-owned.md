@@ -39,4 +39,4 @@ The Sanchez family has owned this since 1973. The current generation has refused
 
 The rule for inclusion is at least fifteen years of continuous family ownership and visible family involvement on the floor or in the kitchen during the editor's visits. Two restaurants we love did not make this list because they have ceded daily operations to managers, however good the food still is. Family-owned, on this list, means the family is still actually there.
 
-— Daisy
+Daisy.

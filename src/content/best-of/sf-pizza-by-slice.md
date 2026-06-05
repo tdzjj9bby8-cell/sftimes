@@ -41,4 +41,4 @@ A few obvious slice joints did not make this list. One has gotten famously incon
 
 If you have a slice place you want me to walk, send it to me. I'll do it.
 
-— Eric
+Eric.

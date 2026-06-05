@@ -41,4 +41,4 @@ A few places we tried and did not include: two places that have great coffee but
 
 Send a pick to [hello@sftimes.com](mailto:hello@sftimes.com). If we add one, the editor reviews the place at least twice over two weeks before it makes the list.
 
-— Eric
+Eric.

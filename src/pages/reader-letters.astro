@@ -131,7 +131,7 @@ const grouped = letters.reduce((acc: Record<string, typeof letters>, l) => {
             <article class="letter">
               <p class="letter__date">{l.date}</p>
               <blockquote class="letter__body">{l.body}</blockquote>
-              <p class="letter__sign">— {l.from}{l.where ? `, ${l.where}` : ''}</p>
+              <p class="letter__sign">{l.from}{l.where ? `, ${l.where}` : ''}</p>
             </article>
           ))}
         </div>

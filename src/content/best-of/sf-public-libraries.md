@@ -43,4 +43,4 @@ If you want a quiet place to work for an afternoon, the Main fifth-floor room is
 
 A reminder: SFPL gives you free use of every museum in the city with a library card, on rotation. The pass system is at sfpl.org. The librarians can walk you through it.
 
-— Nicholas
+Nicholas.
