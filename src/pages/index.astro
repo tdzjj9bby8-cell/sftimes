@@ -23,7 +23,7 @@ const carouselStories = [featured, ...stories.filter((s) => s.slug !== featured.
 const ledeStories = stories.filter((s) => s.slug !== featured.slug).slice(0, 8);
 const bodyStory = stories.find((s) => s.data.pull_quote) || featured;
 const bodyText = bodyStory.data.pull_quote || bodyStory.data.deck;
-// Sponsored article slot — pulls the most recent story with a `sponsor` field set.
+// Sponsored article slot: pulls the most recent story with a `sponsor` field set.
 // Falls back to null (slot shows open-state placeholder) when none exist.
 const sponsoredStory = stories.find((s) => !!s.data.sponsor);
 
@@ -102,7 +102,7 @@ const nextIssue = (featured.data.issue || 0) + 1;
     </div>
   </div>
 
-  <!-- EDITOR'S PARAGRAPH — Drift-style hyperlinked landing block.
+  <!-- EDITOR'S PARAGRAPH. Drift-style hyperlinked landing block.
        Each title is a link inline. Connective text comes from each story's
        own lede_line (preferred, hand-curated) or falls back to the first
        sentence of the deck. -->
@@ -174,7 +174,7 @@ const nextIssue = (featured.data.issue || 0) + 1;
     </div>
   </a>
 
-  <!-- ARCHIVE STRIP — clean horizontal scroll of past issues -->
+  <!-- ARCHIVE STRIP: clean horizontal scroll of past issues -->
   <section class="archive">
     <div class="archive__head">
       <div>
@@ -409,7 +409,7 @@ const nextIssue = (featured.data.issue || 0) + 1;
     color: var(--muted);
   }
 
-  /* Live state (article booked) — photo + copy split */
+  /* Live state (article booked): photo + copy split */
   .sponsored--live { padding: 0; margin: 0 0 64px; }
   .sponsored--live .sponsored__link {
     display: grid;
@@ -540,7 +540,7 @@ const nextIssue = (featured.data.issue || 0) + 1;
     function next() { show((i + 1) % slides.length); }
     function start() {
       stop();
-      // WCAG 2.3.3 — respect prefers-reduced-motion. Dots still work for manual nav.
+      // WCAG 2.3.3: respect prefers-reduced-motion. Dots still work for manual nav.
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       timer = setInterval(next, 6000);
     }

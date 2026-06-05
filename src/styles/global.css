@@ -1,4 +1,4 @@
-/* SF Times — global stylesheet
+/* SF Times: global stylesheet
  * Design tokens, typography, base layout primitives.
  * The single source of truth for the neon-green placeholder color is --placeholder-green.
  * Production build guard fails if this color appears in dist/.

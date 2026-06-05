@@ -59,7 +59,7 @@ const publicDir = path.resolve(process.cwd(), 'public');
 const imgPath = path.join(publicDir, `${hintBase}.jpg`);
 const hasRealImage = fs.existsSync(imgPath);
 
-// hintBase like "heroes/2026-04-25-mrs-kim-tofu-house" — responsive variants
+// hintBase like "heroes/2026-04-25-mrs-kim-tofu-house". Responsive variants
 // live in /heroes/responsive/2026-04-25-mrs-kim-tofu-house-480.webp etc.
 const dir = path.posix.dirname(hintBase);
 const base = path.posix.basename(hintBase);

@@ -105,7 +105,7 @@ const articleSchema = {
     </div>
   </section>
 
-  <!-- SPONSOR DISCLOSURE STRIP — editorial firewall language, full-bleed -->
+  <!-- SPONSOR DISCLOSURE STRIP: editorial firewall language, full-bleed -->
   {s.data.sponsor && (
     <aside class="story-firewall" aria-label="Editorial firewall disclosure">
       <p class="story-firewall__label">EDITORIAL FIREWALL · IN COLLABORATION WITH {s.data.sponsor.name.toUpperCase()}</p>
@@ -128,7 +128,7 @@ const articleSchema = {
     <Content />
   </article>
 
-  <!-- PULL QUOTE — uses typographic curly quotes -->
+  <!-- PULL QUOTE: uses typographic curly quotes -->
   {s.data.pull_quote && (
     <article class="ex-prose">
       <blockquote class="story-pull">
@@ -149,7 +149,7 @@ const articleSchema = {
     </aside>
   )}
 
-  <!-- WORK WITH THE KEEPERS — 4 conversion paths surfaced above Read Next -->
+  <!-- WORK WITH THE KEEPERS: 4 conversion paths surfaced above Read Next -->
   <section class="work-with-keepers" aria-label="Work with the keepers">
     <p class="work-with-keepers__eyebrow">WORK WITH THE KEEPERS</p>
     <div class="work-with-keepers__grid">
@@ -259,7 +259,7 @@ const articleSchema = {
     .story-pull p { font-family: var(--display); font-size: clamp(28px, 4vw, 56px); line-height: 1.1; letter-spacing: -0.005em; margin: 0 0 12px; text-transform: uppercase; }
     .story-pull cite { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); font-style: normal; }
 
-    /* Work-with-the-keepers footer block — surfaces 4 conversion paths above Read Next */
+    /* Work-with-the-keepers footer block: surfaces 4 conversion paths above Read Next */
     .work-with-keepers { max-width: 1100px; margin: 64px auto 8px; padding: 0 12px; }
     .work-with-keepers__eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
     .work-with-keepers__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }

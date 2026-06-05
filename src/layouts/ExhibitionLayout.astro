@@ -13,7 +13,7 @@ export interface Props {
   /** Path to OG image. Defaults to the site brand image. Pass story hero filename
    *  hint for article pages, e.g. "heroes/2026-06-06-zareens-fourth-kitchen.jpg". */
   ogImage?: string;
-  /** Page type — defaults to "website", set "article" on individual story pages. */
+  /** Page type. Defaults to "website", set "article" on individual story pages. */
   ogType?: 'website' | 'article';
 }
 const {
@@ -156,7 +156,7 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
   /* === DRAWER === */
   /* visibility:hidden when closed guarantees the giant link text never paints
      above the viewport edge as a phantom. transform alone isn't enough on
-     some browsers — the translated element can still leak a 1-pixel slice. */
+     some browsers; the translated element can still leak a 1-pixel slice. */
   .ex-drawer {
     position: fixed; inset: 48px 0 0 0; z-index: 100;
     background: var(--paper); overflow-y: auto;
