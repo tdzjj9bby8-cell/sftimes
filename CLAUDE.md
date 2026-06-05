@@ -173,6 +173,20 @@ For you — anything Eric needs to do (ranked, urgent first)
 
 ---
 
+## COMMIT SCOPE DISCIPLINE
+
+Before any git commit, run `git status` and read every file listed. If the working tree contains files outside the explicitly-authorized scope (e.g., user said "commit the photos" but `git status` shows schema/content/route changes too), STOP. Surface the wider scope to the user with a 3-bucket proposal:
+
+(a) all in one truthful commit with a comprehensive message,
+(b) split into scope-bounded commits user approves per bucket,
+(c) stash the unrelated changes and commit only the authorized scope.
+
+Do NOT default to `git add -A` with a narrow message.
+
+The pattern of scope-narrow message + scope-wide diff recurred 4 times in the 2026-06-04 session before this rule was written.
+
+---
+
 ## Gotchas (things that will bite you)
 
 1. **Local sandbox can't always run sharp.** Some environments fail to load the platform-specific sharp binary. The responsive image generator script catches this and exits 0 so build still passes; just no responsive variants get generated locally. Vercel handles it fine.
