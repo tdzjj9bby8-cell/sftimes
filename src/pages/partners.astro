@@ -8,7 +8,7 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
  * urgency without faking sales we don't have.
  */
 
-// SECTION ONE: ONE SATURDAY — text-only credits on a single issue.
+// SECTION ONE: ONE SATURDAY. Text-only credits on a single issue.
 // Light commitment, easy entry, builds the pipeline.
 const saturdayPkgs = [
   {
@@ -53,7 +53,7 @@ const saturdayPkgs = [
   },
 ];
 
-// SECTION TWO: ONE STORY — sponsored editorial.
+// SECTION TWO: ONE STORY. Sponsored editorial.
 // $1,500 anchors the middle. SEO/backlink play, lives forever.
 const storyPkgs = [
   {
@@ -101,7 +101,7 @@ const storyPkgs = [
   },
 ];
 
-// SECTION THREE: MORE THAN ONE — bundles and annual commitments.
+// SECTION THREE: MORE THAN ONE. Bundles and annual commitments.
 // The Founding Bundle is the primary conversion target for serious partners.
 const partnershipPkgs = [
   {
@@ -165,7 +165,7 @@ const saturdayDates = nextSaturdays(8);
 // Each entry: [classifiedOpen, patronOpen, coPresentedOpen, profileOpen]
 // out of 6, 4, 1, 1 totals. Tweak per real bookings.
 const saturdayAvail = [
-  [4, 2, 0, 0],  // this saturday — heavily booked
+  [4, 2, 0, 0],  // this saturday, heavily booked
   [3, 1, 1, 0],
   [5, 2, 1, 1],
   [6, 3, 1, 1],
@@ -236,7 +236,7 @@ const faqs = [
     </div>
     <div class="la la--countdown">
       <span class="la__label">NEXT SLOT REFRESH</span>
-      <span class="la__value" id="laCountdown" data-target>—</span>
+      <span class="la__value" id="laCountdown" data-target>…</span>
     </div>
   </section>
 
@@ -316,7 +316,7 @@ const faqs = [
     <div class="editor-note__inner">
       <p class="editor-note__label">A NOTE FROM THE EDITOR</p>
       <p class="editor-note__body">I pick every sponsor. If a business doesn't pass the bar we hold the bylines to, I'll say no on the intro call and you keep your money. The bar is honest: do you treat your people well, are you specific about what you do, and would your story make a saturday letter our readers actually want to open? If yes, let's talk. If you're not sure, the call is the right place to find out.</p>
-      <p class="editor-note__sign">— Eric, founder &amp; editor</p>
+      <p class="editor-note__sign">Eric, founder &amp; editor</p>
     </div>
   </section>
 
@@ -348,7 +348,7 @@ const faqs = [
 
     <blockquote class="case__quote">
       <p>&ldquo;The piece read like one of our regulars wrote it. The editor walked through the shop twice before he ever started typing. Twelve weeks later we still see the article in our top three referrers.&rdquo;</p>
-      <cite>— MARISA PADILLA, FOUNDER · OLIVE BRANCH ROASTERS</cite>
+      <cite>MARISA PADILLA, FOUNDER · OLIVE BRANCH ROASTERS</cite>
     </blockquote>
 
     <p class="case__note">Sample case study constructed from real publication metrics. Olive Branch Roasters is a sample partner used to illustrate the package format. When you book a Profile, your numbers go here.</p>
@@ -379,7 +379,7 @@ const faqs = [
       <div class="mock mock--patron">
         <span class="mock__chip">THE PATRON · CLOSE OF SATURDAY LETTER</span>
         <div class="mock__divider"></div>
-        <p class="mock__patron-text">— TODAY'S LETTER IS SUPPORTED BY —</p>
+        <p class="mock__patron-text">· TODAY'S LETTER IS SUPPORTED BY ·</p>
         <p class="mock__patron-name"><strong>LOCAL COFFEE CO.</strong></p>
         <p class="mock__patron-line">Roasting in the Mission since 2011. Single-origin pour-overs at 22nd &amp; Mission.</p>
       </div>
@@ -448,7 +448,7 @@ const faqs = [
   </a>
 
   <article class="ex-prose">
-    <p>For partners who want presence over time. Each tier locks in below standalone pricing and reserves your slot before public open. The Founding Bundle is our most-chosen entry for serious partners — capped at twelve and not reopening.</p>
+    <p>For partners who want presence over time. Each tier locks in below standalone pricing and reserves your slot before public open. The Founding Bundle is our most-chosen entry for serious partners, capped at twelve and not reopening.</p>
   </article>
 
   <section class="mock-section">
@@ -506,14 +506,14 @@ const faqs = [
   </section>
 
   <style>
-    /* METRICS — 8 numbers */
+    /* METRICS: 8 numbers */
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 32px; padding: 0 12px 56px; border-bottom: 1px solid var(--rule); }
     .metric { padding: 12px 0; }
     .metric span { font-family: var(--display); font-size: clamp(36px, 4.5vw, 56px); line-height: 1; display: block; }
     .metric p { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); margin: 8px 0 0; text-transform: uppercase; }
     @media (max-width: 880px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
 
-    /* LIVE ACTIVITY STRIP — three signals across the top */
+    /* LIVE ACTIVITY STRIP: three signals across the top */
     .live-activity { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border-block: 1px solid var(--rule); margin: 0 0 48px; }
     @media (max-width: 720px) { .live-activity { grid-template-columns: 1fr; } }
     .la { background: var(--paper); padding: 22px 24px; display: flex; flex-direction: column; gap: 8px; }
@@ -521,7 +521,7 @@ const faqs = [
     .la__value { font-family: var(--display); font-size: clamp(22px, 2.6vw, 32px); line-height: 1; letter-spacing: -0.005em; color: var(--ink); }
     .la--countdown .la__value { color: #d9551f; }
 
-    /* AVAILABILITY STRIP — scarcity at a glance */
+    /* AVAILABILITY STRIP: scarcity at a glance */
     .availability { max-width: 1080px; margin: 48px auto; padding: 32px 24px; border: 1px solid var(--rule); background: var(--paper-2); }
     .availability__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); margin: 0 0 18px; font-weight: 700; }
     .availability__bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; }
