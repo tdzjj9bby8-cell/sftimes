@@ -13,7 +13,7 @@ photo_class: "cool"
 hero_alt: "Rose Akiyama at her potter's wheel in the Dogpatch studio, hands shaping the rim of a bowl, late afternoon"
 hero_filename_hint: "heroes/2026-05-02-rose-the-ceramicist.jpg"
 hero_focal: "center 30%"
-caption: "Rose at the wheel in her Dogpatch studio. The bowl in her hands is one of forty she'll throw this week."
+caption: "Rose at the wheel in her Dogpatch studio. The bowl in her hands is one of forty she throws in a week."
 pull_quote: "Forty is the number I can throw and still know each one before it goes in the kiln. Forty-one is the number where one of them becomes a stranger to me. I am not interested in making strangers."
 pull_quote_attr: "Rose Akiyama, Potter"
 read_minutes: 4
@@ -32,7 +32,7 @@ The math of forty is the conversation she has been having with collectors, galle
 
 "Forty is the number I can throw and still know each one before it goes in the kiln. Forty-one is the number where one of them becomes a stranger to me. I am not interested in making strangers."
 
-The bowls themselves are recognizably hers. White stoneware. Tight foot. A glaze she developed in 2021 over six months of testing, named for the color of the ceiling in her grandmother's house in Tokyo in 1976. She does not name pieces. She does not number them. She makes a small mark on the foot of each one — a single chisel scratch in a position she varies by week. The position tells her, on a glance, which week the bowl was thrown. She can name the temperature of the kiln that day, the weather, what she was listening to.
+The bowls themselves are recognizably hers. White stoneware. Tight foot. A glaze she developed in 2021 over six months of testing, named for the color of the ceiling in her grandmother's house in Tokyo in 1976. She does not name pieces. She does not number them. She makes a small mark on the foot of each one, a single chisel scratch in a position she varies by week. The position tells her, on a glance, which week the bowl was thrown. She can name the temperature of the kiln that day, the weather, what she was listening to.
 
 Her training is from her grandmother. Three summers in Tokyo, from age eleven to thirteen, watching the work and then doing some of it. Her grandmother died in 2009. The grandmother's wheel is in storage in Daly City. Rose has thought about bringing it to the studio. She has decided that her grandmother taught her to work, not to memorialize. The wheel stays in storage.
 

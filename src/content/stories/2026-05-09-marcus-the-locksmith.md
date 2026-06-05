@@ -14,6 +14,7 @@ hero_alt: "Marcus Chen at his workbench on Geary Boulevard, surrounded by labele
 hero_filename_hint: "heroes/2026-05-09-marcus-the-locksmith.jpg"
 hero_focal: "center 40%"
 caption: "Marcus Chen at the workbench he has used since 2008. Behind him: 47 small wooden drawers, each labeled in his handwriting."
+# Pull quote is fabricated. No source. Do not use as a hero pull-quote in a published piece. Replace with a real attributed quote from a real locksmith, or strip the field on rewrite.
 pull_quote: "I lose customers who want a fast unlock with no questions. That is fine. The customers I keep are the ones who notice I am being careful with them."
 pull_quote_attr: "Marcus Chen, Owner"
 read_minutes: 4
@@ -32,12 +33,13 @@ The shop is sixteen by twenty-eight feet. Marcus is the only person who works th
 
 Marcus is the cheapest locksmith on Geary by about thirty percent. He is also the slowest. The cheap part is a choice. The slow part is a choice. The two choices are connected. He charges what he can charge while still feeling honest about it. He arrives in the time it actually takes to be careful. He does not advertise either price.
 
-The advertising he does not run is the more interesting choice. There are locksmith Yelp listings on Geary that are entirely fake. The fake ones pay for placement. They use bait pricing in their listings. When you call, they quote $19. When they arrive, they charge $350. They bully cash from you in a moment of panic, then disappear. Marcus has been called to repair their damage seven times in 2025 alone, after the bait-and-switch lockmith left a door scarred and the renter still locked out. He fixes the damage at the same price he would charge for a regular call. He does not charge extra for the cleanup.
+The advertising he does not run is the more interesting choice. There are locksmith Yelp listings on Geary that are entirely fake. The fake ones pay for placement. They use bait pricing in their listings. When you call, they quote $19. When they arrive, they charge $350. They bully cash from you in a moment of panic, then disappear. Marcus has been called to repair their damage seven times in 2025 alone, after the bait-and-switch locksmith left a door scarred and the renter still locked out. He fixes the damage at the same price he would charge for a regular call. He does not charge extra for the cleanup.
 
 He keeps a list of the fake listings in a notebook by the register. When a customer mentions one, he shows them the notebook. He tells them how to spot the scam. He gives them his card. He tells them to call him next time. About one in three of those customers does.
 
 He learned locks from his uncle, who ran a shop in Oakland from 1974 until 2004. His uncle made him do six months of cutting before he taught him pin tumblers. The first six months were just metal, just precision, just the feel of the machine. Marcus has been doing this for twenty-three years. He still cuts every key by hand. He does not own a digital code-cutter. The code-cutter would be faster. It would also be wrong.
 
+<!-- Fabricated reporter-presence scene. Subject unverified, no interview took place, this entire phone-rings-during-interview moment and the attributed quote "Excuse me. I need to be careful with her." are invented. Cut the paragraph (lines 41-43) on rewrite, or replace with real observed scene if reporting is done. -->
 His phone rings during our interview. He answers. A woman locked out of her car in the Sunset. He asks her to wait fifteen minutes, asks for her phone number, says he will call back from the road. He hangs up. He looks at me. "Excuse me. I need to be careful with her."
 
 He gets up, gets his bag, locks the shop behind him. He will be back in forty-five minutes if the call is what she says it is. If it is not, he will be back sooner.
