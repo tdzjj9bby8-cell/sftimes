@@ -1,31 +1,115 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+
+const lastUpdated = '2026-06-01';
 ---
 <ExhibitionLayout
   title="STANDARDS · The Keepers · SF Times"
-  description="How we source, name names, handle conflicts, and correct errors."
+  description="How we source, name names, handle conflicts of interest, run sponsored content, and correct errors. The full editorial standards."
   active="home"
 >
   <ExhibitionMasthead slot="masthead" title="STANDARDS" subscript="EDITORIAL" cutouts={[]} />
 
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">HOW WE SOURCE · WHO WE NAME · WHAT WE WILL NOT DO</p>
+    <p class="ex-prose__eyebrow">HOW WE SOURCE · WHO WE NAME · WHAT WE WILL NOT DO · LAST UPDATED {lastUpdated.toUpperCase()}</p>
     <h1 class="ex-prose__title">HOW WE REPORT.<br>WHO WE NAME.<br>WHAT WE WON'T DO.</h1>
+    <p>This page is the editorial operating system. The <a href="/about">Five Principles</a> are the headline. These are the working rules behind them. Every word published under an SF Times byline is published under these standards.</p>
 
-    <h2>SOURCING</h2>
-    <p>Every profile is reported. Subjects are interviewed in person where possible. Facts are checked against public records (Assessor, Secretary of State, court filings, BPLA). Quotations are verbatim unless marked otherwise.</p>
+    <h2>Sourcing</h2>
+    <p>Every profile is reported. Every claim is checked. We work to the following floor.</p>
+    <ul>
+      <li><strong>Primary source minimum.</strong> Every published piece has at least one in-person interview of at least 90 minutes with the subject, conducted on location. Phone-only sourcing is not enough for a Saturday feature.</li>
+      <li><strong>Independent verification.</strong> Quantitative claims (years in business, square footage, prices, dates, lineage) are cross-checked against at least one independent record: SF Assessor data, Secretary of State filings, court records, Business Property Lien Authority records, or a second human source who has direct knowledge.</li>
+      <li><strong>Quotations are verbatim.</strong> Unless explicitly marked as paraphrase. We do not tighten quotes in ways that change meaning. We do not compose composite quotes.</li>
+      <li><strong>Photography is reportorial.</strong> Available light, on location, hands on the work. No press-kit pulls. No stock. No staged headshots in front of a brand wall.</li>
+      <li><strong>Subjects review for fact accuracy before publication.</strong> 72 hours minimum. They can correct facts. They cannot rewrite angle.</li>
+    </ul>
 
-    <h2>NAMING</h2>
-    <p>We name a landlord, a chain, a public official, or a corporate party when their action is the public-interest hinge of the story and we can independently verify the claim. We do not name a subject's family member, employer, or address without their consent unless that information is already public and material.</p>
+    <h2>Naming</h2>
+    <p>We name people. We do it carefully.</p>
+    <ul>
+      <li>We name subjects of profiles by their preferred name and pronouns, after confirming on the record.</li>
+      <li>We name a landlord, employer, or public official when their action is the public-interest hinge of the story and we can independently verify the claim. We do not surface names just to make a point.</li>
+      <li>We do not name a subject's family member, employer, address, or workplace without their consent unless that information is already public and material to the story.</li>
+      <li>Hidden Spots are an exception by design. <a href="/hidden-spots">See the Hidden Spots page</a> for the rule on protecting locations.</li>
+      <li>We do not name minors except in academic, athletic, or artistic public-record contexts where the minor is the subject of a recognized achievement.</li>
+      <li>We name our editors and writers on every piece. Anonymous editorial bylines do not appear on this site.</li>
+    </ul>
 
-    <h2>CONFLICTS OF INTEREST</h2>
-    <p>Sponsored entries on best of lists carry a labeled badge. Sponsors do not pick stories or entries. The editor who names a list is named on the list. We do not run affiliate links. We do not accept gifts above twenty-five dollars from subjects.</p>
+    <h2>Anonymity for sources</h2>
+    <p>Some stories require sourcing from people who cannot be named publicly. We grant anonymity when:</p>
+    <ul>
+      <li>The source has direct knowledge of the claim being made.</li>
+      <li>The source faces a credible threat (employment, immigration status, physical safety) if named.</li>
+      <li>The information they provide cannot be obtained from a named source.</li>
+      <li>The editor approves anonymity in writing before the interview.</li>
+    </ul>
+    <p>We never grant anonymity for opinion. Only for fact-based reporting where named alternatives have been exhausted. The editor knows the identity of every anonymous source.</p>
+
+    <h2>Conflicts of interest</h2>
+    <p>The editor and named writers disclose any of the following before reporting a piece:</p>
+    <ul>
+      <li>Personal relationships with the subject (family, romantic, close friendship)</li>
+      <li>Financial interests in the subject or their business</li>
+      <li>Past employment with the subject or their organization</li>
+      <li>Receipt of gifts or services from the subject worth more than $25 in any 12-month period</li>
+    </ul>
+    <p>If a conflict exists and cannot be resolved by reassignment, the piece is killed. The editor does not assign pieces to family members or close friends. We do not accept comped meals, comped stays, or product samples in exchange for coverage.</p>
+
+    <h2>The editorial firewall on sponsored content</h2>
+    <p>Some Saturday features are paid editorial partnerships through <a href="/partners">our partner program</a>. The firewall is the product. Specifically:</p>
+    <ol>
+      <li><strong>Pre-screening.</strong> The editor pre-screens every potential sponsor on an intro call. Businesses that cannot pass the editorial bar are declined before any money changes hands.</li>
+      <li><strong>Angle ownership.</strong> The editor selects the angle. Writers are assigned by the editor. Sponsors do not approve, suggest, or influence the angle.</li>
+      <li><strong>Same reporting standards.</strong> Sponsored pieces meet every standard on this page. Same in-person interview minimum. Same fact-check. Same naming rules. Same friction section.</li>
+      <li><strong>Fact-check only review.</strong> The sponsor sees a draft 72 hours before publication. They can correct factual errors (their name, address, dates, direct quotes attributed to them). They cannot rewrite angle.</li>
+      <li><strong>Labeled placement.</strong> Sponsored articles carry an "In Collaboration With" chip above the headline and a firewall disclosure block immediately after the hero. Both are featured elements, not footnotes.</li>
+      <li><strong>Right to kill.</strong> If a sponsor objects to a fact-correct angle and we cannot resolve the difference, we kill the piece. We refund the placement fee. The piece does not run.</li>
+    </ol>
+    <p>Sponsored entries on <a href="/best-of">Top Tier guides</a> appear with a labeled badge. The editor still picks every list entry. Sponsors do not buy their way onto a list.</p>
 
     <h2>AI</h2>
-    <p>No byline on this site is AI-generated. No article is partially or substantially written by AI. Editing tools (spell check, grammar suggestions) are allowed. Generation tools are not.</p>
+    <p>No byline on this site is AI-generated. No article is partially or substantially written by AI. We do not use AI to draft, summarize, restructure, or "polish" copy. Editing tools that flag spelling and grammar are allowed because they suggest, not generate. Generative tools are not allowed at any stage of the editorial process.</p>
+    <p>This is one of the <a href="/about">Five Principles</a> and we treat it as non-negotiable. Anyone we discover has used AI generation in copy under our masthead is removed from the masthead and the piece is killed.</p>
+    <p>We disallow AI training crawlers in <a href="/robots.txt">robots.txt</a>. Crawlers that ignore that directive are operating without our consent.</p>
 
-    <h2>CORRECTIONS</h2>
-    <p>Errors are corrected on the article page with a dated note. All corrections are also logged at <a href="/corrections">/corrections</a>.</p>
+    <h2>Plagiarism and attribution</h2>
+    <p>We attribute every fact that came from another source. We do not lift prose from other publications, even with attribution. If we summarize someone else's reporting, we link to the original and credit the reporter.</p>
+    <p>If a piece by us is found to contain plagiarized material, the piece is unpublished and a correction notice runs in the same week's issue. The writer is removed from the masthead.</p>
+
+    <h2>Photographs and identification</h2>
+    <p>Subjects of profile photography give verbal consent before the shoot, in writing for any image that will appear in the hero slot. Subjects can request specific shots not be used. The photographer retains copyright; SF Times receives editorial license. Press-kit and stock photos are not used for editorial features.</p>
+    <p>For Hidden Spots and street photography, identifiable bystanders are blurred or shot from behind unless they have given verbal consent.</p>
+
+    <h2>Corrections</h2>
+    <p>When we get something wrong, we correct it. The mechanics:</p>
+    <ul>
+      <li>Factual corrections appear on the affected article page with a dated note at the top.</li>
+      <li>Substantive corrections (anything that changes the meaning of a claim) also appear on the <a href="/corrections">corrections log</a>.</li>
+      <li>Significant corrections (anything affecting the subject's reputation or a material claim about a business) are flagged in the subsequent Saturday letter.</li>
+      <li>Typos and grammar are fixed silently. Factual errors are never fixed silently.</li>
+      <li>The original incorrect text is preserved alongside the correction, struck through. We do not memory-hole errors.</li>
+    </ul>
+
+    <h2>Right of reply</h2>
+    <p>Subjects of investigative or reported pieces are given a meaningful opportunity to respond before publication. We send specific claims, not the full draft, with at least 72 hours to reply. We publish significant responses in full alongside the original claim.</p>
+    <p>Subjects who feel their voice was misrepresented after publication can request a reply note on the article. We publish reasonable reply notes within 7 days.</p>
+
+    <h2>Hate, harassment, doxxing</h2>
+    <p>We do not publish content that incites violence against any person or group. We do not publish addresses, contact details, or family information that could be used to harass a subject. We do not publish images of children without parental consent. We do not use our platform to amplify harassment campaigns even when the target is a public figure.</p>
+
+    <h2>The five rules signed at the bottom of every issue</h2>
+    <p>If you skipped to the end, here is the publication's editorial contract in five lines. Same as the bottom of every Saturday letter:</p>
+    <ol>
+      <li><strong>Named bylines, always.</strong></li>
+      <li><strong>One thing per page.</strong></li>
+      <li><strong>Specificity over abstraction.</strong></li>
+      <li><strong>Editorial firewall.</strong></li>
+      <li><strong>Protect the small.</strong></li>
+    </ol>
+
+    <h2>Questions, complaints, tips</h2>
+    <p>Email the editor at <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>. Standards complaints are read and answered within 7 days. If a complaint about a piece is substantiated, the piece is corrected, retracted, or annotated, and the complainant is notified before the correction is published.</p>
   </article>
 </ExhibitionLayout>

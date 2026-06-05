@@ -1,12 +1,83 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+
+const lastUpdated = '2026-06-01';
 ---
-<ExhibitionLayout title="TERMS · The Keepers · SF Times" active="home">
+<ExhibitionLayout
+  title="TERMS · The Keepers · SF Times"
+  description="The legal terms for reading, sharing, and submitting to SF Times. The honest version, no legalese."
+  active="home"
+>
   <ExhibitionMasthead slot="masthead" title="TERMS" subscript="THE LEGAL BIT" cutouts={[]} />
+
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">COPYRIGHT · ATTRIBUTION · SUBMISSIONS</p>
+    <p class="ex-prose__eyebrow">COPYRIGHT · ATTRIBUTION · SUBMISSIONS · LAST UPDATED {lastUpdated.toUpperCase()}</p>
     <h1 class="ex-prose__title">THE LEGAL BIT.</h1>
-    <p>All written content is © SF Times unless otherwise credited. Photography is © the photographer. Don't repost articles in full. Quote freely with attribution. Hidden spots are reader-submitted with permission. We reserve the right to edit submissions for clarity and accuracy.</p>
+    <p>This page covers what you can and cannot do with the work on sftimes.com. We have tried to write it like a human being would write it. If anything here reads like a contract, that is because that part is one.</p>
+
+    <h2>Copyright</h2>
+    <p>All written content on sftimes.com is © SF Times and the named author. Photography is © the named photographer. Original audio, illustration, and design are © SF Times. Everything published here remains the property of its creators.</p>
+    <p>You are reading the work for free because we want you to. That does not make it free of copyright.</p>
+
+    <h2>What you can do</h2>
+    <ul>
+      <li><strong>Read everything.</strong> Bookmark it. Send the link to a friend. Print a copy for your own use.</li>
+      <li><strong>Quote with attribution.</strong> Up to 200 words from any single piece, in any context, as long as you credit the author by name and link back to the original article URL. Academic and journalistic use can quote more under fair use.</li>
+      <li><strong>Share the link on social media.</strong> Including the headline, deck, and hero photo as preview metadata. That is what the OG tags are for.</li>
+      <li><strong>Translate for personal use.</strong> If you want to translate a piece for a non-English-speaking family member or friend, go ahead. For published translations, ask.</li>
+      <li><strong>Print one personal copy.</strong> A single printout for your own reading or a single archived clipping is fine.</li>
+    </ul>
+
+    <h2>What you cannot do without permission</h2>
+    <ul>
+      <li><strong>Republish a full article.</strong> Not on your blog, not on Medium, not on a Substack, not in a newsletter. Even with attribution. Ask first.</li>
+      <li><strong>Train a machine-learning model on our content.</strong> Explicitly disallowed under the no-AI-bylines principle that runs the whole publication. Crawlers that respect <a href="/robots.txt">robots.txt</a> will see our disallow directives. Crawlers that do not respect them are operating without our consent.</li>
+      <li><strong>Sell our content.</strong> No paywall extracts, no aggregated PDFs, no licensed reuse in a commercial product.</li>
+      <li><strong>Use a photo for promotional purposes.</strong> Photography on the site is licensed to SF Times for editorial use only. The photographer retains all other rights. If you want to license a photo, email the photographer directly through the email at the bottom of <a href="/team">the team page</a>.</li>
+      <li><strong>Remove or modify the byline.</strong> Every piece has a named author. Every photo has a named photographer. Removing the attribution is removing the point.</li>
+    </ul>
+
+    <h2>If you want to do something not listed here</h2>
+    <p>Ask. Email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>. The editor handles permissions personally. Reasonable requests usually get a yes within 48 hours. Unreasonable requests get an explanation of why not. Republication permission for press use is typically granted at no cost.</p>
+
+    <h2>Reader submissions</h2>
+    <p>When you send us a story tip, a hidden-spot submission, a reader letter, or a business-owner submission, the following applies:</p>
+    <ul>
+      <li>You retain copyright in what you submitted.</li>
+      <li>You grant us a non-exclusive license to publish, edit, and excerpt your submission. That license is permanent for anything we choose to publish.</li>
+      <li>We reserve the right to edit submissions for clarity, accuracy, length, and voice.</li>
+      <li>We will not publish your name, contact details, or specific location without your explicit prior agreement on the way the piece will appear.</li>
+      <li>Anonymity is honored if you ask for it. We will name you in a fact-check thread to make sure the piece is accurate, but the published piece will not name you.</li>
+      <li>If you submit a hidden spot, we may visit the location before publishing. We may decline to publish it if doing so would harm the place.</li>
+    </ul>
+
+    <h2>Sponsored content</h2>
+    <p>Sponsored articles ("In Collaboration With" pieces) are paid editorial. The sponsor pays for the placement. The editor writes the piece. The sponsor reviews the draft for factual accuracy before publication, not for angle. The relationship is disclosed in two places on every sponsored article: a chip above the headline and a firewall block at the top of the body. <a href="/standards">See the editorial standards page</a> for the full firewall mechanics.</p>
+    <p>Sponsored content is subject to the same copyright terms as editorial content.</p>
+
+    <h2>Comments</h2>
+    <p>We do not currently host article comments. If we ever add them, we will publish a separate moderation policy. Reader letters submitted by email may be quoted in future issues with your permission.</p>
+
+    <h2>Links to other sites</h2>
+    <p>We sometimes link to other websites. We do not endorse them, do not control them, and do not vouch for their content or privacy practices. Use your own judgment when you follow a link.</p>
+
+    <h2>Disclaimers</h2>
+    <p>We make every reasonable effort to publish accurate, honest, and well-reported work. We are also human, and we make mistakes. When we do, we correct them on the <a href="/corrections">corrections page</a> and re-issue the corrected version. Beyond that:</p>
+    <ul>
+      <li>The website is provided "as is" without warranties of any kind.</li>
+      <li>We do not guarantee uninterrupted availability of the site or any specific content.</li>
+      <li>We are not liable for any loss or damage arising from your use of the site or reliance on its content.</li>
+      <li>Information on the site is editorial opinion and reportage, not professional advice (legal, medical, financial, etc.). Do not treat a profile as a personal recommendation.</li>
+    </ul>
+
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of the State of California. Any dispute that cannot be resolved by emailing us first will be heard in San Francisco County.</p>
+
+    <h2>Changes to these terms</h2>
+    <p>If we change these terms, we will date the new version at the top and post it here. Substantive changes will be announced in the saturday letter. Continued use of the site after a change implies acceptance.</p>
+
+    <h2>Questions</h2>
+    <p>Email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>. The editor reads everything.</p>
   </article>
 </ExhibitionLayout>

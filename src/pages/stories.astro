@@ -2,6 +2,7 @@
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import Placeholder from '../components/Placeholder.astro';
+import AuthorAvatar from '../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
 
 const stories = (await getCollection('stories')).sort(
@@ -33,7 +34,10 @@ const cutoutSrc = (s: any) => `/${s.data.hero_filename_hint.replace(/\.[^.]+$/, 
         <div class="ex-card__media">
           <Placeholder alt={s.data.hero_alt} filenameHint={s.data.hero_filename_hint} aspect="4:3" showLabel={false} />
         </div>
-        <p class="ex-card__meta">ISSUE №{s.data.issue} · BY {s.data.author.toUpperCase()}</p>
+        <p class="ex-card__meta">
+          <AuthorAvatar name={s.data.author} size={20} />
+          <span>ISSUE №{s.data.issue} · BY {s.data.author.toUpperCase()}</span>
+        </p>
         <h3 class="ex-card__title">{s.data.title}</h3>
         <p class="ex-card__deck">{s.data.deck.slice(0, 140)}</p>
       </a>

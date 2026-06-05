@@ -9,18 +9,55 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
     <h1 class="ex-prose__title">THIS PAGE HASN'T<br>BEEN WRITTEN YET.</h1>
     <p>Or maybe it has been written and the link got tangled. Either way, here's where to go from here.</p>
   </article>
-  <ul class="links404">
-    <li><a href="/">HOME</a></li>
-    <li><a href="/stories">FEATURES</a></li>
-    <li><a href="/best-of">TOP TIER</a></li>
-    <li><a href="/hidden-spots">UNPUBLISHED</a></li>
-    <li><a href="/submit">SEND US A SPOT</a></li>
-    <li><a href="/support">KEEP IT ALIVE</a></li>
-  </ul>
+  <section class="links404-section">
+    <p class="links404__group">START READING</p>
+    <ul class="links404">
+      <li><a href="/">HOME</a></li>
+      <li><a href="/stories">EVERY FEATURE</a></li>
+      <li><a href="/sample-issue">A SAMPLE SATURDAY ISSUE</a></li>
+      <li><a href="/map">MAP OF KEEPERS</a></li>
+    </ul>
+
+    <p class="links404__group">LISTS &amp; GUIDES</p>
+    <ul class="links404">
+      <li><a href="/best-of">TOP TIER GUIDES</a></li>
+      <li><a href="/hidden-spots">UNPUBLISHED SPOTS</a></li>
+      <li><a href="/quizzes">CHECKUPS</a></li>
+    </ul>
+
+    <p class="links404__group">GET INVOLVED</p>
+    <ul class="links404">
+      <li><a href="/submit">SEND A TIP OR A SPOT</a></li>
+      <li><a href="/tell-your-story">BUSINESS OWNER? TELL US YOUR STORY</a></li>
+      <li><a href="/support">BECOME A SUPPORTER</a></li>
+      <li><a href="/partners">WORK WITH US</a></li>
+    </ul>
+
+    <p class="links404__group">ABOUT US</p>
+    <ul class="links404">
+      <li><a href="/about">WHO WE ARE</a></li>
+      <li><a href="/team">THE TEAM</a></li>
+      <li><a href="/press">PRESS KIT</a></li>
+      <li><a href="/reader-letters">READER LETTERS</a></li>
+    </ul>
+  </section>
+
   <style>
-    .links404 { list-style: none; padding: 0 12px 80px; max-width: 880px; margin: 0 auto; }
+    .links404-section { max-width: 880px; margin: 0 auto; padding: 0 12px 80px; }
+    .links404__group {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 36px 0 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .links404__group:first-child { margin-top: 12px; }
+    .links404 { list-style: none; padding: 0; margin: 0; }
     .links404 li { border-bottom: 1px solid var(--rule); }
-    .links404 a { font-family: var(--display); font-size: clamp(28px, 4vw, 56px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; display: block; padding: 18px 0; transition: padding 200ms; }
-    .links404 a:hover { padding-left: 12px; }
+    .links404 a { font-family: var(--display); font-size: clamp(20px, 3vw, 36px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; display: block; padding: 14px 0; transition: padding 200ms; }
+    .links404 a:hover { padding-left: 12px; color: var(--accent); }
   </style>
 </ExhibitionLayout>

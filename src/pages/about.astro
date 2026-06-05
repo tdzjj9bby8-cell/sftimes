@@ -49,10 +49,70 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
     <p>Full revenue breakdown lives on the <a href="/support">support page</a>. Editorial standards on the <a href="/standards">standards page</a>. Public corrections log on the <a href="/corrections">corrections page</a>. If we get something wrong we say so.</p>
   </article>
 
+  <!-- FOUNDING SUPPORTERS WALL · social proof + slot scarcity -->
+  <a href="#founders" class="ex-colmark__link">
+    <section class="ex-colmark" id="founders">
+      <h2 class="ex-colmark__text">FOUNDING SUPPORTERS</h2>
+    </section>
+  </a>
+
+  <section class="supporters">
+    <article class="ex-prose">
+      <p class="ex-prose__eyebrow">NAMED · ALPHABETIZED · PERMANENT</p>
+      <p>The keepers is reader-funded. Founding supporters are the first hundred who put their name behind the publication in its first year. Their names live here, in perpetuity, in alphabetical order. No tiers, no asterisks, no preferred logos. One line each.</p>
+    </article>
+
+    <ul class="supporters__list">
+      <li class="supporters__item supporters__item--open">FIRST SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">SECOND SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">THIRD SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">FOURTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">FIFTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">SIXTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">SEVENTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">EIGHTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">NINTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">TENTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">ELEVENTH SUPPORTER · YOUR NAME HERE</li>
+      <li class="supporters__item supporters__item--open">TWELFTH SUPPORTER · YOUR NAME HERE</li>
+    </ul>
+
+    <article class="ex-prose">
+      <p class="supporters__foot">Twelve founding spots reserved. The first hundred names anywhere on this page get permanent placement and locked 2026 pricing on any future renewal. After the first hundred, supporters appear on a dated yearly section. After ten years, every paying supporter is here. <a href="/support">Become a supporter →</a></p>
+    </article>
+  </section>
+
   <!-- Section divider wordmark before the team callout -->
   <a href="/team" class="ex-colmark__link">
     <section class="ex-colmark">
       <h2 class="ex-colmark__text">MEET THE TEAM</h2>
     </section>
   </a>
+
+  <style>
+    .supporters { padding: 0 12px 48px; max-width: 1080px; margin: 0 auto; }
+    .supporters__list {
+      list-style: none;
+      padding: 0;
+      margin: 32px 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0 32px;
+      border-block: 1px solid var(--rule);
+    }
+    @media (max-width: 720px) { .supporters__list { grid-template-columns: 1fr; } }
+    .supporters__item {
+      font-family: var(--display);
+      font-size: clamp(15px, 1.6vw, 18px);
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .supporters__item:nth-last-child(-n+2) { border-bottom: 0; }
+    .supporters__item--open { color: var(--muted); font-style: italic; }
+    .supporters__foot { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 64ch; }
+    .supporters__foot a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; font-weight: 600; }
+  </style>
 </ExhibitionLayout>

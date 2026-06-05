@@ -1,12 +1,74 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+
+const lastUpdated = '2026-06-01';
 ---
-<ExhibitionLayout title="PRIVACY · The Keepers · SF Times" active="home">
-  <ExhibitionMasthead slot="masthead" title="PRIVACY" subscript="WHAT WE DON'T COLLECT" cutouts={[]} />
+<ExhibitionLayout
+  title="PRIVACY · The Keepers · SF Times"
+  description="What we collect, what we don't, what we will never collect. The honest version, no legalese."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="PRIVACY" subscript="THE HONEST VERSION" cutouts={[]} />
+
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">NO TRACKING · NO AD PIXELS · NO SOCIAL TRACKERS</p>
+    <p class="ex-prose__eyebrow">NO TRACKING · NO AD PIXELS · NO SOCIAL TRACKERS · LAST UPDATED {lastUpdated.toUpperCase()}</p>
     <h1 class="ex-prose__title">WHAT WE COLLECT.<br>WHAT WE DON'T.</h1>
-    <p>We don't track you. No analytics on individual pages. No third-party ad pixels. No social-media trackers. Newsletter subscribers give us their email, which we store with our newsletter provider and use only to send the saturday issue. That's it.</p>
+    <p>This page is the honest version. We collect almost nothing. We sell nothing. We do not use a single tracking pixel. If you want the bullet points, here they are.</p>
+
+    <h2>What we collect</h2>
+    <ol>
+      <li><strong>Your email address.</strong> Only if you sign up for the saturday letter. We store it with our newsletter provider (Buttondown). We use it only to send you the issue. We do not share it. We do not analyze it.</li>
+      <li><strong>Anonymous server logs.</strong> Our hosting provider (Vercel) keeps standard web access logs for security purposes. These include IP addresses, requested URLs, and timestamps. We do not look at them. They roll off after 30 days.</li>
+      <li><strong>What you tell us directly.</strong> If you email us, we keep the email. If you submit a story tip, we keep the tip. If you fill out the business-owner submission form, we keep your answers in localStorage on your browser plus a copy in the editor's inbox when you submit. Nothing else.</li>
+    </ol>
+
+    <h2>What we do not collect</h2>
+    <ol>
+      <li>Page-level analytics. We do not run Google Analytics, Plausible, Fathom, or any equivalent service. We genuinely do not know which articles are most read.</li>
+      <li>Cookies. We do not set tracking cookies. The site does not use any cookies for tracking. A handful of essential cookies may be set by our hosting provider for performance and security. None are used to identify you.</li>
+      <li>Advertising trackers. There are no banner ads on this site. There are no advertising pixels. There is no Facebook pixel, no Google ads pixel, no LinkedIn Insight Tag.</li>
+      <li>Social media trackers. We do not embed Facebook widgets, Twitter widgets, Instagram embeds, or any other social-media iframe that would let those platforms track you across our site.</li>
+      <li>Heat maps, session recorders, scroll tracking. Not used.</li>
+      <li>Your IP address, in any persistent form. Vercel sees it in transit. We do not log it ourselves.</li>
+    </ol>
+
+    <h2>What we will never collect</h2>
+    <ol>
+      <li>Financial information beyond what a payment processor needs at checkout. If we ever take payments (we currently don't), the payment processor handles it, not us.</li>
+      <li>Location data beyond the city-level granularity an IP address provides at request-time.</li>
+      <li>Demographic information you have not voluntarily told us.</li>
+      <li>Data we sell, share, or trade with any third party for any reason.</li>
+    </ol>
+
+    <h2>Newsletter subscribers</h2>
+    <p>If you subscribe to the saturday letter, your email lives at Buttondown until you unsubscribe. Buttondown is a privacy-respecting newsletter service. <a href="https://buttondown.email/legal/privacy">Their privacy policy is here</a>.</p>
+    <p>The unsubscribe link is at the bottom of every email. One click. We do not require a reason. We do not send a goodbye email asking why.</p>
+
+    <h2>Sponsored content</h2>
+    <p>When we publish a sponsored article, the sponsor receives no data about who read the piece. They see the article URL go live. They do not see who clicked, when, or from where. We have no mechanism to provide them with that data even if they ask.</p>
+    <p>If a sponsor includes a DoFollow backlink to their own site, and a reader clicks it, the sponsor's own analytics may see that referral. That happens on the sponsor's side, not ours.</p>
+
+    <h2>Your rights</h2>
+    <p>Under California (CCPA) and EU (GDPR) law, you have the right to:</p>
+    <ul>
+      <li>Know what we have stored about you (the answer is almost certainly: your email, if you subscribed)</li>
+      <li>Request a copy of it</li>
+      <li>Request that we delete it</li>
+      <li>Opt out of any sale of your data (we have never sold any data; this is moot)</li>
+    </ul>
+    <p>To exercise any of these rights, email <a href="mailto:privacy@sftimes.com">privacy@sftimes.com</a>. We respond within 7 days. We do not require you to prove your identity beyond confirming the email address we have on file.</p>
+
+    <h2>Children</h2>
+    <p>The site is not directed at children under 13. We do not knowingly collect information from children under 13. If you are a parent who believes your child has subscribed, email us and we will delete the record.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If we change this policy, we will date the new version at the top and post it here. Substantive changes (new categories of data we collect, new third parties we share with) will be announced in the saturday letter the week of the change. We have not yet had a reason to do this.</p>
+
+    <h2>Why this is so short</h2>
+    <p>Most privacy policies are written to be incomprehensible. Ours is short because we collect almost nothing. If we collected more, we would need more pages to describe it. The promise to readers is that we will not. The shortness is the proof.</p>
+
+    <h2>Questions</h2>
+    <p>Email the editor at <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>. The editor is the same person who answers everything else.</p>
   </article>
 </ExhibitionLayout>

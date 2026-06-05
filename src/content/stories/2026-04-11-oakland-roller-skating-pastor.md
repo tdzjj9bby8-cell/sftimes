@@ -18,6 +18,7 @@ pull_quote: "God shows up the same way joy shows up. Without warning, in places 
 pull_quote_attr: "Pastor Adeline Brown"
 read_minutes: 9
 is_featured: false
+lede_line: "skates Lake Merritt at six, then preaches at eleven, still in the skates."
 ---
 
 Pastor Adeline Brown laces up white leather Riedell skates at 6:08 a.m. on a Saturday at the southwest corner of Lake Merritt. Two regulars she calls "the brothers" are already on the path. So is a man in pajama pants who waves at her every morning and has never said his name.

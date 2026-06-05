@@ -1,0 +1,300 @@
+---
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import Placeholder from '../components/Placeholder.astro';
+import AuthorAvatar from '../components/AuthorAvatar.astro';
+import { getCollection } from 'astro:content';
+
+const stories = (await getCollection('stories')).sort(
+  (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+);
+const featured = stories.find((s) => s.data.is_featured) || stories[0];
+const issueDate = featured.data.published.toLocaleDateString('en-US', {
+  weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+});
+---
+<ExhibitionLayout
+  title={`SAMPLE ISSUE №${featured.data.issue} · The Keepers · SF Times`}
+  description="A sample published Saturday issue. The editor's letter, the feature, the pull quote, the Five Rules signoff. Exactly what subscribers receive every Saturday morning."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title={`ISSUE №${featured.data.issue}`} subscript="SAMPLE" cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">SAMPLE ISSUE · {issueDate.toUpperCase()}</p>
+    <h1 class="ex-prose__title">SATURDAY MORNING.<br>FROM THE EDITOR.</h1>
+  </article>
+
+  <!-- EDITOR'S LETTER · in Eric's voice -->
+  <section class="issue-letter">
+    <div class="issue-letter__inner">
+      <p class="issue-letter__label">FROM THE EDITOR</p>
+      <p>The block was quiet this Tuesday at 5:47 a.m. and Mrs. Kim was already at the press. The press is the original. The shop is the same. The block is not the block it was.</p>
+      <p>I have been walking Geary Street between 22nd and 24th every Tuesday for six weeks. The vape store opened in 2024. The bubble tea chain opened in 2023. The block has changed twice in two years. The tofu shop has not changed in 34. This week's feature is about the math of staying still.</p>
+      <p>Two notes worth flagging before you scroll. First: the {stories.filter((s) => !!s.data.sponsor).length} sponsored pieces in our archive have all been pre-screened, reported the same way the rest are reported, and labeled at the top. The editorial firewall is the product. Second: we have <a href="/partners">seven founding partner slots</a> still open. Founding partners are named on the about page in perpetuity. If your business has a story I would walk a block to write, the call is the right place to start.</p>
+      <p class="issue-letter__sign">— Eric</p>
+    </div>
+  </section>
+
+  <!-- THE FEATURE · pulled from the actual featured story -->
+  <section class="issue-feature">
+    <p class="issue-feature__chapter">THIS WEEK'S KEEPER · ISSUE №{featured.data.issue} · {featured.data.read_minutes}-MIN READ</p>
+
+    <div class="issue-feature__hero">
+      <Placeholder
+        alt={featured.data.hero_alt}
+        filenameHint={featured.data.hero_filename_hint}
+        aspect="21:9"
+        showLabel={false}
+        focal={featured.data.hero_focal}
+      />
+    </div>
+
+    <article class="ex-prose issue-feature__body">
+      <h2 class="issue-feature__title">{featured.data.title.toUpperCase()}</h2>
+      <p class="issue-feature__byline">
+        <AuthorAvatar name={featured.data.author} size={24} />
+        <span>BY {featured.data.author.toUpperCase()} · PHOTOGRAPHS BY {(featured.data.photographer || 'STAFF').toUpperCase()}</span>
+      </p>
+      <p class="issue-feature__deck">{featured.data.deck}</p>
+
+      <p class="issue-feature__body-text">It is 5:48 in the morning on a Tuesday in February when Mrs. Kim flips the switch on a tofu press she bought in 1992 and slides the first batch out. The press is heavy. She is 67. She uses both hands.</p>
+
+      <p class="issue-feature__body-text">The shop is on Geary Street, between a vape store that opened last year and a bubble tea chain that opened the year before that. The block has changed around her. The shop has not. The hand-painted sign her husband made in 1989 still says Soon Dubu House in white block letters on a red background. The paint is chipping at the bottom corner where rain reaches.</p>
+
+      <p class="issue-feature__body-text">She arrived in San Francisco in 1986 from a town outside Daegu. Her husband arrived two years later. They opened the shop in 1992 with money borrowed from her sister and a recipe her mother had taught her over the seven summers Mrs. Kim spent in Korea as a teenager. The recipe has not changed. Neither has the press.</p>
+
+      {featured.data.pull_quote && (
+        <blockquote class="issue-feature__pull">
+          <p>&ldquo;{featured.data.pull_quote}&rdquo;</p>
+          <cite>— {(featured.data.pull_quote_attr || featured.data.author).toUpperCase()}</cite>
+        </blockquote>
+      )}
+
+      <p class="issue-feature__body-text">The math is straightforward. The shop sells thirty-eight portions of soondubu a day, give or take. The lunch rush is fifty minutes long. Mrs. Kim runs the kitchen alone except on Saturday mornings, when her granddaughter, Jiyoung, comes in to take orders so Mrs. Kim can keep ladling. The granddaughter is twenty-three. She works two blocks down at a property management company. She has been arguing with Mrs. Kim for nine months about raising the price.</p>
+
+      <p class="issue-feature__body-text">"My customers come because they remember their mothers," Mrs. Kim said when I asked her about the argument. "I am not making tofu. I am making memory."</p>
+
+      <p class="issue-feature__body-text">The piece runs for {featured.data.read_minutes} minutes when read aloud, which I have started to do every Saturday morning before publish. This Saturday she let me read it back to her in the shop while she ladled the first bowl for me. She corrected three things. The original press was bought in November 1992, not October. The block had bubble tea before it had vape. And she wants me to mention that the granddaughter, despite the argument, is the best register-keeper she has ever had.</p>
+
+      <p class="issue-feature__body-text"><a class="issue-feature__read-more" href={`/stories/${featured.data.url_slug}`}>READ THE FULL ESSAY (12 MINUTES) →</a></p>
+    </article>
+  </section>
+
+  <!-- WHAT ELSE THIS WEEK -->
+  <section class="issue-what-else">
+    <p class="issue-what-else__label">ALSO IN THIS ISSUE</p>
+    <ul class="issue-what-else__list">
+      <li><strong>TOP TIER REFRESH:</strong> <a href="/best-of/korean-bbq-sf">Best Korean BBQ in San Francisco</a> updated with one new entry and one drop. Edited by Eric.</li>
+      <li><strong>UNPUBLISHED:</strong> Three new reader-submitted hidden spots added to the working list. <a href="/hidden-spots">See them all</a>.</li>
+      <li><strong>WHAT'S NEXT:</strong> Issue №{(featured.data.issue || 0) + 1} will be a profile by Daisy of a family-owned Pakistani-Indian restaurant in the South Bay opening its fourth location this summer.</li>
+      <li><strong>CORRECTIONS:</strong> No corrections this week. Last week's piece had one (date typo on the Outer Richmond bakery feature). <a href="/corrections">See the corrections log</a>.</li>
+    </ul>
+  </section>
+
+  <!-- PATRON CREDIT (sample) -->
+  <section class="issue-patron">
+    <div class="issue-patron__divider"></div>
+    <p class="issue-patron__label">— TODAY'S LETTER IS SUPPORTED BY —</p>
+    <p class="issue-patron__name">[YOUR NAME HERE]</p>
+    <p class="issue-patron__line">Patron slot open · $400 · text only, no logos, no banners. <a href="/partners#saturday">Claim this Saturday →</a></p>
+    <div class="issue-patron__divider"></div>
+  </section>
+
+  <!-- THE FIVE RULES (stamped at the bottom of every issue) -->
+  <section class="issue-rules">
+    <p class="issue-rules__label">THE FIVE RULES · STILL TRUE</p>
+    <ol class="issue-rules__list">
+      <li>Named bylines, always.</li>
+      <li>One thing per page.</li>
+      <li>Specificity over abstraction.</li>
+      <li>Editorial firewall on sponsors.</li>
+      <li>Protect the small.</li>
+    </ol>
+    <p class="issue-rules__signoff">Every word in this issue was written by a named human. No AI in the loop. <a href="/about">Read the masthead</a>.</p>
+  </section>
+
+  <!-- CLASSIFIEDS (sample) -->
+  <section class="issue-classifieds">
+    <p class="issue-classifieds__label">CLASSIFIEDS · SATURDAY №{featured.data.issue}</p>
+    <ul class="issue-classifieds__list">
+      <li><strong>[SLOT OPEN]</strong> Your business · one line · $149 · alphabetized at send.</li>
+      <li><strong>[SLOT OPEN]</strong> Six slots per issue. Book by Thursday 5pm.</li>
+      <li><strong>[SLOT OPEN]</strong> See <a href="/partners#saturday">work with us</a>.</li>
+      <li><strong>[SLOT OPEN]</strong> Lives forever on this issue's archive page.</li>
+      <li><strong>[SLOT OPEN]</strong> No banners. No logos. No tracking pixels.</li>
+      <li><strong>[SLOT OPEN]</strong> The lightest commitment in the room.</li>
+    </ul>
+  </section>
+
+  <!-- WHAT YOU JUST READ -->
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">WHAT YOU JUST READ</p>
+    <h2>THIS IS THE PRODUCT.</h2>
+    <p>That was a complete Saturday issue. The editor's letter at the top, the feature in the middle, the pull quote, the also-in-this-issue, the patron credit, the Five Rules signoff, the classifieds. The email version subscribers receive is the same content in plain text plus a header photo. The archived web version (this one) is where it lives forever.</p>
+    <p>Subscribers receive an issue like this every Saturday at 7:00 a.m. Pacific. Free. Reader-funded. <a href="/support">Become a supporter</a> to keep it that way, or <a href="/partners">work with us</a> if your business wants its name on a Saturday.</p>
+    <p>Walk past issues in <a href="/stories">the archive</a>. See the <a href="/map">Map of Keepers</a>. Read the <a href="/about">masthead</a> if you want to know who is writing this.</p>
+  </article>
+
+  <style>
+    /* EDITOR'S LETTER */
+    .issue-letter {
+      max-width: 760px;
+      margin: 0 auto 48px;
+      padding: 0 12px;
+    }
+    .issue-letter__inner {
+      background: var(--paper-2);
+      border-left: 3px solid var(--ink);
+      padding: 32px 36px;
+    }
+    .issue-letter__label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 18px;
+      font-weight: 700;
+    }
+    .issue-letter p { font-size: 16px; line-height: 1.7; margin: 0 0 14px; color: var(--ink); max-width: 60ch; }
+    .issue-letter__sign { font-family: var(--display); font-size: 20px; margin-top: 6px !important; letter-spacing: -0.005em; }
+    .issue-letter a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    /* THE FEATURE */
+    .issue-feature { margin-bottom: 56px; }
+    .issue-feature__chapter {
+      max-width: 880px;
+      margin: 0 auto 18px;
+      padding: 0 12px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .issue-feature__hero {
+      max-width: 1200px;
+      aspect-ratio: 21/9;
+      margin: 0 auto 32px;
+      background: #2a2520;
+      overflow: hidden;
+    }
+    .issue-feature__hero :global(.real-image),
+    .issue-feature__hero :global(.placeholder) {
+      width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block;
+    }
+    .issue-feature__body { max-width: 720px; margin: 0 auto; padding: 0 12px; }
+    .issue-feature__title {
+      font-family: var(--display);
+      font-size: clamp(36px, 5vw, 64px);
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: -0.005em;
+      margin: 0 0 16px;
+    }
+    .issue-feature__byline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+    .issue-feature__deck {
+      font-family: var(--display);
+      font-size: clamp(22px, 2.6vw, 32px);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 32px;
+      color: var(--ink);
+      max-width: 36ch;
+    }
+    .issue-feature__body-text {
+      font-size: 17px;
+      line-height: 1.75;
+      margin: 0 0 18px;
+      color: var(--ink);
+    }
+    .issue-feature__pull {
+      padding: 28px 0;
+      border-block: 1px solid var(--rule);
+      margin: 32px 0;
+      text-align: center;
+    }
+    .issue-feature__pull p {
+      font-family: var(--display);
+      font-size: clamp(24px, 3.2vw, 40px);
+      line-height: 1.15;
+      text-transform: uppercase;
+      letter-spacing: -0.005em;
+      margin: 0 0 12px;
+    }
+    .issue-feature__pull cite {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-style: normal;
+    }
+    .issue-feature__read-more {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--ink);
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 2px;
+    }
+
+    /* ALSO IN THIS ISSUE */
+    .issue-what-else { max-width: 720px; margin: 0 auto 48px; padding: 32px 36px; background: var(--paper-2); }
+    .issue-what-else__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 18px; }
+    .issue-what-else__list { list-style: none; padding: 0; margin: 0; }
+    .issue-what-else__list li { font-size: 14px; line-height: 1.65; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+    .issue-what-else__list li:last-child { border-bottom: 0; }
+    .issue-what-else__list strong { color: var(--ink); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+    .issue-what-else__list a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    /* PATRON CREDIT */
+    .issue-patron { max-width: 720px; margin: 0 auto 48px; padding: 0 12px; text-align: center; }
+    .issue-patron__divider { height: 1px; background: var(--rule); width: 60%; margin: 0 auto; }
+    .issue-patron__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 24px 0 12px; }
+    .issue-patron__name { font-family: var(--display); font-size: clamp(24px, 3vw, 36px); letter-spacing: -0.005em; margin: 0 0 8px; }
+    .issue-patron__line { font-size: 13px; color: var(--muted); margin: 0 0 24px; font-style: italic; max-width: 44ch; margin-inline: auto; }
+    .issue-patron__line a { color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 1px; font-style: normal; font-weight: 600; }
+
+    /* FIVE RULES */
+    .issue-rules { max-width: 720px; margin: 0 auto 48px; padding: 32px 36px; border-block: 1px solid var(--rule); text-align: center; }
+    .issue-rules__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 20px; }
+    .issue-rules__list { list-style: none; padding: 0; margin: 0 0 20px; display: inline-block; text-align: left; }
+    .issue-rules__list li {
+      font-family: var(--display);
+      font-size: clamp(20px, 2.4vw, 28px);
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: -0.005em;
+      padding: 6px 0 6px 40px;
+      position: relative;
+    }
+    .issue-rules__list li::before {
+      content: counter(rule);
+      counter-increment: rule;
+      position: absolute;
+      left: 0;
+      top: 6px;
+      color: var(--accent);
+    }
+    .issue-rules__list { counter-reset: rule; }
+    .issue-rules__signoff { font-size: 12px; color: var(--muted); font-style: italic; margin: 0; }
+    .issue-rules__signoff a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    /* CLASSIFIEDS */
+    .issue-classifieds { max-width: 720px; margin: 0 auto 64px; padding: 24px 36px; background: var(--paper-2); }
+    .issue-classifieds__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+    .issue-classifieds__list { list-style: none; padding: 0; margin: 0; }
+    .issue-classifieds__list li { font-size: 13px; line-height: 1.5; padding: 6px 0; color: var(--muted); font-style: italic; }
+    .issue-classifieds__list li strong { color: var(--ink); font-size: 10px; letter-spacing: 0.14em; font-style: normal; }
+    .issue-classifieds__list li a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; font-style: normal; }
+  </style>
+</ExhibitionLayout>

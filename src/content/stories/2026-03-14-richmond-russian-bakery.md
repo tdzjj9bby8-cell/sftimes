@@ -18,6 +18,7 @@ pull_quote: "You do not own this recipe. You hold it for the next person."
 pull_quote_attr: "Larisa Pavlovich"
 read_minutes: 9
 is_featured: false
+lede_line: "has not changed the napoleon recipe since 1953. The owners have, twice."
 ---
 
 Larisa Pavlovich, 71, has been kneading the dough for the same napoleon recipe at Cinderella Bakery on Balboa Street since 1986. This Tuesday at 5:42 a.m., she is showing it to Andrei Volkov, 33, who will be the bakery's third owner when she retires in June.

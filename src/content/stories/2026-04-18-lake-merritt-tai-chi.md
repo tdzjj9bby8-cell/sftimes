@@ -18,6 +18,7 @@ pull_quote: "You don't come because you feel like it. You come because they're e
 pull_quote_attr: "Mr. Wei"
 read_minutes: 9
 is_featured: false
+lede_line: "has held the same southwest corner of the lake every morning for sixteen years."
 ---
 
 It is 6:14 in the morning at the southwest corner of Lake Merritt. The air is 49 degrees. The fog is sitting on the water in a thick gray bank that the rising light has not yet reached. Three people are already in the parking lot taking off jackets.

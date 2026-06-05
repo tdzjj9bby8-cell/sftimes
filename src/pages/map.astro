@@ -1,0 +1,261 @@
+---
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import { getCollection } from 'astro:content';
+
+const stories = (await getCollection('stories')).sort(
+  (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+);
+
+// Neighborhood → relative coordinates on a stylized SF + East Bay + Peninsula map.
+// x and y are percentages on the SVG viewport. Approximate, not cartographic.
+// The map is split visually into: SF proper (left/center), Bay water (right band),
+// East Bay (top-right), and Peninsula (bottom).
+const COORDS: Record<string, { x: number; y: number; region: 'sf' | 'east' | 'peninsula' }> = {
+  // SF
+  'Marina':                 { x: 32, y: 18, region: 'sf' },
+  'Pacific Heights':        { x: 34, y: 26, region: 'sf' },
+  'Russian Hill':           { x: 42, y: 22, region: 'sf' },
+  'North Beach':            { x: 48, y: 18, region: 'sf' },
+  'Chinatown':              { x: 48, y: 25, region: 'sf' },
+  'Financial District':     { x: 53, y: 26, region: 'sf' },
+  'SOMA':                   { x: 50, y: 34, region: 'sf' },
+  'Tenderloin':             { x: 44, y: 30, region: 'sf' },
+  'Hayes Valley':           { x: 38, y: 35, region: 'sf' },
+  'Western Addition':       { x: 34, y: 32, region: 'sf' },
+  'Japantown':              { x: 32, y: 28, region: 'sf' },
+  'Mission':                { x: 42, y: 46, region: 'sf' },
+  'Castro':                 { x: 30, y: 44, region: 'sf' },
+  'Noe Valley':             { x: 34, y: 52, region: 'sf' },
+  'Bernal Heights':         { x: 42, y: 58, region: 'sf' },
+  'Glen Park':              { x: 30, y: 58, region: 'sf' },
+  'Sunnyside':              { x: 26, y: 60, region: 'sf' },
+  'Excelsior':              { x: 40, y: 70, region: 'sf' },
+  'Bayview':                { x: 52, y: 70, region: 'sf' },
+  'Outer Mission':          { x: 32, y: 70, region: 'sf' },
+  'Outer Sunset':           { x: 8,  y: 50, region: 'sf' },
+  'Sunset':                 { x: 14, y: 50, region: 'sf' },
+  'Inner Sunset':           { x: 22, y: 48, region: 'sf' },
+  'Outer Richmond':         { x: 8,  y: 32, region: 'sf' },
+  'Richmond':               { x: 14, y: 30, region: 'sf' },
+  'Inner Richmond':         { x: 22, y: 32, region: 'sf' },
+  'Presidio':               { x: 22, y: 18, region: 'sf' },
+  'Visitacion Valley':      { x: 48, y: 80, region: 'sf' },
+  'San Francisco':          { x: 30, y: 40, region: 'sf' }, // fallback for generic "SF"
+  // East Bay
+  'Lake Merritt':           { x: 78, y: 22, region: 'east' },
+  'Oakland':                { x: 80, y: 24, region: 'east' },
+  'Hayward':                { x: 86, y: 50, region: 'east' },
+  // Peninsula
+  'Daly City':              { x: 36, y: 88, region: 'peninsula' },
+  'Pacifica':               { x: 12, y: 88, region: 'peninsula' },
+  'Sunnyvale':              { x: 70, y: 92, region: 'peninsula' },
+  'Palo Alto':              { x: 60, y: 92, region: 'peninsula' },
+};
+
+function coordsFor(nh?: string): { x: number; y: number } {
+  if (nh && COORDS[nh]) return COORDS[nh];
+  return { x: 50, y: 50 };
+}
+
+// Stable numbering by published-asc so older issues get lower numbers
+const ordered = [...stories].sort(
+  (a, b) => a.data.published.valueOf() - b.data.published.valueOf()
+);
+const pinned = ordered.map((s, i) => ({
+  story: s,
+  num: i + 1,
+  ...coordsFor(s.data.neighborhood),
+}));
+---
+<ExhibitionLayout
+  title="MAP OF KEEPERS · The Keepers · SF Times"
+  description="Every San Francisco keeper we have ever profiled, pinned to a neighborhood. A visual archive of the city, one block at a time."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="MAP OF KEEPERS" subscript={`№${stories.length} ON THE MAP`} cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">EVERY KEEPER, EVERY BLOCK · UPDATED EVERY SATURDAY</p>
+    <h1 class="ex-prose__title">{stories.length} KEEPERS,<br>ONE CITY.</h1>
+    <p>Every saturday letter pinned to a place. Numbered in the order they were published. Click any pin to read the story. The map is a working archive of the city, neighborhood by neighborhood.</p>
+  </article>
+
+  <!-- THE MAP -->
+  <section class="map">
+    <div class="map__svg-wrap">
+      <svg viewBox="0 0 100 100" class="map__svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="San Francisco map with keeper story pins">
+        <!-- Water (background) -->
+        <rect x="0" y="0" width="100" height="100" fill="var(--paper-2)" />
+        <!-- SF land (stylized geometric, not cartographic) -->
+        <path d="M 5,15 L 60,12 L 65,32 L 60,38 L 65,72 L 55,82 L 5,82 Z" fill="var(--paper)" stroke="var(--rule)" stroke-width="0.3" />
+        <!-- East Bay land -->
+        <path d="M 70,12 L 95,18 L 98,55 L 90,58 L 72,32 Z" fill="var(--paper)" stroke="var(--rule)" stroke-width="0.3" />
+        <!-- Peninsula band -->
+        <rect x="0" y="84" width="100" height="16" fill="var(--paper)" stroke="var(--rule)" stroke-width="0.3" />
+        <!-- Bridge lines (Bay + Golden Gate hints) -->
+        <line x1="55" y1="22" x2="78" y2="22" stroke="var(--rule)" stroke-width="0.4" stroke-dasharray="1 1" />
+        <line x1="32" y1="14" x2="22" y2="6" stroke="var(--rule)" stroke-width="0.4" stroke-dasharray="1 1" />
+        <!-- Region labels -->
+        <text x="32" y="8" class="map__region">SAN FRANCISCO</text>
+        <text x="80" y="14" class="map__region">EAST BAY</text>
+        <text x="80" y="98" class="map__region">PENINSULA</text>
+        <text x="68" y="55" class="map__region map__region--water">BAY</text>
+        <text x="2" y="60" class="map__region map__region--water">OCEAN</text>
+
+        <!-- Pins -->
+        {pinned.map(({ story, num, x, y }) => (
+          <a href={`/stories/${story.data.url_slug}`} class="map__pin-link">
+            <circle cx={x} cy={y} r="1.6" class="map__pin-circle" />
+            <text x={x} y={y + 0.6} text-anchor="middle" class="map__pin-num">{num}</text>
+            <title>№{num} · {story.data.title} · {story.data.neighborhood || 'San Francisco'}</title>
+          </a>
+        ))}
+      </svg>
+
+      <p class="map__legend">Hover a pin to see the title. Click to read the story. Numbered in the order published.</p>
+    </div>
+
+    <!-- KEEPER INDEX (numbered list) -->
+    <aside class="map__index">
+      <p class="map__index-label">THE INDEX · {stories.length} KEEPERS</p>
+      <ol class="map__index-list">
+        {pinned.map(({ story, num }) => (
+          <li class="map__index-item">
+            <a href={`/stories/${story.data.url_slug}`}>
+              <span class="map__index-num">{String(num).padStart(2, '0')}</span>
+              <span class="map__index-content">
+                <span class="map__index-title">{story.data.title}</span>
+                <span class="map__index-meta">{story.data.neighborhood || 'San Francisco'} · ISSUE №{story.data.issue}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </aside>
+  </section>
+
+  <!-- SUBMIT A KEEPER STRIP -->
+  <a href="/submit" class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">NOMINATE A KEEPER →</h2>
+    </section>
+  </a>
+
+  <style>
+    .map {
+      max-width: 1320px;
+      margin: 32px auto 64px;
+      padding: 0 12px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 980px) { .map { grid-template-columns: 1fr; } }
+
+    .map__svg-wrap { position: relative; }
+    .map__svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+    }
+    .map__svg :global(.map__region) {
+      font-family: var(--display);
+      font-size: 2.4px;
+      letter-spacing: 0.04em;
+      fill: var(--muted);
+      text-transform: uppercase;
+    }
+    .map__svg :global(.map__region--water) { fill: rgba(107, 99, 87, 0.5); }
+    .map__svg :global(.map__pin-link) { cursor: pointer; }
+    .map__svg :global(.map__pin-circle) {
+      fill: var(--ink);
+      stroke: var(--paper);
+      stroke-width: 0.3;
+      transition: fill 200ms, r 200ms;
+    }
+    .map__svg :global(.map__pin-link:hover .map__pin-circle) {
+      fill: var(--accent);
+      r: 2.2;
+    }
+    .map__svg :global(.map__pin-num) {
+      font-family: var(--ui);
+      font-size: 1.6px;
+      fill: var(--paper);
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .map__legend {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 14px 0 0;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .map__index {
+      max-height: 720px;
+      overflow-y: auto;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+    }
+    .map__index-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--rule);
+      background: var(--paper-2);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 700;
+    }
+    .map__index-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .map__index-item {
+      border-bottom: 1px solid var(--rule);
+    }
+    .map__index-item a {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 14px;
+      padding: 12px 20px;
+      color: var(--ink);
+      transition: background 150ms;
+      align-items: baseline;
+    }
+    .map__index-item a:hover { background: var(--paper-2); }
+    .map__index-num {
+      font-family: var(--display);
+      font-size: 22px;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.005em;
+    }
+    .map__index-title {
+      display: block;
+      font-size: 14px;
+      line-height: 1.3;
+      color: var(--ink);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .map__index-meta {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+  </style>
+</ExhibitionLayout>

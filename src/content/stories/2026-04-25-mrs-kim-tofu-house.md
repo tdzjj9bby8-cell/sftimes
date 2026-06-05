@@ -18,6 +18,7 @@ pull_quote: "My customers come because they remember their mothers. I am not mak
 pull_quote_attr: "Mrs. Kim, owner"
 read_minutes: 12
 is_featured: true
+lede_line: "still pours soondubu before sunrise. Mrs. Kim has held the same press since 1992."
 ---
 
 It is 5:48 in the morning on a Tuesday in February when Mrs. Kim flips the switch on a tofu press she bought in 1992 and slides the first batch out. The press is heavy. She is 67. She uses both hands.

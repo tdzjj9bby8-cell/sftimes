@@ -1,0 +1,323 @@
+---
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { getCollection } from 'astro:content';
+
+const stories = (await getCollection('stories')).sort(
+  (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+);
+const featured = stories.find((s) => s.data.is_featured) || stories[0];
+const issueDate = featured.data.published
+  .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+---
+<ExhibitionLayout
+  title="SAMPLE NEWSLETTER · The Keepers · SF Times"
+  description="What subscribers actually receive every Saturday morning. A working sample of the keepers letter."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="THE LETTER" subscript="WHAT YOU GET" cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">SAMPLE · WHAT LANDS IN YOUR INBOX EVERY SATURDAY MORNING</p>
+    <h1 class="ex-prose__title">YOU READ IT FREE,<br>SATURDAY MORNINGS.</h1>
+    <p>This is a real example of the Saturday letter. Five thousand readers get it weekly. No banner ads, no tracking pixels, no paywall. Just one San Francisco profile, one short note from the editor, and the slot where a sponsor credit lives when one is booked.</p>
+  </article>
+
+  <!-- EMAIL CLIENT FRAME -->
+  <section class="email-wrap">
+    <div class="email-meta">
+      <div class="email-meta__row">
+        <span class="email-meta__label">FROM</span>
+        <span class="email-meta__val">Eric at SF Times &lt;saturday@sftimes.com&gt;</span>
+      </div>
+      <div class="email-meta__row">
+        <span class="email-meta__label">SUBJECT</span>
+        <span class="email-meta__val">Issue №{featured.data.issue} · {featured.data.title}</span>
+      </div>
+      <div class="email-meta__row">
+        <span class="email-meta__label">DATE</span>
+        <span class="email-meta__val">{issueDate}</span>
+      </div>
+    </div>
+
+    <div class="email">
+
+      <!-- CO-PRESENTED SLOT (top of issue) -->
+      <div class="email__presented">
+        <p class="email__presented-text">PRESENTED BY <strong>[YOUR NAME HERE]</strong></p>
+        <p class="email__presented-tag">Co-Presented slot open · see <a href="/partners#saturday">work with us</a></p>
+      </div>
+
+      <!-- HEADER -->
+      <header class="email__head">
+        <div class="email__brand">THE KEEPERS</div>
+        <div class="email__brand-sub">SF TIMES · ISSUE №{featured.data.issue} · {issueDate.toUpperCase()}</div>
+      </header>
+
+      <!-- EDITOR'S NOTE -->
+      <section class="email__note">
+        <p class="email__label">FROM THE EDITOR</p>
+        <p>Good morning. The block was quiet at 5:48 a.m. and Mrs. Kim was already at the press. This week's letter is about her and the tofu house she has held on Geary Street since 1992. It is also about her block, which has not held her back so much as not held still.</p>
+        <p>If you can spare 12 minutes today, this is the one to read. If not, save it for the walk home. The piece will be at the same URL forever.</p>
+        <p class="email__sign">— Eric</p>
+      </section>
+
+      <!-- THE FEATURE -->
+      <article class="email__feature">
+        <p class="email__label">THIS WEEK'S KEEPER · {featured.data.read_minutes}-MIN READ</p>
+
+        <div class="email__hero">
+          <Placeholder
+            alt={featured.data.hero_alt}
+            filenameHint={featured.data.hero_filename_hint}
+            aspect="3:2"
+            showLabel={false}
+            focal={featured.data.hero_focal}
+          />
+        </div>
+
+        <h2 class="email__title">{featured.data.title}</h2>
+        <p class="email__byline">BY {featured.data.author.toUpperCase()} · PHOTOGRAPHS BY {(featured.data.photographer || 'STAFF').toUpperCase()}</p>
+
+        <p class="email__deck">{featured.data.deck}</p>
+
+        <p class="email__excerpt">It is 5:48 in the morning on a Tuesday in February when Mrs. Kim flips the switch on a tofu press she bought in 1992 and slides the first batch out. The press is heavy. She is 67. She uses both hands.</p>
+
+        <p class="email__excerpt">The shop is on Geary Street, between a vape store that opened last year and a bubble tea chain that opened the year before that. The block has changed around her. The shop has not.</p>
+
+        {featured.data.pull_quote && (
+          <blockquote class="email__pull">
+            <p>&ldquo;{featured.data.pull_quote}&rdquo;</p>
+            <cite>— {(featured.data.pull_quote_attr || featured.data.author).toUpperCase()}</cite>
+          </blockquote>
+        )}
+
+        <a class="email__cta" href={`/stories/${featured.data.url_slug}`}>READ THE FULL ESSAY →</a>
+      </article>
+
+      <!-- THE FIVE RULES (footer of every issue) -->
+      <section class="email__rules">
+        <p class="email__label">THE FIVE RULES, STILL TRUE</p>
+        <ol>
+          <li>Named bylines, always.</li>
+          <li>One thing per page.</li>
+          <li>Specificity over abstraction.</li>
+          <li>Editorial firewall on sponsors.</li>
+          <li>Protect the small.</li>
+        </ol>
+      </section>
+
+      <!-- PATRON SLOT (close of issue) -->
+      <section class="email__patron">
+        <p class="email__patron-text">— TODAY'S LETTER IS SUPPORTED BY —</p>
+        <p class="email__patron-name"><strong>[YOUR NAME HERE]</strong></p>
+        <p class="email__patron-line">Patron slot open · text only, no logos, no banners. <a href="/partners#saturday">Book it for $400 →</a></p>
+      </section>
+
+      <!-- CLASSIFIEDS -->
+      <section class="email__classifieds">
+        <p class="email__label">CLASSIFIEDS · SATURDAY №{featured.data.issue}</p>
+        <ul class="email__classifieds-list">
+          <li><strong>[SLOT OPEN]</strong> One line, six slots, alphabetized. $149.</li>
+          <li><strong>[SLOT OPEN]</strong> Your business, one Saturday. No banner, no logo.</li>
+          <li><strong>[SLOT OPEN]</strong> See <a href="/partners#saturday">work with us</a> to claim.</li>
+          <li><strong>[SLOT OPEN]</strong> Lives on the archived web version forever.</li>
+          <li><strong>[SLOT OPEN]</strong> Book before Thursday at 5pm.</li>
+          <li><strong>[SLOT OPEN]</strong> Six classifieds per issue, alphabetized at send.</li>
+        </ul>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="email__foot">
+        <p>You're getting this because you subscribed to The Keepers.</p>
+        <p>SF Times · San Francisco, CA · <a href="/">sftimes.com</a></p>
+        <p><a href="#">Unsubscribe</a> · <a href="/">Read past issues</a> · <a href="/support">Become a supporter</a></p>
+      </footer>
+
+    </div>
+  </section>
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">WHAT YOU JUST SAW</p>
+    <h2>FIVE THINGS WORTH NOTING.</h2>
+    <p>One: there are no banner ads, anywhere. Two: there is one feature, one editor's note, one pull quote, and a five-rules sign-off. Three: the Co-Presented slot at the top, the Patron slot at the bottom, and the Classifieds row are all places where a sponsor can appear, named by the editor, in our voice, never disguised. Four: the email is plain text-and-photo. No HTML buttons that look like ads. Five: every word goes through the same editor.</p>
+    <p>Subscribers receive this in their inbox every Saturday at 7:00 a.m. Pacific. Free. Reader-funded. <a href="/support">Become a supporter</a> if you want to keep it that way, or <a href="/partners">work with us</a> if your business wants its name on a Saturday.</p>
+  </article>
+
+  <style>
+    .email-wrap { max-width: 720px; margin: 32px auto 56px; padding: 0 12px; }
+    .email-meta {
+      background: var(--paper-2);
+      padding: 14px 20px;
+      border: 1px solid var(--rule);
+      border-bottom: 0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .email-meta__row { display: flex; gap: 10px; padding: 2px 0; }
+    .email-meta__label { color: var(--muted); font-weight: 700; letter-spacing: 0.08em; min-width: 64px; text-transform: uppercase; font-size: 10px; padding-top: 1px; }
+    .email-meta__val { color: var(--ink); flex: 1; }
+
+    .email {
+      background: #fff;
+      border: 1px solid var(--rule);
+      padding: 32px 28px 24px;
+      color: var(--ink);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      line-height: 1.55;
+    }
+
+    .email__presented {
+      text-align: center;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .email__presented-text {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 4px;
+    }
+    .email__presented-text strong { color: var(--ink); }
+    .email__presented-tag {
+      font-family: var(--ui);
+      font-size: 10px;
+      color: var(--muted);
+      margin: 0;
+      font-style: italic;
+    }
+    .email__presented-tag a { color: var(--accent); }
+
+    .email__head { text-align: center; margin-bottom: 32px; }
+    .email__brand {
+      font-family: var(--display);
+      font-size: clamp(36px, 6vw, 56px);
+      line-height: 1;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+    }
+    .email__brand-sub {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .email__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+
+    .email__note { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--rule); }
+    .email__note p { margin: 0 0 14px; font-size: 16px; }
+    .email__sign { font-family: var(--display); font-size: 18px; margin-top: 6px !important; }
+
+    .email__feature { margin-bottom: 36px; }
+    .email__hero { background: #2a2520; aspect-ratio: 3/2; overflow: hidden; margin: 0 0 18px; }
+    .email__hero :global(.real-image), .email__hero :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+    .email__title {
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    .email__byline {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 18px;
+    }
+    .email__deck { font-size: 17px; font-style: italic; margin: 0 0 20px; line-height: 1.5; color: var(--ink); }
+    .email__excerpt { font-size: 16px; margin: 0 0 16px; }
+    .email__pull {
+      margin: 24px 0;
+      padding: 18px 24px;
+      border-left: 3px solid var(--ink);
+      background: var(--paper);
+      font-style: italic;
+    }
+    .email__pull p { font-size: 18px; line-height: 1.45; margin: 0 0 8px; }
+    .email__pull cite { font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em; color: var(--muted); font-style: normal; }
+    .email__cta {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 22px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--ui);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .email__rules { margin-bottom: 36px; padding: 18px 0; border-block: 1px solid var(--rule); }
+    .email__rules ol { padding-left: 22px; margin: 0; }
+    .email__rules li { font-size: 14px; margin-bottom: 4px; }
+
+    .email__patron {
+      text-align: center;
+      padding: 20px 0 18px;
+      border-block: 1px solid var(--rule);
+      margin-bottom: 24px;
+    }
+    .email__patron-text {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
+    .email__patron-name {
+      font-family: var(--display);
+      font-size: 20px;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+    }
+    .email__patron-line {
+      font-family: var(--ui);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      font-style: italic;
+    }
+    .email__patron-line a { color: var(--accent); }
+
+    .email__classifieds { padding-bottom: 24px; margin-bottom: 18px; border-bottom: 1px solid var(--rule); }
+    .email__classifieds-list { list-style: none; padding: 0; margin: 0; }
+    .email__classifieds-list li {
+      font-family: var(--ui);
+      font-size: 12px;
+      padding: 4px 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .email__classifieds-list li strong { color: var(--ink); font-size: 10px; letter-spacing: 0.14em; }
+
+    .email__foot {
+      text-align: center;
+      font-family: var(--ui);
+      font-size: 11px;
+      color: var(--muted);
+      padding-top: 18px;
+    }
+    .email__foot p { margin: 4px 0; }
+    .email__foot a { color: var(--ink); }
+  </style>
+</ExhibitionLayout>

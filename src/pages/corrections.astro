@@ -1,28 +1,106 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
-const corrections: Array<{ date: string; story: string; note: string }> = [];
+
+// The public corrections log. Add entries here as they happen.
+// Format: { date: 'YYYY-MM-DD', issue: number, story: 'Story title', slug: 'url-slug' (optional, links to article), what: 'What was wrong', fix: 'What we corrected to' }
+const corrections: Array<{
+  date: string;
+  issue?: number;
+  story: string;
+  slug?: string;
+  what: string;
+  fix: string;
+}> = [
+  // Example shape, swap in real entries as they happen:
+  // {
+  //   date: '2026-05-23',
+  //   issue: 56,
+  //   story: "Hand & Foot Tailoring and the Cantonese Hem Rule",
+  //   slug: 'hand-foot-tailoring-irving',
+  //   what: "Original text stated Auntie Lai opened the shop in 1992. She opened it in 1994.",
+  //   fix: "Updated body text to read '1994' throughout. Issue archive page corrected on 2026-05-25.",
+  // },
+];
 ---
 <ExhibitionLayout
   title="CORRECTIONS · The Keepers · SF Times"
-  description="Every correction we have made, dated and named."
+  description="Every correction we have made, dated and named. The public log."
   active="home"
 >
   <ExhibitionMasthead slot="masthead" title="CORRECTIONS" subscript={`№${corrections.length} LOGGED`} cutouts={[]} />
 
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">DATED · NAMED · DESCRIBED</p>
+    <p class="ex-prose__eyebrow">DATED · NAMED · DESCRIBED · PUBLIC FOREVER</p>
     <h1 class="ex-prose__title">WHAT WE GOT WRONG.<br>WHAT WE CHANGED.</h1>
-    <p>Every correction is dated. The story is named. The change is described. This page exists because we will eventually make a mistake, and the alternative to a public log is hiding it.</p>
+    <p>Every correction is dated. The story is named. The change is described. This page exists because we will eventually make a mistake, and the alternative to a public log is hiding it. Most publications do not run a corrections page. We do.</p>
+
+    <h2>How corrections work here</h2>
+    <ol>
+      <li>If you spot something wrong in a piece, email <a href="mailto:corrections@sftimes.com">corrections@sftimes.com</a>. Be specific: the article, the claim, what you believe is correct, how you know.</li>
+      <li>The editor reads every email to that address. We respond within 72 hours either confirming the correction is needed or explaining why we believe the original is accurate.</li>
+      <li>If a correction is needed, the affected article page gets a dated note at the top. The original text is preserved alongside the correction (struck through) so the change is visible.</li>
+      <li>The correction is logged on this page. The story is named. The issue is named. The change is described in plain language.</li>
+      <li>Significant corrections (anything affecting a subject's reputation or a material claim about a business) are also flagged in the next Saturday letter.</li>
+    </ol>
+
+    <h2>What counts as a correction</h2>
+    <p>We log:</p>
+    <ul>
+      <li>Factual errors (wrong date, wrong price, wrong name spelling, wrong address, wrong claim about a business)</li>
+      <li>Misquoted dialogue</li>
+      <li>Wrong attribution</li>
+      <li>Material omissions that change the meaning of a claim</li>
+    </ul>
+    <p>We do not log: typos, broken links, image swaps, or stylistic edits. Those are fixed silently because they do not change what the piece says.</p>
+
+    <h2>What we will never do</h2>
+    <ul>
+      <li>Memory-hole an error. If we got it wrong, the wrong version is preserved alongside the right one. You can see what we changed.</li>
+      <li>Delete an article without explanation. If a piece is ever taken down, a note appears at the URL explaining why, signed by the editor.</li>
+      <li>Quietly reword a controversial claim and call it "stylistic editing." Substantive edits get a correction note. Stylistic edits do not change what the piece says.</li>
+    </ul>
+
+    <h2>The log</h2>
 
     {corrections.length === 0 ? (
-      <p style="font-family: var(--display); font-size: clamp(32px, 4vw, 56px); text-transform: uppercase; margin-top: 48px; color: var(--muted);">NO CORRECTIONS TO DATE.</p>
+      <section class="corr-empty">
+        <p class="corr-empty__kicker">CORRECTIONS TO DATE</p>
+        <p class="corr-empty__num">NONE</p>
+        <p class="corr-empty__body">Either we have not made a publishable mistake yet, or we have and nobody has flagged it. The second option is more likely than the first. If you have spotted something wrong in a past piece, the editor wants to know. Email <a href="mailto:corrections@sftimes.com">corrections@sftimes.com</a>.</p>
+      </section>
     ) : (
-      <ul>
+      <ul class="corr-list">
         {corrections.map((c) => (
-          <li><strong>{c.date}</strong> · {c.story}<p>{c.note}</p></li>
+          <li class="corr-item">
+            <p class="corr-item__date">{c.date}{c.issue ? ` · ISSUE №${c.issue}` : ''}</p>
+            <h3 class="corr-item__title">
+              {c.slug ? <a href={`/stories/${c.slug}`}>{c.story}</a> : c.story}
+            </h3>
+            <p class="corr-item__what"><strong>WHAT WE GOT WRONG.</strong> {c.what}</p>
+            <p class="corr-item__fix"><strong>WHAT WE CORRECTED.</strong> {c.fix}</p>
+          </li>
         ))}
       </ul>
     )}
+
+    <h2>The transparency claim</h2>
+    <p>If this page stays empty for too long, the editor will say so on the about page. Empty corrections logs are usually a sign of a publication that does not track its mistakes, not a publication without mistakes. We will not let that happen here.</p>
   </article>
+
+  <style>
+    .corr-empty { text-align: center; padding: 64px 0; border-block: 1px solid var(--rule); margin: 32px 0; }
+    .corr-empty__kicker { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; font-weight: 700; }
+    .corr-empty__num { font-family: var(--display); font-size: clamp(48px, 8vw, 96px); line-height: 1; text-transform: uppercase; margin: 0 0 24px; color: var(--ink); letter-spacing: -0.005em; }
+    .corr-empty__body { font-size: 14px; color: var(--muted); max-width: 56ch; margin: 0 auto; line-height: 1.6; }
+    .corr-empty__body a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    .corr-list { list-style: none; padding: 0; margin: 32px 0; border-top: 1px solid var(--rule); }
+    .corr-item { padding: 24px 0; border-bottom: 1px solid var(--rule); }
+    .corr-item__date { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+    .corr-item__title { font-family: var(--display); font-size: clamp(20px, 2.4vw, 28px); line-height: 1.1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 14px; }
+    .corr-item__title a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+    .corr-item__what, .corr-item__fix { font-size: 14px; line-height: 1.6; margin: 0 0 8px; color: var(--ink); }
+    .corr-item__what strong, .corr-item__fix strong { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); font-weight: 700; }
+  </style>
 </ExhibitionLayout>

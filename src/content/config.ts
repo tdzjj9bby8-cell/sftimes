@@ -38,6 +38,13 @@ const stories = defineCollection({
     pull_quote_attr: z.string().optional(),
     read_minutes: z.number().int().positive(),
     is_featured: z.boolean().default(false),
+    /** Optional sponsor metadata. When set, the article is treated as a paid
+     *  collaboration: "IN COLLABORATION WITH {name}" eyebrow on the article page,
+     *  picked up by the homepage "Partner Feature" slot. Editorial firewall holds. */
+    sponsor: z.object({
+      name: z.string(),
+      url: z.string().optional(),
+    }).optional(),
   }),
 });
 

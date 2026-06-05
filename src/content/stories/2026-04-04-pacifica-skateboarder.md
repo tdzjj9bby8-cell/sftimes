@@ -18,6 +18,7 @@ pull_quote: "The trick to staying alive is to keep moving forward at a speed you
 pull_quote_attr: "Hank Doyle, 96"
 read_minutes: 7
 is_featured: false
+lede_line: "does not push hard. He just does not stop."
 ---
 
 Hank Doyle is 96 years old and skates between his house on Calera Creek Road and the Linda Mar Safeway six days a week. He buys one item per trip. He says it is so he has a reason to come back tomorrow.

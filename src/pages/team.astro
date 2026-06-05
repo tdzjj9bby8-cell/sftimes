@@ -4,10 +4,50 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import Placeholder from '../components/Placeholder.astro';
 
 const team = [
-  { name: 'ERIC',     role: 'FOUNDER, EDITOR', bio: 'Saturday letter writer. Walks the blocks.' },
-  { name: 'NICHOLAS', role: 'REPORTER',        bio: 'Profiles, reported features, civic accountability.' },
-  { name: 'DAISY',    role: 'REPORTER',        bio: 'Culture, neighborhoods, small business beats.' },
-  { name: 'KIWI',     role: 'PHOTOGRAPHER',    bio: 'Hero photography for weekly features.' },
+  {
+    name: 'ERIC',
+    slug: 'eric',
+    role: 'FOUNDER, EDITOR',
+    bio: 'Saturday letter writer. Walks the blocks.',
+    longBio: "Eric is the founder and editor. He writes the Saturday letter, edits every published piece, picks the keepers, and answers the inquiries that come in through the partner page personally. Background: ten years in local independent media, three years at a tech company he won't name, two years freelancing across the West Coast while he figured out what he actually wanted to do. The keepers is what he wanted to do.",
+    beats: ['Editorial direction', 'Profile features', 'Best Of curation', 'Partnerships'],
+    sinceIssue: 1,
+    issuesAuthored: 31,
+    location: 'Mission, San Francisco',
+  },
+  {
+    name: 'NICHOLAS',
+    slug: 'nicholas',
+    role: 'REPORTER',
+    bio: 'Profiles, reported features, civic accountability.',
+    longBio: "Nicholas joined in issue twelve. He writes the deeper profiles and the reported features that take more than one Saturday to finish. Background: investigative reporting for two local outlets before the keepers, plus a master's in journalism that he doesn't bring up unless someone asks. He covers civic accountability beats: courts, housing, the places where the city's promises meet the city's pavement.",
+    beats: ['Reported profiles', 'Civic accountability', 'Housing', 'Courts'],
+    sinceIssue: 12,
+    issuesAuthored: 14,
+    location: 'Outer Richmond, San Francisco',
+  },
+  {
+    name: 'DAISY',
+    slug: 'daisy',
+    role: 'REPORTER',
+    bio: 'Culture, neighborhoods, small business beats.',
+    longBio: "Daisy joined in issue twenty-one. She owns the culture and small-business beats and writes most of the Top Tier best-of guides. Background: ten years freelancing for food and culture magazines around the Bay, plus a previous life as a cook in a Mission restaurant that closed in 2019. She knows the food world from both sides of the counter, which shows up in the work.",
+    beats: ['Culture features', 'Small business profiles', 'Best Of editor', 'Restaurants'],
+    sinceIssue: 21,
+    issuesAuthored: 9,
+    location: 'Bernal Heights, San Francisco',
+  },
+  {
+    name: 'KIWI',
+    slug: 'kiwi',
+    role: 'PHOTOGRAPHER',
+    bio: 'Hero photography for weekly features.',
+    longBio: "Kiwi has been the lead photographer since issue three. She shoots the hero portrait for every Saturday feature plus the on-location work for the Top Tier guides. Background: ten years of editorial portraiture for national magazines before the keepers, plus a fine art practice she still maintains. She works in available light, never staged, and always names her subjects on the wall.",
+    beats: ['Hero portraits', 'On-location reportage', 'Best Of photography', 'Print zine art direction'],
+    sinceIssue: 3,
+    issuesAuthored: 55,
+    location: 'Outer Sunset, San Francisco',
+  },
 ];
 ---
 <ExhibitionLayout
@@ -28,15 +68,57 @@ const team = [
     <p>Every byline is a real person. We don't run AI-generated copy, we don't run syndicated filler, and the editor who picks a best of list is named on the list. Here's everyone.</p>
   </article>
 
+  <!-- TEAM SUMMARY CARDS (jump to detail anchors below) -->
   <section class="team">
     {team.map((m) => (
-      <article class="team-card">
+      <a class="team-card" href={`#${m.slug}`}>
         <div class="team-card__photo">
-          <Placeholder alt={`${m.name}, ${m.role}`} filenameHint={`team/${m.name.toLowerCase()}.jpg`} aspect="1:1" showLabel={false} />
+          <Placeholder alt={`${m.name}, ${m.role}`} filenameHint={`team/${m.slug}.jpg`} aspect="1:1" showLabel={false} />
         </div>
         <h3 class="team-card__name">{m.name}</h3>
         <p class="team-card__role">{m.role}</p>
         <p class="team-card__bio">{m.bio}</p>
+        <span class="team-card__more">FULL BIO →</span>
+      </a>
+    ))}
+  </section>
+
+  <!-- DETAIL BIOS · one per team member, with proper anchor IDs that
+       match the Schema.org author URLs (/team#eric, etc.) -->
+  <section class="team-bios">
+    {team.map((m) => (
+      <article class="bio" id={m.slug}>
+        <div class="bio__photo">
+          <Placeholder alt={`${m.name}, ${m.role}`} filenameHint={`team/${m.slug}.jpg`} aspect="3:4" showLabel={false} />
+        </div>
+        <div class="bio__body">
+          <p class="bio__role">{m.role}</p>
+          <h2 class="bio__name">{m.name}</h2>
+          <p class="bio__long">{m.longBio}</p>
+
+          <div class="bio__facts">
+            <div class="bio__fact">
+              <p class="bio__fact-label">BEATS</p>
+              <p class="bio__fact-val">{m.beats.join(' · ')}</p>
+            </div>
+            <div class="bio__fact">
+              <p class="bio__fact-label">FIRST ISSUE</p>
+              <p class="bio__fact-val">№{String(m.sinceIssue).padStart(2, '0')}</p>
+            </div>
+            <div class="bio__fact">
+              <p class="bio__fact-label">ISSUES AUTHORED</p>
+              <p class="bio__fact-val">{m.issuesAuthored}</p>
+            </div>
+            <div class="bio__fact">
+              <p class="bio__fact-label">BASED IN</p>
+              <p class="bio__fact-val">{m.location}</p>
+            </div>
+          </div>
+
+          <div class="bio__contact">
+            <a href={`mailto:${m.slug}@sftimes.com?subject=From%20the%20site`}>{m.slug}@sftimes.com →</a>
+          </div>
+        </div>
       </article>
     ))}
   </section>
@@ -97,7 +179,47 @@ const team = [
     .team-card__photo :global(.real-image), .team-card__photo :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
     .team-card__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 6px; }
     .team-card__role { font-size: 11px; letter-spacing: 0.16em; color: var(--muted); margin: 0 0 12px; }
-    .team-card__bio { font-size: 13px; line-height: 1.5; margin: 0; }
+    .team-card__bio { font-size: 13px; line-height: 1.5; margin: 0 0 10px; color: var(--ink); }
+    .team-card { color: var(--ink); display: block; transition: opacity 200ms; }
+    .team-card:hover { opacity: 0.85; }
+    .team-card__more { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    /* === DETAIL BIOS === */
+    .team-bios { max-width: 1080px; margin: 64px auto; padding: 0 12px; display: flex; flex-direction: column; gap: 56px; }
+    .bio {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 36px;
+      align-items: start;
+      padding-top: 48px;
+      border-top: 1px solid var(--rule);
+      scroll-margin-top: 80px;
+    }
+    .bio:first-child { padding-top: 0; border-top: 0; }
+    @media (max-width: 880px) { .bio { grid-template-columns: 1fr; } }
+    .bio__photo { background: #2a2520; aspect-ratio: 3/4; overflow: hidden; }
+    .bio__photo :global(.real-image), .bio__photo :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+    .bio__role { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+    .bio__name { font-family: var(--display); font-size: clamp(36px, 5vw, 64px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 20px; }
+    .bio__long { font-size: 16px; line-height: 1.7; max-width: 60ch; margin: 0 0 28px; }
+    .bio__facts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px 28px;
+      padding: 18px 0;
+      border-block: 1px solid var(--rule);
+      margin: 0 0 24px;
+    }
+    .bio__fact-label { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+    .bio__fact-val { font-size: 13px; color: var(--ink); margin: 0; line-height: 1.45; }
+    .bio__contact a {
+      font-family: var(--display);
+      font-size: clamp(18px, 1.8vw, 22px);
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 2px;
+    }
 
     /* === HIRING BLOCK === */
     .hiring { background: var(--ink); color: var(--paper); padding: 72px 12px; margin-top: 48px; }

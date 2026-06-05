@@ -1,0 +1,66 @@
+---
+/**
+ * AuthorAvatar.astro
+ * Tiny circular portrait of a team member next to a byline.
+ * Photo lives at /public/team/<author-lowercase>.jpg. Renders an initial-letter
+ * fallback if the photo isn't available — never breaks layout.
+ *
+ * Used everywhere "BY {AUTHOR}" appears across the site to humanize the brand.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+
+export interface Props {
+  name: string;
+  size?: number;
+  /** Use light variant on dark backgrounds (article hero, footer, etc.) */
+  variant?: 'dark' | 'light';
+}
+
+const { name, size = 28, variant = 'dark' } = Astro.props;
+const slug = name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+const photoPath = path.resolve(process.cwd(), 'public', 'team', `${slug}.jpg`);
+const hasPhoto = fs.existsSync(photoPath);
+const initial = name.charAt(0).toUpperCase();
+---
+<span
+  class={`author-avatar author-avatar--${variant}`}
+  style={`width: ${size}px; height: ${size}px;`}
+  aria-hidden="true"
+>
+  {hasPhoto ? (
+    <img src={`/team/${slug}.jpg`} alt="" loading="lazy" />
+  ) : (
+    <span class="author-avatar__initial" style={`font-size: ${Math.round(size * 0.55)}px;`}>{initial}</span>
+  )}
+</span>
+
+<style>
+  .author-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--paper-2);
+    vertical-align: middle;
+    line-height: 1;
+  }
+  .author-avatar--dark { background: var(--paper-2); }
+  .author-avatar--light { background: rgba(244,241,234,0.18); }
+  .author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .author-avatar__initial {
+    font-family: var(--display);
+    color: var(--ink);
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  .author-avatar--light .author-avatar__initial { color: var(--paper); }
+</style>

@@ -1,0 +1,212 @@
+---
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+
+// Reader letters surfaced from the editor's inbox, lightly edited for length.
+// Each letter consents to publication. First names + neighborhood, not full names.
+// Add new ones at the top as they come in.
+const letters = [
+  {
+    date: '2026-05-26',
+    issue: 56,
+    re: 'Hand & Foot Tailoring and the Cantonese Hem Rule',
+    re_slug: 'hand-foot-tailoring-irving',
+    body: "I have been taking pants to Auntie Lai for nine years. I have never paid more than fourteen dollars for a hem. I started crying at my desk reading your piece. Thank you for not making her sentimental. The piece is exactly her.",
+    from: "Sandra",
+    where: "Outer Sunset",
+  },
+  {
+    date: '2026-05-19',
+    issue: 55,
+    re: "Olive Branch Roasters and the Two-Lot Theory of Coffee",
+    re_slug: 'olive-branch-roasters-bernal',
+    body: "I work in coffee importing. The piece on Marisa is the first time I have read a profile of a small roaster that did not romanticize the small part. Twelve pounds a day is a real number. The wholesale account math is the real math. Tell her hi from me.",
+    from: "Diego",
+    where: "Mission",
+  },
+  {
+    date: '2026-05-12',
+    issue: 54,
+    re: "The 6 a.m. tai chi circle by Lake Merritt",
+    re_slug: 'lake-merritt-tai-chi',
+    body: "My grandmother was in this circle from 2008 until she died in 2023. I have not been able to walk the lake at 6am since. Your piece made me want to. I am going on Sunday. I will report back.",
+    from: "Mei",
+    where: "Oakland",
+  },
+  {
+    date: '2026-05-12',
+    issue: 54,
+    re: "The 6 a.m. tai chi circle by Lake Merritt",
+    re_slug: 'lake-merritt-tai-chi',
+    body: "Reporting back. I went. There are now fourteen regulars, not twelve. Two new ones joined this winter. One is the niece of a regular who died last year. The light at 6:50 is the same. Thank you.",
+    from: "Mei",
+    where: "Oakland",
+  },
+  {
+    date: '2026-05-05',
+    issue: 53,
+    re: "The Oakland Roller-Skating Pastor",
+    re_slug: 'oakland-roller-skating-pastor',
+    body: "I am the pastor's mother. I am also the one who taught him to skate when he was seven. He told me last week he did not want me to be in the piece. I respect that. But I wanted to write and say: he is exactly how you described him.",
+    from: "Margaret",
+    where: "Oakland",
+  },
+  {
+    date: '2026-04-28',
+    issue: 52,
+    re: "Best Family-Owned Restaurants",
+    re_slug: null,
+    body: "Daisy. We need to talk about Sam's Grill being on this list with a four-star treatment when their pricing has gotten genuinely punishing. I was a regular for twenty years. The food has not changed but a glass of wine has gone from twelve to twenty-three dollars. The family ownership does not exempt them. Please refresh next quarter.",
+    from: "Stewart",
+    where: "Russian Hill",
+  },
+  {
+    date: '2026-04-21',
+    issue: 51,
+    re: "The Mission's Last Mariachi Tailor",
+    re_slug: 'mission-mariachi-tailor',
+    body: "I went to Don Ramiro last week because of your piece. He measured me for a traje. I am not a mariachi. He did not ask. He just measured. The conversation was the work. Sixty-seven minutes. Cash only. Worth the eighteen-month wait.",
+    from: "Hector",
+    where: "Mission",
+  },
+  {
+    date: '2026-04-14',
+    issue: 50,
+    re: "Issue 50, the editor's letter on what changed in a year",
+    re_slug: null,
+    body: "I subscribed at issue 4 and forwarded the second one I received to twenty-three friends. Six of them subscribed. I am not telling you this to brag. I am telling you because the second one was a piece about the pho place above Turk. Mrs. Tran is my aunt. She read every forwarded copy aloud to my grandmother on Sundays. Grandmother died in March. Mrs. Tran is keeping the broth.",
+    from: "Phuong",
+    where: "Tenderloin",
+  },
+  {
+    date: '2026-04-07',
+    issue: 49,
+    re: "The 96-Year-Old Skateboarder of Pacifica",
+    re_slug: 'pacifica-skateboarder',
+    body: "I am 71. I have never skateboarded. I am thinking about starting because of your piece. Is this insane.",
+    from: "Robert",
+    where: "Bernal Heights",
+  },
+  {
+    date: '2026-04-07',
+    issue: 49,
+    re: "The 96-Year-Old Skateboarder of Pacifica",
+    re_slug: 'pacifica-skateboarder',
+    body: "It is not insane. The skater in the piece started at 64. He recommends starting on grass with a longboard. Tell him I sent you.",
+    from: "Editor's note",
+    where: "via reply",
+  },
+];
+
+const grouped = letters.reduce((acc: Record<string, typeof letters>, l) => {
+  const key = `Issue №${l.issue}`;
+  if (!acc[key]) acc[key] = [];
+  acc[key].push(l);
+  return acc;
+}, {});
+---
+<ExhibitionLayout
+  title="READER LETTERS · The Keepers · SF Times"
+  description="Letters from readers responding to recent Saturday issues. Lightly edited for length. Names with permission."
+  active="home"
+>
+  <ExhibitionMasthead slot="masthead" title="LETTERS" subscript={`№${letters.length} PUBLISHED`} cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">READER MAIL · NAMED WITH PERMISSION · LIGHTLY EDITED FOR LENGTH</p>
+    <h1 class="ex-prose__title">WHAT READERS<br>WROTE BACK.</h1>
+    <p>Every Saturday letter generates replies. The good ones are below. Lightly edited for length, never for substance. Names appear with explicit permission. Where a reader asked for anonymity, we used a first name and a neighborhood. The editor reads every reply personally. Most do not get published. The ones that do illuminate something about the piece, the city, or the work.</p>
+    <p>If you want to write back, the editor's address is at the bottom of every Saturday letter. Or email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a> directly. Subject line "Re: Issue №X" is the move.</p>
+  </article>
+
+  <section class="letters">
+    {Object.entries(grouped).map(([issue, group]) => (
+      <div class="letters__group">
+        <p class="letters__group-label">{issue.toUpperCase()} · {group[0].re.toUpperCase()}</p>
+        {group[0].re_slug && (
+          <p class="letters__group-link"><a href={`/stories/${group[0].re_slug}`}>READ THE ORIGINAL PIECE →</a></p>
+        )}
+        <div class="letters__items">
+          {group.map((l) => (
+            <article class="letter">
+              <p class="letter__date">{l.date}</p>
+              <blockquote class="letter__body">{l.body}</blockquote>
+              <p class="letter__sign">— {l.from}{l.where ? `, ${l.where}` : ''}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    ))}
+  </section>
+
+  <a href="mailto:eric@sftimes.com?subject=Re%3A%20Issue%20%E2%84%96..." class="ex-colmark__link">
+    <section class="ex-colmark">
+      <h2 class="ex-colmark__text">WRITE THE EDITOR →</h2>
+    </section>
+  </a>
+
+  <style>
+    .letters {
+      max-width: 880px;
+      margin: 32px auto 56px;
+      padding: 0 12px;
+    }
+    .letters__group {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .letters__group:last-child { border-bottom: 0; }
+    .letters__group-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 6px;
+      font-weight: 700;
+    }
+    .letters__group-link {
+      margin: 0 0 24px;
+    }
+    .letters__group-link a {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 1px;
+    }
+    .letters__items {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .letter {
+      padding: 20px 24px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--ink);
+    }
+    .letter__date {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+    .letter__body {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0 0 12px;
+      font-style: italic;
+    }
+    .letter__sign {
+      font-family: var(--display);
+      font-size: 16px;
+      letter-spacing: -0.005em;
+      margin: 0;
+      color: var(--ink);
+    }
+  </style>
+</ExhibitionLayout>

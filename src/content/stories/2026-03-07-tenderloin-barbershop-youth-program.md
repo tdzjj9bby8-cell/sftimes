@@ -18,6 +18,7 @@ pull_quote: "A boy who has someone to listen to him for the length of a haircut 
 pull_quote_attr: "Mike Henderson, owner"
 read_minutes: 12
 is_featured: false
+lede_line: "gives haircuts in the morning and homework help by 3 p.m."
 ---
 
 Mike Henderson, 54, opened Big Mike's Cuts on Eddy Street in 2008. By 2014 he was making sandwiches for the kids who came in after school. By 2018 he had a small library in the back room. By 2021 he had three couches, a tutor named Ms. Janet who comes Tuesday and Thursday, and a sign on the door that reads HOMEWORK BEFORE CUT.

@@ -18,6 +18,7 @@ pull_quote: "You build a place for kids and the kids find it. You don't need a s
 pull_quote_attr: "Linda Tran"
 read_minutes: 8
 is_featured: false
+lede_line: "is still hosting the kids who keep coming back, twenty years on."
 ---
 
 In a neighborhood off Hesperian Boulevard in Hayward, in a one-story stucco house with a peach tree out front, Roy and Linda Tran built a small skate park in their driveway in 2003. They poured the concrete themselves. They did not get a permit. The city has never said anything.

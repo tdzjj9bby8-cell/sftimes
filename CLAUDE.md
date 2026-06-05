@@ -6,16 +6,16 @@ This file is read automatically when you run `claude` from `/Users/eric/projects
 
 ## What this project is
 
-Static publication built with Astro 4.16. Content is 57 markdown story files plus 4 best-of categories. Deployed via git push to Vercel; lives at sftimes.com.
+Static publication built with Astro 4.16. Content is 57+ markdown story files plus best-of categories, hidden-spots, and personality quizzes. Deployed via git push to Vercel; lives at sftimes.com.
 
-The site is mid-pivot from the original keepers design (lowercase Fraunces, terracotta accents, italic WONK) to a new Exhibition Magazine design (Anton gothic ALL CAPS, cream paper, hairline borders, dark footer). Both systems currently coexist:
+**The Exhibition Magazine design IS the production tree.** As of 2026-06, the redesign was promoted from `/exhibition/*` to root paths. Legacy keepers files are archived under `src/pages/_legacy/` and excluded from routing by the underscore-prefix convention.
 
 | State | Files | Status |
 |---|---|---|
-| Keepers system (legacy) | `src/pages/*.astro` at root, `src/components/Header.astro`, `Footer.astro`, `PageMasthead.astro`, `src/styles/global.css` | Currently in production source. Eric has not pushed to Vercel yet. |
-| Exhibition system (new) | `src/pages/exhibition.astro` + `src/pages/exhibition/*.astro`, `src/layouts/ExhibitionLayout.astro`, `src/components/ExhibitionMasthead.astro` | Sample preview. Lives at `/exhibition/*` routes. Goal is to swap this into production. |
+| Exhibition system (production) | `src/pages/*.astro`, `src/layouts/ExhibitionLayout.astro`, `src/components/ExhibitionMasthead.astro`, `Placeholder.astro` | Active. This is what ships when Eric pushes. |
+| Keepers system (legacy archive) | `src/pages/_legacy/*` | Excluded from routing. Kept for rollback safety. Don't import from here. |
 
-Eric is reviewing the Exhibition sample locally (`npm run dev`). Don't push to Vercel without explicit approval.
+`vercel.json` includes 301 redirects from old `/exhibition/*` URLs to root paths so any inbound links keep resolving during the transition.
 
 ---
 
@@ -23,7 +23,7 @@ Eric is reviewing the Exhibition sample locally (`npm run dev`). Don't push to V
 
 `/Users/eric/projects/sftimes/MASTER-EXHIBITION.md` is the single source of truth for the Exhibition design system. Read it before making design changes. If the spec contradicts the code, fix the spec first then align the code.
 
-The kitchen-sink reference page that shows every block with `[BRACKETED PLACEHOLDERS]` is at `src/pages/exhibition/template.astro`. Render it at `http://localhost:4321/exhibition/_template` after `npm run dev`. Copy any block from it into a new page.
+There used to be a kitchen-sink template page (`exhibition/_template.astro`) — Astro's underscore-prefix convention excludes it from routing. Copy any block from it into a new page. The file is at `src/pages/_template.astro` post-migration; view its source for reference, not via URL.
 
 ---
 
@@ -31,14 +31,15 @@ The kitchen-sink reference page that shows every block with `[BRACKETED PLACEHOL
 
 ### Cowork handles
 - Design system architecture (tokens, type scale, block library)
-- New block design (when an Exhibition reference shape doesn't have a recipe yet)
+- New block design (when a reference shape doesn't have a recipe yet)
 - Master spec updates
 - Large multi-page refactors
 - Audits + reports
 - Branding decisions (palette, type family, voice)
+- Editorial copy beyond simple swap-ins
 
 ### You (Claude Code) handle
-- Filling content placeholders in `template.astro` clones
+- Filling content placeholders in template clones
 - Building a new page from a copied template
 - Bug fixes (broken links, wrong scope CSS, layout breaks)
 - Adding/removing fields in content collection schemas
@@ -53,20 +54,24 @@ When in doubt: if it's a 1-file edit Eric describes in plain language, you do it
 
 ## Common tasks (recipes)
 
-### 1. Build a new Exhibition page
+### 1. Build a new page
 
 ```bash
-cp src/pages/exhibition/template.astro src/pages/exhibition/<new-slug>.astro
+# Open the kitchen-sink template for reference (do NOT visit a URL — it's not routed)
+src/pages/_template.astro
+
+# Create new page at the desired path
+cp src/pages/_template.astro src/pages/<new-slug>.astro
 ```
 
 Then edit the new file:
 - Update the `<ExhibitionLayout title=… active=…>` props
-- Replace the `<ExhibitionMasthead title=… subscript=…>` props
+- Update the `<ExhibitionMasthead title=… subscript=…>` props
 - Delete the blocks you don't need
 - Fill in `[BRACKETED PLACEHOLDERS]` with real content
 - Add the new route to the section nav in `ExhibitionLayout.astro` if it's a top-level page
 
-Verify in dev mode at `http://localhost:4321/exhibition/<new-slug>`.
+Verify in dev mode at `http://localhost:4321/<new-slug>`.
 
 ### 2. Swap content on an existing page
 
@@ -83,6 +88,14 @@ public/heroes/<YYYY-MM-DD>-<slug>.jpg
 
 # That's it. The collection picks it up on next build.
 ```
+
+If the story is part of a paid partnership, set the `sponsor` field in frontmatter:
+```yaml
+sponsor:
+  name: "Local Coffee Co."
+  url: "https://localcoffeeco.com"
+```
+The article page will auto-render the "IN COLLABORATION WITH" treatment + editorial firewall disclosure blocks.
 
 ### 4. Run the dev server
 
@@ -103,18 +116,36 @@ The post-guard fails if any neon-green `data-placeholder="true"` markers leak in
 
 Stories reference photos via `hero_filename_hint: "heroes/<YYYY-MM-DD>-<slug>.jpg"`. The `Placeholder.astro` component checks if `public/heroes/<that-name>` exists at build time. If yes → renders `<img>`. If no → renders the neon-green block and the guard fails. Match the names exactly.
 
+### 7. Per-image focal points
+
+When a hero photo crops awkwardly (subject out of frame), set the focal point in story frontmatter:
+```yaml
+hero_focal: "30% 40%"   # 30% from left, 40% from top
+hero_focal: "right top"
+hero_focal: "center 25%"
+```
+Default is `"center 25%"` which favors faces in the upper third. Use the dev-only page at `http://localhost:4321/focal-audit` to walk every photo at its current focal setting with a red crosshair overlay — handy for spotting bad crops at a glance. That page has `noindex` + robots disallow so it doesn't leak to production search.
+
 ---
 
-## Production migration path (when Eric blesses it)
+## The commercial layer
 
-1. Diff `src/pages/exhibition/*.astro` against the current `src/pages/*.astro` to confirm content parity
-2. Move files: `mv src/pages/exhibition/*.astro src/pages/`
-3. Rename: `mv src/pages/exhibition.astro src/pages/index.astro`
-4. Delete legacy: `rm src/components/Header.astro src/components/Footer.astro src/components/PageMasthead.astro`
-5. Update `src/layouts/BaseLayout.astro` to point at the new chrome OR delete it if every new page uses `ExhibitionLayout` directly
-6. `npm run build` and verify guard passes
-7. `git add -A && git commit -m "ship exhibition design"`
-8. Stop and confirm with Eric before `git push`
+`src/pages/partners.astro` is the conversion page. Nine packages across three sections:
+
+| Section | Packages | Price range |
+|---|---|---|
+| Saturday Underwriting | Classified, Patron, Co-Presented | $149–$900 / saturday |
+| Sponsored Articles | Profile, Feature, Bespoke | $1,500–$5,500 |
+| Ongoing Partnerships | Quarterly, Founding Bundle, Pillar | $1,400–$18,000 / year |
+
+Slot availability counts are hardcoded; update as real bookings come in. The live countdown to the first of next month is computed client-side from `Date()` so it always shows real numbers.
+
+Homepage sponsor surfaces:
+- **Presented-By strip** at the top — single line, links to `/partners#saturday`
+- **Sponsored Article slot** — dynamic, pulls the most recent story with `sponsor` frontmatter set
+- **Classifieds strip** at the bottom — six text-only slot lines
+
+When sponsor slots are empty, copy promotes `/partners` instead of going dark.
 
 ---
 
@@ -150,13 +181,15 @@ For you — anything Eric needs to do (ranked, urgent first)
 
 3. **CSS scope leaks.** Astro scopes `<style>` per component. If you write `.foo img { ... }` but `img` is rendered by a child component (like `Placeholder`), the rule won't apply. Use `:global(img)` to pierce the scope.
 
-4. **Two collisions of CSS class names.** Old keepers system uses unprefixed names (`.page-head`, `.tier`, etc.). Exhibition uses `.ex-` prefix. Keep them separate. Don't mix.
+4. **The newsletter form has fixed IDs (`exNewsletter`, `exNlForm`, `exNlThanks`).** The inline JS at the bottom of `ExhibitionLayout.astro` finds them by ID. Don't rename without updating the script.
 
-5. **The exhibition newsletter form has fixed IDs (`exNewsletter`, `exNlForm`, `exNlThanks`).** The inline JS at the bottom of `ExhibitionLayout.astro` finds them by ID. Don't rename without updating the script.
+5. **Cutouts are disabled by design call.** `ExhibitionMasthead` still accepts a `cutouts` prop but always pass `cutouts={[]}`. Don't add photo cutouts to mastheads without checking with Eric first.
 
-6. **Cutouts are disabled by design call.** `ExhibitionMasthead` still accepts a `cutouts` prop but always pass `cutouts={[]}`. Don't add photo cutouts to mastheads without checking with Eric first.
+6. **The `active` prop on ExhibitionLayout** controls which section nav item is underlined. Valid values: `home`, `stories`, `best-of`, `hidden-spots`, `quizzes`, `about`, `support`. Pages outside those sections (like `/submit`) pass `active="home"` or just don't pass it.
 
-7. **The `active` prop on ExhibitionLayout** controls which section nav item is underlined. Valid values: `home`, `stories`, `best-of`, `hidden-spots`, `quizzes`, `about`, `support`. Pages outside those sections (like `/exhibition/submit`) pass `active="home"` or just don't pass it.
+7. **Underscore-prefixed pages are not routed.** `_template.astro`, anything in `_legacy/*`. To make something a real route, drop the underscore.
+
+8. **Drawer label vs URL gap.** The drawer/section nav uses marketing labels ("Features", "Top Tier", "Unpublished", "Checkups", "Who We Are", "Keep It Alive"), but URLs still use the original slugs (`/stories`, `/best-of`, `/hidden-spots`, `/quizzes`, `/about`, `/support`). Labels and URLs are deliberately separable. Renaming URLs is a separate coordinated move.
 
 ---
 
@@ -165,29 +198,30 @@ For you — anything Eric needs to do (ranked, urgent first)
 ```
 src/
 ├── layouts/
-│   ├── ExhibitionLayout.astro     ← Chrome + global CSS for /exhibition/*
-│   ├── BaseLayout.astro            ← Legacy chrome for keepers system
-│   ├── ArticleImmersive.astro      ← Legacy story layout (still in production)
-│   └── ArticleStandard.astro       ← Legacy story layout variant
+│   └── ExhibitionLayout.astro     ← Chrome + global CSS for the whole site
 ├── components/
 │   ├── ExhibitionMasthead.astro   ← Giant Anton wordmark
-│   ├── PageMasthead.astro          ← Legacy keepers wordmark
-│   ├── Header.astro                ← Legacy keepers header (lowercase Fraunces)
-│   ├── Footer.astro                ← Legacy keepers footer
-│   └── Placeholder.astro           ← Image-or-fallback renderer (used by both systems)
+│   └── Placeholder.astro           ← Image-or-fallback renderer with focal-point support
 ├── content/
-│   ├── config.ts                   ← Zod schemas for stories + best-of
-│   ├── stories/*.md                ← 57 stories
-│   └── best-of/*.md                ← 4 categories
+│   ├── config.ts                   ← Zod schemas (stories, best-of)
+│   ├── stories/*.md                ← 57+ stories (sponsored ones have `sponsor:` field)
+│   └── best-of/*.md                ← Best Of categories
 ├── pages/
-│   ├── index.astro                 ← Keepers homepage (current production)
-│   ├── about.astro, partners.astro, ...   ← Keepers interior pages
-│   ├── exhibition.astro            ← Exhibition homepage sample
-│   └── exhibition/
-│       ├── template.astro         ← Kitchen-sink reference: every block + placeholders
-│       └── about.astro, stories.astro, ...   ← Exhibition sample pages
-└── styles/
-    └── global.css                  ← Legacy keepers tokens + reset
+│   ├── index.astro                 ← Homepage (Exhibition design)
+│   ├── partners.astro              ← Commercial page, nine packages
+│   ├── about.astro, stories.astro, best-of.astro, ...   ← Top-level pages
+│   ├── focal-audit.astro           ← Dev tool, noindex'd
+│   ├── _template.astro             ← Kitchen-sink reference, not routed
+│   ├── _legacy/                    ← Archived keepers system, not routed
+│   ├── stories/[slug].astro        ← Dynamic article route (sponsored articles auto-disclose)
+│   ├── best-of/[slug].astro        ← Dynamic best-of detail
+│   └── quizzes/[slug].astro        ← Dynamic quiz route (uses legacy engine)
+└── public/
+    ├── heroes/                     ← All story photos here
+    ├── best-of/                    ← Best-of category photos
+    ├── team/                       ← Author headshots (eric.jpg, nicholas.jpg, daisy.jpg, kiwi.jpg)
+    ├── fonts/anton/, fonts/inter-tight/   ← Self-hosted fonts
+    └── quizzes/                    ← Legacy quiz engine JS + per-quiz configs
 ```
 
 ---

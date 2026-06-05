@@ -10,12 +10,23 @@ export interface Props {
   title: string;
   description?: string;
   active?: 'home' | 'stories' | 'best-of' | 'hidden-spots' | 'quizzes' | 'about' | 'support';
+  /** Path to OG image. Defaults to the site brand image. Pass story hero filename
+   *  hint for article pages, e.g. "heroes/2026-06-06-zareens-fourth-kitchen.jpg". */
+  ogImage?: string;
+  /** Page type — defaults to "website", set "article" on individual story pages. */
+  ogType?: 'website' | 'article';
 }
 const {
   title,
   description = 'One San Francisco keeper every Saturday. Reader-funded.',
   active = 'home',
+  ogImage = 'og-image.svg',
+  ogType = 'website',
 } = Astro.props;
+
+const SITE = 'https://sftimes.com';
+const canonicalUrl = new URL(Astro.url.pathname, SITE).toString();
+const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.replace(/^\//, '')}`;
 ---
 <!doctype html>
 <html lang="en">
@@ -24,9 +35,80 @@ const {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{title}</title>
 <meta name="description" content={description}>
+<link rel="canonical" href={canonicalUrl}>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="alternate" type="application/rss+xml" title="SF Times · Saturday Letter" href="/rss.xml">
+
+<!-- Open Graph -->
+<meta property="og:type" content={ogType}>
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:url" content={canonicalUrl}>
+<meta property="og:image" content={ogImageUrl}>
+<meta property="og:site_name" content="SF Times · The Keepers">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={title}>
+<meta name="twitter:description" content={description}>
+<meta name="twitter:image" content={ogImageUrl}>
+
 <link rel="preload" href="/fonts/anton/anton-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-tight/inter-tight-variable.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Schema.org: NewsMediaOrganization · sitewide. Tells Google AI Overviews
+     and traditional crawlers that this is a real publication with named editors,
+     a circulation model, and editorial standards. -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "NewsMediaOrganization",
+  "@id": "https://sftimes.com/#org",
+  "name": "SF Times",
+  "alternateName": "The Keepers",
+  "url": "https://sftimes.com",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://sftimes.com/og-image.svg",
+    "width": 1200,
+    "height": 630
+  },
+  "foundingDate": "2025",
+  "publishingPrinciples": "https://sftimes.com/standards",
+  "ethicsPolicy": "https://sftimes.com/standards",
+  "actionableFeedbackPolicy": "https://sftimes.com/corrections",
+  "diversityPolicy": "https://sftimes.com/standards",
+  "correctionsPolicy": "https://sftimes.com/corrections",
+  "areaServed": {
+    "@type": "City",
+    "name": "San Francisco",
+    "containedInPlace": {
+      "@type": "State",
+      "name": "California"
+    }
+  },
+  "sameAs": [
+    "https://sftimes.com"
+  ],
+  "founder": {
+    "@type": "Person",
+    "name": "Eric",
+    "jobTitle": "Founder, Editor"
+  },
+  "description": "One San Francisco keeper every Saturday morning. Reader-funded. Zero banner ads."
+})} />
+
+<!-- Schema.org: WebSite · enables sitelinks search box and named-entity context -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://sftimes.com/#website",
+  "url": "https://sftimes.com",
+  "name": "SF Times · The Keepers",
+  "description": "A weekly San Francisco profile publication, reader-funded.",
+  "publisher": { "@id": "https://sftimes.com/#org" },
+  "inLanguage": "en-US"
+})} />
 <style is:global>
   /* Self-hosted display + UI faces. Replaces the previous jsDelivr CDN dependency. */
   @font-face {
@@ -190,7 +272,7 @@ const {
   }
   .ex-card:hover .ex-card__media :global(.real-image),
   .ex-card:hover .ex-card__media :global(.placeholder) { transform: scale(1.03); }
-  .ex-card__meta { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
+  .ex-card__meta { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; display: flex; align-items: center; gap: 8px; }
   .ex-card__title { font-family: var(--ui); font-size: 18px; font-weight: 600; line-height: 1.2; margin: 0 0 6px; }
   .ex-card__deck { font-size: 13px; line-height: 1.45; color: var(--muted); margin: 0; }
 
@@ -205,6 +287,21 @@ const {
 
   /* === FOOTER === */
   .ex-ft { background: var(--ink); color: var(--paper); }
+  .ex-ft__discover {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px 36px;
+    padding: 48px 28px 32px;
+    border-top: 1px solid rgba(244,241,234,0.12);
+  }
+  @media (max-width: 880px) { .ex-ft__discover { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .ex-ft__discover { grid-template-columns: 1fr; } }
+  .ex-ft__discover-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,241,234,0.55); margin: 0 0 16px; font-weight: 700; }
+  .ex-ft__discover ul { list-style: none; padding: 0; margin: 0; }
+  .ex-ft__discover li { padding: 5px 0; }
+  .ex-ft__discover a { font-size: 13px; color: rgba(244,241,234,0.9); transition: color 150ms; }
+  .ex-ft__discover a:hover { color: var(--paper); }
+
   .ex-ft__row { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 28px; border-top: 1px solid rgba(244,241,234,0.12); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
   .ex-ft__row > div:nth-child(2) { text-align: center; color: rgba(244,241,234,0.6); }
   .ex-ft__row > div:last-child { text-align: right; }
@@ -273,6 +370,46 @@ const {
 </section>
 
 <footer class="ex-ft">
+  <!-- Discover row · surfaces the lesser-known pages -->
+  <div class="ex-ft__discover">
+    <div class="ex-ft__discover-col">
+      <p class="ex-ft__discover-label">DISCOVER</p>
+      <ul>
+        <li><a href="/map">Map of Keepers</a></li>
+        <li><a href="/sample-issue">Sample Saturday issue</a></li>
+        <li><a href="/newsletter-sample">Newsletter sample</a></li>
+        <li><a href="/rss.xml">RSS feed</a></li>
+      </ul>
+    </div>
+    <div class="ex-ft__discover-col">
+      <p class="ex-ft__discover-label">WORK WITH US</p>
+      <ul>
+        <li><a href="/partners">Partner packages</a></li>
+        <li><a href="/tell-your-story">Tell us your story</a></li>
+        <li><a href="/submit">Send a tip</a></li>
+        <li><a href="/team#hiring">We're hiring</a></li>
+      </ul>
+    </div>
+    <div class="ex-ft__discover-col">
+      <p class="ex-ft__discover-label">FOR JOURNALISTS</p>
+      <ul>
+        <li><a href="/press">Press kit</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/standards">Editorial standards</a></li>
+        <li><a href="/corrections">Corrections log</a></li>
+      </ul>
+    </div>
+    <div class="ex-ft__discover-col">
+      <p class="ex-ft__discover-label">SUPPORT</p>
+      <ul>
+        <li><a href="/support">Become a supporter</a></li>
+        <li><a href="/about#founders">Founding supporters</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+
   <div class="ex-ft__row">
     <div><a href="mailto:hello@sftimes.com">EMAIL US</a></div>
     <div>READER-FUNDED · NO PARENT COMPANY</div>
@@ -290,14 +427,53 @@ const {
     const toggle = document.getElementById('exMenuToggle');
     const drawer = document.getElementById('exDrawer');
     if (!toggle || !drawer) return;
+
+    // Collect focusable elements inside the drawer for the tab trap.
+    function focusables() {
+      return Array.from(
+        drawer.querySelectorAll('a[href], button, [tabindex]:not([tabindex="-1"])')
+      ).filter((el) => !el.disabled && el.offsetParent !== null);
+    }
+
     function setOpen(open) {
       drawer.classList.toggle('is-open', open);
       toggle.classList.toggle('is-open', open);
       drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+      if (open) {
+        // Move focus into the drawer so keyboard users land inside the open menu.
+        const first = focusables()[0];
+        if (first) setTimeout(() => first.focus(), 50);
+      } else {
+        // Return focus to the menu button when closing.
+        toggle.focus();
+      }
     }
+
     toggle.addEventListener('click', () => setOpen(!drawer.classList.contains('is-open')));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        return;
+      }
+      // Tab trap: when the drawer is open, keep tab navigation inside it.
+      if (e.key === 'Tab' && drawer.classList.contains('is-open')) {
+        const items = focusables();
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
     drawer.addEventListener('click', (e) => { if (e.target.tagName === 'A') setOpen(false); });
   })();
 

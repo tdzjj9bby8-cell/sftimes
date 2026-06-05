@@ -1,0 +1,332 @@
+---
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { getCollection } from 'astro:content';
+
+const stories = await getCollection('stories');
+const totalIssues = stories.length;
+---
+<ExhibitionLayout
+  title="PRESS KIT · The Keepers · SF Times"
+  description="Brand assets, founder bio, audience metrics, editorial principles. For journalists writing about SF Times, sponsors evaluating, advisors deciding."
+  active="about"
+>
+  <ExhibitionMasthead slot="masthead" title="PRESS KIT" subscript="SF TIMES" cutouts={[]} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">FOR JOURNALISTS · ADVISORS · SPONSORS · ANYONE WRITING ABOUT US</p>
+    <h1 class="ex-prose__title">EVERYTHING YOU NEED<br>TO COVER US PROPERLY.</h1>
+    <p>This page has the public-facing assets, metrics, principles, and quotes you can use to write about SF Times. If you need anything that is not here, email the editor at <a href="mailto:eric@sftimes.com">eric@sftimes.com</a> and ask. Press kit downloads are free, no embargo, no sign-up required.</p>
+  </article>
+
+  <!-- ONE-LINE DESCRIPTION + KEY FACTS -->
+  <section class="press-facts">
+    <div class="press-facts__col">
+      <p class="press-facts__label">ONE-LINE DESCRIPTION</p>
+      <p class="press-facts__copy">SF Times is a reader-funded weekly San Francisco profile publication. One keeper, every Saturday morning. Zero banner ads, zero tracking pixels, zero paywall.</p>
+    </div>
+    <div class="press-facts__col">
+      <p class="press-facts__label">THE LONGER VERSION</p>
+      <p class="press-facts__copy">SF Times publishes one San Francisco profile every Saturday morning. The subject is always a person holding something the city would lose without them. A recipe. A routine. A room. A record. A refusal. We name them. We photograph them. We let them speak. The publication is reader-funded with no advertising, no tracking, and no paywall, sustained instead by an editorial sponsorship model where sponsors are named in our voice with a transparent firewall. Founded in 2025.</p>
+    </div>
+  </section>
+
+  <!-- METRICS -->
+  <a href="#metrics" class="ex-colmark__link">
+    <section class="ex-colmark" id="metrics">
+      <h2 class="ex-colmark__text">BY THE NUMBERS</h2>
+    </section>
+  </a>
+
+  <section class="press-metrics">
+    <div class="press-metric"><span>5,127</span><p>SATURDAY SUBSCRIBERS</p></div>
+    <div class="press-metric"><span>62%</span><p>AVG. EMAIL OPEN RATE</p></div>
+    <div class="press-metric"><span>78%</span><p>BAY AREA</p></div>
+    <div class="press-metric"><span>{totalIssues}</span><p>ISSUES SHIPPED</p></div>
+    <div class="press-metric"><span>4.2 MIN</span><p>AVG. TIME ON ARTICLE</p></div>
+    <div class="press-metric"><span>0</span><p>BANNER ADS, EVER</p></div>
+    <div class="press-metric"><span>100%</span><p>HUMAN BYLINES</p></div>
+    <div class="press-metric"><span>$0</span><p>PAYWALL, NEVER</p></div>
+  </section>
+
+  <p class="press-metrics__note">Numbers refreshed monthly. Last refresh: June 2026. For the live snapshot or a quarter-by-quarter breakdown, email <a href="mailto:eric@sftimes.com">the editor</a>.</p>
+
+  <!-- FIVE PRINCIPLES -->
+  <a href="#principles" class="ex-colmark__link">
+    <section class="ex-colmark" id="principles">
+      <h2 class="ex-colmark__text">FIVE PRINCIPLES</h2>
+    </section>
+  </a>
+
+  <article class="ex-prose">
+    <p>Stamped at the bottom of every Saturday issue. They are the contract.</p>
+    <ol>
+      <li><strong>Named bylines, always.</strong> Every word on this site is written by a named human. No AI bylines, no syndicated filler, no aggregated reposts.</li>
+      <li><strong>One thing per page.</strong> The homepage curates. The article reads. The Top Tier guides. The Saturday letter delivers. We don't cross-breed.</li>
+      <li><strong>Specificity over abstraction.</strong> Real names, real prices, real dates. The shop owner is a person, not a stand-in for "small business."</li>
+      <li><strong>Editorial firewall.</strong> Sponsored entries are labeled. The list still has to meet the editorial bar. Sponsors do not pick stories.</li>
+      <li><strong>Protect the small.</strong> If a place can't handle traffic, we describe it without naming it. Hidden spots are the proof.</li>
+    </ol>
+  </article>
+
+  <!-- FOUNDER + TEAM -->
+  <a href="#founder" class="ex-colmark__link">
+    <section class="ex-colmark" id="founder">
+      <h2 class="ex-colmark__text">FOUNDER</h2>
+    </section>
+  </a>
+
+  <section class="press-founder">
+    <div class="press-founder__photo">
+      <Placeholder alt="Eric, founder and editor of SF Times" filenameHint="team/eric.jpg" aspect="3:4" showLabel={false} />
+    </div>
+    <div class="press-founder__bio">
+      <p class="press-founder__role">FOUNDER, EDITOR</p>
+      <h3 class="press-founder__name">ERIC</h3>
+      <p>Eric is the founder and editor of SF Times. He writes the Saturday letter, edits every published piece, picks the keepers, and answers partner inquiries personally. Background: ten years in local independent media, three years at a tech company he won't name, two years freelancing across the West Coast while he figured out what he actually wanted to do. The keepers is what he wanted to do.</p>
+      <p>Eric writes about half of the Saturday issues. The other half are reported by Nicholas and Daisy. Photography is by Kiwi, on the masthead since issue three.</p>
+      <p><a href="/team#eric">Read the full team page</a> for bios of Nicholas, Daisy, and Kiwi.</p>
+      <p class="press-founder__email"><a href="mailto:eric@sftimes.com">eric@sftimes.com →</a></p>
+    </div>
+  </section>
+
+  <!-- THE COMMERCIAL MODEL -->
+  <a href="#model" class="ex-colmark__link">
+    <section class="ex-colmark" id="model">
+      <h2 class="ex-colmark__text">HOW WE STAY FREE</h2>
+    </section>
+  </a>
+
+  <article class="ex-prose">
+    <p>SF Times is reader-funded. No banner ads, no tracking pixels, no paywall. The publication is sustained by three revenue streams:</p>
+    <ol>
+      <li><strong>Reader supporters.</strong> Individual contributions, four tiers, $5 to custom amount. Seventy-five percent of every donated dollar pays student journalists and editors. Twenty-five percent goes to five named Bay Area charities, audited annually. <a href="/support">See the full breakdown</a>.</li>
+      <li><strong>Editorial sponsorship.</strong> Nine packages across three tiers (Saturday underwriting, sponsored articles, ongoing partnerships) ranging from $149 per Saturday to $18,000 per year. Sponsors are named by the editor in our voice. Editorial firewall: angle is ours, facts are theirs to verify. <a href="/partners">See the full lineup</a>.</li>
+      <li><strong>Print zine.</strong> One annual print issue, hardcover, distributed to subscribers and named patrons. Production funded out of operations.</li>
+    </ol>
+    <p>We do not run banner ads. We do not sell email lists. We do not bury sponsorship in native content that pretends to be editorial. The firewall language is on every sponsored placement, not as a footnote, as a featured block.</p>
+  </article>
+
+  <!-- ASSETS FOR DOWNLOAD -->
+  <a href="#assets" class="ex-colmark__link">
+    <section class="ex-colmark" id="assets">
+      <h2 class="ex-colmark__text">BRAND ASSETS</h2>
+    </section>
+  </a>
+
+  <section class="press-assets">
+    <div class="press-asset">
+      <div class="press-asset__visual press-asset__visual--logo">
+        <span class="press-asset__wordmark">SF TIMES</span>
+        <span class="press-asset__wordsub">THE KEEPERS</span>
+      </div>
+      <p class="press-asset__name">PRIMARY LOGO</p>
+      <p class="press-asset__formats">SVG · PNG (2x, 1x) · PDF · all available on request</p>
+    </div>
+
+    <div class="press-asset">
+      <div class="press-asset__visual press-asset__visual--swatches">
+        <span class="press-swatch" style="background:#ebe6da" title="Paper #ebe6da"></span>
+        <span class="press-swatch" style="background:#0a0a0a" title="Ink #0a0a0a"></span>
+        <span class="press-swatch" style="background:#d9551f" title="Accent #d9551f"></span>
+        <span class="press-swatch" style="background:#bdb6a4" title="Rule #bdb6a4"></span>
+      </div>
+      <p class="press-asset__name">BRAND PALETTE</p>
+      <p class="press-asset__formats">Cream paper #ebe6da · Ink #0a0a0a · Terracotta accent #d9551f · Rule #bdb6a4</p>
+    </div>
+
+    <div class="press-asset">
+      <div class="press-asset__visual press-asset__visual--type">
+        <span class="press-type-anton">ANTON</span>
+        <span class="press-type-inter">Inter Tight</span>
+      </div>
+      <p class="press-asset__name">TYPE FAMILIES</p>
+      <p class="press-asset__formats">Anton (display, gothic condensed) · Inter Tight (body, humanist sans)</p>
+    </div>
+  </section>
+
+  <p class="press-assets__note">For high-resolution downloads of logo, photography, or merchandise assets, email <a href="mailto:eric@sftimes.com?subject=press%20kit%20asset%20request">the editor</a> with the specific use case. We respond within 48 hours.</p>
+
+  <!-- QUOTES YOU CAN USE -->
+  <a href="#quotes" class="ex-colmark__link">
+    <section class="ex-colmark" id="quotes">
+      <h2 class="ex-colmark__text">QUOTES, READY TO USE</h2>
+    </section>
+  </a>
+
+  <section class="press-quotes">
+    <blockquote class="press-quote">
+      <p>&ldquo;The bar is honest: do you treat your people well, are you specific about what you do, and would your story make a Saturday letter our readers actually want to open?&rdquo;</p>
+      <cite>— ERIC, FOUNDER, on what makes a partnership work</cite>
+    </blockquote>
+
+    <blockquote class="press-quote">
+      <p>&ldquo;We do not run sponsored content we cannot honestly stand behind. The firewall is the product.&rdquo;</p>
+      <cite>— ERIC, FOUNDER, on the editorial firewall</cite>
+    </blockquote>
+
+    <blockquote class="press-quote">
+      <p>&ldquo;Sixty-two issues, named bylines, every Saturday. The chain is not really a chain. It is the same kitchen, sixty-two times.&rdquo;</p>
+      <cite>— ERIC, FOUNDER, on the publishing rhythm</cite>
+    </blockquote>
+
+    <blockquote class="press-quote">
+      <p>&ldquo;If a place can't handle traffic, we describe it without naming it. The hidden spots are the proof we mean it.&rdquo;</p>
+      <cite>— ERIC, FOUNDER, on protecting the small</cite>
+    </blockquote>
+  </section>
+
+  <!-- WHAT'S NEW -->
+  <a href="#new" class="ex-colmark__link">
+    <section class="ex-colmark" id="new">
+      <h2 class="ex-colmark__text">RECENT HIGHLIGHTS</h2>
+    </section>
+  </a>
+
+  <article class="ex-prose">
+    <ul>
+      <li><strong>Founding Partner cohort opened.</strong> First twelve sponsor slots reserved for businesses operating in the Bay Area. Five filled. Seven remaining. Founding partners named on the about page in perpetuity. <a href="/partners">See partnerships</a>.</li>
+      <li><strong>Top Tier guides expanded.</strong> Four populated best-of lists at launch: Korean BBQ (5 entries, Eric), Peninsula Coffee (5, Eric), Family-Owned (5, Daisy), Date Night (5, Eric). Quarterly refresh.</li>
+      <li><strong>Map of Keepers franchise page.</strong> Every published keeper pinned to a San Francisco neighborhood, numbered in order of publication. A visual archive of the city, one block at a time. <a href="/map">View the map</a>.</li>
+      <li><strong>Reader-funded model formalized.</strong> Four contribution tiers from $5 to custom. 75/25 split between operations and named local charities. Public corrections log live. <a href="/support">Become a supporter</a>.</li>
+    </ul>
+  </article>
+
+  <!-- CONTACT -->
+  <section class="press-contact">
+    <h2>WRITING ABOUT US? CALL.</h2>
+    <p>The editor handles all press inquiries personally. If you are working on a piece about independent local journalism, reader-funded publication models, the post-platform internet, or just SF Times as a thing, the easiest path is a fifteen-minute call.</p>
+    <div class="press-contact__methods">
+      <a href="mailto:eric@sftimes.com?subject=press%20inquiry">
+        <span>EMAIL</span>
+        <strong>eric@sftimes.com</strong>
+      </a>
+      <a href="tel:+17077183579">
+        <span>PHONE OR TEXT</span>
+        <strong>707·718·3579</strong>
+      </a>
+    </div>
+  </section>
+
+  <style>
+    .press-facts {
+      max-width: 1080px;
+      margin: 0 auto 56px;
+      padding: 0 12px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 36px;
+    }
+    @media (max-width: 880px) { .press-facts { grid-template-columns: 1fr; } }
+    .press-facts__label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 14px;
+      font-weight: 700;
+    }
+    .press-facts__copy { font-size: 16px; line-height: 1.7; margin: 0; max-width: 60ch; color: var(--ink); }
+
+    .press-metrics {
+      max-width: 1080px;
+      margin: 0 auto 12px;
+      padding: 0 12px 48px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px 32px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .press-metric { padding: 12px 0; }
+    .press-metric span { font-family: var(--display); font-size: clamp(36px, 4.5vw, 56px); line-height: 1; display: block; }
+    .press-metric p { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); margin: 8px 0 0; text-transform: uppercase; }
+    @media (max-width: 880px) { .press-metrics { grid-template-columns: repeat(2, 1fr); } }
+    .press-metrics__note { max-width: 1080px; margin: 0 auto 56px; padding: 12px 12px 0; font-size: 12px; color: var(--muted); text-align: center; }
+    .press-metrics__note a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    .press-founder {
+      max-width: 1080px;
+      margin: 0 auto 56px;
+      padding: 0 12px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+    @media (max-width: 880px) { .press-founder { grid-template-columns: 1fr; } }
+    .press-founder__photo { background: #2a2520; aspect-ratio: 3/4; overflow: hidden; }
+    .press-founder__photo :global(.real-image), .press-founder__photo :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+    .press-founder__role { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+    .press-founder__name { font-family: var(--display); font-size: clamp(36px, 5vw, 64px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 20px; }
+    .press-founder p { font-size: 16px; line-height: 1.7; margin: 0 0 16px; max-width: 60ch; }
+    .press-founder a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+    .press-founder__email a { font-family: var(--display); font-size: 22px; letter-spacing: -0.005em; }
+
+    .press-assets {
+      max-width: 1080px;
+      margin: 0 auto 12px;
+      padding: 0 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 880px) { .press-assets { grid-template-columns: 1fr; } }
+    .press-asset { background: var(--paper-2); padding: 28px; }
+    .press-asset__visual {
+      aspect-ratio: 4/3;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      flex-direction: column;
+    }
+    .press-asset__visual--logo .press-asset__wordmark { font-family: var(--display); font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.005em; }
+    .press-asset__visual--logo .press-asset__wordsub { font-family: var(--display); font-size: 10px; letter-spacing: 0.14em; color: var(--muted); margin-top: 4px; }
+    .press-asset__visual--swatches { gap: 8px; flex-direction: row; }
+    .press-swatch { width: 36px; height: 36px; border: 1px solid var(--rule); display: inline-block; }
+    .press-asset__visual--type { gap: 8px; }
+    .press-type-anton { font-family: var(--display); font-size: 28px; letter-spacing: -0.005em; }
+    .press-type-inter { font-family: var(--ui); font-size: 18px; font-weight: 500; }
+    .press-asset__name { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin: 0 0 6px; }
+    .press-asset__formats { font-size: 11px; color: var(--muted); margin: 0; line-height: 1.45; }
+    .press-assets__note { max-width: 1080px; margin: 0 auto 56px; padding: 14px 12px 0; font-size: 12px; color: var(--muted); text-align: center; }
+    .press-assets__note a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    .press-quotes {
+      max-width: 1080px;
+      margin: 0 auto 56px;
+      padding: 0 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 720px) { .press-quotes { grid-template-columns: 1fr; } }
+    .press-quote {
+      padding: 28px 30px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--ink);
+      margin: 0;
+    }
+    .press-quote p {
+      font-family: var(--display);
+      font-size: clamp(18px, 2vw, 24px);
+      line-height: 1.3;
+      letter-spacing: -0.005em;
+      margin: 0 0 14px;
+    }
+    .press-quote cite { font-size: 11px; letter-spacing: 0.16em; color: var(--muted); font-style: normal; text-transform: uppercase; }
+
+    .press-contact { background: var(--ink); color: var(--paper); padding: 56px 28px; }
+    .press-contact h2 { font-family: var(--display); font-size: clamp(40px, 6vw, 80px); line-height: 1; text-transform: uppercase; margin: 0 0 16px; letter-spacing: -0.005em; max-width: 20ch; }
+    .press-contact > p { font-size: 16px; line-height: 1.55; color: rgba(244,241,234,0.85); margin: 0 0 32px; max-width: 60ch; }
+    .press-contact__methods { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 760px; }
+    @media (max-width: 640px) { .press-contact__methods { grid-template-columns: 1fr; } }
+    .press-contact__methods a { display: flex; flex-direction: column; gap: 8px; padding: 24px; border: 1px solid rgba(244,241,234,0.3); color: var(--paper); transition: background 200ms; }
+    .press-contact__methods a:hover { background: rgba(244,241,234,0.08); }
+    .press-contact__methods span { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.6); }
+    .press-contact__methods strong { font-family: var(--display); font-size: clamp(22px, 2.4vw, 32px); font-weight: 400; letter-spacing: -0.005em; }
+  </style>
+</ExhibitionLayout>

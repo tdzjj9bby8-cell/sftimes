@@ -2,4 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /focal-audit
+Disallow: /tell-your-story
+Disallow: /sponsorship-deck
 Sitemap: https://sftimes.com/sitemap.xml

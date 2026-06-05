@@ -18,6 +18,7 @@ pull_quote: "A traje is not a costume. It is the family before you, sewn into so
 pull_quote_attr: "Don Ramiro Vega"
 read_minutes: 11
 is_featured: false
+lede_line: "hand-stitches another traje at 4:42 a.m. His children argue about the shop."
 ---
 
 It is 7:14 in the morning and Don Ramiro Vega is rolling out a length of black wool on a cutting table older than two of his children.

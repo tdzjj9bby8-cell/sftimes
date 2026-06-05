@@ -18,6 +18,7 @@ pull_quote: "A kid who learns to swim at 14 will never look at water the same wa
 pull_quote_attr: "Lulu Garcia"
 read_minutes: 10
 is_featured: false
+lede_line: "has no fee, no logo, and a waitlist. Lulu Garcia teaches inland kids the water."
 ---
 
 It is 6:55 a.m. on a Saturday and Lulu Garcia is dragging six wetsuits out of a Toyota Tacoma onto the sand at Sloat. Five of the wetsuits are children's sizes. The sixth fits a 14-year-old named Esme who has never put her face under water and has been on the waitlist for fourteen months.

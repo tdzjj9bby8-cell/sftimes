@@ -1,6 +1,7 @@
 ---
 import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
 import Placeholder from '../../components/Placeholder.astro';
+import AuthorAvatar from '../../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
 
 // One Exhibition-styled article page per story. Body comes from the markdown
@@ -23,12 +24,63 @@ const { Content } = await s.render();
 const dateLong = s.data.published
   .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
   .toUpperCase();
+
+// Schema.org Article payload. Tells crawlers + AI Overviews the story metadata,
+// author identity, sponsor (when present), and content classification.
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "@id": `https://sftimes.com/stories/${s.data.url_slug}#article`,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://sftimes.com/stories/${s.data.url_slug}`
+  },
+  "headline": s.data.title,
+  "description": s.data.deck,
+  "datePublished": s.data.published.toISOString().slice(0, 10),
+  "dateModified": s.data.published.toISOString().slice(0, 10),
+  "author": {
+    "@type": "Person",
+    "name": s.data.author,
+    "url": `https://sftimes.com/team#${s.data.author.toLowerCase()}`
+  },
+  "publisher": { "@id": "https://sftimes.com/#org" },
+  "image": [`https://sftimes.com/${s.data.hero_filename_hint}`],
+  "articleSection": s.data.keeper_type || "Profile",
+  "wordCount": Math.round(s.data.read_minutes * 220),
+  "inLanguage": "en-US",
+  "isAccessibleForFree": true,
+  ...(s.data.neighborhood && {
+    "contentLocation": {
+      "@type": "Place",
+      "name": `${s.data.neighborhood}, San Francisco`
+    }
+  }),
+  ...(s.data.photographer && s.data.photographer !== 'Staff' && {
+    "creator": [{
+      "@type": "Person",
+      "name": s.data.photographer,
+      "jobTitle": "Photographer"
+    }]
+  }),
+  ...(s.data.sponsor && {
+    "sponsor": {
+      "@type": "Organization",
+      "name": s.data.sponsor.name,
+      ...(s.data.sponsor.url && { "url": s.data.sponsor.url })
+    }
+  })
+};
 ---
 <ExhibitionLayout
   title={`${(s.data.seo_title || s.data.title).toUpperCase()} · The Keepers · SF Times`}
   description={s.data.deck}
   active="stories"
+  ogImage={s.data.hero_filename_hint}
+  ogType="article"
 >
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(articleSchema)} />
+
   <!-- HERO PHOTO + TITLE -->
   <section class="story-hero">
     <div class="story-hero__media">
@@ -41,11 +93,30 @@ const dateLong = s.data.published
       />
     </div>
     <div class="story-hero__overlay">
+      {s.data.sponsor && (
+        <p class="story-hero__sponsor">IN COLLABORATION WITH <strong>{s.data.sponsor.name.toUpperCase()}</strong></p>
+      )}
       <p class="story-hero__eyebrow">ISSUE №{s.data.issue} · {dateLong} · {s.data.read_minutes}-MIN READ</p>
       <h1 class="story-hero__title">{s.data.title.toUpperCase()}</h1>
-      <p class="story-hero__byline">BY {s.data.author.toUpperCase()} {s.data.photographer && s.data.photographer !== 'Staff' ? `· PHOTOGRAPHS BY ${s.data.photographer.toUpperCase()}` : ''}</p>
+      <p class="story-hero__byline">
+        <AuthorAvatar name={s.data.author} size={28} variant="light" />
+        <span>BY {s.data.author.toUpperCase()} · PHOTOGRAPHS BY {(s.data.photographer && s.data.photographer !== 'Staff' ? s.data.photographer : 'SF TIMES STAFF').toUpperCase()}</span>
+      </p>
     </div>
   </section>
+
+  <!-- SPONSOR DISCLOSURE STRIP — editorial firewall language, full-bleed -->
+  {s.data.sponsor && (
+    <aside class="story-firewall" aria-label="Editorial firewall disclosure">
+      <p class="story-firewall__label">EDITORIAL FIREWALL · IN COLLABORATION WITH {s.data.sponsor.name.toUpperCase()}</p>
+      <p class="story-firewall__body">
+        This story was commissioned as part of a paid editorial partnership with {s.data.sponsor.name}.
+        {s.data.sponsor.url && (<> Visit them at <a href={s.data.sponsor.url} rel="sponsored noopener" target="_blank">{s.data.sponsor.url.replace(/^https?:\/\//, '')}</a>.</>)}
+        Sponsor approved facts. The editor wrote every word. We do not run sponsored content we cannot honestly stand behind.
+        <a class="story-firewall__more" href="/partners">How partnerships work →</a>
+      </p>
+    </aside>
+  )}
 
   <!-- DECK -->
   <article class="ex-prose">
@@ -57,14 +128,25 @@ const dateLong = s.data.published
     <Content />
   </article>
 
-  <!-- PULL QUOTE -->
+  <!-- PULL QUOTE — uses typographic curly quotes -->
   {s.data.pull_quote && (
     <article class="ex-prose">
       <blockquote class="story-pull">
-        <p>"{s.data.pull_quote}"</p>
+        <p>&ldquo;{s.data.pull_quote}&rdquo;</p>
         {s.data.pull_quote_attr && <cite>{s.data.pull_quote_attr.toUpperCase()}</cite>}
       </blockquote>
     </article>
+  )}
+
+  <!-- FOOT-OF-ARTICLE SPONSOR REMINDER (only on sponsored pieces) -->
+  {s.data.sponsor && (
+    <aside class="story-firewall story-firewall--foot" aria-label="Editorial firewall disclosure">
+      <p class="story-firewall__label">END OF SPONSORED FEATURE</p>
+      <p class="story-firewall__body">
+        Brought to you in partnership with {s.data.sponsor.name}. The editor maintained full control of the angle and copy.
+        Interested in your own collaboration? <a href="/partners#stories">See Profile packages →</a>
+      </p>
+    </aside>
   )}
 
   <!-- READ NEXT -->
@@ -80,7 +162,10 @@ const dateLong = s.data.published
         <div class="ex-card__media">
           <Placeholder alt={m.data.hero_alt} filenameHint={m.data.hero_filename_hint} aspect="4:3" showLabel={false} />
         </div>
-        <p class="ex-card__meta">ISSUE №{m.data.issue} · BY {m.data.author.toUpperCase()}</p>
+        <p class="ex-card__meta">
+          <AuthorAvatar name={m.data.author} size={20} />
+          <span>ISSUE №{m.data.issue} · BY {m.data.author.toUpperCase()}</span>
+        </p>
         <h3 class="ex-card__title">{m.data.title}</h3>
       </a>
     ))}
@@ -96,9 +181,56 @@ const dateLong = s.data.published
       background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 70%, transparent);
       color: var(--paper);
     }
+    .story-hero__sponsor {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--paper);
+      padding: 5px 12px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      margin: 0 0 14px;
+      text-transform: uppercase;
+    }
+    .story-hero__sponsor strong { font-weight: 700; }
     .story-hero__eyebrow { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0 0 12px; }
     .story-hero__title { font-family: var(--display); font-size: clamp(36px, 6vw, 96px); line-height: 1; letter-spacing: -0.005em; margin: 0 0 12px; text-transform: uppercase; max-width: 20ch; }
-    .story-hero__byline { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0; }
+    .story-hero__byline { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .story-firewall {
+      max-width: 880px;
+      margin: 32px auto 0;
+      padding: 22px 28px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--accent);
+    }
+    .story-firewall--foot { margin: 48px auto; }
+    .story-firewall__label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .story-firewall__body {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0;
+    }
+    .story-firewall__body a {
+      color: var(--ink);
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 1px;
+    }
+    .story-firewall__more {
+      display: inline-block;
+      margin-left: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
     .story-deck { font-family: var(--display); font-size: clamp(22px, 2.6vw, 38px); line-height: 1.2; text-transform: none; letter-spacing: -0.005em; margin: 0; max-width: 36ch; }
     .story-pull { padding: 32px 0; border-block: 1px solid var(--rule); margin: 32px 0; text-align: center; }
     .story-pull p { font-family: var(--display); font-size: clamp(28px, 4vw, 56px); line-height: 1.1; letter-spacing: -0.005em; margin: 0 0 12px; text-transform: uppercase; }
