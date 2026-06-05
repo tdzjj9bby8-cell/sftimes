@@ -1,59 +1,61 @@
 # Code prompt: Interlink the "Work With Us" pages across the site
 
-Eric flagged that the Partner packages / Tell us your story / Send a tip / We're hiring pages are buried in the footer and hard to find. He approved BOTH the header dropdown AND inline CTAs.
+**SHIPPED 2026-06-04 in commit `f88f2da`.** This document is preserved as a reference for the pattern + as a template for future similar interlinking work. File references below reflect the post-migration Exhibition tree (not the legacy Keepers layout that the original draft referenced).
 
-## What to read first
+## Why this exists
+
+Eric flagged that the Partner packages / Tell us your story / Send a tip / We're hiring pages were buried in the footer and hard to find. He approved both a header surface and inline CTAs. This prompt was the spec Code executed.
+
+## What to read first if running again
 
 1. `/Users/eric/projects/mission-control/skills/voice-standards.md`
-2. `/Users/eric/projects/sftimes/astro/src/components/Header.astro` (current nav structure)
-3. `/Users/eric/projects/sftimes/astro/src/layouts/BaseLayout.astro` (where Header is included)
-4. `/Users/eric/projects/sftimes/astro/src/layouts/ArticleImmersive.astro` (article footer placement, especially the existing `.article-footer` + `.article-read-next` sections at line ~115)
-5. `/Users/eric/projects/sftimes/astro/src/pages/about.astro`
-6. `/Users/eric/projects/sftimes/astro/src/pages/support.astro`
+2. `/Users/eric/projects/sftimes/astro/src/layouts/ExhibitionLayout.astro` (the current header / drawer surface; the legacy `components/Header.astro` is the older Keepers layout, NOT what production uses)
+3. `/Users/eric/projects/sftimes/astro/src/pages/stories/[slug].astro` (story page template; the legacy `layouts/ArticleImmersive.astro` is the older Keepers article layout, NOT what production uses)
+4. `/Users/eric/projects/sftimes/astro/src/pages/about.astro`
+5. `/Users/eric/projects/sftimes/astro/src/pages/support.astro`
+6. `/Users/eric/projects/sftimes/astro/src/pages/team.astro` (confirm the `id="hiring"` anchor is present for the `/team#hiring` link target)
 
-## Job 1: Header dropdown
+## Job 1: Drawer subgroup (post-migration equivalent of "header dropdown")
 
-In `src/components/Header.astro`:
+In `src/layouts/ExhibitionLayout.astro`:
 
-The current `nav` array (line 8) has 6 flat items: stories, best of, hidden spots, quizzes, about, support. Add a 7th item that opens a small dropdown menu exposing 4 links:
+The Exhibition system uses a drawer (hamburger-triggered) rather than a flat header nav. Add a labeled subgroup inside the drawer with the heading "WORK WITH US" and 4 sub-links underneath. Pure CSS, no JS required.
 
+The 4 destinations:
 - Partner packages → `/partners`
 - Tell us your story → `/tell-your-story`
 - Send a tip → `/submit`
-- We're hiring → `/team` (or whatever the careers page is — verify by reading)
+- We're hiring → `/team#hiring`
 
 Implementation guidance:
-- Use CSS hover for desktop dropdown (no JS unless absolutely necessary; if accessibility requires keyboard support, add minimal toggle JS scoped to the dropdown)
-- Mobile menu also needs the new "work with us" group exposed (not as a dropdown, just as a sub-section with the 4 links)
-- Don't break the current `.site-nav__link.is-active` underline logic
-- Use the existing typography + color tokens; don't introduce new design language
-- Test that the existing 6 items still render cleanly
+- Use the existing `.ex-*` token system (not legacy Keepers tokens like `.ui-label` or `.container-narrow`)
+- Color via `var(--rule)` / `var(--paper-2)` etc., not the legacy palette
+- Keep the existing drawer hierarchy intact, just add the WORK WITH US subgroup
+- Subgroup label lowercase to match Exhibition tone: "work with us"
 
-The label should be lowercase to match the existing nav style: "work with us"
+## Job 2: Article footer CTA cards (post-migration equivalent of "ArticleImmersive footer addition")
 
-## Job 2: Inline CTAs at article footers
-
-In `src/layouts/ArticleImmersive.astro`, between the existing `.article-footer` block (~line 115) and the `.article-read-next` section (~line 128), add a new section that surfaces the 4 work-with-us pages. The pattern should match the existing editorial design language (not feel like banner ads).
+In `src/pages/stories/[slug].astro`, add a `.work-with-keepers` 4-card section between the optional sponsor-foot block and the existing READ NEXT section.
 
 Suggested treatment:
 
 ```astro
-<section class="article-work-with-us container container-narrow" aria-label="Work with the keepers">
-  <h2 class="ui-label article-work-with-us__eyebrow">work with the keepers</h2>
-  <div class="article-work-with-us__grid">
-    <a href="/partners" class="article-work-with-us__card">
+<section class="work-with-keepers" aria-label="Work with the keepers">
+  <h2 class="work-with-keepers__eyebrow">work with the keepers</h2>
+  <div class="work-with-keepers__grid">
+    <a href="/partners" class="work-with-keepers__card">
       <h3>Partner packages</h3>
       <p>Sponsor a saturday, a profile, a season, or a year. Real editorial firewall.</p>
     </a>
-    <a href="/tell-your-story" class="article-work-with-us__card">
+    <a href="/tell-your-story" class="work-with-keepers__card">
       <h3>Tell us your story</h3>
       <p>Operator, keeper, regular, kid with a paper route. Pitch us what you know.</p>
     </a>
-    <a href="/submit" class="article-work-with-us__card">
+    <a href="/submit" class="work-with-keepers__card">
       <h3>Send a tip</h3>
       <p>Anonymous if you want. We follow up on every one we can verify.</p>
     </a>
-    <a href="/team" class="article-work-with-us__card">
+    <a href="/team#hiring" class="work-with-keepers__card">
       <h3>We're hiring</h3>
       <p>Student journalism roles. Paid. SF or Bay Area. See the open list.</p>
     </a>
@@ -63,40 +65,52 @@ Suggested treatment:
 
 Style guidance:
 - Grid: `repeat(4, 1fr)` desktop, `repeat(2, 1fr)` tablet, `1fr` mobile
-- Cards have generous padding, hairline borders matching `.org` and `.tier` styles already in the codebase, hover state that drops a brand-accent underline
-- Heading style matches `.section-title` in scale
-- The 4 card descriptions above are placeholders, voice-clean, edit if you want sharper copy
+- Card borders use `var(--rule)` matching the `.org` and `.tier` patterns elsewhere in the codebase
+- Hover state: brand-accent underline drop
+- Heading uses the `.ex-*` type scale
+- Place the section AFTER any optional sponsor-foot block and BEFORE the READ NEXT grid
 
-Refresh the copy in case any of those pages have updated their stated value props since this prompt was written.
+Refresh card descriptions before shipping if the destination pages have updated their stated value props.
 
-## Job 3: About + Support page cross-links
+## Job 3: About + Support page link strips
 
-In `src/pages/about.astro` and `src/pages/support.astro`, add a "Work with us" link strip near the page footer / bottom. Same 4 destinations. Treatment can be a simpler horizontal link row, doesn't need the full card grid since the page itself is content-heavy.
+In `src/pages/about.astro` and `src/pages/support.astro`, add a `.work-with-strip` horizontal link row near the page footer. Same 4 destinations. Doesn't need the full card grid since these pages are content-heavy.
 
-## Voice rules apply to all copy you draft
+## Voice rules apply to all draft copy
 
-- No em dashes
-- No banned filler (leverage, utilize, comprehensive, robust, cutting-edge, seamlessly, vibrant, delve into, circle back, moving forward, synergy, in today's world)
-- Closed compounds (onsite, online, followup, setup, startup)
+- No em dashes anywhere
+- No banned filler: leverage, utilize, comprehensive, robust, cutting-edge, seamlessly, vibrant, delve into, circle back, moving forward, synergy, in today's world
+- Closed compounds: onsite, online, followup, setup, startup
 - Voice: direct, operator, every word earns its place
 
-## Voice + integration checks before commit
+## Pre-push verification checks
 
-- `grep -c "—" src/components/Header.astro src/layouts/ArticleImmersive.astro src/pages/about.astro src/pages/support.astro` returns 0 across all
-- `grep -ciE "leverage|utilize|circle back|moving forward|touch base|reach out|hope this finds|synergy|delve into|seamlessly" src/components/Header.astro src/layouts/ArticleImmersive.astro src/pages/about.astro src/pages/support.astro` returns 0
-- `npm run build` runs clean
-- Visual eye-test on the active-branch preview after Vercel deploys: header dropdown renders on `/`, mobile menu shows the 4 work-with-us items, every article page has the new section above Read Next, About and Support have the link strip
+Updated for the post-migration architecture:
+- `grep -c "—" src/layouts/ExhibitionLayout.astro src/pages/stories/\[slug\].astro src/pages/about.astro src/pages/support.astro` returns 0
+- `grep -ciE "leverage|utilize|circle back|moving forward|touch base|reach out|hope this finds|synergy|delve into|seamlessly" src/layouts/ExhibitionLayout.astro src/pages/stories/\[slug\].astro src/pages/about.astro src/pages/support.astro` returns 0
+- `npm run build` clean (98 pages, placeholder guard exit 0)
+- Visual eye-test on Vercel preview: drawer subgroup opens with 4 sub-links, article footer 4-card section above READ NEXT, About + Support link strips visible near foot
 
-## Commit scope discipline (standing rule)
+## Commit scope discipline
 
-Per the `## COMMIT SCOPE DISCIPLINE` section in `astro/CLAUDE.md` (added 2026-06-04 commit `4dcc1b6`): before committing, run `git status` and bucket changes. If you find files outside this prompt's scope (Header.astro, ArticleImmersive.astro, about.astro, support.astro), surface them and ask before committing. Do NOT default to `git add -A`.
+Per the `## COMMIT SCOPE DISCIPLINE` section in `astro/CLAUDE.md` (added 2026-06-04 commit `4dcc1b6`): before committing, run `git status` and bucket changes. If you find files outside this prompt's scope, surface them and ask before committing. Do NOT default to `git add -A`.
 
-## What to commit + push
+For this specific prompt's scope, the 4 named files are:
+- `src/layouts/ExhibitionLayout.astro`
+- `src/pages/stories/[slug].astro`
+- `src/pages/about.astro`
+- `src/pages/support.astro`
 
-Single PR or single commit with a truthful subject line, e.g.:
+If `support.astro` carries an unrelated pre-existing change (it did in the first run because of an entangled supporter-slot edit), surface it in the commit message rather than hiding it.
+
+## Suggested commit message
 
 ```
-Add work-with-us interlinking: header dropdown + article footer CTAs + about/support cross-links
+Interlink Work With Us: drawer subgroup + article footer cards + about/support strips
 ```
 
-Push when build is clean.
+If `support.astro` is entangled, append a parenthetical noting the entangled change.
+
+## Historical note
+
+The original draft of this prompt referenced legacy Keepers tokens (`.article-footer`, `.article-read-next`, `.ui-label`, `.container-narrow`, `components/Header.astro`, `layouts/ArticleImmersive.astro`). Those don't exist in the post-migration Exhibition tree. Code adapted on the fly in the 2026-06-04 run and shipped `f88f2da` cleanly. This refresh aligns the spec with what actually works in production.
