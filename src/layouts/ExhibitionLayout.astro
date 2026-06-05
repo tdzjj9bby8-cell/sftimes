@@ -175,6 +175,10 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
   .ex-drawer a { font-family: var(--display); font-size: clamp(36px, 6vw, 80px); line-height: 1; text-transform: uppercase; color: var(--ink); letter-spacing: -0.005em; transition: opacity 150ms; }
   .ex-drawer a:hover { opacity: 0.5; }
   .ex-drawer__hint { font-family: var(--ui); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 32px; }
+  .ex-drawer__group { display: grid; gap: 6px; margin-top: 4px; }
+  .ex-drawer__group-label { font-family: var(--display); font-size: clamp(36px, 6vw, 80px); line-height: 1; text-transform: uppercase; color: var(--ink); letter-spacing: -0.005em; }
+  .ex-drawer__sublink { font-family: var(--ui); font-size: 17px; font-weight: 500; color: var(--ink); padding-left: 6px; letter-spacing: 0.01em; text-transform: none; transition: opacity 150ms; }
+  .ex-drawer__sublink:hover { opacity: 0.55; }
 
   /* === SECTION NAV === */
   .ex-secnav { display: grid; grid-template-columns: 60px repeat(7, 1fr); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); height: 56px; align-items: center; }
@@ -339,7 +343,13 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
     <a href="/quizzes">CHECKUPS</a>
     <a href="/about">WHO WE ARE</a>
     <a href="/support">KEEP IT ALIVE</a>
-    <a href="/partners">WORK WITH US</a>
+    <div class="ex-drawer__group">
+      <span class="ex-drawer__group-label">WORK WITH US</span>
+      <a class="ex-drawer__sublink" href="/partners">Partner packages</a>
+      <a class="ex-drawer__sublink" href="/tell-your-story">Tell us your story</a>
+      <a class="ex-drawer__sublink" href="/submit">Send a tip</a>
+      <a class="ex-drawer__sublink" href="/team#hiring">We're hiring</a>
+    </div>
     <p class="ex-drawer__hint">Press Esc or tap the X to close</p>
   </div>
 </aside>

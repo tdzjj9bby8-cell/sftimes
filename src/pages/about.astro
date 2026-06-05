@@ -89,6 +89,17 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
     </section>
   </a>
 
+  <!-- WORK WITH US — link strip surfacing the 4 conversion paths -->
+  <section class="work-with-strip" aria-label="Work with the keepers">
+    <p class="work-with-strip__label">WORK WITH US</p>
+    <ul class="work-with-strip__list">
+      <li><a href="/partners">Partner packages</a></li>
+      <li><a href="/tell-your-story">Tell us your story</a></li>
+      <li><a href="/submit">Send a tip</a></li>
+      <li><a href="/team#hiring">We're hiring</a></li>
+    </ul>
+  </section>
+
   <style>
     .supporters { padding: 0 12px 48px; max-width: 1080px; margin: 0 auto; }
     .supporters__list {
@@ -114,5 +125,12 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
     .supporters__item--open { color: var(--muted); font-style: italic; }
     .supporters__foot { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 64ch; }
     .supporters__foot a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; font-weight: 600; }
+
+    /* Work-with-us link strip — horizontal row of 4 destinations */
+    .work-with-strip { max-width: 1100px; margin: 56px auto; padding: 32px 12px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+    .work-with-strip__label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+    .work-with-strip__list { display: flex; flex-wrap: wrap; gap: 16px 36px; list-style: none; padding: 0; margin: 0; }
+    .work-with-strip__list a { font-family: var(--display); font-size: clamp(20px, 2.2vw, 30px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: opacity 150ms; }
+    .work-with-strip__list a:hover { opacity: 0.55; }
   </style>
 </ExhibitionLayout>
