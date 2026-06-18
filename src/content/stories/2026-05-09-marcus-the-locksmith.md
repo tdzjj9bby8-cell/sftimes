@@ -19,6 +19,7 @@ pull_quote: "I lose customers who want a fast unlock with no questions. That is 
 pull_quote_attr: "Marcus Chen, Owner"
 read_minutes: 4
 is_featured: false
+is_sample: true
 lede_line: "still checks ID before opening a door. The cheapest and slowest locksmith on Geary, on purpose."
 sponsor:
   name: "Chen Lock & Key"

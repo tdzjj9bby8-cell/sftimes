@@ -1,7 +1,7 @@
 ---
 title: "Best Family-Owned Restaurants"
 url_slug: "family-owned"
-intro: "Five San Francisco restaurants owned and run by the same family for at least fifteen years. Editor visited every one. Named on every menu. Real recipes, real grandmothers, real kids working the register. Refreshed quarterly."
+intro: "Five San Francisco restaurants owned and run by the same family for at least fifteen years. Compiled from public records and in-person visits where the editor has been a regular. Named on every menu. Real recipes, real grandmothers, real kids working the register. Refreshed quarterly once the column is in regular rotation."
 editor: Daisy
 last_refreshed: 2026-05-25
 hero_alt: "Best Family-Owned Restaurants category card"

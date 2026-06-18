@@ -1,7 +1,7 @@
 ---
 title: "Best Korean BBQ in San Francisco"
 url_slug: "korean-bbq-sf"
-intro: "Five Korean BBQ spots that earn their place. Editor walked every one twice. No affiliate links, no chain inventory, no preferred placements. Refreshed quarterly. If you have a pick we missed, send it."
+intro: "Five Korean BBQ spots that earn their place. Compiled by the editor from in-person visits, public reviews, and confirmed menus. No affiliate links, no chain inventory, no preferred placements. Refreshed quarterly once the column is in regular rotation. If you have a pick we missed, send it."
 editor: Eric
 last_refreshed: 2026-05-25
 hero_alt: "Best Korean BBQ in San Francisco category card"

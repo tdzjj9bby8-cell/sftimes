@@ -50,7 +50,7 @@ const totalIssues = stories.length;
     <div class="press-metric"><span>$0</span><p>PAYWALL, NEVER</p></div>
   </section>
 
-  <p class="press-metrics__note">Numbers refreshed monthly. Last refresh: June 2026. For the live snapshot or a quarter-by-quarter breakdown, email <a href="mailto:eric@sftimes.com">the editor</a>.</p>
+  <p class="press-metrics__note">Pre-launch projections. Subscriber count, open rate, Bay Area percentage, and time-on-article are targets based on early signups and indie newsletter benchmarks. Banner ads, paywall, and human-byline figures are real. Issues shipped reflects the published archive. For the live snapshot once we are operating at full scale, email <a href="mailto:eric@sftimes.com">the editor</a>.</p>
 
   <!-- FIVE PRINCIPLES -->
   <a href="#principles" class="ex-colmark__link">
@@ -151,30 +151,26 @@ const totalIssues = stories.length;
   <!-- QUOTES YOU CAN USE -->
   <a href="#quotes" class="ex-colmark__link">
     <section class="ex-colmark" id="quotes">
-      <h2 class="ex-colmark__text">QUOTES, READY TO USE</h2>
+      <h2 class="ex-colmark__text">POSITIONING TALKING POINTS</h2>
     </section>
   </a>
 
   <section class="press-quotes">
-    <blockquote class="press-quote">
-      <p>&ldquo;The bar is honest: do you treat your people well, are you specific about what you do, and would your story make a Saturday letter our readers actually want to open?&rdquo;</p>
-      <cite>ERIC, FOUNDER, on what makes a partnership work</cite>
-    </blockquote>
+    <p class="press-quotes__note">Positioning language only. Use these as paraphrased context for the publication's stance on partnerships, the editorial firewall, the publishing rhythm, and how we protect small businesses. For direct, attributable quotes from the editor on any of these topics, email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a> with the angle you are writing about and a deadline. Same-day turnaround in most cases.</p>
 
-    <blockquote class="press-quote">
-      <p>&ldquo;We do not run sponsored content we cannot honestly stand behind. The firewall is the product.&rdquo;</p>
-      <cite>ERIC, FOUNDER, on the editorial firewall</cite>
-    </blockquote>
+    <div class="press-talkingpoints">
+      <p class="press-talkingpoint__label">ON WHAT MAKES A PARTNERSHIP WORK</p>
+      <p>SF Times takes partners whose work meets an honest bar: they treat their people well, they are specific about what they do, and the story behind their business is the kind of profile our readers want to open on a Saturday morning.</p>
 
-    <blockquote class="press-quote">
-      <p>&ldquo;Sixty-two issues, named bylines, every Saturday. The chain is not really a chain. It is the same kitchen, sixty-two times.&rdquo;</p>
-      <cite>ERIC, FOUNDER, on the publishing rhythm</cite>
-    </blockquote>
+      <p class="press-talkingpoint__label">ON THE EDITORIAL FIREWALL</p>
+      <p>The publication does not run sponsored content it cannot honestly stand behind. Partners pay for an editor's time and attention. They do not buy approval rights, copy review, or favorable framing. That separation is the product.</p>
 
-    <blockquote class="press-quote">
-      <p>&ldquo;If a place can't handle traffic, we describe it without naming it. The hidden spots are the proof we mean it.&rdquo;</p>
-      <cite>ERIC, FOUNDER, on protecting the small</cite>
-    </blockquote>
+      <p class="press-talkingpoint__label">ON THE PUBLISHING RHYTHM</p>
+      <p>One profile every Saturday morning, named editor, named photographer. No catch-up issues. No filler. The cadence is the discipline.</p>
+
+      <p class="press-talkingpoint__label">ON PROTECTING THE SMALL</p>
+      <p>If a place cannot handle the traffic an SF Times profile would send, the publication describes it without naming it. The Hidden Spots column is the standing proof of this policy.</p>
+    </div>
   </section>
 
   <!-- WHAT'S NEW -->
@@ -318,6 +314,37 @@ const totalIssues = stories.length;
       margin: 0 0 14px;
     }
     .press-quote cite { font-size: 11px; letter-spacing: 0.16em; color: var(--muted); font-style: normal; text-transform: uppercase; }
+    .press-quotes__note {
+      max-width: 760px;
+      margin: 0 auto 32px;
+      padding: 14px 18px;
+      background: #fef3e6;
+      border-left: 3px solid var(--accent, #b8473a);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+    .press-talkingpoints {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .press-talkingpoint__label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 20px 0 4px;
+      font-weight: 700;
+    }
+    .press-talkingpoints p:not(.press-talkingpoint__label) {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
 
     .press-contact { background: var(--ink); color: var(--paper); padding: 56px 28px; }
     .press-contact h2 { font-family: var(--display); font-size: clamp(40px, 6vw, 80px); line-height: 1; text-transform: uppercase; margin: 0 0 16px; letter-spacing: -0.005em; max-width: 20ch; }

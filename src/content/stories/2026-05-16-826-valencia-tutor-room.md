@@ -18,6 +18,7 @@ pull_quote: "The room works because nobody has tried to make it bigger. Bigger w
 pull_quote_attr: "Program Director, 826 Valencia"
 read_minutes: 4
 is_featured: false
+is_sample: true
 lede_line: "is still tutoring at 3:15 p.m. on a Tuesday, just like every weekday since 2002."
 sponsor:
   name: "826 Valencia"

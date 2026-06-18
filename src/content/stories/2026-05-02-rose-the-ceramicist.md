@@ -18,6 +18,7 @@ pull_quote: "Forty is the number I can throw and still know each one before it g
 pull_quote_attr: "Rose Akiyama, Potter"
 read_minutes: 4
 is_featured: false
+is_sample: true
 lede_line: "throws exactly forty bowls a week and has a fifteen-month waitlist."
 sponsor:
   name: "Rose Akiyama Ceramics"

@@ -18,6 +18,7 @@ pull_quote: "I do not need to be the biggest. I need to know the people I buy fr
 pull_quote_attr: "Marisa Padilla, Founder"
 read_minutes: 5
 is_featured: false
+is_sample: true
 lede_line: "knows both growers by name and refuses to scale past two farms."
 sponsor:
   name: "Olive Branch Roasters"

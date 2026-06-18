@@ -223,22 +223,13 @@ const faqs = [
     <div class="metric"><span>4.2 MIN</span><p>AVG. TIME ON ARTICLE</p></div>
     <div class="metric"><span>$0</span><p>PAYWALL · NEVER</p></div>
   </section>
+  <p class="metrics-disclosure">Pre-launch projections. The subscriber, open rate, time-on-article, and SF Bay Area percentages above are targets based on early signups and comparable indie newsletter benchmarks, not yet audited at full scale. Issues shipped, human bylines, banner ads, and paywall figures are real. We replace projections with audited numbers once the Saturday newsletter has run twelve consecutive weeks.</p>
 
-  <!-- LIVE ACTIVITY STRIP · honest scarcity signals -->
-  <section class="live-activity">
-    <div class="la la--inquiries">
-      <span class="la__label">INQUIRIES THIS WEEK</span>
-      <span class="la__value">7</span>
-    </div>
-    <div class="la la--last">
-      <span class="la__label">LAST INQUIRY</span>
-      <span class="la__value" id="laLast">6 hours ago</span>
-    </div>
-    <div class="la la--countdown">
-      <span class="la__label">NEXT SLOT REFRESH</span>
-      <span class="la__value" id="laCountdown" data-target>…</span>
-    </div>
-  </section>
+  <!-- The "live activity" strip (inquiries this week, last inquiry, slot refresh countdown)
+       was removed during the fabrication cleanup. Pre-launch, those numbers had no real
+       source. We restore the strip when the partner inbox is live and we have real counts
+       to publish. -->
+
 
   <!-- THIS MONTH'S AVAILABILITY · the scarcity strip -->
   <section class="availability">
@@ -320,38 +311,34 @@ const faqs = [
     </div>
   </section>
 
-  <!-- RECENT PARTNER CASE STUDY · concrete proof of what a Profile delivers -->
+  <!-- SAMPLE CASE STUDY · illustrative format only, no real partnership shipped yet -->
   <section class="case">
     <div class="case__head">
-      <p class="case__label">RECENT PARTNER · THE PROFILE</p>
-      <h2 class="case__title">What a Saturday partnership actually delivers.</h2>
+      <p class="case__label">SAMPLE CASE STUDY · ILLUSTRATIVE FORMAT</p>
+      <h2 class="case__title">What a Saturday partnership would look like.</h2>
+      <p class="case__intro">SF Times has not yet shipped a paid sponsored Profile. The card below shows the format a real partnership would take, the kind of numbers a Profile would be expected to produce in its first 30 days based on average newsletter performance, and the framing the editor would use. The story title, partner name, and metrics are constructed for demonstration. The first real case study replaces this card.</p>
     </div>
 
     <div class="case__body">
       <div class="case__story">
-        <p class="case__story-eyebrow">ISSUE №57 · IN COLLABORATION WITH OLIVE BRANCH ROASTERS</p>
-        <h3 class="case__story-title">Olive Branch Roasters and the Two-Lot Theory of Coffee</h3>
-        <p class="case__story-deck">Marisa Padilla roasts twelve pounds a day from two farms. She names the growers. She refuses every wholesale order under a written promise.</p>
-        <a class="case__story-link" href="/stories/olive-branch-roasters-bernal">READ THE PIECE →</a>
+        <p class="case__story-eyebrow">SAMPLE · IN COLLABORATION WITH [YOUR BUSINESS]</p>
+        <h3 class="case__story-title">A Profile of Your Business, in Our Voice</h3>
+        <p class="case__story-deck">A 1,200-word reported feature by a named editor, in the SF Times voice, with a DoFollow backlink to your site and a permanent URL on sftimes.com.</p>
+        <a class="case__story-link" href="/stories/olive-branch-roasters-bernal">READ A FORMAT SAMPLE →</a>
       </div>
 
       <div class="case__metrics">
-        <p class="case__metrics-label">RESULTS · FIRST 30 DAYS</p>
-        <div class="case__metric"><span class="case__num">3,221</span><p>UNIQUE READERS</p></div>
-        <div class="case__metric"><span class="case__num">68%</span><p>EMAIL OPEN RATE</p></div>
-        <div class="case__metric"><span class="case__num">5:14</span><p>AVG. TIME ON ARTICLE</p></div>
-        <div class="case__metric"><span class="case__num">412</span><p>OUTBOUND CLICKS</p></div>
-        <div class="case__metric"><span class="case__num">+187</span><p>NEW EMAIL SIGNUPS</p></div>
+        <p class="case__metrics-label">EXPECTED RESULTS · ESTIMATED FROM CURRENT READERSHIP</p>
+        <div class="case__metric"><span class="case__num">~3,200</span><p>UNIQUE READERS</p></div>
+        <div class="case__metric"><span class="case__num">~62%</span><p>EMAIL OPEN RATE</p></div>
+        <div class="case__metric"><span class="case__num">~5 MIN</span><p>AVG. TIME ON ARTICLE</p></div>
+        <div class="case__metric"><span class="case__num">~400</span><p>OUTBOUND CLICKS</p></div>
+        <div class="case__metric"><span class="case__num">~185</span><p>NEW EMAIL SIGNUPS</p></div>
         <div class="case__metric"><span class="case__num">∞</span><p>DOFOLLOW BACKLINK · FOREVER</p></div>
       </div>
     </div>
 
-    <blockquote class="case__quote">
-      <p>&ldquo;The piece read like one of our regulars wrote it. The editor walked through the shop twice before he ever started typing. Twelve weeks later we still see the article in our top three referrers.&rdquo;</p>
-      <cite>MARISA PADILLA, FOUNDER · OLIVE BRANCH ROASTERS</cite>
-    </blockquote>
-
-    <p class="case__note">Sample case study constructed from real publication metrics. Olive Branch Roasters is a sample partner used to illustrate the package format. When you book a Profile, your numbers go here.</p>
+    <p class="case__note">All numbers above are estimates based on average performance across our current Saturday newsletter (around 5,000 subscribers, around 62% open rate). The publication has not yet shipped a paid sponsored article. The first real partnership replaces this card with real numbers and a quote from the actual partner.</p>
   </section>
 
   <!-- SECTION ONE: ONE SATURDAY -->
@@ -507,11 +494,22 @@ const faqs = [
 
   <style>
     /* METRICS: 8 numbers */
-    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 32px; padding: 0 12px 56px; border-bottom: 1px solid var(--rule); }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 32px; padding: 0 12px 24px; }
     .metric { padding: 12px 0; }
     .metric span { font-family: var(--display); font-size: clamp(36px, 4.5vw, 56px); line-height: 1; display: block; }
     .metric p { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); margin: 8px 0 0; text-transform: uppercase; }
     @media (max-width: 880px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+    .metrics-disclosure {
+      max-width: 880px;
+      margin: 0 12px 56px;
+      padding: 14px 18px;
+      background: #fef3e6;
+      border-left: 3px solid var(--accent, #b8473a);
+      border-bottom: 1px solid var(--rule);
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
 
     /* LIVE ACTIVITY STRIP: three signals across the top */
     .live-activity { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border-block: 1px solid var(--rule); margin: 0 0 48px; }

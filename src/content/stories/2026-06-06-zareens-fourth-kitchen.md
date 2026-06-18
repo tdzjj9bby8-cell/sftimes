@@ -18,6 +18,7 @@ pull_quote: "Here, even after 14 hours of work, I don't feel tired. I'm full of 
 pull_quote_attr: "Zareen Khan, Chef and Owner"
 read_minutes: 5
 is_featured: false
+is_sample: true
 lede_line: "is mid-soft-opening at her fourth kitchen in Sunnyvale, dialing in quality and service before the official launch."
 sponsor:
   name: "Zareen's Restaurant"

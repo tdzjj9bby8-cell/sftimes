@@ -5,7 +5,7 @@ const totalIssues = 57;
 ---
 <ExhibitionLayout
   title="SPONSORSHIP DECK · SF Times · The Keepers"
-  description="60-second overview of partnership opportunities with SF Times. Reader-funded, no banner ads, editorial firewall, 5,000+ Saturday subscribers."
+  description="60-second overview of partnership opportunities with SF Times. Reader-funded, no banner ads, editorial firewall. Pre-launch projections inside."
   active="support"
 >
   <meta name="robots" content="noindex, nofollow" slot="head" />
@@ -58,7 +58,7 @@ const totalIssues = 57;
         <div class="deck__metric"><span>+18%</span><p>QUARTERLY SUBSCRIBER GROWTH</p></div>
       </div>
 
-      <p class="deck__caption">62% open rate is more than 3x the publishing-industry average. 78% Bay Area means your spend reaches actual SF spenders, not a national list with 4% of the audience that could ever walk into your store. Numbers refreshed monthly.</p>
+      <p class="deck__caption">All numbers above are pre-launch projections. Subscriber count, open rate, Bay Area percentage, time-on-article, and quarterly growth are targets based on early signups and indie newsletter benchmarks (the indie publishing industry average open rate sits around 20%, so we are modeling against that). Issues shipped is the real archived count. We replace projections with audited figures once the Saturday newsletter has run twelve consecutive weeks.</p>
     </div>
   </section>
 
@@ -164,11 +164,12 @@ const totalIssues = 57;
   <!-- THE EDITOR -->
   <section class="deck-page">
     <div class="deck-page__inner deck-page__inner--quote">
-      <p class="deck__eyebrow">A NOTE FROM THE EDITOR</p>
-      <blockquote class="deck__quote">
-        <p>&ldquo;I pick every sponsor. If a business doesn't pass the bar we hold the bylines to, I'll say no on the intro call and you keep your money. The bar is honest: do you treat your people well, are you specific about what you do, and would your story make a Saturday letter our readers actually want to open?&rdquo;</p>
-        <cite>ERIC, FOUNDER &amp; EDITOR · SF TIMES</cite>
-      </blockquote>
+      <p class="deck__eyebrow">FROM THE EDITOR</p>
+      <div class="deck__editor-note">
+        <p>The editor picks every sponsor personally. If a business does not pass the bar we hold our bylines to, the answer is no on the intro call and the conversation ends there.</p>
+        <p>The bar: the business treats its people well, it is specific about what it does, and its story would make a Saturday letter readers actually want to open. If the answer to any of those is unclear, the editor declines.</p>
+        <p class="deck__editor-sign">Eric, founder and editor. SF Times.</p>
+      </div>
     </div>
   </section>
 
@@ -519,6 +520,24 @@ const totalIssues = 57;
       color: var(--muted);
       font-style: normal;
       text-transform: uppercase;
+    }
+    .deck__editor-note {
+      max-width: 56ch;
+    }
+    .deck__editor-note p {
+      font-family: var(--display);
+      font-size: clamp(20px, 2.6vw, 28px);
+      line-height: 1.3;
+      letter-spacing: -0.005em;
+      margin: 0 0 18px;
+    }
+    .deck__editor-sign {
+      font-family: var(--display) !important;
+      font-size: 14px !important;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-transform: none;
+      margin-top: 8px !important;
     }
 
     /* CTA page */

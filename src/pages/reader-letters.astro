@@ -113,9 +113,13 @@ const grouped = letters.reduce((acc: Record<string, typeof letters>, l) => {
   <ExhibitionMasthead slot="masthead" title="LETTERS" subscript={`№${letters.length} PUBLISHED`} cutouts={[]} />
 
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">READER MAIL · NAMED WITH PERMISSION · LIGHTLY EDITED FOR LENGTH</p>
-    <h1 class="ex-prose__title">WHAT READERS<br>WROTE BACK.</h1>
-    <p>Every Saturday letter generates replies. The good ones are below. Lightly edited for length, never for substance. Names appear with explicit permission. Where a reader asked for anonymity, we used a first name and a neighborhood. The editor reads every reply personally. Most do not get published. The ones that do illuminate something about the piece, the city, or the work.</p>
+    <p class="ex-prose__eyebrow">ILLUSTRATIVE SAMPLES · COLUMN FORMAT PREVIEW · PRE-LAUNCH</p>
+    <h1 class="ex-prose__title">WHAT READER LETTERS<br>WILL LOOK LIKE.</h1>
+    <aside class="letters-disclosure" aria-label="Sample disclosure">
+      <p class="letters-disclosure__label">SAMPLE PAGE · NOT REAL READER MAIL</p>
+      <p>This page demonstrates the format the Reader Letters column will take once we have published enough Saturday issues to generate them. The ten letters below are constructed to show the voice, length, and editing standard the column will use. They are not actual reader correspondence. Names, neighborhoods, and references to articles are all fictional. Real letters replace this page as they arrive.</p>
+    </aside>
+    <p>When the column is live: every Saturday letter generates replies. The good ones run here, lightly edited for length, never for substance. Names appear with explicit permission. Where a reader asks for anonymity, we use a first name and a neighborhood. The editor reads every reply personally. Most do not get published. The ones that do illuminate something about the piece, the city, or the work.</p>
     <p>If you want to write back, the editor's address is at the bottom of every Saturday letter. Or email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a> directly. Subject line "Re: Issue №X" is the move.</p>
   </article>
 
@@ -146,6 +150,26 @@ const grouped = letters.reduce((acc: Record<string, typeof letters>, l) => {
   </a>
 
   <style>
+    .letters-disclosure {
+      background: #fef3e6;
+      border-left: 4px solid var(--accent, #b8473a);
+      padding: 18px 22px;
+      margin: 24px 0 32px;
+    }
+    .letters-disclosure__label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent, #b8473a);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .letters-disclosure p:last-child {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
     .letters {
       max-width: 880px;
       margin: 32px auto 56px;

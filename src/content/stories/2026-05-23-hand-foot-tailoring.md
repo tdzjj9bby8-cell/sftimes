@@ -18,6 +18,7 @@ pull_quote: "I do not raise the price. The price is for the neighborhood. The ne
 pull_quote_attr: "Auntie Lai, Owner"
 read_minutes: 4
 is_featured: false
+is_sample: true
 lede_line: "still hems pants for $14, the same as last year and the year before."
 sponsor:
   name: "Hand & Foot Tailoring"
