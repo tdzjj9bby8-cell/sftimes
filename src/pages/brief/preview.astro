@@ -1,0 +1,27 @@
+---
+/**
+ * Legacy /brief/preview route.
+ *
+ * Replaced by the live /brief/ canonical now that the production reader
+ * surface ships. This page redirects to /brief/ via meta-refresh and JS,
+ * with a noindex meta to keep it out of search results.
+ *
+ * Kept in the tree (rather than deleted) because the Phase A test results
+ * reference this URL and a hard 404 would break those records.
+ */
+const targetUrl = '/brief/';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting to The Brief · SF Times</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href={`https://sftimes.com${targetUrl}`} />
+    <meta http-equiv="refresh" content={`0; url=${targetUrl}`} />
+    <script set:html={`window.location.replace(${JSON.stringify(targetUrl)});`} />
+  </head>
+  <body>
+    <p>The Brief preview has been replaced by the live route at <a href={targetUrl}>{targetUrl}</a>.</p>
+  </body>
+</html>

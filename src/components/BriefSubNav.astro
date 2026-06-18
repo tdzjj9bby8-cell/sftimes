@@ -1,0 +1,85 @@
+---
+/**
+ * BriefSubNav.astro
+ *
+ * Sub-nav strip for /brief/* pages. Renders a horizontal row of links
+ * to the Brief's main surfaces. The active page gets visually emphasized.
+ *
+ * Usage:
+ *   <BriefSubNav active="today" />
+ *   active values: today, this-week, explore, archive, methodology, sources
+ */
+export interface Props {
+  active?: 'today' | 'this-week' | 'explore' | 'archive' | 'about' | 'methodology' | 'sources';
+}
+const { active = 'today' } = Astro.props;
+
+const LINKS = [
+  { id: 'today', label: 'Today', href: '/brief/' },
+  { id: 'this-week', label: 'This week', href: '/brief/this-week/' },
+  { id: 'explore', label: 'Explore', href: '/brief/explore/' },
+  { id: 'archive', label: 'Archive', href: '/brief/archive/' },
+  { id: 'about', label: 'About', href: '/brief/about/' },
+  { id: 'methodology', label: 'Methodology', href: '/brief/methodology/' },
+  { id: 'sources', label: 'Sources', href: '/brief/sources/' },
+];
+---
+<nav class="brief-subnav" aria-label="Brief sections">
+  <ul class="brief-subnav__list">
+    {LINKS.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={['brief-subnav__link', { 'brief-subnav__link--active': link.id === active }]}
+          aria-current={link.id === active ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .brief-subnav {
+    max-width: var(--max-narrow);
+    margin: 0 auto 24px;
+    padding: 0 var(--gutter);
+    border-bottom: 1px solid var(--rule);
+  }
+  .brief-subnav__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .brief-subnav__list::-webkit-scrollbar { display: none; }
+  .brief-subnav__link {
+    display: inline-block;
+    padding: 14px 18px 12px;
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 180ms, border-color 180ms;
+    white-space: nowrap;
+  }
+  .brief-subnav__link:hover { color: var(--ink); }
+  .brief-subnav__link--active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .brief-subnav { margin-bottom: 18px; }
+    .brief-subnav__link { padding: 12px 14px 10px; font-size: 10.5px; letter-spacing: 0.14em; }
+  }
+</style>

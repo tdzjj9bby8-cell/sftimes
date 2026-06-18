@@ -1,0 +1,647 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../../components/BriefSubNav.astro';
+
+/**
+ * Single Brief item permalink at /brief/[YYYY-MM-DD]/[slug]/.
+ *
+ * Full Schema.org NewsArticle markup with citation pointing to the original
+ * source. The angle statement is rendered as a large editorial pull quote
+ * between the TLDR and the editor's note, calling out the load-bearing
+ * editorial argument for the item.
+ */
+export async function getStaticPaths() {
+  const all = await getCollection('briefs');
+  const paths: any[] = [];
+
+  for (const brief of all) {
+    const date = brief.data.date.toISOString().slice(0, 10);
+    for (const item of brief.data.items) {
+      paths.push({
+        params: { date, slug: item.slug },
+        props: { item, brief, allBriefs: all },
+      });
+    }
+  }
+
+  return paths;
+}
+
+function readingTime(text: string): string {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const seconds = Math.round((words / 200) * 60);
+  if (seconds < 60) return `${Math.max(20, Math.ceil(seconds / 10) * 10)} sec read`;
+  if (seconds < 90) return '1 min read';
+  if (seconds < 150) return '2 min read';
+  return `${Math.round(seconds / 60)} min read`;
+}
+
+const { item, brief, allBriefs } = Astro.props;
+const dateString = brief.data.date.toISOString().slice(0, 10);
+const longDate = brief.data.date
+  .toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+  .toUpperCase();
+
+const sourceDateLong = item.source_date.toLocaleDateString('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+const itemReadTime = readingTime(item.tldr + ' ' + item.editor_note);
+
+// The editor's note in the content collection starts with the angle statement
+// repeated. For the permalink, we pull the angle statement OUT into its own
+// pull-quote section so the editor's note can begin with the next paragraph
+// or sentence. If the note's first sentence matches the angle statement
+// (case-insensitive, trimmed), strip it.
+function noteWithoutAngle(note: string, angle: string): string {
+  const trimmedAngle = angle.trim();
+  const trimmedNote = note.trim();
+  // Exact prefix match
+  if (trimmedNote.toLowerCase().startsWith(trimmedAngle.toLowerCase())) {
+    return trimmedNote.slice(trimmedAngle.length).trim().replace(/^[.!?]\s*/, '');
+  }
+  return trimmedNote;
+}
+const editorNoteRest = noteWithoutAngle(item.editor_note, item.angle_statement);
+
+// Related items: same category, different day. Sort by date desc, max 3.
+const related = allBriefs
+  .flatMap((b) =>
+    b.data.items.map((i: any) => ({
+      ...i,
+      brief_date: b.data.date,
+      brief_date_string: b.data.date.toISOString().slice(0, 10),
+    }))
+  )
+  .filter((i: any) => i.category === item.category && !(i.brief_date_string === dateString && i.slug === item.slug))
+  .sort((a: any, b: any) => b.brief_date.valueOf() - a.brief_date.valueOf())
+  .slice(0, 3);
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const permalinkUrl = `${SITE_ORIGIN}/brief/${dateString}/${item.slug}/`;
+
+const newsArticleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  '@id': permalinkUrl,
+  url: permalinkUrl,
+  headline: item.source_headline,
+  description: item.tldr,
+  articleBody: item.editor_note,
+  datePublished: brief.data.date.toISOString(),
+  dateModified: brief.data.date.toISOString(),
+  author: {
+    '@type': 'Person',
+    name: brief.data.editor,
+    affiliation: {
+      '@type': 'NewsMediaOrganization',
+      name: 'SF Times',
+      url: SITE_ORIGIN,
+    },
+  },
+  publisher: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_ORIGIN}/logo.png`,
+    },
+  },
+  citation: {
+    '@type': 'CreativeWork',
+    url: item.source_url,
+    name: item.source_headline,
+    publisher: {
+      '@type': 'Organization',
+      name: item.source_outlet,
+    },
+    author: item.source_byline !== 'Staff' ? {
+      '@type': 'Person',
+      name: item.source_byline,
+    } : undefined,
+  },
+  isPartOf: {
+    '@type': 'WebPage',
+    '@id': `${SITE_ORIGIN}/brief/${dateString}/`,
+    name: `The Brief, ${longDate}`,
+  },
+  articleSection: item.category,
+};
+---
+<ExhibitionLayout
+  title={`${item.source_headline} · The Brief · SF Times`}
+  description={item.tldr}
+  active="home"
+  ogType="article"
+  ogImage={`/api/og/brief/${dateString}/${item.slug}`}
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(newsArticleSchema)} />
+  <link slot="head" rel="canonical" href={permalinkUrl} />
+  <link slot="head" rel="alternate" type="application/rss+xml" title="SF Times · The Brief" href="/brief/rss.xml" />
+  <link slot="head" rel="alternate" type="application/feed+json" title="SF Times · The Brief (JSON Feed)" href="/brief/feed.json" />
+  <meta slot="head" property="article:published_time" content={brief.data.date.toISOString()} />
+  <meta slot="head" property="article:author" content={brief.data.editor} />
+  <meta slot="head" property="article:section" content={item.category} />
+  <meta slot="head" property="article:tag" content={item.signal.replace(/-/g, ' ')} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript={`№${item.id}`}
+    cutouts={[]}
+  />
+
+  <BriefSubNav />
+
+  <article class={`brief-permalink brief-permalink--${item.signal}`}>
+    <header class="brief-permalink__head">
+      <p class="brief-permalink__breadcrumb">
+        <a href="/brief/">The Brief</a>
+        <span> · </span>
+        <a href={`/brief/${dateString}/`}>{longDate}</a>
+      </p>
+
+      <div class="brief-permalink__meta">
+        <div class="brief-permalink__tags">
+          <span class="brief-permalink__category">{item.category}</span>
+          <span class={`brief-permalink__signal brief-permalink__signal--${item.signal}`}>
+            {item.signal.replace(/-/g, ' ').toUpperCase()}
+          </span>
+        </div>
+        <span class="brief-permalink__time">{itemReadTime}</span>
+      </div>
+
+      <h1 class="brief-permalink__headline">{item.source_headline}</h1>
+
+      <p class="brief-permalink__source-line">
+        Reported by <strong>{item.source_byline}</strong> at <a href={item.source_url} rel="noopener noreferrer" target="_blank">{item.source_outlet}</a> · {sourceDateLong}
+      </p>
+    </header>
+
+    <section class="brief-permalink__tldr">
+      <p class="brief-permalink__tldr-label">TLDR</p>
+      <p class="brief-permalink__tldr-body">{item.tldr}</p>
+    </section>
+
+    <!-- ============ THE PULL QUOTE: angle statement ============ -->
+    <figure class={`brief-permalink__angle brief-permalink__angle--${item.signal}`}>
+      <p class="brief-permalink__angle-label">THE ANGLE</p>
+      <blockquote class="brief-permalink__angle-text">
+        {item.angle_statement}
+      </blockquote>
+      <figcaption class="brief-permalink__angle-caption">
+        SIGNAL · {item.signal.replace(/-/g, ' ').toUpperCase()} · WHY WE PICKED THIS
+      </figcaption>
+    </figure>
+
+    <section class="brief-permalink__note">
+      <p class="brief-permalink__note-label">EDITOR'S NOTE · BY {brief.data.editor.toUpperCase()}</p>
+      <div class="brief-permalink__note-body">
+        {editorNoteRest.split(/\n\n+/).map((para: string) => <p>{para}</p>)}
+      </div>
+    </section>
+
+    <section class="brief-permalink__watch">
+      <p class="brief-permalink__watch-label">WHAT TO WATCH</p>
+      <p class="brief-permalink__watch-body">{item.what_to_watch}</p>
+    </section>
+
+    <section class="brief-permalink__source-cta">
+      <a class="brief-permalink__source-btn" href={item.source_url} rel="noopener noreferrer" target="_blank">
+        Read the full reporting at {item.source_outlet} <span aria-hidden="true">↗</span>
+      </a>
+      <p class="brief-permalink__source-note">
+        The Brief is editorial commentary on news reported by others. Original reporting always linked, always credited.
+      </p>
+    </section>
+
+    {related.length > 0 && (
+      <section class="brief-permalink__related">
+        <p class="brief-permalink__related-label">MORE FROM {item.category}</p>
+        <ul class="brief-permalink__related-list">
+          {related.map((rel: any) => (
+            <li>
+              <a href={`/brief/${rel.brief_date_string}/${rel.slug}/`}>
+                <span class="brief-permalink__related-date">
+                  {rel.brief_date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+                <span class="brief-permalink__related-headline">{rel.source_headline}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <aside class="brief-disclosure">
+      <p class="brief-disclosure__label">EDITORIAL DISCLOSURE</p>
+      <p>{brief.data.ai_disclosure}</p>
+      <p class="brief-disclosure__more">Read the full <a href="/standards#brief-ai-assistance">editorial standards</a> on AI assistance in the Brief.</p>
+    </aside>
+  </article>
+
+  <style>
+    .brief-permalink {
+      max-width: var(--max-prose);
+      margin: 0 auto 64px;
+      padding: 0 var(--gutter);
+    }
+
+    .brief-permalink__head {
+      margin: 24px 0 36px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .brief-permalink__breadcrumb {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 16px;
+    }
+    .brief-permalink__breadcrumb a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+    .brief-permalink__meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .brief-permalink__tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .brief-permalink__category {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper-2);
+      padding: 4px 10px;
+      color: var(--ink);
+    }
+    .brief-permalink__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 4px 10px;
+      color: white;
+    }
+    .brief-permalink__signal--first-to-connect { background: var(--accent); }
+    .brief-permalink__signal--underreported { background: #2c5582; }
+    .brief-permalink__signal--missing-context { background: var(--muted); }
+    .brief-permalink__signal--structural-pattern { background: var(--ink-2); }
+    .brief-permalink__time {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .brief-permalink__headline {
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px;
+      color: var(--ink);
+    }
+    .brief-permalink__source-line {
+      font-family: var(--ui);
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.55;
+    }
+    .brief-permalink__source-line a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+    .brief-permalink__source-line strong { color: var(--ink); font-weight: 700; }
+
+    .brief-permalink__tldr,
+    .brief-permalink__note,
+    .brief-permalink__watch {
+      margin-bottom: 32px;
+    }
+    .brief-permalink__tldr-label,
+    .brief-permalink__note-label,
+    .brief-permalink__watch-label,
+    .brief-permalink__related-label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .brief-permalink__tldr-body {
+      font-family: var(--display);
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.45;
+      color: var(--ink);
+      margin: 0;
+      letter-spacing: -0.005em;
+    }
+
+    /* ============ THE PULL QUOTE: angle statement ============ */
+    .brief-permalink__angle {
+      margin: 40px 0;
+      padding: 36px 24px 28px;
+      position: relative;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      text-align: center;
+    }
+    .brief-permalink__angle::before {
+      content: '"';
+      font-family: var(--display);
+      font-size: clamp(60px, 8vw, 92px);
+      line-height: 0.8;
+      color: var(--accent);
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.5;
+    }
+    .brief-permalink__angle-label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 18px;
+      padding-top: 32px;
+    }
+    .brief-permalink__angle-text {
+      font-family: var(--display);
+      font-size: clamp(20px, 2.6vw, 28px);
+      line-height: 1.35;
+      color: var(--ink);
+      margin: 0 0 18px;
+      letter-spacing: -0.005em;
+      max-width: 36ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .brief-permalink__angle-caption {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .brief-permalink__note-body p {
+      font-family: var(--ui);
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0 0 16px;
+    }
+    .brief-permalink__note-body p:last-child { margin-bottom: 0; }
+    .brief-permalink__watch-body {
+      font-family: var(--ui);
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+      font-style: italic;
+      padding-left: 14px;
+      border-left: 2px solid var(--accent);
+    }
+
+    .brief-permalink__source-cta {
+      margin: 40px 0;
+      padding: 28px;
+      background: var(--paper-2);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      text-align: center;
+    }
+    .brief-permalink__source-btn {
+      display: inline-block;
+      font-family: var(--ui);
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 14px 26px;
+      transition: background 200ms;
+    }
+    .brief-permalink__source-btn:hover { background: var(--accent); }
+    .brief-permalink__source-note {
+      font-family: var(--ui);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 14px auto 0;
+      max-width: 48ch;
+      line-height: 1.5;
+    }
+
+    .brief-permalink__related {
+      margin: 40px 0;
+    }
+    .brief-permalink__related-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .brief-permalink__related-list a {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .brief-permalink__related-list a:hover .brief-permalink__related-headline {
+      color: var(--accent);
+    }
+    .brief-permalink__related-date {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      min-width: 70px;
+      padding-top: 2px;
+    }
+    .brief-permalink__related-headline {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .brief-disclosure {
+      margin: 32px 0 0;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+    .brief-disclosure__more a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+
+    @media (max-width: 640px) {
+      .brief-permalink__angle { padding: 28px 16px 22px; margin: 28px 0; }
+      .brief-permalink__angle::before { font-size: 50px; top: 8px; }
+      .brief-permalink__angle-label { padding-top: 22px; }
+    }
+
+    @media (max-width: 420px) {
+      .brief-permalink__head { margin: 16px 0 24px; }
+      .brief-permalink__breadcrumb { font-size: 10px; margin-bottom: 12px; }
+      .brief-permalink__headline { font-size: 24px; line-height: 1.15; }
+      .brief-permalink__source-line { font-size: 13px; }
+      .brief-permalink__tldr-body { font-size: 17px; line-height: 1.4; }
+      .brief-permalink__tldr-label,
+      .brief-permalink__note-label,
+      .brief-permalink__watch-label,
+      .brief-permalink__related-label { font-size: 9px; letter-spacing: 0.18em; }
+      .brief-permalink__angle { padding: 22px 14px 18px; margin: 22px 0; }
+      .brief-permalink__angle::before { font-size: 42px; }
+      .brief-permalink__angle-label { padding-top: 16px; margin-bottom: 12px; }
+      .brief-permalink__angle-text { font-size: 18px; line-height: 1.35; max-width: 28ch; }
+      .brief-permalink__angle-caption { font-size: 9px; letter-spacing: 0.16em; }
+      .brief-permalink__note-body p { font-size: 15px; line-height: 1.65; }
+      .brief-permalink__watch-body { font-size: 14px; padding-left: 12px; }
+      .brief-permalink__source-cta { padding: 22px 16px; margin: 28px 0; }
+      .brief-permalink__source-btn { padding: 12px 18px; font-size: 12px; letter-spacing: 0.14em; display: block; }
+      .brief-permalink__source-note { font-size: 11.5px; }
+      .brief-permalink__meta { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .brief-permalink__related-list a { gap: 10px; padding: 10px 0; }
+      .brief-permalink__related-date { min-width: 56px; font-size: 10px; }
+      .brief-permalink__related-headline { font-size: 13px; }
+    }
+
+    /* ============ PRINT STYLESHEET ============ */
+    @media print {
+      /* Strip the chrome */
+      :global(.ex-masthead),
+      :global(.ex-utility-bar),
+      :global(.ex-secnav),
+      :global(.ex-newsletter),
+      :global(.ex-footer),
+      :global(.ex-drawer) { display: none !important; }
+
+      :global(body) { background: white !important; color: black !important; }
+      .brief-permalink {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        font-family: Georgia, 'Times New Roman', serif !important;
+      }
+      .brief-permalink__breadcrumb a,
+      .brief-permalink__source-line a,
+      .brief-permalink__source-btn { color: black !important; text-decoration: underline !important; }
+
+      /* Reveal source URLs inline so the printed page is self-contained */
+      .brief-permalink__source-line a::after,
+      .brief-permalink__source-btn::after {
+        content: ' (' attr(href) ')';
+        font-family: monospace;
+        font-size: 11px;
+        color: #444;
+      }
+
+      .brief-permalink__head { margin: 0 0 18pt; padding-bottom: 12pt; border-bottom: 1pt solid #888; }
+      .brief-permalink__tags { display: none; }
+      .brief-permalink__time { display: none; }
+      .brief-permalink__headline { font-size: 22pt; line-height: 1.15; margin: 8pt 0; color: black !important; }
+      .brief-permalink__source-line { font-size: 10pt; color: #333; }
+
+      /* TLDR */
+      .brief-permalink__tldr,
+      .brief-permalink__note,
+      .brief-permalink__watch { margin: 14pt 0; page-break-inside: avoid; }
+      .brief-permalink__tldr-body { font-size: 12pt; line-height: 1.5; font-family: Georgia, serif !important; }
+
+      /* Pull-quote angle */
+      .brief-permalink__angle {
+        padding: 14pt 18pt;
+        margin: 18pt 0;
+        border: 1pt solid #888;
+        border-left: 3pt solid black;
+        background: transparent !important;
+        page-break-inside: avoid;
+      }
+      .brief-permalink__angle::before { display: none; }
+      .brief-permalink__angle-label { color: black !important; padding-top: 0; font-size: 9pt; }
+      .brief-permalink__angle-text { font-family: Georgia, serif !important; font-size: 14pt; max-width: none; text-align: left; }
+      .brief-permalink__angle-caption { display: none; }
+
+      /* Editor's note */
+      .brief-permalink__note-label,
+      .brief-permalink__watch-label,
+      .brief-permalink__tldr-label { color: black !important; font-size: 9pt; letter-spacing: 0.18em; }
+      .brief-permalink__note-body p { font-size: 11pt; line-height: 1.6; font-family: Georgia, serif !important; }
+
+      /* What to watch */
+      .brief-permalink__watch-body { font-style: italic; font-family: Georgia, serif !important; font-size: 11pt; padding-left: 12pt; border-left: 2pt solid #888; }
+
+      /* Source CTA */
+      .brief-permalink__source-cta {
+        margin: 18pt 0;
+        padding: 14pt;
+        border: 1pt solid #888;
+        background: transparent !important;
+        page-break-inside: avoid;
+      }
+      .brief-permalink__source-btn {
+        background: transparent !important;
+        color: black !important;
+        padding: 0;
+        font-size: 11pt;
+        font-weight: 700;
+      }
+      .brief-permalink__source-note { font-size: 9pt; color: #444; }
+
+      /* Drop related and disclosure on print */
+      .brief-permalink__related,
+      .brief-disclosure { display: none; }
+    }
+  </style>
+</ExhibitionLayout>

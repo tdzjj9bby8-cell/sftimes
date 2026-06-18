@@ -1,0 +1,857 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../../components/BriefSubNav.astro';
+
+/**
+ * Daily Brief archive entry at /brief/[YYYY-MM-DD]/.
+ *
+ * Two-tier hierarchy: the highest-composite-score item gets a lead-story
+ * card with the first paragraph of the editor's note inlined. The rest are
+ * shorter teaser cards. A category-chip row at the top lets readers filter
+ * to a single category via inline JS. Each card shows reading time and a
+ * full byline + outlet + date attribution.
+ */
+export async function getStaticPaths() {
+  const all = await getCollection('briefs');
+  return all.map((brief) => ({
+    params: { date: brief.data.date.toISOString().slice(0, 10) },
+    props: { brief, allBriefs: all },
+  }));
+}
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function readingTime(text: string): string {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const seconds = Math.round((words / 200) * 60);
+  if (seconds < 60) return `${Math.max(20, Math.ceil(seconds / 10) * 10)} sec read`;
+  if (seconds < 90) return '1 min read';
+  if (seconds < 150) return '2 min read';
+  return `${Math.round(seconds / 60)} min read`;
+}
+
+function firstParagraph(note: string): string {
+  // Editor's note in our content collection uses YAML literal block scalar
+  // syntax (`|`) and tends to be one big paragraph. If split by double-newline,
+  // we get the first paragraph. Otherwise return the whole note up to ~300 chars.
+  const paras = note.trim().split(/\n\n+/);
+  if (paras.length > 1) return paras[0];
+  // Fallback: first three sentences or first 300 chars, whichever is shorter
+  const sentences = note.match(/[^.!?]+[.!?]+/g) || [note];
+  const firstThree = sentences.slice(0, 3).join('').trim();
+  return firstThree.length > 320 ? firstThree.slice(0, 300).trim() + '…' : firstThree;
+}
+
+function shortDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+const { brief, allBriefs } = Astro.props;
+const dateString = formatDate(brief.data.date);
+const longDate = brief.data.date
+  .toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+  .toUpperCase();
+
+// Sort items by composite, highest first
+const sortedItems = [...brief.data.items].sort((a, b) => b.composite_score - a.composite_score);
+const leadItem = sortedItems[0];
+const restItems = sortedItems.slice(1);
+
+// Filter chip row: unique categories in this edition, ordered by first appearance
+const filterCategories: string[] = [];
+for (const item of sortedItems) {
+  if (!filterCategories.includes(item.category)) filterCategories.push(item.category);
+}
+
+// Archive nav
+const sortedBriefs = [...allBriefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const currentIdx = sortedBriefs.findIndex((b) => b.slug === brief.slug);
+const prevBrief = sortedBriefs[currentIdx + 1] || null;
+const nextBrief = sortedBriefs[currentIdx - 1] || null;
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE_ORIGIN}/brief/${dateString}/`,
+  name: `The Brief, ${longDate}`,
+  description: `SF Times Daily Brief, edition №${brief.data.edition}. ${brief.data.items.length} curated SF news items with editor's notes.`,
+  datePublished: brief.data.date.toISOString(),
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: brief.data.items.length,
+    itemListElement: sortedItems.map((item, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      url: `${SITE_ORIGIN}/brief/${dateString}/${item.slug}/`,
+      name: item.source_headline,
+    })),
+  },
+};
+---
+<ExhibitionLayout
+  title={`THE BRIEF · ${longDate} · SF Times`}
+  description={`${brief.data.items.length} curated SF news items with editor's notes. Edition №${brief.data.edition}.`}
+  active="home"
+  ogType="article"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+  <link slot="head" rel="alternate" type="application/rss+xml" title="SF Times · The Brief" href="/brief/rss.xml" />
+  <link slot="head" rel="alternate" type="application/feed+json" title="SF Times · The Brief (JSON Feed)" href="/brief/feed.json" />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript={`EDITION №${String(brief.data.edition).padStart(2, '0')}`}
+    cutouts={[]}
+  />
+
+  <BriefSubNav active={currentIdx === 0 ? 'today' : undefined as any} />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">{longDate} · EDITED BY {brief.data.editor.toUpperCase()} · {brief.data.items.length} ITEMS</p>
+    <h1 class="ex-prose__title">THE BRIEF.<br>WHAT WE READ<br>THIS MORNING.</h1>
+    {brief.data.intro && <p>{brief.data.intro}</p>}
+    <p>The day's curated SF news. Each item links out to the original reporter. Editorial commentary in our voice, not theirs. Browse <a href="/brief/this-week/">the rolling weekly digest</a>, the <a href="/brief/archive/">full archive</a>, or the <a href="/brief/methodology/">methodology</a>.</p>
+  </article>
+
+  {filterCategories.length > 1 && (
+    <nav class="brief-filter" aria-label="Filter by category">
+      <p class="brief-filter__label">FILTER</p>
+      <ul class="brief-filter__chips" id="briefFilterChips">
+        <li><button class="brief-filter__chip brief-filter__chip--active" data-filter="all" type="button">All ({sortedItems.length})</button></li>
+        {filterCategories.map((cat) => {
+          const count = sortedItems.filter((it) => it.category === cat).length;
+          return (
+            <li><button class="brief-filter__chip" data-filter={cat} type="button">{cat} ({count})</button></li>
+          );
+        })}
+      </ul>
+    </nav>
+  )}
+
+  <!-- LEAD STORY ============ -->
+  <section class="brief-lead" data-category={leadItem.category}>
+    <p class="brief-lead__eyebrow">LEAD STORY · HIGHEST COMPOSITE</p>
+    <a class={`brief-lead__card brief-lead__card--${leadItem.signal}`} href={`/brief/${dateString}/${leadItem.slug}/`}>
+      <header class="brief-lead__head">
+        <div class="brief-lead__tags">
+          <span class="brief-lead__category">{leadItem.category}</span>
+          <span class={`brief-lead__signal brief-lead__signal--${leadItem.signal}`}>
+            {leadItem.signal.replace(/-/g, ' ').toUpperCase()}
+          </span>
+        </div>
+        <span class="brief-lead__time">{readingTime(leadItem.tldr + ' ' + leadItem.editor_note)}</span>
+      </header>
+
+      <h2 class="brief-lead__headline">{leadItem.source_headline}</h2>
+      <p class="brief-lead__tldr">{leadItem.tldr}</p>
+
+      <div class="brief-lead__angle">
+        <p class="brief-lead__angle-label">THE ANGLE</p>
+        <p class="brief-lead__angle-text">{leadItem.angle_statement}</p>
+      </div>
+
+      <p class="brief-lead__excerpt">{firstParagraph(leadItem.editor_note)}</p>
+
+      <footer class="brief-lead__foot">
+        <p class="brief-lead__source">
+          Reported by <strong>{leadItem.source_byline}</strong> at {leadItem.source_outlet} · {shortDate(leadItem.source_date)}
+        </p>
+        <span class="brief-lead__expand">Read editor's note <span aria-hidden="true">→</span></span>
+      </footer>
+    </a>
+  </section>
+
+  <!-- MORE FROM TODAY ============ -->
+  {restItems.length > 0 && (
+    <section class="brief-rest">
+      <h3 class="brief-rest__label">MORE FROM TODAY · {restItems.length} ITEMS</h3>
+
+      <div class="brief-stack" id="briefStack">
+        {restItems.map((item) => (
+          <a
+            class={`brief-item brief-item--${item.signal}`}
+            href={`/brief/${dateString}/${item.slug}/`}
+            data-category={item.category}
+          >
+            <header class="brief-item__head">
+              <div class="brief-item__tags">
+                <span class="brief-item__category">{item.category}</span>
+                <span class={`brief-item__signal brief-item__signal--${item.signal}`}>
+                  {item.signal.replace(/-/g, ' ').toUpperCase()}
+                </span>
+              </div>
+              <span class="brief-item__time">{readingTime(item.tldr + ' ' + item.editor_note)}</span>
+            </header>
+
+            <h2 class="brief-item__headline">{item.source_headline}</h2>
+            <p class="brief-item__tldr">{item.tldr}</p>
+            <p class="brief-item__angle">{item.angle_statement}</p>
+
+            <footer class="brief-item__foot">
+              <p class="brief-item__source">
+                Reported by <strong>{item.source_byline}</strong> at {item.source_outlet} · {shortDate(item.source_date)}
+              </p>
+              <span class="brief-item__expand">Read editor's note <span aria-hidden="true">→</span></span>
+            </footer>
+          </a>
+        ))}
+      </div>
+
+      <p class="brief-filter__empty" id="briefFilterEmpty" hidden>
+        No items in this category for today. <button class="brief-filter__reset" type="button" data-filter="all">Show all →</button>
+      </p>
+    </section>
+  )}
+
+  <!-- ARCHIVE NAVIGATION ============ -->
+  <nav class="brief-nav">
+    <div class={`brief-nav__cell ${prevBrief ? '' : 'brief-nav__cell--empty'}`}>
+      {prevBrief ? (
+        <a class="brief-nav__link" href={`/brief/${formatDate(prevBrief.data.date)}/`}>
+          <span class="brief-nav__label">← PREVIOUS EDITION</span>
+          <span class="brief-nav__date">
+            {prevBrief.data.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </span>
+        </a>
+      ) : (
+        <div class="brief-nav__placeholder">
+          <span class="brief-nav__label">PREVIOUS EDITION</span>
+          <span class="brief-nav__date">First published edition</span>
+        </div>
+      )}
+    </div>
+    <div class={`brief-nav__cell brief-nav__cell--right ${nextBrief ? '' : 'brief-nav__cell--empty'}`}>
+      {nextBrief ? (
+        <a class="brief-nav__link" href={`/brief/${formatDate(nextBrief.data.date)}/`}>
+          <span class="brief-nav__label">NEXT EDITION →</span>
+          <span class="brief-nav__date">
+            {nextBrief.data.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </span>
+        </a>
+      ) : (
+        <div class="brief-nav__placeholder">
+          <span class="brief-nav__label">LATEST EDITION</span>
+          <span class="brief-nav__date">This is today's brief</span>
+        </div>
+      )}
+    </div>
+  </nav>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">EDITORIAL DISCLOSURE</p>
+    <p>{brief.data.ai_disclosure}</p>
+    <p class="brief-disclosure__more">
+      Read <a href="/brief/methodology/">the full methodology</a> or the
+      <a href="/standards#brief-ai-assistance">editorial standards</a>.
+      Browse <a href="/brief/archive/">the archive</a> or subscribe to <a href="/brief/rss.xml">the RSS feed</a>.
+    </p>
+  </aside>
+
+  <style>
+    /* ============ FILTER CHIPS ============ */
+    .brief-filter {
+      max-width: var(--max-narrow);
+      margin: 0 auto 32px;
+      padding: 0 var(--gutter);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brief-filter__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0;
+    }
+    .brief-filter__chips {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .brief-filter__chip {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 180ms, color 180ms;
+    }
+    .brief-filter__chip:hover { background: var(--paper); }
+    .brief-filter__chip--active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+    .brief-filter__empty {
+      max-width: var(--max-narrow);
+      margin: 24px auto;
+      padding: 24px;
+      text-align: center;
+      font-family: var(--ui);
+      font-size: 14px;
+      color: var(--muted);
+      background: var(--paper-2);
+    }
+    .brief-filter__reset {
+      background: none;
+      border: 0;
+      color: var(--accent);
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    /* ============ LEAD STORY ============ */
+    .brief-lead {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+    }
+    .brief-lead__eyebrow {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+    .brief-lead__card {
+      display: block;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 6px;
+      padding: 28px 32px 24px;
+      color: var(--ink);
+      transition: background 200ms, transform 200ms;
+    }
+    .brief-lead__card:hover {
+      background: var(--paper-2);
+      transform: translateY(-2px);
+    }
+    .brief-lead__card--first-to-connect { border-left-color: var(--accent); }
+    .brief-lead__card--underreported { border-left-color: #2c5582; }
+    .brief-lead__card--missing-context { border-left-color: var(--muted); }
+    .brief-lead__card--structural-pattern { border-left-color: var(--ink-2); }
+
+    .brief-lead__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brief-lead__tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .brief-lead__category {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper-2);
+      padding: 4px 10px;
+      color: var(--ink);
+    }
+    .brief-lead__card:hover .brief-lead__category { background: var(--paper); }
+    .brief-lead__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 4px 10px;
+      color: white;
+    }
+    .brief-lead__signal--first-to-connect { background: var(--accent); }
+    .brief-lead__signal--underreported { background: #2c5582; }
+    .brief-lead__signal--missing-context { background: var(--muted); }
+    .brief-lead__signal--structural-pattern { background: var(--ink-2); }
+    .brief-lead__time {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .brief-lead__headline {
+      font-family: var(--display);
+      font-size: clamp(26px, 3.4vw, 36px);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px;
+      color: var(--ink);
+    }
+    .brief-lead__tldr {
+      font-family: var(--ui);
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0 0 20px;
+    }
+    .brief-lead__angle {
+      margin: 0 0 20px;
+      padding: 16px 20px;
+      background: rgba(217, 85, 31, 0.08);
+      border-left: 3px solid var(--accent);
+    }
+    .brief-lead__angle-label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .brief-lead__angle-text {
+      font-family: var(--display);
+      font-size: clamp(16px, 1.8vw, 19px);
+      line-height: 1.4;
+      color: var(--ink);
+      margin: 0;
+      letter-spacing: -0.005em;
+    }
+    .brief-lead__excerpt {
+      font-family: var(--ui);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0 0 20px;
+    }
+    .brief-lead__foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brief-lead__source {
+      font-family: var(--ui);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+    .brief-lead__source strong { color: var(--ink); font-weight: 700; }
+    .brief-lead__expand {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* ============ MORE FROM TODAY ============ */
+    .brief-rest {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+    }
+    .brief-rest__label {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .brief-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .brief-item {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 18px 22px;
+      display: block;
+      transition: background 200ms, transform 200ms;
+      color: var(--ink);
+    }
+    .brief-item[hidden] { display: none; }
+    .brief-item:hover {
+      background: var(--paper-2);
+      transform: translateY(-1px);
+    }
+    .brief-item--first-to-connect { border-left-color: var(--accent); }
+    .brief-item--underreported { border-left-color: #2c5582; }
+    .brief-item--missing-context { border-left-color: var(--muted); }
+    .brief-item--structural-pattern { border-left-color: var(--ink-2); }
+
+    .brief-item__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .brief-item__tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .brief-item__category {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper-2);
+      padding: 3px 9px;
+      color: var(--ink);
+    }
+    .brief-item:hover .brief-item__category { background: var(--paper); }
+    .brief-item__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 3px 9px;
+      color: white;
+    }
+    .brief-item__signal--first-to-connect { background: var(--accent); }
+    .brief-item__signal--underreported { background: #2c5582; }
+    .brief-item__signal--missing-context { background: var(--muted); }
+    .brief-item__signal--structural-pattern { background: var(--ink-2); }
+    .brief-item__time {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .brief-item__headline {
+      font-family: var(--display);
+      font-size: clamp(19px, 2.2vw, 22px);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 10px;
+      color: var(--ink);
+    }
+    .brief-item__tldr {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0 0 10px;
+    }
+    .brief-item__angle {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent);
+      margin: 0 0 12px;
+      font-weight: 500;
+      padding: 8px 12px;
+      background: rgba(217, 85, 31, 0.08);
+      border-left: 2px solid var(--accent);
+    }
+    .brief-item__foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 10px;
+      border-top: 1px solid var(--rule);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .brief-item__source {
+      font-family: var(--ui);
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+    .brief-item__source strong { color: var(--ink); font-weight: 700; }
+    .brief-item__expand {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* ============ ARCHIVE NAV ============ */
+    .brief-nav {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 16px var(--gutter);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-block: 1px solid var(--rule);
+    }
+    .brief-nav__cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .brief-nav__cell--right { text-align: right; }
+    .brief-nav__cell--empty { opacity: 0.5; }
+    .brief-nav__link, .brief-nav__placeholder {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--ink);
+    }
+    .brief-nav__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .brief-nav__date {
+      font-family: var(--ui);
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .brief-nav__cell--empty .brief-nav__date {
+      color: var(--muted);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+    .brief-disclosure__more a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+
+    @media (max-width: 640px) {
+      .brief-lead__card { padding: 22px 20px 18px; }
+      .brief-lead__head, .brief-item__head { gap: 6px; }
+      .brief-nav { flex-direction: column; gap: 18px; }
+      .brief-nav__cell--right { text-align: left; }
+    }
+
+    @media (max-width: 420px) {
+      .brief-lead__card { padding: 18px 16px 16px; }
+      .brief-lead__angle { padding: 12px 14px; }
+      .brief-lead__headline { font-size: 22px; }
+      .brief-lead__tldr { font-size: 15px; }
+      .brief-lead__excerpt { font-size: 14px; line-height: 1.6; }
+      .brief-lead__foot { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .brief-item { padding: 16px 16px 14px; }
+      .brief-item__headline { font-size: 17px; }
+      .brief-item__tldr { font-size: 13.5px; }
+      .brief-item__angle { font-size: 12.5px; padding: 7px 10px; }
+      .brief-item__foot { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .brief-filter { gap: 10px; }
+      .brief-filter__chips { gap: 4px; }
+      .brief-filter__chip { font-size: 10.5px; padding: 5px 9px; }
+    }
+
+    /* ============ PRINT STYLESHEET ============ */
+    @media print {
+      :global(.ex-masthead),
+      :global(.ex-utility-bar),
+      :global(.ex-secnav),
+      :global(.ex-newsletter),
+      :global(.ex-footer),
+      :global(.ex-drawer) { display: none !important; }
+
+      :global(body) { background: white !important; color: black !important; }
+      :global(.ex-prose) {
+        max-width: none;
+        font-family: Georgia, 'Times New Roman', serif !important;
+      }
+
+      .brief-filter { display: none; }
+      .brief-nav { display: none; }
+      .brief-disclosure { display: none; }
+
+      .brief-lead,
+      .brief-rest,
+      .brief-stack {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+      .brief-lead { margin-bottom: 14pt; }
+      .brief-lead__card,
+      .brief-item {
+        background: transparent !important;
+        border: 1pt solid #888 !important;
+        border-left: 3pt solid black !important;
+        padding: 12pt 16pt !important;
+        margin-bottom: 10pt;
+        transform: none !important;
+        page-break-inside: avoid;
+        color: black !important;
+      }
+      .brief-lead__card:hover,
+      .brief-item:hover { background: transparent !important; transform: none !important; }
+
+      .brief-lead__category,
+      .brief-lead__signal,
+      .brief-item__category,
+      .brief-item__signal {
+        background: transparent !important;
+        color: black !important;
+        border: 1pt solid #888;
+        font-size: 8pt;
+        padding: 2pt 6pt;
+      }
+      .brief-lead__time, .brief-item__time { display: none; }
+      .brief-lead__eyebrow { font-size: 9pt; color: black !important; }
+      .brief-lead__headline,
+      .brief-item__headline {
+        font-family: Georgia, serif !important;
+        font-size: 14pt;
+        line-height: 1.2;
+        color: black !important;
+        margin: 6pt 0;
+      }
+      .brief-lead__tldr,
+      .brief-item__tldr {
+        font-family: Georgia, serif !important;
+        font-size: 11pt;
+        line-height: 1.5;
+        color: black !important;
+      }
+      .brief-lead__angle,
+      .brief-item__angle {
+        background: transparent !important;
+        border-left: 2pt solid black !important;
+        padding: 6pt 10pt !important;
+        font-family: Georgia, serif !important;
+        font-size: 10pt !important;
+        color: black !important;
+        font-style: italic;
+      }
+      .brief-lead__angle-label,
+      .brief-rest__label,
+      .brief-stack-head__eyebrow {
+        font-family: Georgia, serif !important;
+        font-size: 8pt;
+        letter-spacing: 0.12em;
+        color: black !important;
+      }
+      .brief-lead__excerpt {
+        font-family: Georgia, serif !important;
+        font-size: 10pt;
+        line-height: 1.55;
+        color: black !important;
+      }
+      .brief-lead__foot,
+      .brief-item__foot {
+        border-top: 1pt solid #888 !important;
+        padding-top: 6pt;
+        margin-top: 6pt;
+      }
+      .brief-lead__source,
+      .brief-item__source {
+        color: #333 !important;
+        font-size: 9pt;
+      }
+      .brief-lead__expand,
+      .brief-item__expand {
+        color: black !important;
+        font-size: 9pt;
+      }
+      /* Reveal source URLs */
+      :global(.brief-permalink__source-line a)::after,
+      a[href^="http"]::after {
+        content: ' (' attr(href) ')';
+        font-family: monospace;
+        font-size: 9pt;
+        color: #444;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    (function () {
+      const chips = document.querySelectorAll('#briefFilterChips .brief-filter__chip');
+      const items = document.querySelectorAll('#briefStack .brief-item');
+      const lead = document.querySelector('.brief-lead');
+      const empty = document.getElementById('briefFilterEmpty');
+      const resetBtn = empty ? empty.querySelector('.brief-filter__reset') : null;
+      if (!chips.length) return;
+
+      function applyFilter(filter) {
+        chips.forEach((c) => c.classList.toggle('brief-filter__chip--active', c.dataset.filter === filter));
+
+        const leadCategory = lead ? lead.dataset.category : null;
+        if (lead) lead.hidden = filter !== 'all' && filter !== leadCategory;
+
+        let visibleCount = 0;
+        items.forEach((it) => {
+          const match = filter === 'all' || it.dataset.category === filter;
+          it.hidden = !match;
+          if (match) visibleCount++;
+        });
+
+        const leadVisible = lead && !lead.hidden;
+        if (empty) empty.hidden = visibleCount > 0 || leadVisible;
+      }
+
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => applyFilter(chip.dataset.filter));
+      });
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => applyFilter('all'));
+      }
+    })();
+  </script>
+</ExhibitionLayout>

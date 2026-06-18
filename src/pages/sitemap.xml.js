@@ -3,12 +3,14 @@ import { getCollection } from 'astro:content';
 export async function GET() {
   const stories = await getCollection('stories');
   const bestOf = await getCollection('best-of');
+  const briefs = await getCollection('briefs');
   const site = 'https://sftimes.com';
 
   // Page priority + change frequency per URL family.
   // Pages in `EXCLUDE` are deliberately omitted (noindex destinations).
   const EXCLUDE = new Set([
     '/admin', '/focal-audit', '/tell-your-story', '/sponsorship-deck',
+    '/brief/preview', '/brief-dashboard', '/brief-dashboard/weekly', '/brief-dashboard/health',
   ]);
 
   const homepageUrls = [
@@ -28,6 +30,13 @@ export async function GET() {
     { path: '/sample-issue', priority: '0.6', freq: 'monthly' },
     { path: '/newsletter-sample', priority: '0.5', freq: 'monthly' },
     { path: '/reader-letters', priority: '0.6', freq: 'weekly' },
+    { path: '/brief', priority: '0.9', freq: 'daily' },
+    { path: '/brief/archive', priority: '0.7', freq: 'daily' },
+    { path: '/brief/about', priority: '0.7', freq: 'monthly' },
+    { path: '/brief/methodology', priority: '0.7', freq: 'monthly' },
+    { path: '/brief/sources', priority: '0.6', freq: 'monthly' },
+    { path: '/brief/this-week', priority: '0.8', freq: 'daily' },
+    { path: '/brief/explore', priority: '0.7', freq: 'daily' },
     { path: '/submit', priority: '0.5', freq: 'yearly' },
     { path: '/standards', priority: '0.4', freq: 'yearly' },
     { path: '/corrections', priority: '0.5', freq: 'weekly' },
@@ -61,12 +70,53 @@ export async function GET() {
     lastmod: c.data.last_refreshed.toISOString().slice(0, 10),
   }));
 
+  // Brief: archive day pages + individual item permalinks + category landings.
+  // Daily editions get higher priority. Item permalinks decay slightly with age.
+  // Category landings get refreshed daily as new items publish.
+  const briefEntries = [];
+  const sortedBriefs = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  for (const [i, brief] of sortedBriefs.entries()) {
+    const date = brief.data.date.toISOString().slice(0, 10);
+    briefEntries.push({
+      path: `/brief/${date}`,
+      priority: i === 0 ? '0.9' : i < 7 ? '0.7' : '0.5',
+      freq: i === 0 ? 'daily' : 'monthly',
+      lastmod: date,
+    });
+    for (const item of brief.data.items) {
+      briefEntries.push({
+        path: `/brief/${date}/${item.slug}`,
+        priority: i === 0 ? '0.7' : '0.5',
+        freq: 'monthly',
+        lastmod: date,
+      });
+    }
+  }
+  // Category landings: one per category that has at least one item across the archive.
+  const seenCategories = new Set();
+  for (const brief of briefs) {
+    for (const item of brief.data.items) {
+      seenCategories.add(item.category);
+    }
+  }
+  const latestDate = sortedBriefs[0] ? sortedBriefs[0].data.date.toISOString().slice(0, 10) : null;
+  for (const cat of seenCategories) {
+    const catSlug = cat.toLowerCase().replace(/\s+/g, '-');
+    briefEntries.push({
+      path: `/brief/category/${catSlug}`,
+      priority: '0.7',
+      freq: 'daily',
+      lastmod: latestDate,
+    });
+  }
+
   const allEntries = [
     ...homepageUrls,
     ...sectionUrls,
     ...quizUrls,
     ...storyEntries,
     ...bestOfEntries,
+    ...briefEntries,
   ].filter((e) => !EXCLUDE.has(e.path));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

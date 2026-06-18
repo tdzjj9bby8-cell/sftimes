@@ -1,0 +1,528 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../components/BriefSubNav.astro';
+
+/**
+ * /brief/sources
+ *
+ * The outlets whose reporting we curate, with credit. This page is part
+ * gratitude, part transparency, part marketing. Readers see exactly who
+ * we depend on. Outlets see we credit them. Search engines see a real
+ * acknowledgment-graph of SF journalism.
+ *
+ * Also a useful diff page when an outlet changes name, paywall posture,
+ * or RSS shape. We update this page when we add or drop a source.
+ */
+
+interface Source {
+  name: string;
+  short: string;
+  url: string;
+  rss: string;
+  type: 'outlet' | 'reddit';
+  description: string;
+  notable_reporters?: string;
+  position: string;
+}
+
+const SOURCES: Source[] = [
+  {
+    name: 'Mission Local',
+    short: 'missionlocal.org',
+    url: 'https://missionlocal.org',
+    rss: 'https://missionlocal.org/feed/',
+    type: 'outlet',
+    description: 'Hyperlocal Mission District plus citywide civic accountability. Founded by Lydia Chavez out of UC Berkeley\'s J-school. Strong on housing, transit, school board, tenants\' rights, supervisor races. They are the publication that asks the hard policy questions other outlets miss.',
+    notable_reporters: 'Eleni Balakrishnan, Joe Eskenazi, Joshua Sabatini',
+    position: 'The civic-accountability anchor.',
+  },
+  {
+    name: 'The San Francisco Standard',
+    short: 'sfstandard.com',
+    url: 'https://sfstandard.com',
+    rss: 'https://sfstandard.com/feed/',
+    type: 'outlet',
+    description: 'Launched 2023 with funding from Michael Moritz\'s Crankstart Foundation. Strong on real estate, downtown recovery, the SF tech ecosystem, the Fed, and the budget. Their exclusives on the Housing Accelerator Fund and the CARB cut are the kind of original reporting the Brief is built to amplify.',
+    notable_reporters: 'Garrett Leahy (transit), Jessica Blough (Fed), Sara Deseran (food)',
+    position: 'The new-media business and civic outlet.',
+  },
+  {
+    name: 'SFist',
+    short: 'sfist.com',
+    url: 'https://sfist.com',
+    rss: 'https://sfist.com/feed/',
+    type: 'outlet',
+    description: 'Daily SF blog since 2004. Founded by Jack Beck, run by Jay Barmann. Mix of curated and original. Strongest on restaurant openings and closings, neighborhood color, local culture, and the daily political beat. The Day Around the Bay roundup is where we catch items the other outlets miss.',
+    notable_reporters: 'Jay Barmann, Leanne Maxwell, Zack Ruskin',
+    position: 'The daily SF beat.',
+  },
+  {
+    name: 'ABC7 Bay Area',
+    short: 'abc7news.com',
+    url: 'https://abc7news.com',
+    rss: 'https://abc7news.com/feed/',
+    type: 'outlet',
+    description: 'Local TV affiliate with a strong web operation. Breaking news, public safety, weather, and the I-Team investigations. Often first to confirm public-safety incidents and city-government statements.',
+    notable_reporters: 'I-Team investigative unit',
+    position: 'The broadcast-news anchor.',
+  },
+  {
+    name: 'KQED',
+    short: 'kqed.org',
+    url: 'https://www.kqed.org',
+    rss: 'https://www.kqed.org/news/feed',
+    type: 'outlet',
+    description: 'NPR and PBS member station. Long-form policy analysis, arts coverage, civic engagement. Their housing and transit coverage tends to go deeper than the daily turn. The Forum and Bay Curious shows surface stories our pipeline picks up.',
+    notable_reporters: 'Erin Baldassari (housing), Pendarvis Harshaw (civic)',
+    position: 'The long-form public-media outlet.',
+  },
+  {
+    name: 'NBC Bay Area',
+    short: 'nbcbayarea.com',
+    url: 'https://www.nbcbayarea.com',
+    rss: 'https://www.nbcbayarea.com/news/local/feed/',
+    type: 'outlet',
+    description: 'Local TV affiliate. The NBC Bay Area Responds investigative unit is a real watchdog operation. Weather, breaking news, and consumer protection are the strongest beats.',
+    notable_reporters: 'NBC Bay Area Responds team',
+    position: 'The broadcast investigative team.',
+  },
+  {
+    name: 'Berkeleyside',
+    short: 'berkeleyside.org',
+    url: 'https://www.berkeleyside.org',
+    rss: 'https://www.berkeleyside.org/feed',
+    type: 'outlet',
+    description: 'East Bay hyperlocal focused on Berkeley civic, UC Berkeley, and Berkeley public safety. We pull from Berkeleyside when an East Bay story has SF spillover (mutual-aid deployments, regional transit, university spending).',
+    notable_reporters: 'Frances Dinkelspiel, Emilie Raguso',
+    position: 'The East Bay civic outlet.',
+  },
+  {
+    name: 'Eater SF',
+    short: 'sf.eater.com',
+    url: 'https://sf.eater.com',
+    rss: 'https://sf.eater.com/rss/index.xml',
+    type: 'outlet',
+    description: 'Vox Media food site. Authoritative on SF restaurant openings, closings, and scene news. When a closure or opening matters, Eater usually has the named-source confirm. Becky Duffett and Lauren Saria carry most of the daily report.',
+    notable_reporters: 'Becky Duffett, Lauren Saria',
+    position: 'The food-scene of record.',
+  },
+  {
+    name: 'Curbed SF',
+    short: 'sf.curbed.com',
+    url: 'https://sf.curbed.com',
+    rss: 'https://sf.curbed.com/rss/index.xml',
+    type: 'outlet',
+    description: 'Vox Media real estate site. Listings, design, neighborhood profiles. Less active than peak years but still publishes substantive market analysis. We pull when a real-estate or design story has civic implications.',
+    position: 'The real-estate and design site.',
+  },
+  {
+    name: 'San Francisco Chronicle',
+    short: 'sfchronicle.com',
+    url: 'https://www.sfchronicle.com',
+    rss: 'https://www.sfchronicle.com/rss/feed/Latest-News-415.php',
+    type: 'outlet',
+    description: 'Legacy daily of record, Hearst-owned. The free RSS gives us headlines and dek; the full reporting sits behind the paywall. We link readers to the Chronicle article and pay the subscription ourselves so we can read what we link to.',
+    notable_reporters: 'Heather Knight (column), Trisha Thadani (housing), Roland Li (real estate)',
+    position: 'The legacy daily of record.',
+  },
+  {
+    name: 'San Francisco Examiner',
+    short: 'sfexaminer.com',
+    url: 'https://www.sfexaminer.com',
+    rss: 'https://www.sfexaminer.com/feed/',
+    type: 'outlet',
+    description: 'Legacy daily, smaller than the Chronicle but still publishes daily civic coverage. Strong on the local political beat, supervisor meetings, and city department news.',
+    position: 'The smaller legacy daily.',
+  },
+  {
+    name: 'SF Public Press',
+    short: 'sfpublicpress.org',
+    url: 'https://www.sfpublicpress.org',
+    rss: 'https://www.sfpublicpress.org/feed/',
+    type: 'outlet',
+    description: 'Nonprofit investigative outlet. Long-form, policy-focused, public-records-driven. Their work on the homelessness budget and the school district has set the agenda for citywide policy discussions.',
+    notable_reporters: 'Noah Arroyo, Ambika Kandasamy',
+    position: 'The nonprofit investigative outlet.',
+  },
+
+  // ============ REDDIT ============
+  {
+    name: 'r/sanfrancisco',
+    short: 'reddit.com/r/sanfrancisco',
+    url: 'https://www.reddit.com/r/sanfrancisco/',
+    rss: 'https://www.reddit.com/r/sanfrancisco/top.json?t=day',
+    type: 'reddit',
+    description: 'The largest SF subreddit. Daily discussion, breaking-news threads, neighborhood color. We pull the top-of-day signal to surface stories that broke on Reddit before the news outlets caught up.',
+    position: 'The largest SF discussion forum.',
+  },
+  {
+    name: 'r/AskSF',
+    short: 'reddit.com/r/AskSF',
+    url: 'https://www.reddit.com/r/AskSF/',
+    rss: 'https://www.reddit.com/r/AskSF/top.json?t=day',
+    type: 'reddit',
+    description: 'Q&A sub for people asking SF-specific questions. "Where can I find..." and "Why is..." threads sometimes surface gaps the news outlets are not yet covering.',
+    position: 'The Q&A sub.',
+  },
+  {
+    name: 'r/bayarea',
+    short: 'reddit.com/r/bayarea',
+    url: 'https://www.reddit.com/r/bayarea/',
+    rss: 'https://www.reddit.com/r/bayarea/top.json?t=day',
+    type: 'reddit',
+    description: 'The regional sub. Covers SF, East Bay, Peninsula, North Bay. We use it for regional context on stories that cross city lines (BART, AC Transit, regional taxation).',
+    position: 'The regional discussion sub.',
+  },
+];
+
+const outletSources = SOURCES.filter((s) => s.type === 'outlet');
+const redditSources = SOURCES.filter((s) => s.type === 'reddit');
+
+// Count how often each outlet appears in our published items so we can
+// surface the relative weight of each source.
+const briefs = await getCollection('briefs');
+const outletCounts: Record<string, number> = {};
+for (const brief of briefs) {
+  for (const item of brief.data.items) {
+    outletCounts[item.source_outlet] = (outletCounts[item.source_outlet] || 0) + 1;
+  }
+}
+const totalItems = Object.values(outletCounts).reduce((s, n) => s + n, 0);
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const pageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${SITE_ORIGIN}/brief/sources/`,
+  name: 'The Brief Sources · SF Times',
+  description: 'The outlets whose SF reporting the Brief curates, with credit.',
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+};
+---
+<ExhibitionLayout
+  title="THE BRIEF · SOURCES · SF Times"
+  description="The 12 outlets and 3 subreddits whose SF reporting the daily Brief curates, with credit."
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="SOURCES"
+    cutouts={[]}
+  />
+
+  <BriefSubNav active="sources" />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">SOURCES · {outletSources.length} OUTLETS · {redditSources.length} SUBREDDITS</p>
+    <h1 class="ex-prose__title">WHO REPORTS<br>THE NEWS WE<br>CURATE.</h1>
+    <p>The Brief is editorial commentary on stories other people reported. The 12 outlets and 3 subreddits below are the sources we pull from each morning. We link to them. We credit them. We pay for the subscriptions that gate their work so we can read what we link to. The publication economics that keep these reporters writing are the same economics that keep the Brief working.</p>
+    <p>If you want to read the news yourself, start with them. The Brief sits one layer downstream.</p>
+  </article>
+
+  <!-- ============ OUTLETS ============ -->
+  <section class="src-section">
+    <header class="src-section__head">
+      <p class="src-section__eyebrow">PRIMARY OUTLETS</p>
+      <h2 class="src-section__title">Twelve SF newsrooms</h2>
+      <p class="src-section__sub">The outlets we pull RSS from every morning. Order is roughly by the share of items we publish from each source.</p>
+    </header>
+
+    <ol class="src-list">
+      {outletSources.map((src) => (
+        <li class="src-card">
+          <div class="src-card__head">
+            <div class="src-card__name-block">
+              <a class="src-card__name" href={src.url} rel="noopener noreferrer" target="_blank">{src.name} <span class="src-card__arrow" aria-hidden="true">↗</span></a>
+              <p class="src-card__short">{src.short}</p>
+            </div>
+            <div class="src-card__stats">
+              <p class="src-card__position">{src.position}</p>
+              <p class="src-card__count">
+                {outletCounts[src.name] || 0} item{outletCounts[src.name] === 1 ? '' : 's'} in archive
+              </p>
+            </div>
+          </div>
+          <p class="src-card__desc">{src.description}</p>
+          {src.notable_reporters && (
+            <p class="src-card__reporters">
+              <span class="src-card__reporters-label">REPORTERS WE READ:</span> {src.notable_reporters}
+            </p>
+          )}
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- ============ REDDIT ============ -->
+  <section class="src-section">
+    <header class="src-section__head">
+      <p class="src-section__eyebrow">REDDIT SIGNALS</p>
+      <h2 class="src-section__title">Three subreddits</h2>
+      <p class="src-section__sub">Top-of-day posts give us signal on stories breaking in community forums before the news outlets catch up. We never publish a Reddit post as-is. Reddit feeds the editorial decision, not the editorial output.</p>
+    </header>
+
+    <ol class="src-list">
+      {redditSources.map((src) => (
+        <li class="src-card src-card--reddit">
+          <div class="src-card__head">
+            <div class="src-card__name-block">
+              <a class="src-card__name" href={src.url} rel="noopener noreferrer" target="_blank">{src.name} <span class="src-card__arrow" aria-hidden="true">↗</span></a>
+              <p class="src-card__short">{src.short}</p>
+            </div>
+            <div class="src-card__stats">
+              <p class="src-card__position">{src.position}</p>
+            </div>
+          </div>
+          <p class="src-card__desc">{src.description}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- ============ WHAT WE LOOK FOR ============ -->
+  <section class="src-section">
+    <header class="src-section__head">
+      <p class="src-section__eyebrow">SELECTION</p>
+      <h2 class="src-section__title">What we look for</h2>
+    </header>
+
+    <div class="src-look">
+      <p>From the 40 to 60 candidates we ingest each morning, fewer than 15 typically reach the editor's review surface. The filter is intentional: the Brief is curated commentary, not aggregation, and most newsworthy stories do not belong in it.</p>
+      <p>We pick items where one of four things is true:</p>
+      <ol class="src-look__list">
+        <li><strong>The connection is missed.</strong> Two stories from different outlets that together form a pattern no one else is naming.</li>
+        <li><strong>The angle is underplayed.</strong> The source ran the news but stopped short of the structural implication.</li>
+        <li><strong>The backstory is missing.</strong> The source did not have time for the prior coverage that materially changes how a reader understands the news.</li>
+        <li><strong>The pattern is structural.</strong> The single news item is one instance of a longer arc only we are tracking.</li>
+      </ol>
+      <p>Items that fail all four get rejected. The full selection rubric is at <a href="/brief/methodology/">/brief/methodology</a>.</p>
+    </div>
+  </section>
+
+  <!-- ============ ARE WE MISSING YOU ============ -->
+  <section class="src-section">
+    <header class="src-section__head">
+      <p class="src-section__eyebrow">SUGGESTIONS</p>
+      <h2 class="src-section__title">Are we missing your outlet?</h2>
+    </header>
+
+    <p class="src-section__sub">
+      If you run an SF news operation, write an SF substack, or report on a beat we are not following, tell us.
+      We add sources when the editorial value is real and the RSS or feed structure is parseable. Email
+      <a href="mailto:eric@sftimes.com" class="src-mail">eric@sftimes.com</a> with your URL, the beat you cover,
+      and a recent representative piece. If we add you, we link to you on this page and pull your feed into
+      the morning ingest.
+    </p>
+    <p class="src-section__sub">
+      We have a strong preference for outlets that own their RSS, write under named bylines, and are not behind
+      a hard paywall on the items we would link to.
+    </p>
+  </section>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">RELATED</p>
+    <p>
+      Browse the <a href="/brief/archive/">archive</a>,
+      read the <a href="/brief/methodology/">methodology</a>,
+      or follow <a href="/brief/rss.xml">the daily RSS feed</a>.
+    </p>
+  </aside>
+
+  <style>
+    .src-section {
+      max-width: var(--max-narrow);
+      margin: 0 auto 56px;
+      padding: 0 var(--gutter);
+    }
+    .src-section__head { margin-bottom: 22px; }
+    .src-section__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .src-section__title {
+      font-family: var(--display);
+      font-size: clamp(26px, 3vw, 34px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+    }
+    .src-section__sub {
+      font-family: var(--ui);
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0 0 14px;
+      max-width: 64ch;
+    }
+    .src-section__sub a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+    .src-mail { font-weight: 700; }
+
+    /* ============ SOURCE LIST ============ */
+    .src-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .src-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--accent);
+      padding: 18px 22px;
+    }
+    .src-card--reddit { border-left-color: var(--muted); }
+
+    .src-card__head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .src-card__name-block { min-width: 0; flex: 1 1 220px; }
+    .src-card__name {
+      font-family: var(--display);
+      font-size: 22px;
+      line-height: 1.15;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .src-card__name:hover { color: var(--accent); }
+    .src-card__arrow {
+      font-family: var(--ui);
+      font-size: 15px;
+      color: var(--accent);
+    }
+    .src-card__short {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      margin: 4px 0 0;
+    }
+    .src-card__stats {
+      text-align: right;
+      min-width: 180px;
+    }
+    .src-card__position {
+      font-family: var(--ui);
+      font-size: 12px;
+      color: var(--accent);
+      margin: 0;
+      font-style: italic;
+      line-height: 1.45;
+    }
+    .src-card__count {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 4px 0 0;
+      font-weight: 700;
+    }
+    .src-card__desc {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0 0 10px;
+    }
+    .src-card__reporters {
+      font-family: var(--ui);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .src-card__reporters-label {
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* ============ SELECTION ============ */
+    .src-look p {
+      font-family: var(--ui);
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--ink);
+      margin: 0 0 12px;
+      max-width: 64ch;
+    }
+    .src-look a { color: var(--accent); border-bottom: 1px solid currentColor; }
+    .src-look__list {
+      list-style: decimal;
+      padding-left: 22px;
+      margin: 10px 0 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .src-look__list li {
+      font-family: var(--ui);
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .src-look__list strong { color: var(--accent); font-weight: 700; }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .brief-disclosure a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+
+    @media (max-width: 640px) {
+      .src-card__head { flex-direction: column; gap: 8px; }
+      .src-card__stats { text-align: left; min-width: 0; }
+    }
+  </style>
+</ExhibitionLayout>

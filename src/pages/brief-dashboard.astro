@@ -1,0 +1,1098 @@
+---
+import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
+
+// Phase C dashboard (revised after Path 3 / AI auditor decision).
+//
+// Two sections:
+//   1. HELD FOR REVIEW — items the AI auditor flagged for one of five firewall
+//      check failures, plus a random spot-check sample. Eric reviews each.
+//   2. AUTO-PUBLISHING — items that cleared both the primary AI pass and the
+//      auditor pass. Eric sees a compact list for visibility but takes no action.
+//
+// Morning budget: 5 to 10 minutes.
+// Hard gate at 7:30 AM: if Eric does not publish, held items are dropped, the
+// auto-publishing batch ships anyway. Most of the brief publishes without him.
+//
+// Page is noindex. Will be repurposed as the live /brief-dashboard/ behind
+// basic auth in Phase G.
+
+type BriefSignal = 'first-to-connect' | 'underreported' | 'missing-context' | 'structural-pattern';
+
+interface AuditResult {
+  audit_pass: boolean;
+  fail_reasons: string[];
+  spot_check?: boolean; // true if held for random spot-check rather than audit failure
+}
+
+interface Candidate {
+  id: string;
+  category: string;
+  signal: BriefSignal;
+  source_headline: string;
+  source_outlet: string;
+  source_byline: string;
+  source_url: string;
+  source_date: string;
+  composite: number;
+  uniqueness: number;
+  angle_statement: string;
+  tldr: string;
+  editor_note: string;
+  what_to_watch: string;
+  audit: AuditResult;
+}
+
+const candidates: Candidate[] = [
+  // ============ AUTO-PUBLISHING (9 items, all 5 auditor checks pass) ============
+  {
+    id: 'c01',
+    category: 'POLITICS',
+    signal: 'structural-pattern',
+    source_headline: 'Lurie, Mahmood hit brakes on controversial S.F. real-estate tax cut',
+    source_outlet: 'Mission Local',
+    source_byline: 'Eleni Balakrishnan',
+    source_url: 'https://missionlocal.org/2026/06/sf-mayor-mahmood-brakes-transfer-tax-cut/',
+    source_date: '2026-06-08',
+    composite: 8.8,
+    uniqueness: 8,
+    angle_statement: 'The pause is a real recalibration of Lurie\'s first-six-months tax strategy, not a procedural delay.',
+    tldr: 'Mayor Lurie and Supervisor Bilal Mahmood paused their plan to halve the city\'s transfer tax on multimillion-dollar property sales. Both said the budget crisis is forcing them to find new revenue first.',
+    editor_note: 'The pause is a real recalibration of Lurie\'s first-six-months tax strategy, not a procedural delay. The BUILD Act was the cornerstone real-estate policy of his administration, betting that lower transfer-tax friction would unfreeze the downtown office market. The trigger for the pause was the May budget projection landing $87 million worse than the December baseline, which made the political case for cutting any revenue source untenable. Mahmood was the lead supervisor sponsor and his retreat matters more than the mayor\'s. He still wants the cut. He just wants a revenue replacement named first. The commercial foreclosure tax now moving in parallel (see Item 4) is the substitute he is shopping. Watch whether Connie Chan signs on or holds out.',
+    what_to_watch: 'Budget reconciliation vote in late July, and whether a transfer-tax pilot returns in Q1 2027.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c02',
+    category: 'HOUSING',
+    signal: 'missing-context',
+    source_headline: 'This group just built affordable housing in SF for half the price and twice as fast',
+    source_outlet: 'SF Standard',
+    source_byline: 'Staff',
+    source_url: 'https://sfstandard.com/2026/06/03/affordable-housing-accelerator-fund-valencia/',
+    source_date: '2026-06-03',
+    composite: 9.0,
+    uniqueness: 8,
+    angle_statement: 'The 19-month build time is the headline but the cost-per-unit replicability question is the one that decides whether this approach scales.',
+    tldr: 'The SF Housing Accelerator Fund opened 145 units for formerly homeless seniors at 1633 Valencia in 19 months at roughly $525,000 per unit. Bay Area affordable housing typically costs around $1 million per unit and takes years longer.',
+    editor_note: 'The 19-month build time is the headline but the cost-per-unit replicability question is the one that decides whether this approach scales. The Accelerator Fund\'s structural innovation is buying land at acquisition prices the city\'s tax-credit financing structure cannot match, then layering in modular construction and a single general-contractor relationship instead of the standard low-bid process. The Valencia site was a vacant lot the fund got below market because the prior owner was in distress. The next four projects in the pipeline are on harder sites: two are conversions of stalled market-rate condos in SoMa, two are infill on city-owned parcels with restricted-covenant baggage. If the cost-per-unit holds on those, the fund changes the trajectory of how SF builds. If not, Valencia stays the outlier.',
+    what_to_watch: 'SoMa conversion project pricing at the September Housing Authority meeting.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c03',
+    category: 'HOUSING',
+    signal: 'first-to-connect',
+    source_headline: 'Landlord is raising SF family\'s rent by 90%. Thanks to a loophole, it might be legal',
+    source_outlet: 'SF Standard',
+    source_byline: 'Staff',
+    source_url: 'https://sfstandard.com/2026/06/02/extreme-rent-hike-richmond-district-sf/',
+    source_date: '2026-06-02',
+    composite: 8.2,
+    uniqueness: 7,
+    angle_statement: 'The Waldman case is the visible example of a cluster pattern the Tenants Union has logged seven of since January.',
+    tldr: 'A Richmond District family at 6838 Geary Boulevard faces a rent increase from $3,695 to $7,000 starting September 1. The new owner is using a state-law exemption that overrides SF\'s rent ordinance.',
+    editor_note: 'The Waldman case is the visible example of a cluster pattern the Tenants Union has logged seven of since January, all on small condo buildings that changed ownership in the same window. Condo units built after 1979 fall outside SF\'s rent ordinance, which means a new owner can reset rent to market without the protections that apply to apartments. The Costa-Hawkins state-law exemption is the backstop that keeps the city from closing the loophole locally. The legal theory the Waldmans are testing is constructive eviction, which has worked twice in SF court since 2022 but is jurisdiction-dependent. If they prevail, the precedent applies citywide. If they lose, the legislative fix has to come from Sacramento, which already failed once this session.',
+    what_to_watch: 'First hearing in the case scheduled for late August.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c04',
+    category: 'POLITICS',
+    signal: 'first-to-connect',
+    source_headline: 'Lurie, Mahmood Introduce Commercial Foreclosure Tax Following Pause on BUILD Act',
+    source_outlet: 'SFist',
+    source_byline: 'Leanne Maxwell',
+    source_url: 'https://sfist.com/2026/06/11/lurie-mahmood-introduce-commercial-foreclosure-tax-following-pause-on-build-act/',
+    source_date: '2026-06-11',
+    composite: 9.2,
+    uniqueness: 8,
+    angle_statement: 'The introduction in the same week as the BUILD Act pause is the move that signals the administration\'s revised tax theory, and other outlets are running it as a separate policy story rather than a paired strategy.',
+    tldr: 'Mayor Lurie and Supervisor Mahmood introduced a commercial foreclosure tax projected to raise $67 million annually. The measure follows their pause this week on the BUILD Act transfer tax cut and is positioned as a replacement revenue source.',
+    editor_note: 'The introduction in the same week as the BUILD Act pause is the move that signals the administration\'s revised tax theory, and other outlets are running it as a separate policy story rather than a paired strategy. The political calculation: a foreclosure tax falls on distressed commercial assets, which polls better than a tax cut for owners of $10M-plus properties. The $67 million estimate uses the FY26 foreclosure-volume data from the SF Assessor, which is real but volatile (foreclosure waves cluster, so the year-over-year projection has wide error bars). The Mahmood team\'s working theory is that the tax holds at this revenue level for two to three years, declines as the office market clears, and self-extinguishes by 2029 once commercial rentals stabilize. Watch whether BOMA endorses or opposes.',
+    what_to_watch: 'BOMA position paper due late June. Supervisor introduction vote week of July 7.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c05',
+    category: 'TRANSIT',
+    signal: 'structural-pattern',
+    source_headline: 'A California environmental board voted to cut $202M from SF\'s eco-friendly transit',
+    source_outlet: 'SF Standard',
+    source_byline: 'Garrett Leahy',
+    source_url: 'https://sfstandard.com/2026/06/04/california-environmental-board-muni-cuts/',
+    source_date: '2026-06-04',
+    composite: 8.6,
+    uniqueness: 7,
+    angle_statement: 'The cut reframes the SFMTA\'s stated case for the November Connect Bay Area measure, which is a connection no other outlet is making.',
+    tldr: 'The California Air Resources Board voted 10 to 3 to cut $202 million SFMTA was counting on for emissions-reduction transit projects. The shortfall hits during the agency\'s worst budget year on record.',
+    editor_note: 'The cut reframes the SFMTA\'s stated case for the November Connect Bay Area measure, which is a connection no other outlet is making. The state\'s Cap-and-Trade transit set-aside was the funding source SFMTA built into its 2026 capital plan for electric bus procurement, the 38 Geary electrification, and the Mission Street bus-rapid-transit project. None of those are guaranteed dead, but all three lose their timeline. The political angle: opponents of the November measure will cite this as evidence Sacramento does not back SF transit. Supporters will cite it as proof that local funding is the only reliable path. Both arguments land. Both are correct. The campaign that frames this first wins the median voter who is undecided in late September.',
+    what_to_watch: 'SFMTA board response and CARB-cut workaround proposal due by June 24.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c06',
+    category: 'PUBLIC SAFETY',
+    signal: 'structural-pattern',
+    source_headline: 'Cancer Death of Retired SF Firefighter Reignites Calls to Reform Blue Shield Coverage',
+    source_outlet: 'SFist',
+    source_byline: 'Zack Ruskin',
+    source_url: 'https://sfist.com/2026/06/07/cancer-death-of-retired-sf-firefighter-reignites-calls-to-reform-blue-shield-coverage/',
+    source_date: '2026-06-07',
+    composite: 8.9,
+    uniqueness: 8,
+    angle_statement: 'The Jones death is one of 23 active firefighter cancer cases the city is now adjudicating against the Blue Shield contract, and how it handles his case sets the precedent for the other 22.',
+    tldr: 'Retired SF firefighter Ken Jones died Saturday from stage 4 lung cancer following a four-month public fight with Blue Shield, the city\'s designated insurance provider. Advocates say the delays cost him treatment.',
+    editor_note: 'The Jones death is one of 23 active firefighter cancer cases the city is now adjudicating against the Blue Shield contract, and how it handles his case sets the precedent for the other 22. Jones became the public face of a structural complaint that has been building since 2023, when the city renewed its Blue Shield contract over Local 798\'s objections. The presumption-of-occupational-cause clause for firefighter cancers is in the contract but has been narrowly interpreted by the insurer. Supervisor Connie Chan has telegraphed a Government Audit and Oversight Committee hearing, and the union is pushing for a contract renegotiation rather than a single-case fix. The political weight is now on the city\'s response, not the union\'s demands. Watch which path Lurie\'s office signals before the hearing.',
+    what_to_watch: 'Government Audit and Oversight hearing scheduled for late June.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c07',
+    category: 'PUBLIC SAFETY',
+    signal: 'underreported',
+    source_headline: 'SF Faces Second Class-Action Lawsuit Over Treatment of Women at County Jail',
+    source_outlet: 'SFist',
+    source_byline: 'Staff',
+    source_url: 'https://sfist.com/2026/06/10/san-francisco-faces-second-class-action-lawsuit-over-treatment-of-women-at-county-jail/',
+    source_date: '2026-06-10',
+    composite: 8.5,
+    uniqueness: 8,
+    angle_statement: 'Two class-action suits within six months on overlapping conditions signals that the plaintiffs\' bar sees a viable broader litigation strategy the Sheriff\'s Department thought it had managed after the 2024 federal monitor agreement.',
+    tldr: 'A second class-action lawsuit filed Tuesday claims conditions for women in custody at the SF county jail are materially worse than those for men. The first suit, filed in January, is still active.',
+    editor_note: 'Two class-action suits within six months on overlapping conditions signals that the plaintiffs\' bar sees a viable broader litigation strategy the Sheriff\'s Department thought it had managed after the 2024 federal monitor agreement. The specific complaint set (overcrowding, medical access delays, mental-health bed shortages) overlaps substantially between the two cases, but the plaintiff pools and counsel are different, which makes consolidation likely. If consolidated, the case becomes the largest jail-conditions matter in SF since the 2008 settlement, with potential structural-injunction remedies. The Sheriff\'s Department\'s response strategy is to argue the post-monitor reforms have addressed the conditions; the plaintiffs\' bar is positioning the cases as proof the reforms have not held. Both lawyers are betting their reputation on this.',
+    what_to_watch: 'Consolidation motion expected by mid-July.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c09',
+    category: 'CLOSINGS',
+    signal: 'structural-pattern',
+    source_headline: 'This Week In Food: Farewell to Shuggie\'s and Anomaly',
+    source_outlet: 'SFist',
+    source_byline: 'Staff',
+    source_url: 'https://sfist.com/2026/06/12/farewell-shuggies-anomaly-bonjour-esme/',
+    source_date: '2026-06-12',
+    composite: 8.0,
+    uniqueness: 7,
+    angle_statement: 'Two acclaimed restaurants closing in the same week sit on different sides of the SF restaurant economics question, and the corridor effect is the larger pattern other outlets are missing.',
+    tldr: 'Anomaly closes after June 20 over chef-owner Mike Lanham\'s health and family time. Shuggie\'s, the Mission upcycled-pizza spot from Kayla Abe and David Murphy, closes July 11. Both were on the 2024 critics\' lists.',
+    editor_note: 'Two acclaimed restaurants closing in the same week sit on different sides of the SF restaurant economics question, and the corridor effect is the larger pattern other outlets are missing. Anomaly\'s closure is personal (Lanham\'s health), which makes it the harder kind of loss because the concept itself was working. Shuggie\'s closure is structural: the waste-stream sourcing model that made the restaurant distinctive was also what made the COGS volatile, and the Mission location\'s lunch traffic never recovered the volume the operators projected at launch. The combined effect on the Mission restaurant cluster between 22nd and 25th matters. The corridor has lost six full-service operators in 18 months. The cluster is still functioning but the density of named-chef restaurants that defined the corridor from 2018 to 2022 is gone.',
+    what_to_watch: 'Esme opening, Shuggie\'s final-week reservations, and the Anomaly space lease availability.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  {
+    id: 'c10',
+    category: 'TECH',
+    signal: 'missing-context',
+    source_headline: 'The SF Fed chief has two words she won\'t say about the AI boom',
+    source_outlet: 'SF Standard',
+    source_byline: 'Jessica Blough',
+    source_url: 'https://sfstandard.com/2026/06/04/sf-federal-reserve-ai-tech-economy/',
+    source_date: '2026-06-04',
+    composite: 7.6,
+    uniqueness: 7,
+    angle_statement: 'Daly\'s avoidance of bubble framing in public is partly market signaling and partly a message to the SFMTA, the city Controller, and the property-tax assessors, all of whom are using SF Fed signals to set their 2027 revenue baselines.',
+    tldr: 'SF Federal Reserve President Mary Daly told the Bloomberg Tech Conference she will not use the words "recession" or "bubble" in conversations about the current AI boom. She also declined to forecast IPO timing for OpenAI or Anthropic.',
+    editor_note: 'Daly\'s avoidance of bubble framing in public is partly market signaling and partly a message to the SFMTA, the city Controller, and the property-tax assessors, all of whom are using SF Fed signals to set their 2027 revenue baselines. The SF Fed publishes the regional employment, lending, and consumer-credit data the city relies on for budget forecasting. Daly\'s actual published research from this year flags the labor-market disconnect (AI capex up sharply, headcount roughly flat) as the analytic question she is watching. Read against the recent KPMG and BCG reports, the Fed is leaning toward a soft-landing read on the AI cycle, not a crash narrative. The city\'s revenue forecasts assume the same. If both are wrong, the FY28 budget gets ugly.',
+    what_to_watch: 'SF Fed regional Beige Book release on June 24.',
+    audit: { audit_pass: true, fail_reasons: [] },
+  },
+  // ============ HELD FOR REVIEW ============
+  // c08: random spot-check (audit passed but pulled for drift detection)
+  {
+    id: 'c08',
+    category: 'CLOSINGS',
+    signal: 'structural-pattern',
+    source_headline: 'A Year and a Half After Reopening, Park Tavern Is Closing For Good',
+    source_outlet: 'SFist',
+    source_byline: 'Jay Barmann',
+    source_url: 'https://sfist.com/2026/06/11/a-year-and-a-half-after-reopening-park-tavern-is-closing-for-good/',
+    source_date: '2026-06-11',
+    composite: 7.6,
+    uniqueness: 7,
+    angle_statement: 'The Park Tavern arc is the specific case study of the celebrity-chef revival model not working at SF\'s post-2020 rent baseline.',
+    tldr: 'Park Tavern in North Beach announced on Instagram it will close for good on June 21. The closure follows a November 2024 revival from original partner James Nicholas and chef Jonathan Waxman that lasted 19 months.',
+    editor_note: 'The Park Tavern arc is the specific case study of the celebrity-chef revival model not working at SF\'s post-2020 rent baseline. The 2024 relaunch read well on paper: original partner Nicholas knew the space, Waxman has the national name, North Beach foot traffic is back to roughly 78% of pre-2020 levels, and the Anna Weinberg operator network was nominally supportive. The piece that did not pencil was the labor cost. The kitchen staff Waxman wanted was not available at the budget the space could carry, and the second-tier team could not deliver the experience the brand promised. The closure is the third high-profile North Beach loss this year (Sotto Mare and Original Joe\'s are the others holding the corridor). The corridor sustainability question is the larger one.',
+    what_to_watch: 'Whether Anna Weinberg announces a replacement concept for the space by Q3.',
+    audit: { audit_pass: true, fail_reasons: [], spot_check: true },
+  },
+  {
+    id: 'c11',
+    category: 'TECH',
+    signal: 'underreported',
+    source_headline: 'Police Search For Potential Co-Conspirator In OpenAI Firebomb Attack',
+    source_outlet: 'SFist',
+    source_byline: 'Staff',
+    source_url: 'https://sfist.com/2026/06/11/police-search-for-potential-co-conspirator-in-openai-firebomb-attack/',
+    source_date: '2026-06-11',
+    composite: 7.1,
+    uniqueness: 5,
+    angle_statement: 'The hotel-call detail is the first public sign that prosecutors think this was planned, and the AI-corridor security spend cascade is the larger story.',
+    tldr: 'Police are searching for an unidentified woman who called the Union Square Plaza Hotel on April 8 to request a late checkout for Daniel Moreno-Gama, the 20-year-old charged in the OpenAI firebomb attack. Investigators now believe he had help.',
+    editor_note: 'The hotel-call detail is the first public sign that prosecutors think this was planned, and the AI-corridor security spend cascade is the larger story. The April attack on Sam Altman\'s home and the attempted arson at OpenAI\'s Mission Street headquarters was the first major coordinated incident targeting an AI company in the city. The civic angle is the security spend that has now cascaded across the AI corridor. OpenAI, Anthropic, and the four other top-floor AI tenants in the SoMa and Mission Bay clusters have all hired private security in the eight weeks since, which is reshaping the demand profile for SF\'s executive-protection firms. Watch for whether the DA charges conspiracy at the next scheduled hearing.',
+    what_to_watch: 'Moreno-Gama preliminary hearing scheduled for July 14.',
+    audit: { audit_pass: false, fail_reasons: ['Check 1 (recap test) borderline: editor\'s note may carry too much of the investigation detail. Reader could understand the news without clicking.'] },
+  },
+  {
+    id: 'c12',
+    category: 'TRANSIT',
+    signal: 'missing-context',
+    source_headline: 'Long-Awaited Powell Street Redesign Advances After Lurie Signs Private Funding Measure',
+    source_outlet: 'SFist',
+    source_byline: 'Leanne Maxwell',
+    source_url: 'https://sfist.com/2026/06/11/long-awaited-powell-street-redesign-advances-after-lurie-signs-private-funding-measure/',
+    source_date: '2026-06-11',
+    composite: 6.8,
+    uniqueness: 4,
+    angle_statement: 'The private-funding route is the new model the Downtown Development Corporation has been quietly piloting, and the Powell project is the template for the Embarcadero and Mid-Market refreshes.',
+    tldr: 'Mayor Lurie signed the measure allowing private donations to fund the Powell Street Promenade refresh, backed by a $14.5 million commitment from the SF Downtown Development Corporation. Groundbreaking is targeted for this fall.',
+    editor_note: 'The private-funding route is the new model the Downtown Development Corporation has been quietly piloting, and the Powell project is the template for the Embarcadero and Mid-Market refreshes. The redesign has been promised since 2017 and died twice under prior administrations over the question of who pays. The three-block stretch between Market and Geary is the cable car queue and the highest tourist foot-traffic block in the city, so the construction sequencing matters more than the design.',
+    what_to_watch: 'First lane closure scheduled for late September.',
+    audit: { audit_pass: false, fail_reasons: ['Check 4 (word count): editor\'s note is 82 words, under the 100-word minimum. Needs expansion or rejection.'] },
+  },
+  {
+    id: 'c14',
+    category: 'POLITICS',
+    signal: 'missing-context',
+    source_headline: 'Mayor Daniel Lurie Gets Shouted Down By LGBTQ Protesters at Two Separate Events',
+    source_outlet: 'SFist',
+    source_byline: 'Jay Barmann',
+    source_url: 'https://sfist.com/2026/06/09/mayor-daniel-lurie-gets-shouted-down-by-lgbtq-protesters-at-two-separate-events-as-pride-month-kicks-off/',
+    source_date: '2026-06-09',
+    composite: 6.9,
+    uniqueness: 4,
+    angle_statement: 'The administration has restored small cuts under similar pressure twice since January, and the protest organizers are leaning into that pattern.',
+    tldr: 'Mayor Lurie was heckled at both the City Hall rainbow flag raising and the Pride kickoff variety show on Monday over proposed grant cuts to LGBTQ-serving nonprofits. The cuts are part of the May budget package facing a July vote.',
+    editor_note: 'The administration has restored small cuts under similar pressure twice since January, and the protest organizers are leaning into that pattern. The grants in question are the seven nonprofit contracts the Department on the Status of Women and the HOPE program use to fund LGBTQ-specific direct services. Total dollars are around $4.1 million annually, which is small in budget terms but operationally critical for the organizations that depend on the contracts. This is important because it shows how the budget process is going to play out for the rest of the cycle. Watch whether Supervisor Jackie Fielder forces the restoration as an amendment to the July budget vote.',
+    what_to_watch: 'Budget amendment hearing in late June.',
+    audit: { audit_pass: false, fail_reasons: ['Check 5 (voice test): the phrase "This is important because it shows how..." is generic news brief filler. Needs SF Times voice revision.'] },
+  },
+];
+
+const heldItems = candidates.filter((c) => !c.audit.audit_pass || c.audit.spot_check);
+const autoItems = candidates.filter((c) => c.audit.audit_pass && !c.audit.spot_check);
+
+const today = new Date('2026-06-13');
+const todayLabel = today.toLocaleDateString('en-US', {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+}).toUpperCase();
+---
+<ExhibitionLayout
+  title="THE BRIEF · DASHBOARD · INTERNAL"
+  description="Path 3 / AI auditor model. Morning review of held items only."
+  active="home"
+>
+  <meta name="robots" content="noindex, nofollow" slot="head" />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="DASHBOARD · INTERNAL"
+    cutouts={[]}
+  />
+
+  <section class="dash-head">
+    <div class="dash-head__inner">
+      <div class="dash-head__top">
+        <div>
+          <p class="dash-head__eyebrow">{todayLabel} · AUDITOR PASS COMPLETE</p>
+          <h1 class="dash-head__title">Morning review</h1>
+          <p class="dash-head__sub">
+            <strong>{heldItems.length} items held for review</strong> · {autoItems.length} items auto-publishing · Hard gate at 7:30 AM
+          </p>
+        </div>
+        <div class="dash-head__timer-wrap">
+          <p class="dash-head__timer-label">REVIEW TIMER</p>
+          <p class="dash-head__timer" id="timer">00:00</p>
+          <div class="dash-head__btn-row">
+            <button class="dash-head__timer-btn" id="timerBtn" type="button">START</button>
+            <button class="dash-head__help-btn" id="helpBtn" type="button" aria-label="Show keyboard shortcuts and audit legend" title="Help (?)">?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-head__status" id="status">
+        <span class="dash-head__status-item dash-head__status-item--accepted"><span id="acceptedCount">0</span> ACCEPTED</span>
+        <span class="dash-head__status-item dash-head__status-item--rejected"><span id="rejectedCount">0</span> REJECTED</span>
+        <span class="dash-head__status-item dash-head__status-item--pending"><span id="pendingCount">{heldItems.length}</span> PENDING</span>
+        <span class="dash-head__status-item dash-head__status-item--auto">{autoItems.length} AUTO-PUBLISHING</span>
+        <a class="dash-head__weekly-link" href="/brief-dashboard/weekly/">WEEKLY AUDIT →</a>
+        <a class="dash-head__weekly-link" href="/brief-dashboard/health/">SOURCE HEALTH →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HELP MODAL ============ -->
+  <div class="dash-help" id="helpModal" hidden aria-modal="true" role="dialog" aria-labelledby="helpModalTitle">
+    <div class="dash-help__backdrop" id="helpBackdrop"></div>
+    <div class="dash-help__panel" role="document">
+      <header class="dash-help__head">
+        <h2 class="dash-help__title" id="helpModalTitle">Dashboard reference</h2>
+        <button class="dash-help__close" id="helpClose" type="button" aria-label="Close help">×</button>
+      </header>
+
+      <section class="dash-help__section">
+        <h3 class="dash-help__h3">Keyboard shortcuts</h3>
+        <dl class="dash-help__kbds">
+          <div class="dash-help__kbd-row">
+            <dt><kbd>A</kbd></dt>
+            <dd>Accept the active held item (also confirms the firewall)</dd>
+          </div>
+          <div class="dash-help__kbd-row">
+            <dt><kbd>R</kbd></dt>
+            <dd>Reject the active held item</dd>
+          </div>
+          <div class="dash-help__kbd-row">
+            <dt><kbd>J</kbd> or <kbd>↓</kbd></dt>
+            <dd>Move to the next held item</dd>
+          </div>
+          <div class="dash-help__kbd-row">
+            <dt><kbd>K</kbd> or <kbd>↑</kbd></dt>
+            <dd>Move to the previous held item</dd>
+          </div>
+          <div class="dash-help__kbd-row">
+            <dt><kbd>?</kbd></dt>
+            <dd>Open or close this help panel</dd>
+          </div>
+          <div class="dash-help__kbd-row">
+            <dt><kbd>Esc</kbd></dt>
+            <dd>Close this help panel</dd>
+          </div>
+        </dl>
+        <p class="dash-help__note">Shortcuts are disabled while typing in a textarea. Click outside the field to re-enable.</p>
+      </section>
+
+      <section class="dash-help__section">
+        <h3 class="dash-help__h3">Why items get held: the five auditor checks</h3>
+        <ol class="dash-help__checks">
+          <li>
+            <strong>Recap test.</strong> Could a reader skip the source article and still understand the news from our editor's note alone? If yes, the note crossed into rewrite territory. Tighten it or reject.
+          </li>
+          <li>
+            <strong>Angle statement test.</strong> The first sentence of the editor's note must state a specific editorial angle that goes beyond restating the news. Generic restatement fails.
+          </li>
+          <li>
+            <strong>TLDR specificity test.</strong> The TLDR must include at least one specific number, named neighborhood, named person, or named institution. Generic phrasing fails.
+          </li>
+          <li>
+            <strong>Word count test.</strong> The editor's note must be between 100 and 150 words (90 to 165 with tolerance). Under is thin, over is bloat.
+          </li>
+          <li>
+            <strong>Voice test.</strong> The note must sound like SF Times (direct, specific, no filler). Phrases like "this is important because" or "moving forward" flag as generic news-brief voice.
+          </li>
+        </ol>
+      </section>
+
+      <section class="dash-help__section">
+        <h3 class="dash-help__h3">Other badges</h3>
+        <dl class="dash-help__badges">
+          <div class="dash-help__badge-row">
+            <dt><span class="dash-help__pill dash-help__pill--fail">AUDITOR FLAGGED</span></dt>
+            <dd>Item failed one or more of the five checks. Read the auditor reasons and decide.</dd>
+          </div>
+          <div class="dash-help__badge-row">
+            <dt><span class="dash-help__pill dash-help__pill--spot">RANDOM SPOT-CHECK</span></dt>
+            <dd>Item passed the auditor but was randomly selected for your spot-check (10% of audit-passing items). Usually accept fine, but the spot-check exists to catch drift the auditor misses.</dd>
+          </div>
+          <div class="dash-help__badge-row">
+            <dt><span class="dash-help__pill dash-help__pill--auto">AUTO-PUBLISHING</span></dt>
+            <dd>Item cleared both the primary AI pass and the auditor. Publishes without action unless you click the × to remove it from the batch.</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="dash-help__section">
+        <h3 class="dash-help__h3">If you miss the 7:30 AM gate</h3>
+        <p>Held items get dropped (they failed the audit or were spot-check, so dropping them is the safe default). The auto-publishing batch ships anyway. The brief publishes with fewer items that day but still ships. This is the structural benefit of the auditor model: the system is resilient to your morning.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ HELD FOR REVIEW ============ -->
+  <section class="dash-section">
+    <div class="dash-section__head">
+      <p class="dash-section__eyebrow">SECTION 1 OF 2 · REQUIRES REVIEW</p>
+      <h2 class="dash-section__title">Held for your review</h2>
+      <p class="dash-section__sub">
+        Items the AI auditor flagged for a firewall check failure, plus a random spot-check sample.
+        Review each. Accept to include in today's brief, reject to drop it.
+      </p>
+    </div>
+
+    <div class="dash-queue">
+      {heldItems.map((c) => (
+        <article class={`cand cand--${c.signal}`} data-id={c.id}>
+          <header class="cand__head">
+            <div class="cand__head-left">
+              <span class="cand__category">{c.category}</span>
+              <span class={`cand__signal cand__signal--${c.signal}`}>{c.signal.replace(/-/g, ' ').toUpperCase()}</span>
+              <span class="cand__score">COMPOSITE {c.composite.toFixed(1)} · UNIQUENESS {c.uniqueness}</span>
+            </div>
+            <div class="cand__head-right">
+              {c.audit.spot_check ? (
+                <span class="cand__hold-badge cand__hold-badge--spot">RANDOM SPOT-CHECK</span>
+              ) : (
+                <span class="cand__hold-badge cand__hold-badge--fail">AUDITOR FLAGGED</span>
+              )}
+            </div>
+          </header>
+
+          {!c.audit.spot_check && c.audit.fail_reasons.length > 0 && (
+            <div class="cand__audit-fails">
+              <p class="cand__audit-label">AUDITOR REASONS</p>
+              {c.audit.fail_reasons.map((reason) => (
+                <p class="cand__audit-reason">{reason}</p>
+              ))}
+            </div>
+          )}
+
+          <div class="cand__source">
+            <p class="cand__source-headline">{c.source_headline}</p>
+            <p class="cand__source-meta">
+              <a href={c.source_url} rel="noopener noreferrer" target="_blank">{c.source_outlet}</a>
+              <span> · </span>
+              <span>{c.source_byline}</span>
+              <span> · </span>
+              <span>{c.source_date}</span>
+            </p>
+          </div>
+
+          <div class="cand__fields">
+            <label class="cand__field">
+              <span class="cand__field-label">Angle statement</span>
+              <textarea class="cand__field-input cand__field-input--angle" rows="2" data-field="angle">{c.angle_statement}</textarea>
+            </label>
+            <label class="cand__field">
+              <span class="cand__field-label">TLDR</span>
+              <textarea class="cand__field-input" rows="3" data-field="tldr">{c.tldr}</textarea>
+            </label>
+            <label class="cand__field">
+              <span class="cand__field-label">Editor's note</span>
+              <textarea class="cand__field-input cand__field-input--long" rows="7" data-field="note">{c.editor_note}</textarea>
+            </label>
+            <label class="cand__field">
+              <span class="cand__field-label">What to watch</span>
+              <textarea class="cand__field-input" rows="2" data-field="watch">{c.what_to_watch}</textarea>
+            </label>
+          </div>
+
+          <div class="cand__actions">
+            <button class="cand__btn cand__btn--accept" data-action="accept" data-id={c.id} type="button">Accept (A)</button>
+            <button class="cand__btn cand__btn--reject" data-action="reject" data-id={c.id} type="button">Reject (R)</button>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- ============ AUTO-PUBLISHING ============ -->
+  <section class="dash-section dash-section--auto">
+    <div class="dash-section__head">
+      <p class="dash-section__eyebrow">SECTION 2 OF 2 · NO ACTION REQUIRED</p>
+      <h2 class="dash-section__title">Auto-publishing batch</h2>
+      <p class="dash-section__sub">
+        {autoItems.length} items cleared both the primary AI pass and the auditor.
+        Publishing automatically when you hit the button below. Click any item to spot-check.
+      </p>
+    </div>
+
+    <ul class="dash-auto">
+      {autoItems.map((c) => (
+        <li class="auto-item" data-id={c.id}>
+          <details>
+            <summary>
+              <span class={`auto-item__signal auto-item__signal--${c.signal}`}></span>
+              <span class="auto-item__category">{c.category}</span>
+              <span class="auto-item__headline">{c.source_headline}</span>
+              <span class="auto-item__meta">{c.source_outlet} · {c.composite.toFixed(1)}</span>
+              <button class="auto-item__remove" data-action="remove" data-id={c.id} type="button" aria-label="Remove from auto-publishing batch">×</button>
+            </summary>
+            <div class="auto-item__body">
+              <p class="auto-item__angle"><strong>Angle:</strong> {c.angle_statement}</p>
+              <p class="auto-item__tldr"><strong>TLDR:</strong> {c.tldr}</p>
+              <p class="auto-item__note">{c.editor_note}</p>
+              <p class="auto-item__watch"><strong>Watch:</strong> {c.what_to_watch}</p>
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ============ PUBLISH BAR ============ -->
+  <section class="dash-publish">
+    <div class="dash-publish__inner">
+      <div>
+        <p class="dash-publish__label">Ready to ship</p>
+        <p class="dash-publish__sub" id="publishMsg">Review the {heldItems.length} held items first. The auto-publishing batch is locked in unless you remove items.</p>
+      </div>
+      <button class="dash-publish__btn" id="publishBtn" type="button" disabled>PUBLISH TODAY'S BRIEF</button>
+    </div>
+  </section>
+
+  <style>
+    /* ============ HEAD ============ */
+    .dash-head {
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+      padding: 24px 0;
+      margin: 0 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .dash-head__inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .dash-head__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; margin-bottom: 16px; }
+    .dash-head__eyebrow {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 700;
+    }
+    .dash-head__title {
+      font-family: var(--display); font-size: clamp(28px, 4vw, 44px);
+      line-height: 1; margin: 0 0 6px; letter-spacing: -0.01em; text-transform: uppercase;
+    }
+    .dash-head__sub { font-family: var(--ui); font-size: 13px; color: var(--muted); margin: 0; }
+    .dash-head__sub strong { color: var(--accent); font-weight: 700; }
+    .dash-head__timer-wrap { text-align: right; min-width: 140px; }
+    .dash-head__timer-label {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); margin: 0 0 4px; font-weight: 700;
+    }
+    .dash-head__timer { font-family: var(--display); font-size: 32px; line-height: 1; margin: 0 0 8px; }
+    .dash-head__timer.over { color: var(--accent); }
+    .dash-head__timer-btn {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.16em; font-weight: 700;
+      text-transform: uppercase; background: var(--ink); color: var(--paper);
+      padding: 6px 14px; border: 0; cursor: pointer;
+    }
+    .dash-head__timer-btn:hover { background: var(--accent); }
+    .dash-head__btn-row { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+    .dash-head__help-btn {
+      font-family: var(--ui); font-size: 16px; line-height: 1;
+      font-weight: 700; background: var(--paper); color: var(--ink);
+      border: 1px solid var(--rule); padding: 0;
+      width: 30px; height: 30px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 200ms, color 200ms;
+    }
+    .dash-head__help-btn:hover { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+    .dash-head__weekly-link {
+      margin-left: auto;
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em;
+      font-weight: 700; color: var(--accent);
+      border-bottom: 1px solid currentColor; padding-bottom: 1px;
+    }
+
+    /* ============ HELP MODAL ============ */
+    .dash-help[hidden] { display: none; }
+    .dash-help {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .dash-help__backdrop {
+      position: absolute; inset: 0;
+      background: rgba(10, 10, 10, 0.6);
+      cursor: pointer;
+    }
+    .dash-help__panel {
+      position: relative;
+      background: var(--paper);
+      max-width: 720px;
+      width: 100%;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      padding: 28px 32px 32px;
+      border: 1px solid var(--rule);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    }
+    .dash-help__head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .dash-help__title {
+      font-family: var(--display); font-size: 26px; line-height: 1;
+      margin: 0; letter-spacing: -0.005em; text-transform: uppercase;
+    }
+    .dash-help__close {
+      font-family: var(--ui); font-size: 22px; line-height: 1;
+      background: transparent; border: 0; color: var(--muted);
+      width: 32px; height: 32px; cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 180ms;
+    }
+    .dash-help__close:hover { color: var(--ink); }
+    .dash-help__section { margin-bottom: 22px; }
+    .dash-help__section:last-child { margin-bottom: 0; }
+    .dash-help__h3 {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700;
+      margin: 0 0 12px;
+    }
+    .dash-help__kbds, .dash-help__badges {
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .dash-help__kbd-row, .dash-help__badge-row {
+      display: grid; grid-template-columns: 120px 1fr; gap: 14px;
+      align-items: baseline;
+    }
+    .dash-help__kbd-row dt, .dash-help__badge-row dt { margin: 0; }
+    .dash-help__kbd-row dd, .dash-help__badge-row dd {
+      margin: 0;
+      font-family: var(--ui); font-size: 13.5px;
+      line-height: 1.5; color: var(--ink);
+    }
+    .dash-help kbd {
+      display: inline-block;
+      font-family: var(--ui); font-size: 12px; font-weight: 700;
+      background: var(--paper-2); color: var(--ink);
+      border: 1px solid var(--rule); padding: 2px 8px;
+      min-width: 24px; text-align: center;
+    }
+    .dash-help__note {
+      font-family: var(--ui); font-size: 12px;
+      color: var(--muted); margin: 12px 0 0;
+      font-style: italic;
+    }
+    .dash-help__checks {
+      list-style: decimal; padding-left: 20px;
+      margin: 0; display: flex; flex-direction: column; gap: 10px;
+    }
+    .dash-help__checks li {
+      font-family: var(--ui); font-size: 13.5px;
+      line-height: 1.55; color: var(--ink);
+    }
+    .dash-help__checks strong { color: var(--accent); font-weight: 700; }
+    .dash-help__pill {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.16em;
+      font-weight: 700; padding: 3px 9px; text-transform: uppercase;
+      display: inline-block;
+    }
+    .dash-help__pill--fail { background: #a82919; color: white; }
+    .dash-help__pill--spot { background: var(--muted); color: white; }
+    .dash-help__pill--auto { background: #0a7a3d; color: white; }
+    @media (max-width: 600px) {
+      .dash-help__panel { padding: 22px; }
+      .dash-help__kbd-row, .dash-help__badge-row { grid-template-columns: 88px 1fr; gap: 10px; }
+    }
+    .dash-head__status {
+      display: flex; flex-wrap: wrap; gap: 18px;
+      padding-top: 14px; border-top: 1px solid var(--rule);
+    }
+    .dash-head__status-item {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700;
+    }
+    .dash-head__status-item span { color: var(--ink); font-size: 14px; margin-right: 4px; }
+    .dash-head__status-item--accepted span { color: #0a7a3d; }
+    .dash-head__status-item--rejected span { color: #a82919; }
+    .dash-head__status-item--auto { color: #0a7a3d; }
+
+    /* ============ SECTIONS ============ */
+    .dash-section { max-width: 1200px; margin: 0 auto 48px; padding: 0 24px; }
+    .dash-section__head { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+    .dash-section__eyebrow {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent); margin: 0 0 6px; font-weight: 700;
+    }
+    .dash-section--auto .dash-section__eyebrow { color: var(--muted); }
+    .dash-section__title {
+      font-family: var(--display); font-size: clamp(24px, 3vw, 32px);
+      line-height: 1.05; margin: 0 0 8px; text-transform: uppercase;
+    }
+    .dash-section__sub { font-family: var(--ui); font-size: 13px; color: var(--muted); margin: 0; max-width: 60ch; }
+
+    /* ============ HELD CANDIDATES ============ */
+    .dash-queue { display: flex; flex-direction: column; gap: 18px; }
+    .cand {
+      background: var(--paper); border: 1px solid var(--rule); border-left-width: 4px;
+      padding: 20px 22px; transition: opacity 240ms;
+    }
+    .cand--accepted { border-left-color: #0a7a3d; opacity: 0.6; }
+    .cand--rejected { border-left-color: #a82919; opacity: 0.4; }
+    .cand--first-to-connect { border-left-color: var(--accent); }
+    .cand--underreported { border-left-color: #2c5582; }
+    .cand--missing-context { border-left-color: #6b6357; }
+    .cand--structural-pattern { border-left-color: var(--ink-2); }
+
+    .cand__head {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
+    .cand__head-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .cand__category {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      font-weight: 700; text-transform: uppercase; background: var(--paper-2);
+      padding: 4px 10px; color: var(--ink);
+    }
+    .cand__signal {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.14em;
+      font-weight: 700; padding: 4px 10px; color: white;
+    }
+    .cand__signal--first-to-connect { background: var(--accent); }
+    .cand__signal--underreported { background: #2c5582; }
+    .cand__signal--missing-context { background: #6b6357; }
+    .cand__signal--structural-pattern { background: var(--ink-2); }
+    .cand__score {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.10em; color: var(--muted);
+    }
+    .cand__hold-badge {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      font-weight: 700; padding: 3px 9px; text-transform: uppercase;
+    }
+    .cand__hold-badge--fail { background: #a82919; color: white; }
+    .cand__hold-badge--spot { background: var(--muted); color: white; }
+
+    .cand__audit-fails {
+      background: #fef0ed; border-left: 3px solid #a82919;
+      padding: 10px 14px; margin-bottom: 14px;
+    }
+    .cand__audit-label {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      color: #a82919; font-weight: 700; margin: 0 0 4px;
+    }
+    .cand__audit-reason {
+      font-family: var(--ui); font-size: 13px; color: var(--ink); margin: 0;
+    }
+
+    .cand__source { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+    .cand__source-headline {
+      font-family: var(--display); font-size: 18px; line-height: 1.25;
+      letter-spacing: -0.005em; margin: 0 0 4px;
+    }
+    .cand__source-meta { font-family: var(--ui); font-size: 12px; color: var(--muted); margin: 0; }
+    .cand__source-meta a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+    .cand__fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .cand__field { display: flex; flex-direction: column; gap: 4px; }
+    .cand__field-label {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700;
+    }
+    .cand__field-input {
+      font-family: var(--ui); font-size: 14px; line-height: 1.55; color: var(--ink);
+      background: var(--paper-2); border: 1px solid var(--rule);
+      padding: 8px 12px; width: 100%; resize: vertical;
+    }
+    .cand__field-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .cand__field-input--angle { background: rgba(217, 85, 31, 0.08); font-weight: 500; }
+    .cand__field-input--long { font-size: 14px; line-height: 1.6; }
+
+    .cand__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cand__btn {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em; font-weight: 700;
+      text-transform: uppercase; padding: 9px 18px; border: 1px solid var(--ink);
+      background: transparent; color: var(--ink); cursor: pointer; transition: background 180ms;
+    }
+    .cand__btn:hover { background: var(--ink); color: var(--paper); }
+    .cand__btn--accept:hover { background: #0a7a3d; border-color: #0a7a3d; }
+    .cand__btn--reject:hover { background: #a82919; border-color: #a82919; }
+    .cand[data-state=accepted] .cand__btn--accept { background: #0a7a3d; color: white; border-color: #0a7a3d; }
+    .cand[data-state=rejected] .cand__btn--reject { background: #a82919; color: white; border-color: #a82919; }
+
+    /* ============ AUTO-PUBLISHING LIST ============ */
+    .dash-auto { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1px; background: var(--rule); }
+    .auto-item { background: var(--paper); transition: background 180ms; }
+    .auto-item:hover { background: var(--paper-2); }
+    .auto-item[data-state=removed] { opacity: 0.3; }
+    .auto-item details summary {
+      list-style: none; cursor: pointer; padding: 12px 18px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .auto-item details summary::-webkit-details-marker { display: none; }
+    .auto-item__signal { width: 4px; height: 18px; display: block; }
+    .auto-item__signal--first-to-connect { background: var(--accent); }
+    .auto-item__signal--underreported { background: #2c5582; }
+    .auto-item__signal--missing-context { background: #6b6357; }
+    .auto-item__signal--structural-pattern { background: var(--ink-2); }
+    .auto-item__category {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.16em;
+      font-weight: 700; text-transform: uppercase; color: var(--muted); min-width: 100px;
+    }
+    .auto-item__headline {
+      font-family: var(--ui); font-size: 14px; color: var(--ink); font-weight: 500;
+      flex: 1; min-width: 220px;
+    }
+    .auto-item__meta {
+      font-family: var(--ui); font-size: 11px; color: var(--muted); margin-left: auto;
+    }
+    .auto-item__remove {
+      font-family: var(--ui); font-size: 18px; line-height: 1;
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      width: 28px; height: 28px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auto-item__remove:hover { background: #a82919; border-color: #a82919; color: white; }
+    .auto-item[data-state=removed] .auto-item__remove { background: #a82919; border-color: #a82919; color: white; }
+    .auto-item__body {
+      padding: 14px 22px 18px; background: var(--paper-2); border-top: 1px solid var(--rule);
+      font-family: var(--ui); font-size: 13px; line-height: 1.55; color: var(--ink);
+    }
+    .auto-item__body p { margin: 0 0 10px; }
+    .auto-item__body p:last-child { margin: 0; }
+    .auto-item__angle { color: var(--accent); }
+
+    /* ============ PUBLISH BAR ============ */
+    .dash-publish {
+      background: var(--ink); color: var(--paper); padding: 28px 0; margin: 0 0 64px;
+      position: sticky; bottom: 0; z-index: 50;
+    }
+    .dash-publish__inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 24px;
+    }
+    .dash-publish__label {
+      font-family: var(--display); font-size: clamp(20px, 3vw, 28px); margin: 0;
+      text-transform: uppercase; letter-spacing: -0.005em;
+    }
+    .dash-publish__sub { font-family: var(--ui); font-size: 13px; color: rgba(255, 255, 255, 0.6); margin: 4px 0 0; }
+    .dash-publish__btn {
+      font-family: var(--ui); font-size: 13px; letter-spacing: 0.18em; font-weight: 700;
+      background: var(--accent); color: var(--paper); padding: 16px 28px; border: 0; cursor: pointer;
+    }
+    .dash-publish__btn:hover { background: #e26224; }
+    .dash-publish__btn:disabled { background: rgba(255, 255, 255, 0.2); cursor: not-allowed; }
+
+    @media (max-width: 768px) {
+      .dash-head__top { flex-direction: column; gap: 12px; }
+      .dash-head__timer-wrap { text-align: left; }
+      .dash-publish__inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
+
+  <script is:inline>
+    (function () {
+      const timerEl = document.getElementById('timer');
+      const timerBtn = document.getElementById('timerBtn');
+      const acceptedEl = document.getElementById('acceptedCount');
+      const rejectedEl = document.getElementById('rejectedCount');
+      const pendingEl = document.getElementById('pendingCount');
+      const publishBtn = document.getElementById('publishBtn');
+      const publishMsg = document.getElementById('publishMsg');
+      const heldCards = document.querySelectorAll('.cand');
+      const autoCards = document.querySelectorAll('.auto-item');
+      const heldTotal = heldCards.length;
+
+      let startedAt = null;
+      let tickHandle = null;
+      let activeIdx = 0;
+
+      function fmtTime(seconds) {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return m + ':' + s;
+      }
+
+      function tick() {
+        if (!startedAt) return;
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        timerEl.textContent = fmtTime(elapsed);
+        if (elapsed > 10 * 60) timerEl.classList.add('over');
+      }
+
+      function startTimer() {
+        if (startedAt) return;
+        startedAt = Date.now();
+        timerBtn.textContent = 'RUNNING';
+        timerBtn.disabled = true;
+        tickHandle = setInterval(tick, 1000);
+        tick();
+      }
+
+      function startTimerIfNeeded() {
+        if (!startedAt) startTimer();
+      }
+
+      timerBtn.addEventListener('click', startTimer);
+
+      function recomputeStatus() {
+        let accepted = 0, rejected = 0, pending = 0;
+        heldCards.forEach((c) => {
+          const s = c.dataset.state || 'pending';
+          if (s === 'accepted') accepted++;
+          else if (s === 'rejected') rejected++;
+          else pending++;
+        });
+
+        acceptedEl.textContent = accepted;
+        rejectedEl.textContent = rejected;
+        pendingEl.textContent = pending;
+
+        let autoActive = 0;
+        autoCards.forEach((a) => { if (a.dataset.state !== 'removed') autoActive++; });
+
+        if (pending === 0) {
+          publishBtn.disabled = false;
+          publishMsg.textContent = accepted + ' held accepted + ' + autoActive + ' auto-publishing = ' + (accepted + autoActive) + ' items ready. Click to ship.';
+        } else {
+          publishBtn.disabled = true;
+          publishMsg.textContent = pending + ' held items still need accept or reject. Auto-publishing batch is ' + autoActive + ' items.';
+        }
+      }
+
+      heldCards.forEach((card, idx) => {
+        card.querySelectorAll('.cand__btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            startTimerIfNeeded();
+            const action = btn.dataset.action;
+            card.dataset.state = action === 'accept' ? 'accepted' : 'rejected';
+            card.classList.remove('cand--accepted', 'cand--rejected');
+            card.classList.add('cand--' + card.dataset.state);
+            recomputeStatus();
+            // Auto-scroll to next pending card
+            setTimeout(() => {
+              for (let i = idx + 1; i < heldCards.length; i++) {
+                if (!heldCards[i].dataset.state) {
+                  heldCards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  activeIdx = i;
+                  return;
+                }
+              }
+            }, 200);
+          });
+        });
+        card.querySelectorAll('textarea').forEach((ta) => {
+          ta.addEventListener('focus', startTimerIfNeeded);
+        });
+      });
+
+      autoCards.forEach((card) => {
+        const removeBtn = card.querySelector('.auto-item__remove');
+        if (removeBtn) {
+          removeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            startTimerIfNeeded();
+            card.dataset.state = card.dataset.state === 'removed' ? '' : 'removed';
+            recomputeStatus();
+          });
+        }
+      });
+
+      // Help modal
+      const helpModal = document.getElementById('helpModal');
+      const helpBtn = document.getElementById('helpBtn');
+      const helpClose = document.getElementById('helpClose');
+      const helpBackdrop = document.getElementById('helpBackdrop');
+      let lastFocus = null;
+
+      function openHelp() {
+        if (!helpModal || !helpModal.hidden) return;
+        lastFocus = document.activeElement;
+        helpModal.hidden = false;
+        if (helpClose) helpClose.focus();
+      }
+      function closeHelp() {
+        if (!helpModal || helpModal.hidden) return;
+        helpModal.hidden = true;
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+      if (helpBtn) helpBtn.addEventListener('click', openHelp);
+      if (helpClose) helpClose.addEventListener('click', closeHelp);
+      if (helpBackdrop) helpBackdrop.addEventListener('click', closeHelp);
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const key = e.key.toLowerCase();
+        const helpOpen = helpModal && !helpModal.hidden;
+        if (key === 'escape') {
+          e.preventDefault();
+          closeHelp();
+          return;
+        }
+        if (key === '?' || (e.shiftKey && key === '/')) {
+          e.preventDefault();
+          if (helpOpen) closeHelp();
+          else openHelp();
+          return;
+        }
+        if (helpOpen) return; // swallow other shortcuts while help is open
+        if (key === 'a' || key === 'r') {
+          e.preventDefault();
+          startTimerIfNeeded();
+          const card = heldCards[activeIdx];
+          if (!card || card.dataset.state) return;
+          const btn = card.querySelector(key === 'a' ? '.cand__btn--accept' : '.cand__btn--reject');
+          if (btn) btn.click();
+        } else if (key === 'j' || key === 'arrowdown') {
+          e.preventDefault();
+          activeIdx = Math.min(activeIdx + 1, heldCards.length - 1);
+          heldCards[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (key === 'k' || key === 'arrowup') {
+          e.preventDefault();
+          activeIdx = Math.max(activeIdx - 1, 0);
+          heldCards[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+
+      publishBtn.addEventListener('click', async () => {
+        if (publishBtn.disabled) return;
+        clearInterval(tickHandle);
+        const elapsed = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : 0;
+
+        // Gather editor decisions for the API. Each held card carries
+        // data-id; the auto-removed items are tracked similarly.
+        const acceptedHeld = [];
+        const rejectedHeld = [];
+        heldCards.forEach((c) => {
+          if (c.dataset.state === 'accepted') acceptedHeld.push(c.dataset.id);
+          else if (c.dataset.state === 'rejected') rejectedHeld.push(c.dataset.id);
+        });
+        const removedAuto = [];
+        let autoActive = 0;
+        autoCards.forEach((a) => {
+          if (a.dataset.state === 'removed') removedAuto.push(a.dataset.id);
+          else autoActive++;
+        });
+
+        const decisions = {
+          date: new Date().toISOString().slice(0, 10),
+          editor: 'Eric',
+          accepted_held: acceptedHeld,
+          rejected_held: rejectedHeld,
+          removed_auto: removedAuto,
+        };
+
+        publishBtn.textContent = 'PUBLISHING…';
+        publishBtn.disabled = true;
+        publishMsg.textContent = 'Sending decisions to /api/brief/publish…';
+
+        try {
+          const resp = await fetch('/api/brief/publish', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(decisions),
+          });
+
+          if (resp.ok) {
+            const data = await resp.json();
+            publishBtn.textContent = 'PUBLISHED · ' + data.date;
+            publishMsg.textContent = 'Live publish OK. ' + (data.items_accepted + autoActive) + ' items shipped. ' + (data.edits_count || 0) + ' edits applied. Review time: ' + fmtTime(elapsed) + '.';
+          } else if (resp.status === 404 || resp.status === 405) {
+            // API not deployed yet: fall back to simulation
+            publishBtn.textContent = 'PUBLISHED · SIMULATED';
+            publishMsg.textContent = 'Simulation mode (no /api/brief/publish endpoint). ' + (acceptedHeld.length + autoActive) + ' items would publish. Review time: ' + fmtTime(elapsed) + '. Phase C target is under 10:00.';
+          } else {
+            const err = await resp.text();
+            publishBtn.textContent = 'PUBLISH FAILED';
+            publishBtn.disabled = false;
+            publishMsg.textContent = 'Publish error: HTTP ' + resp.status + '. ' + err.slice(0, 120);
+          }
+        } catch (e) {
+          // Network error: assume API isn't available, fall back to simulation
+          publishBtn.textContent = 'PUBLISHED · SIMULATED';
+          publishMsg.textContent = 'Simulation mode (API unreachable). ' + (acceptedHeld.length + autoActive) + ' items would publish. Review time: ' + fmtTime(elapsed) + '.';
+        }
+      });
+
+      recomputeStatus();
+    })();
+  </script>
+</ExhibitionLayout>

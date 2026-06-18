@@ -13,7 +13,10 @@
     "responsive": "node scripts/generate-responsive-heroes.mjs",
     "subset-fonts": "node scripts/subset-fonts.mjs",
     "lighthouse": "node scripts/lighthouse-baseline.mjs",
-    "guard": "node scripts/check-placeholders.mjs --post"
+    "guard": "node scripts/check-placeholders.mjs --post",
+    "brief:ingest": "tsx scripts/brief-ingest.ts",
+    "brief:ai": "tsx scripts/brief-ai.ts",
+    "brief:publish": "tsx scripts/brief-publish.ts"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.7",
@@ -21,6 +24,10 @@
     "astro": "^4.16.0"
   },
   "devDependencies": {
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "@vercel/node": "^3.2.0",
+    "@anthropic-ai/sdk": "^0.32.0",
+    "rss-parser": "^3.13.0",
+    "tsx": "^4.19.0"
   }
 }

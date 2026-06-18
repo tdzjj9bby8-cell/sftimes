@@ -1,0 +1,552 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../components/BriefSubNav.astro';
+
+/**
+ * /brief/this-week
+ *
+ * Rolling 7-day digest. Aggregates every Brief item from the last week,
+ * surfaces the top 12 by composite score, then groups the remainder by
+ * day for chronological browse.
+ *
+ * Targets reader-acquisition queries like "san francisco news this week"
+ * and AI Overview citations on weekly-recap intents.
+ *
+ * Rebuilt every time we publish (the cron-and-deploy flow); the data
+ * automatically reflects the latest archive without manual editing.
+ */
+const briefs = await getCollection('briefs');
+
+if (briefs.length === 0) {
+  throw new Error('No briefs in collection.');
+}
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+function shortDate(d: Date): string {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+function longDate(d: Date): string {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+const sortedBriefs = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const windowEnd = sortedBriefs[0].data.date;
+const windowStart = new Date(windowEnd.valueOf() - 6 * 24 * 60 * 60 * 1000);
+
+const inWindow = sortedBriefs.filter((b) => {
+  const d = b.data.date.valueOf();
+  return d >= windowStart.valueOf() && d <= windowEnd.valueOf();
+});
+
+interface FlatItem {
+  item: any;
+  brief_date: Date;
+  brief_date_string: string;
+  brief_edition: number;
+}
+
+const flatItems: FlatItem[] = inWindow.flatMap((b) =>
+  b.data.items.map((item: any) => ({
+    item,
+    brief_date: b.data.date,
+    brief_date_string: formatDate(b.data.date),
+    brief_edition: b.data.edition,
+  }))
+);
+
+// Top 12 by composite score across the week.
+const topItems = [...flatItems]
+  .sort((a, b) => (b.item.composite_score ?? 0) - (a.item.composite_score ?? 0))
+  .slice(0, 12);
+
+// Day groupings for the chronological section.
+interface DayGroup {
+  date: Date;
+  date_string: string;
+  edition: number;
+  items: any[];
+}
+const dayGroups: DayGroup[] = inWindow.map((b) => ({
+  date: b.data.date,
+  date_string: formatDate(b.data.date),
+  edition: b.data.edition,
+  items: [...b.data.items].sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0)),
+}));
+
+// Category breakdown for the week.
+const catCounts: Record<string, number> = {};
+for (const f of flatItems) {
+  catCounts[f.item.category] = (catCounts[f.item.category] || 0) + 1;
+}
+const sortedCats = Object.entries(catCounts)
+  .sort(([, a], [, b]) => b - a)
+  .map(([category, count]) => ({ category, count }));
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE_ORIGIN}/brief/this-week/`,
+  name: `The Brief · This week · ${longDate(windowStart)} to ${longDate(windowEnd)}`,
+  description: `Rolling 7-day digest of SF Times Brief items. ${flatItems.length} items across ${inWindow.length} editions.`,
+  datePublished: windowEnd.toISOString(),
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: topItems.length,
+    itemListElement: topItems.map((f, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      url: `${SITE_ORIGIN}/brief/${f.brief_date_string}/${f.item.slug}/`,
+      name: f.item.source_headline,
+    })),
+  },
+};
+---
+<ExhibitionLayout
+  title={`THE BRIEF · THIS WEEK · ${flatItems.length} items · SF Times`}
+  description={`Rolling 7-day digest of SF Times Brief items. ${flatItems.length} curated SF news items across ${inWindow.length} editions.`}
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript={`THIS WEEK · ${flatItems.length} ITEMS`}
+    cutouts={[]}
+  />
+
+  <BriefSubNav active="this-week" />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">
+      {shortDate(windowStart).toUpperCase()} TO {shortDate(windowEnd).toUpperCase()} · {inWindow.length} EDITIONS · {flatItems.length} ITEMS
+    </p>
+    <h1 class="ex-prose__title">SAN FRANCISCO,<br>THE WEEK<br>SO FAR.</h1>
+    <p>Every Brief item from the last seven days. The 12 highest-composite items lead. The full daily groups follow.</p>
+  </article>
+
+  <!-- ============ CATEGORY BREAKDOWN ============ -->
+  {sortedCats.length > 0 && (
+    <section class="week-cats">
+      <p class="week-cats__label">CATEGORY BREAKDOWN</p>
+      <ul class="week-cats__list">
+        {sortedCats.map((cat) => (
+          <li>
+            <a href={`/brief/category/${cat.category.toLowerCase().replace(/\s+/g, '-')}/`}>
+              <span class="week-cats__name">{cat.category}</span>
+              <span class="week-cats__count">{cat.count}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <!-- ============ TOP STORIES ============ -->
+  <section class="week-section">
+    <header class="week-section__head">
+      <p class="week-section__eyebrow">TOP THIS WEEK</p>
+      <h2 class="week-section__title">Twelve items, highest composite first</h2>
+      <p class="week-section__sub">Composite scores are the weighted average of novelty, civic significance, SF specificity, and uniqueness. Higher is more unique to SF Times' editorial value-add.</p>
+    </header>
+
+    <ol class="week-top">
+      {topItems.map((f, idx) => (
+        <li>
+          <a class={`week-top-item week-top-item--${f.item.signal}`} href={`/brief/${f.brief_date_string}/${f.item.slug}/`}>
+            <div class="week-top-item__num-col">
+              <span class="week-top-item__num">{String(idx + 1).padStart(2, '0')}</span>
+              <span class="week-top-item__date">{shortDate(f.brief_date).toUpperCase()}</span>
+            </div>
+
+            <div class="week-top-item__body">
+              <div class="week-top-item__tags">
+                <span class="week-top-item__category">{f.item.category}</span>
+                <span class={`week-top-item__signal week-top-item__signal--${f.item.signal}`}>
+                  {f.item.signal.replace(/-/g, ' ').toUpperCase()}
+                </span>
+                <span class="week-top-item__score">COMPOSITE {f.item.composite_score?.toFixed(1) ?? '—'}</span>
+              </div>
+              <h3 class="week-top-item__headline">{f.item.source_headline}</h3>
+              <p class="week-top-item__angle">{f.item.angle_statement}</p>
+              <p class="week-top-item__source">
+                Reported by <strong>{f.item.source_byline}</strong> at {f.item.source_outlet}
+              </p>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- ============ DAY GROUPS ============ -->
+  <section class="week-section">
+    <header class="week-section__head">
+      <p class="week-section__eyebrow">BY DAY</p>
+      <h2 class="week-section__title">The full week, chronological</h2>
+    </header>
+
+    <div class="week-days">
+      {dayGroups.map((day) => (
+        <article class="week-day">
+          <header class="week-day__head">
+            <a class="week-day__link" href={`/brief/${day.date_string}/`}>
+              <p class="week-day__date">{longDate(day.date).toUpperCase()}</p>
+              <p class="week-day__edition">EDITION №{String(day.edition).padStart(2, '0')} · {day.items.length} ITEMS · OPEN →</p>
+            </a>
+          </header>
+
+          <ul class="week-day__items">
+            {day.items.map((item: any) => (
+              <li>
+                <a class={`week-day__item week-day__item--${item.signal}`} href={`/brief/${day.date_string}/${item.slug}/`}>
+                  <div class="week-day__item-head">
+                    <span class="week-day__item-category">{item.category}</span>
+                    <span class={`week-day__item-signal week-day__item-signal--${item.signal}`}>
+                      {item.signal.replace(/-/g, ' ').toUpperCase()}
+                    </span>
+                  </div>
+                  <p class="week-day__item-headline">{item.source_headline}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">SUBSCRIBE</p>
+    <p>
+      The full daily Brief publishes Monday through Saturday. Subscribe to
+      <a href="/brief/rss.xml">the RSS feed</a> or browse the
+      <a href="/brief/archive/">archive</a>. Read about
+      <a href="/brief/methodology/">how we make the Brief</a>.
+    </p>
+  </aside>
+
+  <style>
+    /* ============ CATEGORY BREAKDOWN ============ */
+    .week-cats {
+      max-width: var(--max-narrow);
+      margin: 0 auto 40px;
+      padding: 18px var(--gutter);
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+    }
+    .week-cats__label {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+    .week-cats__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .week-cats__list a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      transition: background 180ms, color 180ms;
+    }
+    .week-cats__list a:hover {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+    .week-cats__name {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .week-cats__count {
+      font-family: var(--display);
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+    }
+    .week-cats__list a:hover .week-cats__count { color: var(--paper); }
+
+    /* ============ SECTIONS ============ */
+    .week-section {
+      max-width: var(--max-narrow);
+      margin: 0 auto 56px;
+      padding: 0 var(--gutter);
+    }
+    .week-section__head { margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+    .week-section__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .week-section__title {
+      font-family: var(--display);
+      font-size: clamp(24px, 2.8vw, 32px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    .week-section__sub {
+      font-family: var(--ui);
+      font-size: 13.5px;
+      color: var(--muted);
+      margin: 0;
+      max-width: 60ch;
+      line-height: 1.55;
+    }
+
+    /* ============ TOP ITEMS ============ */
+    .week-top {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .week-top-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 18px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 18px 22px;
+      color: var(--ink);
+      transition: background 180ms, transform 180ms;
+    }
+    .week-top-item:hover { background: var(--paper-2); transform: translateY(-1px); }
+    .week-top-item--first-to-connect { border-left-color: var(--accent); }
+    .week-top-item--underreported { border-left-color: #2c5582; }
+    .week-top-item--missing-context { border-left-color: var(--muted); }
+    .week-top-item--structural-pattern { border-left-color: var(--ink-2); }
+    .week-top-item__num-col { text-align: left; }
+    .week-top-item__num {
+      font-family: var(--display);
+      font-size: 32px;
+      line-height: 1;
+      color: var(--accent);
+      display: block;
+      letter-spacing: -0.005em;
+    }
+    .week-top-item__date {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      font-weight: 700;
+      display: block;
+      margin-top: 6px;
+    }
+    .week-top-item__body { min-width: 0; }
+    .week-top-item__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; align-items: center; }
+    .week-top-item__category {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper-2);
+      padding: 3px 9px;
+      color: var(--ink);
+    }
+    .week-top-item__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 3px 9px;
+      color: white;
+    }
+    .week-top-item__signal--first-to-connect { background: var(--accent); }
+    .week-top-item__signal--underreported { background: #2c5582; }
+    .week-top-item__signal--missing-context { background: var(--muted); }
+    .week-top-item__signal--structural-pattern { background: var(--ink-2); }
+    .week-top-item__score {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .week-top-item__headline {
+      font-family: var(--display);
+      font-size: clamp(18px, 2.2vw, 22px);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+    }
+    .week-top-item__angle {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent);
+      margin: 0 0 10px;
+      padding: 7px 10px;
+      background: rgba(217, 85, 31, 0.08);
+      border-left: 2px solid var(--accent);
+    }
+    .week-top-item__source {
+      font-family: var(--ui);
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .week-top-item__source strong { color: var(--ink); font-weight: 700; }
+
+    /* ============ DAY GROUPS ============ */
+    .week-days { display: flex; flex-direction: column; gap: 32px; }
+    .week-day {
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .week-day:last-child { border-bottom: 0; }
+    .week-day__head { margin-bottom: 14px; }
+    .week-day__link { color: var(--ink); display: block; }
+    .week-day__date {
+      font-family: var(--display);
+      font-size: 20px;
+      letter-spacing: -0.005em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    .week-day__link:hover .week-day__date { color: var(--accent); }
+    .week-day__edition {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 4px 0 0;
+    }
+    .week-day__items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .week-day__item {
+      display: block;
+      padding: 10px 14px;
+      border: 1px solid var(--rule);
+      border-left-width: 3px;
+      background: var(--paper);
+      color: var(--ink);
+      transition: background 180ms;
+    }
+    .week-day__item:hover { background: var(--paper-2); }
+    .week-day__item--first-to-connect { border-left-color: var(--accent); }
+    .week-day__item--underreported { border-left-color: #2c5582; }
+    .week-day__item--missing-context { border-left-color: var(--muted); }
+    .week-day__item--structural-pattern { border-left-color: var(--ink-2); }
+    .week-day__item-head {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .week-day__item-category {
+      font-family: var(--ui);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .week-day__item-signal {
+      font-family: var(--ui);
+      font-size: 9.5px;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      padding: 2px 8px;
+      color: white;
+    }
+    .week-day__item-signal--first-to-connect { background: var(--accent); }
+    .week-day__item-signal--underreported { background: #2c5582; }
+    .week-day__item-signal--missing-context { background: var(--muted); }
+    .week-day__item-signal--structural-pattern { background: var(--ink-2); }
+    .week-day__item-headline {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--ink);
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .brief-disclosure a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+
+    @media (max-width: 640px) {
+      .week-top-item { grid-template-columns: 56px 1fr; gap: 14px; padding: 14px 16px; }
+      .week-top-item__num { font-size: 26px; }
+    }
+  </style>
+</ExhibitionLayout>

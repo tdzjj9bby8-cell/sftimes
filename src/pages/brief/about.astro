@@ -1,0 +1,427 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../components/BriefSubNav.astro';
+
+/**
+ * /brief/about
+ *
+ * Inviting first-time-reader page about what the Brief is. Lighter and
+ * shorter than /brief/methodology. The methodology page is for journalists,
+ * fact-checkers, and AI Overview citation engines. This page is for the
+ * SF resident who clicked a link and wants to know what they just found.
+ */
+
+const briefs = await getCollection('briefs');
+const totalItems = briefs.reduce((sum, b) => sum + b.data.items.length, 0);
+
+// Try to surface a representative item from the latest edition for the example.
+const sortedBriefs = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latestBrief = sortedBriefs[0];
+const exampleItem = latestBrief
+  ? [...latestBrief.data.items].sort((a: any, b: any) => (b.composite_score ?? 0) - (a.composite_score ?? 0))[0]
+  : null;
+const exampleDate = latestBrief ? latestBrief.data.date.toISOString().slice(0, 10) : null;
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const pageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${SITE_ORIGIN}/brief/about/`,
+  name: 'About The Brief · SF Times',
+  description: 'A short introduction to the SF Times daily Brief: what it is, who writes it, how it works, and how to read it.',
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+};
+---
+<ExhibitionLayout
+  title="ABOUT THE BRIEF · SF Times"
+  description="The SF Times daily Brief is curated SF news with editor's commentary. Linked out to original reporters, never rewritten."
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+  <link slot="head" rel="alternate" type="application/feed+json" title="SF Times · The Brief (JSON Feed)" href="/brief/feed.json" />
+  <link slot="head" rel="alternate" type="application/rss+xml" title="SF Times · The Brief" href="/brief/rss.xml" />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="ABOUT"
+    cutouts={[]}
+  />
+
+  <BriefSubNav active="about" />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">ABOUT · {briefs.length} EDITIONS PUBLISHED · {totalItems} ITEMS</p>
+    <h1 class="ex-prose__title">THE DAILY<br>SF NEWS BRIEF.</h1>
+    <p>The Brief is the SF Times' daily morning read on San Francisco. We pick the 10 to 15 stories that actually matter from a queue of 40 to 60 candidates. We write a tight TLDR and a short editor's note that adds the backstory and connections the original article did not have time for. We link to the original reporter. We do not rewrite the news.</p>
+    <p>If you read SF news to keep up, this is the page that catches you up in 10 minutes.</p>
+  </article>
+
+  <!-- ============ THE WHAT, WHO, WHEN, HOW ============ -->
+  <section class="about-grid">
+    <article class="about-card">
+      <h2 class="about-card__head">What</h2>
+      <p>Curated SF news with the editor's framing on why it matters. Each item carries: the original headline, a 25 to 30 word TLDR, the editor's angle, a 100 to 150 word note, what to watch next, and a link to the original reporter. About 10 to 15 items each weekday morning.</p>
+    </article>
+
+    <article class="about-card">
+      <h2 class="about-card__head">Who</h2>
+      <p>Edited by Eric, the founder of SF Times. The full <a href="/team/">team page</a> covers the bylines. Reporting credit always goes to the original SF outlets we link to. We are not the reporter; we are the curator.</p>
+    </article>
+
+    <article class="about-card">
+      <h2 class="about-card__head">When</h2>
+      <p>Published Monday through Saturday by 7:00 AM Pacific. Sunday is a recharge; Monday's brief covers Saturday and Sunday news. The hard publish gate is 7:30 AM.</p>
+    </article>
+
+    <article class="about-card">
+      <h2 class="about-card__head">How to read</h2>
+      <p>Open <a href="/brief/">today's brief</a>, follow the <a href="/brief/rss.xml">RSS feed</a> or <a href="/brief/feed.json">JSON Feed</a>, or follow a single category like <a href="/brief/category/transit/">Transit</a> or <a href="/brief/category/politics/">Politics</a>. Each item links out to the original reporter for the actual news.</p>
+    </article>
+  </section>
+
+  <!-- ============ EXAMPLE ============ -->
+  {exampleItem && exampleDate && (
+    <section class="about-example">
+      <p class="about-example__eyebrow">EXAMPLE · FROM TODAY'S BRIEF</p>
+      <h2 class="about-example__title">What an item looks like</h2>
+
+      <a class={`about-example__card about-example__card--${exampleItem.signal}`} href={`/brief/${exampleDate}/${exampleItem.slug}/`}>
+        <header class="about-example__head">
+          <div class="about-example__tags">
+            <span class="about-example__category">{exampleItem.category}</span>
+            <span class={`about-example__signal about-example__signal--${exampleItem.signal}`}>
+              {exampleItem.signal.replace(/-/g, ' ').toUpperCase()}
+            </span>
+          </div>
+        </header>
+        <h3 class="about-example__headline">{exampleItem.source_headline}</h3>
+        <p class="about-example__tldr"><strong>TLDR:</strong> {exampleItem.tldr}</p>
+        <p class="about-example__angle"><strong>THE ANGLE:</strong> {exampleItem.angle_statement}</p>
+        <p class="about-example__source">
+          Reported by <strong>{exampleItem.source_byline}</strong> at {exampleItem.source_outlet}
+        </p>
+        <span class="about-example__cta">Read the full editor's note <span aria-hidden="true">→</span></span>
+      </a>
+
+      <p class="about-example__note">
+        Every item carries a <strong>brief signal tag</strong>: first-to-connect, underreported, missing-context, or structural-pattern. The signal tells you why we picked the item. The pull-quote angle on the permalink page is the load-bearing editorial argument.
+      </p>
+    </section>
+  )}
+
+  <!-- ============ WHY ============ -->
+  <section class="about-why">
+    <h2 class="about-why__title">Why we built this</h2>
+    <p>San Francisco gets news from a dozen good outlets and four or five aggregators. The aggregators rewrite the news using AI and call it editorial. The good outlets each cover their beat well but no one connects the dots across them. A reader who follows three of those outlets still misses half the SF story.</p>
+    <p>The Brief is the connection layer. Editorial commentary by a named editor, on stories other people reported, with backstory and pattern recognition the source articles do not have time for. We pay for the subscriptions we link to. We never republish source articles. The "Read the full reporting" button on every item sends you to the original reporter.</p>
+    <p>The longer answer is at <a href="/brief/methodology/">/brief/methodology</a> (the four-stage pipeline, the seven firewall rules, the AI assistance disclosure). The list of outlets we depend on is at <a href="/brief/sources/">/brief/sources</a>. The aggregator landscape we are positioned against is in our <a href="/AGGREGATION-STRATEGY.md">aggregation strategy memo</a>, on request.</p>
+  </section>
+
+  <!-- ============ SUBSCRIBE ============ -->
+  <section class="about-subscribe">
+    <h2 class="about-subscribe__title">Three ways to follow</h2>
+
+    <div class="about-subscribe__opts">
+      <article class="about-sub-opt">
+        <p class="about-sub-opt__eyebrow">DAILY VISIT</p>
+        <h3>Open <a href="/brief/">/brief/</a> each morning</h3>
+        <p>The canonical URL always redirects to the latest published edition. Bookmark it. Habit forms in two weeks.</p>
+      </article>
+
+      <article class="about-sub-opt">
+        <p class="about-sub-opt__eyebrow">RSS</p>
+        <h3>Subscribe to <a href="/brief/rss.xml">the RSS feed</a></h3>
+        <p>Use Feedly, NetNewsWire, Inoreader, or any RSS reader. Per-category feeds too (e.g., <a href="/brief/category/politics/rss.xml">Politics</a>, <a href="/brief/category/transit/rss.xml">Transit</a>).</p>
+      </article>
+
+      <article class="about-sub-opt">
+        <p class="about-sub-opt__eyebrow">JSON FEED</p>
+        <h3>Subscribe to <a href="/brief/feed.json">the JSON Feed</a></h3>
+        <p>Modern alternative to RSS. Works in Reeder, NetNewsWire, Feedbin, and the indie reader ecosystem.</p>
+      </article>
+    </div>
+
+    <p class="about-subscribe__note">
+      Email is parked. We are testing whether daily reader habit forms on the web alone before launching an email channel. Revisit gate at the 90-day post-launch mark per <a href="/brief/methodology/">the methodology</a>.
+    </p>
+  </section>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">QUESTIONS, TIPS, CORRECTIONS</p>
+    <p>
+      Email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>. Corrections run inline within 12 hours of detection and land on the <a href="/corrections/">corrections page</a>.
+    </p>
+  </aside>
+
+  <style>
+    /* ============ GRID OF WHAT/WHO/WHEN/HOW ============ */
+    .about-grid {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+    .about-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--accent);
+      padding: 18px 22px;
+    }
+    .about-card__head {
+      font-family: var(--display);
+      font-size: 20px;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+    .about-card p {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--ink);
+      margin: 0;
+    }
+    .about-card a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+    /* ============ EXAMPLE ============ */
+    .about-example {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+    }
+    .about-example__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .about-example__title {
+      font-family: var(--display);
+      font-size: clamp(24px, 2.8vw, 32px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      margin: 0 0 16px;
+    }
+    .about-example__card {
+      display: block;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 20px 24px;
+      color: var(--ink);
+      transition: background 200ms, transform 200ms;
+    }
+    .about-example__card:hover { background: var(--paper-2); transform: translateY(-1px); }
+    .about-example__card--first-to-connect { border-left-color: var(--accent); }
+    .about-example__card--underreported { border-left-color: #2c5582; }
+    .about-example__card--missing-context { border-left-color: var(--muted); }
+    .about-example__card--structural-pattern { border-left-color: var(--ink-2); }
+    .about-example__head { margin-bottom: 12px; }
+    .about-example__tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .about-example__category {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper-2);
+      padding: 4px 10px;
+      color: var(--ink);
+    }
+    .about-example__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 4px 10px;
+      color: white;
+    }
+    .about-example__signal--first-to-connect { background: var(--accent); }
+    .about-example__signal--underreported { background: #2c5582; }
+    .about-example__signal--missing-context { background: var(--muted); }
+    .about-example__signal--structural-pattern { background: var(--ink-2); }
+    .about-example__headline {
+      font-family: var(--display);
+      font-size: clamp(20px, 2.4vw, 26px);
+      line-height: 1.15;
+      letter-spacing: -0.005em;
+      margin: 0 0 12px;
+      color: var(--ink);
+    }
+    .about-example__tldr,
+    .about-example__angle {
+      font-family: var(--ui);
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0 0 10px;
+    }
+    .about-example__tldr strong,
+    .about-example__angle strong {
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-size: 11px;
+      margin-right: 4px;
+    }
+    .about-example__source {
+      font-family: var(--ui);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 12px 0 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--rule);
+    }
+    .about-example__source strong { color: var(--ink); font-weight: 700; }
+    .about-example__cta {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .about-example__note {
+      font-family: var(--ui);
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .about-example__note strong { color: var(--ink); }
+
+    /* ============ WHY ============ */
+    .about-why {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+    }
+    .about-why__title {
+      font-family: var(--display);
+      font-size: clamp(24px, 2.8vw, 32px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      margin: 0 0 16px;
+    }
+    .about-why p {
+      font-family: var(--ui);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0 0 14px;
+      max-width: 64ch;
+    }
+    .about-why a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+    /* ============ SUBSCRIBE ============ */
+    .about-subscribe {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 24px var(--gutter);
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+    }
+    .about-subscribe__title {
+      font-family: var(--display);
+      font-size: clamp(22px, 2.6vw, 28px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      margin: 0 0 18px;
+    }
+    .about-subscribe__opts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 720px) { .about-subscribe__opts { grid-template-columns: 1fr; } }
+    .about-sub-opt {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 16px 18px;
+    }
+    .about-sub-opt__eyebrow {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .about-sub-opt h3 {
+      font-family: var(--display);
+      font-size: 17px;
+      line-height: 1.25;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+    .about-sub-opt h3 a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+    .about-sub-opt p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .about-sub-opt p a { color: var(--accent); border-bottom: 1px solid currentColor; }
+    .about-subscribe__note {
+      font-family: var(--ui);
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin: 0;
+      font-style: italic;
+    }
+    .about-subscribe__note a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .brief-disclosure a { color: var(--accent); border-bottom: 1px solid currentColor; }
+  </style>
+</ExhibitionLayout>

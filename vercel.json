@@ -2,6 +2,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "astro",
+  "crons": [
+    { "path": "/api/cron/brief-ingest",   "schedule": "0 11 * * *" },
+    { "path": "/api/cron/brief-ai",       "schedule": "30 13 * * *" },
+    { "path": "/api/cron/brief-hard-gate","schedule": "30 15 * * 1-6" }
+  ],
+  "functions": {
+    "api/**/*.ts": { "memory": 1024, "maxDuration": 300 }
+  },
   "redirects": [
     { "source": "/exhibition", "destination": "/", "permanent": true },
     { "source": "/exhibition/:slug*", "destination": "/:slug*", "permanent": true },

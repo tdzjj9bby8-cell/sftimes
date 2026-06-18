@@ -1,0 +1,422 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../../components/BriefSubNav.astro';
+
+/**
+ * Category landing page at /brief/category/[category]/.
+ *
+ * Lists every Brief item in a single category across all published editions,
+ * sorted newest first. The SEO surface for entity-specific queries like
+ * "san francisco transit news" or "sf housing coverage."
+ *
+ * Categories are slugified from the 13-value taxonomy (e.g., "PUBLIC SAFETY"
+ * becomes "public-safety" in the URL).
+ */
+const CATEGORIES = [
+  'TRANSIT', 'HOUSING', 'FOOD', 'POLITICS', 'TECH', 'CULTURE', 'ARTS',
+  'BUSINESS', 'PUBLIC SAFETY', 'OPENINGS', 'CLOSINGS', 'WEATHER', 'SPORTS',
+];
+
+function categorySlug(cat: string): string {
+  return cat.toLowerCase().replace(/\s+/g, '-');
+}
+
+function slugToCategory(slug: string): string {
+  return slug.toUpperCase().replace(/-/g, ' ');
+}
+
+export async function getStaticPaths() {
+  const briefs = await getCollection('briefs');
+  const categories = new Set<string>();
+  for (const brief of briefs) {
+    for (const item of brief.data.items) {
+      categories.add(item.category);
+    }
+  }
+  return Array.from(categories).map((cat) => ({
+    params: { category: cat.toLowerCase().replace(/\s+/g, '-') },
+    props: { category: cat },
+  }));
+}
+
+const { category } = Astro.props;
+const briefs = await getCollection('briefs');
+
+// Flatten: collect every item in this category across all briefs
+const items = briefs
+  .flatMap((brief) =>
+    brief.data.items
+      .filter((i: any) => i.category === category)
+      .map((i: any) => ({
+        ...i,
+        brief_date: brief.data.date,
+        brief_date_string: brief.data.date.toISOString().slice(0, 10),
+        brief_edition: brief.data.edition,
+      }))
+  )
+  .sort((a: any, b: any) => b.brief_date.valueOf() - a.brief_date.valueOf());
+
+// Unique signals seen in this category
+const signalCounts: Record<string, number> = {};
+for (const item of items) {
+  signalCounts[item.signal] = (signalCounts[item.signal] || 0) + 1;
+}
+
+function longDate(d: Date): string {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const slug = categorySlug(category);
+const pageUrl = `${SITE_ORIGIN}/brief/category/${slug}/`;
+
+const collectionSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': pageUrl,
+  name: `The Brief · ${category}`,
+  description: `Every Brief item in the ${category} category, across all editions.`,
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: items.length,
+    itemListElement: items.map((item: any, idx: number) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      url: `${SITE_ORIGIN}/brief/${item.brief_date_string}/${item.slug}/`,
+      name: item.source_headline,
+    })),
+  },
+};
+---
+<ExhibitionLayout
+  title={`THE BRIEF · ${category} · SF Times`}
+  description={`Every SF Times Brief item in the ${category} category. ${items.length} items across ${briefs.length} editions.`}
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+  <link slot="head" rel="alternate" type="application/rss+xml" title={`SF Times · The Brief · ${category}`} href={`/brief/category/${slug}/rss.xml`} />
+  <link slot="head" rel="alternate" type="application/feed+json" title="SF Times · The Brief (JSON Feed)" href="/brief/feed.json" />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript={`CATEGORY · ${category}`}
+    cutouts={[]}
+  />
+
+  <BriefSubNav />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">CATEGORY · {items.length} ITEMS · {Object.keys(signalCounts).length} SIGNAL TYPES</p>
+    <h1 class="ex-prose__title">{category}<br>IN THE BRIEF.</h1>
+    <p>Every Brief item in the {category} category, sorted newest first. Each item links to its permalink with the full editor's note and the source attribution. Browse <a href="/brief/archive/">the full archive</a> or <a href="/brief/">today's Brief</a>.</p>
+  </article>
+
+  {/* Quick signal-type filter chips (similar to daily archive but applied across all editions) */}
+  {Object.keys(signalCounts).length > 1 && (
+    <nav class="cat-filter" aria-label="Filter by signal type">
+      <p class="cat-filter__label">FILTER</p>
+      <ul class="cat-filter__chips" id="catFilterChips">
+        <li><button class="cat-filter__chip cat-filter__chip--active" data-filter="all" type="button">All ({items.length})</button></li>
+        {Object.entries(signalCounts).map(([sig, count]) => (
+          <li>
+            <button class={`cat-filter__chip cat-filter__chip--${sig}`} data-filter={sig} type="button">
+              {sig.replace(/-/g, ' ').toUpperCase()} ({count})
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
+  <section class="cat-items" id="catItemList">
+    {items.map((item: any) => (
+      <a
+        class={`cat-item cat-item--${item.signal}`}
+        href={`/brief/${item.brief_date_string}/${item.slug}/`}
+        data-signal={item.signal}
+      >
+        <header class="cat-item__head">
+          <span class={`cat-item__signal cat-item__signal--${item.signal}`}>
+            {item.signal.replace(/-/g, ' ').toUpperCase()}
+          </span>
+          <span class="cat-item__date">{longDate(item.brief_date)}</span>
+        </header>
+        <h2 class="cat-item__headline">{item.source_headline}</h2>
+        <p class="cat-item__angle">{item.angle_statement}</p>
+        <footer class="cat-item__foot">
+          <span class="cat-item__source">Reported by <strong>{item.source_byline}</strong> at {item.source_outlet}</span>
+          <span class="cat-item__cta">Read editor's note →</span>
+        </footer>
+      </a>
+    ))}
+  </section>
+
+  <p class="cat-filter__empty" id="catFilterEmpty" hidden>
+    No items match this filter. <button class="cat-filter__reset" type="button" data-filter="all">Show all →</button>
+  </p>
+
+  <nav class="cat-nav">
+    <p class="cat-nav__label">BROWSE OTHER CATEGORIES</p>
+    <ul class="cat-nav__list">
+      {CATEGORIES.filter((c) => c !== category).map((c) => (
+        <li>
+          <a href={`/brief/category/${categorySlug(c)}/`}>{c}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <style>
+    .cat-filter {
+      max-width: var(--max-narrow);
+      margin: 0 auto 32px;
+      padding: 0 var(--gutter);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .cat-filter__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0;
+    }
+    .cat-filter__chips {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .cat-filter__chip {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 180ms, color 180ms;
+    }
+    .cat-filter__chip:hover { background: var(--paper); }
+    .cat-filter__chip--active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+    .cat-filter__empty {
+      max-width: var(--max-narrow);
+      margin: 24px auto;
+      padding: 24px;
+      text-align: center;
+      font-family: var(--ui);
+      font-size: 14px;
+      color: var(--muted);
+      background: var(--paper-2);
+    }
+    .cat-filter__reset {
+      background: none;
+      border: 0;
+      color: var(--accent);
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .cat-items {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .cat-item {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 18px 22px;
+      display: block;
+      color: var(--ink);
+      transition: background 180ms, transform 180ms;
+    }
+    .cat-item[hidden] { display: none; }
+    .cat-item:hover {
+      background: var(--paper-2);
+      transform: translateY(-1px);
+    }
+    .cat-item--first-to-connect { border-left-color: var(--accent); }
+    .cat-item--underreported { border-left-color: #2c5582; }
+    .cat-item--missing-context { border-left-color: var(--muted); }
+    .cat-item--structural-pattern { border-left-color: var(--ink-2); }
+
+    .cat-item__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .cat-item__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 3px 9px;
+      color: white;
+    }
+    .cat-item__signal--first-to-connect { background: var(--accent); }
+    .cat-item__signal--underreported { background: #2c5582; }
+    .cat-item__signal--missing-context { background: var(--muted); }
+    .cat-item__signal--structural-pattern { background: var(--ink-2); }
+    .cat-item__date {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .cat-item__headline {
+      font-family: var(--display);
+      font-size: clamp(18px, 2.2vw, 22px);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+    .cat-item__angle {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent);
+      margin: 0 0 12px;
+      font-weight: 500;
+      padding: 8px 12px;
+      background: rgba(217, 85, 31, 0.08);
+      border-left: 2px solid var(--accent);
+    }
+    .cat-item__foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--rule);
+      flex-wrap: wrap;
+    }
+    .cat-item__source {
+      font-family: var(--ui);
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .cat-item__source strong { color: var(--ink); font-weight: 700; }
+    .cat-item__cta {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .cat-nav {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 24px var(--gutter);
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+    }
+    .cat-nav__label {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 14px;
+    }
+    .cat-nav__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cat-nav__list a {
+      display: inline-block;
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      transition: background 180ms;
+    }
+    .cat-nav__list a:hover {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    @media (max-width: 420px) {
+      .cat-item { padding: 14px 16px; }
+      .cat-item__foot { flex-direction: column; align-items: flex-start; gap: 6px; }
+    }
+  </style>
+
+  <script is:inline>
+    (function () {
+      const chips = document.querySelectorAll('#catFilterChips .cat-filter__chip');
+      const items = document.querySelectorAll('#catItemList .cat-item');
+      const empty = document.getElementById('catFilterEmpty');
+      const resetBtn = empty ? empty.querySelector('.cat-filter__reset') : null;
+      if (!chips.length) return;
+
+      function applyFilter(filter) {
+        chips.forEach((c) => c.classList.toggle('cat-filter__chip--active', c.dataset.filter === filter));
+        let visibleCount = 0;
+        items.forEach((it) => {
+          const match = filter === 'all' || it.dataset.signal === filter;
+          it.hidden = !match;
+          if (match) visibleCount++;
+        });
+        if (empty) empty.hidden = visibleCount > 0;
+      }
+
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => applyFilter(chip.dataset.filter));
+      });
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => applyFilter('all'));
+      }
+    })();
+  </script>
+</ExhibitionLayout>

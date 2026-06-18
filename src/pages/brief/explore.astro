@@ -1,0 +1,606 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../components/BriefSubNav.astro';
+
+/**
+ * /brief/explore
+ *
+ * Searchable, filterable view of every Brief item in the archive.
+ * Text search, signal filter (multi), category filter (multi), outlet
+ * filter (multi), and sort by date or composite score. All client-side
+ * for instant response; data is embedded as a JSON island.
+ *
+ * Targets long-tail queries like "search SF Times brief politics" and
+ * the power-user reader who wants to surface old items by topic.
+ */
+const briefs = await getCollection('briefs');
+
+// Flatten all items with the date metadata each needs to render a link.
+const items = briefs.flatMap((b) => {
+  const dateString = b.data.date.toISOString().slice(0, 10);
+  return b.data.items.map((item: any) => ({
+    id: item.id,
+    slug: item.slug,
+    category: item.category,
+    signal: item.signal,
+    headline: item.source_headline,
+    tldr: item.tldr,
+    angle: item.angle_statement,
+    outlet: item.source_outlet,
+    byline: item.source_byline,
+    composite: item.composite_score ?? 0,
+    uniqueness: item.uniqueness_score ?? 0,
+    date_string: dateString,
+    timestamp: b.data.date.valueOf(),
+    href: `/brief/${dateString}/${item.slug}/`,
+  }));
+});
+
+// Sort by date descending as the default render order; the client can re-sort.
+items.sort((a, b) => b.timestamp - a.timestamp);
+
+// Build filter dimension lists. Counts are passed through to the chip labels.
+const categoryCounts: Record<string, number> = {};
+const signalCounts: Record<string, number> = {};
+const outletCounts: Record<string, number> = {};
+for (const it of items) {
+  categoryCounts[it.category] = (categoryCounts[it.category] || 0) + 1;
+  signalCounts[it.signal] = (signalCounts[it.signal] || 0) + 1;
+  outletCounts[it.outlet] = (outletCounts[it.outlet] || 0) + 1;
+}
+
+const SIGNAL_ORDER = ['first-to-connect', 'underreported', 'missing-context', 'structural-pattern'];
+const sortedCategories = Object.entries(categoryCounts).sort(([a], [b]) => a.localeCompare(b));
+const sortedSignals = SIGNAL_ORDER.filter((s) => signalCounts[s]).map((s) => [s, signalCounts[s]] as [string, number]);
+const sortedOutlets = Object.entries(outletCounts).sort(([, a], [, b]) => b - a);
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const pageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE_ORIGIN}/brief/explore/`,
+  name: 'Explore the Brief · SF Times',
+  description: `Search and filter ${items.length} Brief items across ${briefs.length} editions.`,
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+};
+---
+<ExhibitionLayout
+  title="EXPLORE THE BRIEF · SF Times"
+  description={`Search and filter ${items.length} curated SF news items across ${briefs.length} Brief editions.`}
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript={`EXPLORE · ${items.length} ITEMS`}
+    cutouts={[]}
+  />
+
+  <BriefSubNav active="explore" />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">EXPLORE · {items.length} ITEMS · {briefs.length} EDITIONS · {sortedOutlets.length} OUTLETS</p>
+    <h1 class="ex-prose__title">SEARCH<br>EVERY BRIEF<br>ITEM.</h1>
+    <p>Type a query, pick filter chips, sort. Filters compose: select two signals and a category and only items matching all three show. Click any result to open the permalink.</p>
+  </article>
+
+  <!-- ============ SEARCH CONTROLS ============ -->
+  <section class="explore-controls">
+    <div class="explore-search">
+      <label for="exploreSearch" class="explore-search__label">SEARCH</label>
+      <input
+        id="exploreSearch"
+        type="search"
+        class="explore-search__input"
+        placeholder="Headline, angle, outlet, byline..."
+        autocomplete="off"
+      />
+      <button type="button" id="exploreClear" class="explore-search__clear" aria-label="Clear search">×</button>
+    </div>
+
+    <div class="explore-controls__row">
+      <div class="explore-controls__sort">
+        <label for="exploreSort">SORT</label>
+        <select id="exploreSort">
+          <option value="date-desc" selected>Newest first</option>
+          <option value="date-asc">Oldest first</option>
+          <option value="composite-desc">Highest composite</option>
+          <option value="composite-asc">Lowest composite</option>
+        </select>
+      </div>
+      <div class="explore-controls__result" id="exploreResultCount">{items.length} of {items.length}</div>
+      <button type="button" id="exploreResetAll" class="explore-controls__reset">RESET ALL FILTERS</button>
+    </div>
+  </section>
+
+  <!-- ============ FILTERS ============ -->
+  <section class="explore-filters">
+    <details open class="explore-filter-group">
+      <summary>Signal <span class="explore-filter-group__count">({sortedSignals.length})</span></summary>
+      <ul class="explore-chips">
+        {sortedSignals.map(([sig, count]) => (
+          <li>
+            <button class={`explore-chip explore-chip--${sig}`} data-filter-type="signal" data-filter={sig} type="button">
+              {sig.replace(/-/g, ' ').toUpperCase()} <span class="explore-chip__count">{count}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </details>
+
+    <details open class="explore-filter-group">
+      <summary>Category <span class="explore-filter-group__count">({sortedCategories.length})</span></summary>
+      <ul class="explore-chips">
+        {sortedCategories.map(([cat, count]) => (
+          <li>
+            <button class="explore-chip" data-filter-type="category" data-filter={cat} type="button">
+              {cat} <span class="explore-chip__count">{count}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </details>
+
+    <details class="explore-filter-group">
+      <summary>Outlet <span class="explore-filter-group__count">({sortedOutlets.length})</span></summary>
+      <ul class="explore-chips">
+        {sortedOutlets.map(([outlet, count]) => (
+          <li>
+            <button class="explore-chip" data-filter-type="outlet" data-filter={outlet} type="button">
+              {outlet} <span class="explore-chip__count">{count}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </details>
+  </section>
+
+  <!-- ============ RESULT LIST ============ -->
+  <section class="explore-results" id="exploreResults">
+    {items.map((it) => (
+      <a
+        class={`explore-result explore-result--${it.signal}`}
+        href={it.href}
+        data-id={it.id}
+        data-category={it.category}
+        data-signal={it.signal}
+        data-outlet={it.outlet}
+        data-search={(it.headline + ' ' + it.angle + ' ' + it.tldr + ' ' + it.outlet + ' ' + it.byline).toLowerCase()}
+        data-timestamp={it.timestamp}
+        data-composite={it.composite}
+      >
+        <header class="explore-result__head">
+          <div class="explore-result__tags">
+            <span class="explore-result__category">{it.category}</span>
+            <span class={`explore-result__signal explore-result__signal--${it.signal}`}>
+              {it.signal.replace(/-/g, ' ').toUpperCase()}
+            </span>
+            <span class="explore-result__score">COMPOSITE {it.composite.toFixed(1)}</span>
+          </div>
+          <span class="explore-result__date">{new Date(it.timestamp).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase()}</span>
+        </header>
+        <h2 class="explore-result__headline">{it.headline}</h2>
+        <p class="explore-result__angle">{it.angle}</p>
+        <p class="explore-result__source">Reported by <strong>{it.byline}</strong> at {it.outlet}</p>
+      </a>
+    ))}
+  </section>
+
+  <p class="explore-empty" id="exploreEmpty" hidden>
+    No items match your filters and search. <button type="button" id="exploreResetEmpty">Reset all filters</button>.
+  </p>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">RELATED</p>
+    <p>
+      Read <a href="/brief/methodology/">the methodology</a>,
+      browse <a href="/brief/this-week/">this week's digest</a>,
+      or the <a href="/brief/archive/">archive index</a>.
+    </p>
+  </aside>
+
+  <style>
+    .explore-controls {
+      max-width: var(--max-narrow);
+      margin: 0 auto 18px;
+      padding: 0 var(--gutter);
+    }
+    .explore-search {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 0 18px;
+      margin-bottom: 14px;
+    }
+    .explore-search__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .explore-search__input {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      padding: 14px 0;
+      font-family: var(--ui);
+      font-size: 16px;
+      color: var(--ink);
+      outline: none;
+      min-width: 0;
+    }
+    .explore-search__input::placeholder { color: var(--muted); }
+    .explore-search__clear {
+      font-family: var(--ui);
+      font-size: 22px;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 0 4px;
+      cursor: pointer;
+      line-height: 1;
+      display: none;
+    }
+    .explore-search__clear:hover { color: var(--ink); }
+    .explore-search--has-value .explore-search__clear { display: inline-block; }
+    .explore-controls__row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-family: var(--ui);
+      font-size: 11px;
+    }
+    .explore-controls__sort {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .explore-controls__sort label {
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .explore-controls__sort select {
+      font-family: var(--ui);
+      font-size: 13px;
+      padding: 6px 10px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+    }
+    .explore-controls__result {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+    .explore-controls__reset {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      padding: 7px 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .explore-controls__reset:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* ============ FILTERS ============ */
+    .explore-filters {
+      max-width: var(--max-narrow);
+      margin: 0 auto 24px;
+      padding: 0 var(--gutter);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .explore-filter-group {
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      padding: 12px 16px;
+    }
+    .explore-filter-group summary {
+      cursor: pointer;
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      font-weight: 700;
+      padding: 4px 0;
+    }
+    .explore-filter-group__count { color: var(--muted); font-weight: 500; margin-left: 4px; }
+    .explore-chips {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .explore-chip {
+      font-family: var(--ui);
+      font-size: 10.5px;
+      letter-spacing: 0.10em;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 6px 11px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 180ms, color 180ms;
+    }
+    .explore-chip:hover { background: var(--paper-2); }
+    .explore-chip__count {
+      color: var(--muted);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+    .explore-chip--active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .explore-chip--active .explore-chip__count { color: rgba(255, 255, 255, 0.6); }
+    .explore-chip--first-to-connect.explore-chip--active { background: var(--accent); border-color: var(--accent); }
+    .explore-chip--underreported.explore-chip--active { background: #2c5582; border-color: #2c5582; }
+    .explore-chip--missing-context.explore-chip--active { background: var(--muted); border-color: var(--muted); }
+    .explore-chip--structural-pattern.explore-chip--active { background: var(--ink-2); border-color: var(--ink-2); }
+
+    /* ============ RESULTS ============ */
+    .explore-results {
+      max-width: var(--max-narrow);
+      margin: 0 auto 24px;
+      padding: 0 var(--gutter);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .explore-result {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 16px 22px;
+      display: block;
+      color: var(--ink);
+      transition: background 180ms, transform 180ms;
+    }
+    .explore-result[hidden] { display: none; }
+    .explore-result:hover { background: var(--paper-2); transform: translateY(-1px); }
+    .explore-result--first-to-connect { border-left-color: var(--accent); }
+    .explore-result--underreported { border-left-color: #2c5582; }
+    .explore-result--missing-context { border-left-color: var(--muted); }
+    .explore-result--structural-pattern { border-left-color: var(--ink-2); }
+    .explore-result__head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .explore-result__tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .explore-result__category {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper-2);
+      padding: 3px 9px;
+      color: var(--ink);
+    }
+    .explore-result__signal {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 3px 9px;
+      color: white;
+    }
+    .explore-result__signal--first-to-connect { background: var(--accent); }
+    .explore-result__signal--underreported { background: #2c5582; }
+    .explore-result__signal--missing-context { background: var(--muted); }
+    .explore-result__signal--structural-pattern { background: var(--ink-2); }
+    .explore-result__score {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .explore-result__date {
+      font-family: var(--ui);
+      font-size: 10.5px;
+      letter-spacing: 0.10em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .explore-result__headline {
+      font-family: var(--display);
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+    }
+    .explore-result__angle {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent);
+      margin: 0 0 8px;
+      padding: 7px 10px;
+      background: rgba(217, 85, 31, 0.08);
+      border-left: 2px solid var(--accent);
+    }
+    .explore-result__source {
+      font-family: var(--ui);
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .explore-result__source strong { color: var(--ink); font-weight: 700; }
+
+    .explore-empty {
+      max-width: var(--max-narrow);
+      margin: 24px auto;
+      padding: 24px;
+      text-align: center;
+      font-family: var(--ui);
+      font-size: 14px;
+      color: var(--muted);
+      background: var(--paper-2);
+    }
+    .explore-empty button {
+      background: none;
+      border: 0;
+      color: var(--accent);
+      font: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .brief-disclosure a { color: var(--accent); border-bottom: 1px solid currentColor; }
+  </style>
+
+  <script is:inline>
+    (function () {
+      const searchInput = document.getElementById('exploreSearch');
+      const searchClear = document.getElementById('exploreClear');
+      const searchWrap = searchInput?.parentElement;
+      const sortSelect = document.getElementById('exploreSort');
+      const resultCount = document.getElementById('exploreResultCount');
+      const resetAll = document.getElementById('exploreResetAll');
+      const resetEmpty = document.getElementById('exploreResetEmpty');
+      const results = document.getElementById('exploreResults');
+      const emptyEl = document.getElementById('exploreEmpty');
+      const allResults = Array.from(results.querySelectorAll('.explore-result'));
+      const chips = Array.from(document.querySelectorAll('.explore-chip'));
+      const totalCount = allResults.length;
+
+      const activeFilters = {
+        signal: new Set(),
+        category: new Set(),
+        outlet: new Set(),
+      };
+      let searchQuery = '';
+
+      function applyAll() {
+        let visible = 0;
+        for (const el of allResults) {
+          const matchSignal = activeFilters.signal.size === 0 || activeFilters.signal.has(el.dataset.signal);
+          const matchCategory = activeFilters.category.size === 0 || activeFilters.category.has(el.dataset.category);
+          const matchOutlet = activeFilters.outlet.size === 0 || activeFilters.outlet.has(el.dataset.outlet);
+          const matchSearch = !searchQuery || el.dataset.search.indexOf(searchQuery) !== -1;
+          const visibleNow = matchSignal && matchCategory && matchOutlet && matchSearch;
+          el.hidden = !visibleNow;
+          if (visibleNow) visible++;
+        }
+        resultCount.textContent = visible + ' of ' + totalCount;
+        emptyEl.hidden = visible > 0;
+      }
+
+      function applySort() {
+        const mode = sortSelect.value;
+        const sorted = allResults.slice().sort((a, b) => {
+          if (mode === 'date-desc') return Number(b.dataset.timestamp) - Number(a.dataset.timestamp);
+          if (mode === 'date-asc') return Number(a.dataset.timestamp) - Number(b.dataset.timestamp);
+          if (mode === 'composite-desc') return Number(b.dataset.composite) - Number(a.dataset.composite);
+          if (mode === 'composite-asc') return Number(a.dataset.composite) - Number(b.dataset.composite);
+          return 0;
+        });
+        for (const el of sorted) results.appendChild(el);
+      }
+
+      chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const type = chip.dataset.filterType;
+          const val = chip.dataset.filter;
+          if (!type || !val) return;
+          if (activeFilters[type].has(val)) {
+            activeFilters[type].delete(val);
+            chip.classList.remove('explore-chip--active');
+          } else {
+            activeFilters[type].add(val);
+            chip.classList.add('explore-chip--active');
+          }
+          applyAll();
+        });
+      });
+
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        if (searchWrap) searchWrap.classList.toggle('explore-search--has-value', !!searchQuery);
+        applyAll();
+      });
+
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        if (searchWrap) searchWrap.classList.remove('explore-search--has-value');
+        applyAll();
+        searchInput.focus();
+      });
+
+      sortSelect.addEventListener('change', applySort);
+
+      function reset() {
+        searchInput.value = '';
+        searchQuery = '';
+        if (searchWrap) searchWrap.classList.remove('explore-search--has-value');
+        activeFilters.signal.clear();
+        activeFilters.category.clear();
+        activeFilters.outlet.clear();
+        chips.forEach((c) => c.classList.remove('explore-chip--active'));
+        sortSelect.value = 'date-desc';
+        applyAll();
+        applySort();
+      }
+      resetAll.addEventListener('click', reset);
+      resetEmpty.addEventListener('click', reset);
+    })();
+  </script>
+</ExhibitionLayout>

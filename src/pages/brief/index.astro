@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+
+/**
+ * Canonical /brief/ route.
+ *
+ * Resolves to the most recently published brief. Astro static-builds this
+ * page as an HTML meta-refresh redirect to /brief/[latest-date]/, which is
+ * the right pattern for a static site (no server-side 302 available).
+ *
+ * The crawler-facing canonical link points to the dated archive entry so
+ * search engines don't index this as a separate page from the current
+ * edition. AI Overview engines will follow the canonical.
+ */
+const briefs = await getCollection('briefs');
+const sorted = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latest = sorted[0];
+
+if (!latest) {
+  throw new Error('No published briefs yet. Add at least one .md file to src/content/briefs/.');
+}
+
+const latestDate = latest.data.date.toISOString().slice(0, 10);
+const targetUrl = `/brief/${latestDate}/`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>THE BRIEF · SF Times</title>
+    <link rel="canonical" href={`https://sftimes.com${targetUrl}`} />
+    <meta http-equiv="refresh" content={`0; url=${targetUrl}`} />
+    <meta name="description" content="The daily SF Times Brief. Curated SF news with editor's commentary." />
+    <script set:html={`window.location.replace(${JSON.stringify(targetUrl)});`} />
+  </head>
+  <body>
+    <p>Redirecting to today's brief at <a href={targetUrl}>{targetUrl}</a>.</p>
+  </body>
+</html>

@@ -37,6 +37,9 @@ const lastUpdated = '2026-06-01';
       <li>We name our editors and writers on every piece. Anonymous editorial bylines do not appear on this site.</li>
     </ul>
 
+    <h3>A note on bylines during the pre-launch period</h3>
+    <p>SF Times is in the pre-launch and early-publication phase. Eric is the founding editor and currently writes or oversees every piece on the site. The Nicholas and Daisy bylines on the <a href="/team">team page</a> represent the masthead positions (deeper reported features, culture and small-business beats) the publication is staffed for at full scale. While the publication is staffing up, work attributed to those bylines is written under shared editorial direction and may be revised once the named role is filled. Real bylines replace masthead bylines as those hires happen, and any piece written by the masthead voice rather than a single named reporter carries an editor's note on the byline line at that time.</p>
+
     <h2>Anonymity for sources</h2>
     <p>Some stories require sourcing from people who cannot be named publicly. We grant anonymity when:</p>
     <ul>
@@ -69,10 +72,28 @@ const lastUpdated = '2026-06-01';
     </ol>
     <p>Sponsored entries on <a href="/best-of">Top Tier guides</a> appear with a labeled badge. The editor still picks every list entry. Sponsors do not buy their way onto a list.</p>
 
-    <h2>AI</h2>
-    <p>No byline on this site is AI-generated. No article is partially or substantially written by AI. We do not use AI to draft, summarize, restructure, or "polish" copy. Editing tools that flag spelling and grammar are allowed because they suggest, not generate. Generative tools are not allowed at any stage of the editorial process.</p>
-    <p>This is one of the <a href="/about">Five Principles</a> and we treat it as non-negotiable. Anyone we discover has used AI generation in copy under our masthead is removed from the masthead and the piece is killed.</p>
-    <p>We disallow AI training crawlers in <a href="/robots.txt">robots.txt</a>. Crawlers that ignore that directive are operating without our consent.</p>
+    <h2>AI assistance</h2>
+    <p>SF Times has two products with different AI policies. We disclose each one explicitly.</p>
+
+    <h3>The Saturday Profile and feature work</h3>
+    <p>No byline on Saturday Profile work is AI-generated. No feature article is partially or substantially written by AI. We do not use AI to draft, summarize, restructure, or "polish" feature copy. Editing tools that flag spelling and grammar are allowed because they suggest, not generate. Generative tools are not allowed at any stage of the feature editorial process.</p>
+    <p>This is one of the <a href="/about">Five Principles</a> for our feature work and we treat it as non-negotiable. Anyone we discover has used AI generation in feature copy under our masthead is removed from the masthead and the piece is killed.</p>
+
+    <h3 id="brief-ai-assistance">The daily Brief</h3>
+    <p>The Brief is a different product than the Saturday Profile and has a different disclosure. The Brief is curated commentary on the day's SF news, with editorial value-add (backstory, context, connections) that the source articles do not provide. AI is used to assist in drafting and to audit drafts before publish.</p>
+    <p>The Brief pipeline runs in four automated stages, with editor oversight on held items and a weekly sample audit. Specifically:</p>
+    <ul>
+      <li><strong>Drafting.</strong> A first AI pass (Claude Haiku) drafts each Brief item's TLDR (25 to 30 words) and editor's note (100 to 150 words) from the source article. The prompt requires the editor's note to add backstory or context the source does not have, never to recap the source.</li>
+      <li><strong>Auditing.</strong> A second AI pass audits each draft against five firewall checks: does the editor's note recap the source, does the first sentence state a real editorial angle, does the TLDR include a specific number or named entity, is the note 100 to 150 words, does it sound like SF Times voice. Items that fail any check are held.</li>
+      <li><strong>Editor review.</strong> Eric reviews every item the auditor flags, plus a random 10% spot-check of audit-passing items. Held items get edited, accepted, or rejected. The auto-publishing batch ships at 7 AM each weekday.</li>
+      <li><strong>Weekly sample audit.</strong> Every Sunday, Eric grades 10 random items from the prior week. If more than 2 of 10 are graded bad, the pipeline pauses until the prompts are revised.</li>
+    </ul>
+    <p>Original reporting on every Brief item is linked, named, and credited. The "Read the full reporting" button on every Brief item permalink sends readers to the source reporter, not to a rewrite. We never republish source article content. We add editorial framing only.</p>
+    <p>The full pipeline, the seven firewall rules, the 13 categories, the four brief signals, and the AI-yes / AI-no matrix are documented in detail at <a href="/brief/methodology">/brief/methodology</a>.</p>
+    <p>If a Brief item is wrong, the correction runs inline on the item's permalink within 12 hours of detection and on the <a href="/corrections">corrections page</a>. No silent edits.</p>
+
+    <h3>AI training crawlers</h3>
+    <p>We disallow AI training crawlers in <a href="/robots.txt">robots.txt</a>. Crawlers that ignore that directive are operating without our consent. This applies to both Saturday Profile and Brief content.</p>
 
     <h2>Plagiarism and attribution</h2>
     <p>We attribute every fact that came from another source. We do not lift prose from other publications, even with attribution. If we summarize someone else's reporting, we link to the original and credit the reporter.</p>

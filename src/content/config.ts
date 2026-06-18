@@ -45,6 +45,10 @@ const stories = defineCollection({
       name: z.string(),
       url: z.string().optional(),
     }).optional(),
+    /** When true, this piece is an illustrative format sample — the subject, quotes,
+     *  and details are constructed to demonstrate the article shape, not the result
+     *  of actual reporting. The article page renders a visible disclosure banner. */
+    is_sample: z.boolean().default(false),
   }),
 });
 
@@ -61,7 +65,103 @@ const bestOf = defineCollection({
   }),
 });
 
+/**
+ * Daily Brief collection.
+ *
+ * Each markdown file in src/content/briefs/ represents one day's edition.
+ * Filename pattern: YYYY-MM-DD.md (e.g., 2026-06-13.md).
+ *
+ * The Brief is curated commentary on the day's SF news, not aggregation.
+ * Each item carries a TLDR, an editor's note that adds backstory/context
+ * the source article does not have, a brief signal tag indicating why we
+ * picked it, and a link out to the original reporter.
+ *
+ * Architecture: AI drafts via the prompts in BRIEF-MASTER-PLAN.md sections
+ * 7.1-7.4. An AI auditor pass (7.4) gates auto-publish vs. held-for-editor.
+ * Eric reviews held items each morning and publishes the daily edition by
+ * 7:30 AM. Held items that don't get reviewed are dropped; auto-publishing
+ * batch ships regardless.
+ *
+ * Permalink routes:
+ *   /brief/                        latest published edition (canonical)
+ *   /brief/[YYYY-MM-DD]/           specific day's archive entry
+ *   /brief/[YYYY-MM-DD]/[slug]/    single-item permalink
+ */
+const briefs = defineCollection({
+  type: 'content',
+  schema: z.object({
+    /** The date this brief was published, in YYYY-MM-DD form. Drives routing. */
+    date: z.coerce.date(),
+    /** Edition number. Increments by one each publish day. */
+    edition: z.number().int().positive(),
+    /** Named editor who published this edition. Currently only 'Eric'. */
+    editor: z.enum(['Eric', 'Nicholas', 'Daisy']),
+    /** Optional editor's intro at the top of the brief page. */
+    intro: z.string().optional(),
+    /** AI assistance disclosure. Defaults to the standard statement;
+     *  override if a specific day's process differs (e.g., manual draft). */
+    ai_disclosure: z.string().default(
+      'TLDRs and editor\'s notes drafted with AI assistance from source materials, audited by a second AI against the firewall rules, with editor review on held items and a weekly sample audit. AI does not write the news. Original reporting is always linked, always credited.'
+    ),
+    /** The items that appear in this edition. */
+    items: z.array(
+      z.object({
+        /** Stable id for cross-day references and the dashboard audit log. */
+        id: z.string(),
+        /** URL slug for the permalink. Generated from the headline at publish. */
+        slug: z.string(),
+        /** Category tag. One of the 13 fixed taxonomy values. */
+        category: z.enum([
+          'TRANSIT',
+          'HOUSING',
+          'FOOD',
+          'POLITICS',
+          'TECH',
+          'CULTURE',
+          'ARTS',
+          'BUSINESS',
+          'PUBLIC SAFETY',
+          'OPENINGS',
+          'CLOSINGS',
+          'WEATHER',
+          'SPORTS',
+        ]),
+        /** Brief signal tag (the reader-visible badge). One of four values. */
+        signal: z.enum(['first-to-connect', 'underreported', 'missing-context', 'structural-pattern']),
+        /** Original source headline as published. */
+        source_headline: z.string(),
+        /** Outlet that ran the source story. */
+        source_outlet: z.string(),
+        /** Source reporter byline. 'Staff' if not visible. */
+        source_byline: z.string().default('Staff'),
+        /** Full URL to the source article. Required. The Brief firewall depends
+         *  on the reader being able to click out to the original reporting. */
+        source_url: z.string().url(),
+        /** Date the source article was published, in YYYY-MM-DD form. */
+        source_date: z.coerce.date(),
+        /** The angle statement. Must match the first sentence of the editor's note. */
+        angle_statement: z.string(),
+        /** 25 to 30 word TLDR, two sentences, sentence case. */
+        tldr: z.string(),
+        /** 100 to 150 word editor's note in SF Times voice. Starts with the
+         *  angle statement. Never recaps the source article. */
+        editor_note: z.string(),
+        /** One-line forward-looking note (the next decision date or vote). */
+        what_to_watch: z.string(),
+        /** Composite score from the primary AI pass scoring prompt. */
+        composite_score: z.number(),
+        /** Uniqueness score from the primary AI pass. */
+        uniqueness_score: z.number().int().min(1).max(10),
+        /** True if this item was auto-published (auditor passed all 5 checks).
+         *  False if Eric manually accepted it after the auditor flagged it. */
+        auto_published: z.boolean().default(true),
+      })
+    ),
+  }),
+});
+
 export const collections = {
   stories,
   'best-of': bestOf,
+  briefs,
 };

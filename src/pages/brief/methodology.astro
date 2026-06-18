@@ -1,0 +1,595 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../components/BriefSubNav.astro';
+import { getCollection } from 'astro:content';
+
+/**
+ * /brief/methodology
+ *
+ * Reader-facing explanation of the daily Brief pipeline. Transparency
+ * surface for readers, journalists, AI Overview citation engines, and
+ * prospective partners. Covers the four pipeline stages, the editorial
+ * firewall rules, the 13 categories, the 4 brief signals, what AI does
+ * and does not do, and how readers can hold us accountable.
+ *
+ * This is the surface that wins trust queries like "how does SF Times
+ * use AI" and "SF Times brief editorial standards."
+ */
+
+const briefs = await getCollection('briefs');
+const editionCount = briefs.length;
+const totalItems = briefs.reduce((sum, b) => sum + b.data.items.length, 0);
+
+const SIGNALS = [
+  {
+    name: 'first-to-connect',
+    label: 'First to connect',
+    color: 'terracotta',
+    description: 'We are first to make the connection between this story and another current SF story that other outlets are running as separate news. The pairing is the editorial value-add.',
+  },
+  {
+    name: 'underreported',
+    label: 'Underreported',
+    color: 'pacific',
+    description: 'Other outlets have this story but at low depth or with a missing angle. We surface what they skipped over.',
+  },
+  {
+    name: 'missing-context',
+    label: 'Missing context',
+    color: 'fog',
+    description: 'Other outlets ran the news but missed the backstory that materially changes how a reader understands it. We add the backstory.',
+  },
+  {
+    name: 'structural-pattern',
+    label: 'Structural pattern',
+    color: 'ink-soft',
+    description: 'This is one instance of a larger pattern only we are naming. The single news item becomes legible as part of a longer arc.',
+  },
+];
+
+const CATEGORIES = [
+  { name: 'Transit', tag: 'TRANSIT' },
+  { name: 'Housing', tag: 'HOUSING' },
+  { name: 'Food', tag: 'FOOD' },
+  { name: 'Politics', tag: 'POLITICS' },
+  { name: 'Tech', tag: 'TECH' },
+  { name: 'Culture', tag: 'CULTURE' },
+  { name: 'Arts', tag: 'ARTS' },
+  { name: 'Business', tag: 'BUSINESS' },
+  { name: 'Public safety', tag: 'PUBLIC SAFETY' },
+  { name: 'Openings', tag: 'OPENINGS' },
+  { name: 'Closings', tag: 'CLOSINGS' },
+  { name: 'Weather', tag: 'WEATHER' },
+  { name: 'Sports', tag: 'SPORTS' },
+];
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const pageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${SITE_ORIGIN}/brief/methodology/`,
+  name: 'The Brief Methodology · SF Times',
+  description: 'How SF Times publishes the daily Brief: pipeline, editorial firewall, AI assistance disclosure, and accountability.',
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+};
+---
+<ExhibitionLayout
+  title="THE BRIEF · METHODOLOGY · SF Times"
+  description="How the SF Times daily Brief is produced. Four-stage pipeline, editorial firewall, AI assistance disclosure, and reader accountability."
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="METHODOLOGY"
+    cutouts={[]}
+  />
+
+  <BriefSubNav active="methodology" />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">METHODOLOGY · {editionCount} EDITIONS · {totalItems} ITEMS PUBLISHED</p>
+    <h1 class="ex-prose__title">HOW WE MAKE<br>THE BRIEF.</h1>
+    <p>The Brief is the SF Times' daily curation of San Francisco news. It is editorial commentary on stories other people reported. We pick the items, we write the editor's notes, we link out to the original reporting. We do not rewrite the news. We do not pretend to be the reporter. We add the backstory and the connections the source articles do not have time for.</p>
+    <p>This page lays out exactly how the Brief gets made. Read it before you decide whether to trust us. Then hold us accountable to it.</p>
+  </article>
+
+  <!-- ============ THE FIREWALL ============ -->
+  <section class="meth-section">
+    <p class="meth-section__eyebrow">THE EDITORIAL FIREWALL</p>
+    <h2 class="meth-section__title">Seven rules</h2>
+    <p class="meth-section__lead">The seven rules below are the spine of the product. If any rule breaks in practice, the firewall collapses and the Brief becomes the thing we said we would not become.</p>
+
+    <ol class="meth-rules">
+      <li>
+        <h3>No rewriting source articles.</h3>
+        <p>The editor's note never recaps the source. It adds backstory, SF context, prior coverage references, and what-to-watch lines that the source article does not contain. A reader who reads only our editor's note must not be able to substitute it for reading the source article. They must still have to click out for the actual news.</p>
+      </li>
+      <li>
+        <h3>Every item links out, prominently and primarily.</h3>
+        <p>The Read the full reporting button is the call to action. Our editorial framing is a wrapper that points readers at the original reporter, not a replacement for them.</p>
+      </li>
+      <li>
+        <h3>Auditor passes plus 10% spot-check go through editor review.</h3>
+        <p>Items that pass both AI passes auto-publish. Items the auditor flags get held for the editor. A random 10% of audit-passing items also get held as drift-detection. Hard gate at 7:30 AM PT: if the editor does not review held items by then, they drop and the auto-batch ships anyway.</p>
+      </li>
+      <li>
+        <h3>AI assistance is disclosed inline on every page.</h3>
+        <p>Every Brief item, every daily archive, and the homepage strip carry the disclosure. The full <a href="/standards#brief-ai-assistance">/standards entry</a> explains what AI does at each stage and what it does not.</p>
+      </li>
+      <li>
+        <h3>No fake bylines, no fictional reporters, no stock photography.</h3>
+        <p>The Brief is edited by Eric and signed Eric. The visual format is text and our own design system. Source photography credit, when used, goes to the original outlet.</p>
+      </li>
+      <li>
+        <h3>Categories and tags are taxonomic, not ranking.</h3>
+        <p>The category tag exists to help readers scan. It does not encode editorial judgment beyond classification.</p>
+      </li>
+      <li>
+        <h3>Corrections published openly.</h3>
+        <p>If a TLDR or editor's note is wrong, the correction runs inline within 12 hours of detection. The <a href="/corrections">/corrections</a> page picks up the correction. No silent edits.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ FOUR STAGES ============ -->
+  <section class="meth-section">
+    <p class="meth-section__eyebrow">THE PIPELINE</p>
+    <h2 class="meth-section__title">Four stages</h2>
+    <p class="meth-section__lead">The Brief runs Monday through Saturday on a four-stage pipeline. Stage one ingests. Stage two drafts with AI. Stage three audits the draft with a second AI call. Stage four publishes after the editor's morning review.</p>
+
+    <div class="meth-stages">
+      <article class="meth-stage">
+        <header class="meth-stage__head">
+          <span class="meth-stage__num">01</span>
+          <p class="meth-stage__time">3:00 AM PT</p>
+          <h3 class="meth-stage__title">Ingest</h3>
+        </header>
+        <p>A scheduled job pulls the last 24 hours from 12 San Francisco news outlets via RSS, plus the top posts from three SF subreddits. Mission Local, SF Standard, SFist, ABC7 Bay Area, KQED, NBC Bay Area, Berkeleyside, Eater SF, Curbed SF, the SF Chronicle free feed, the SF Examiner, and the SF Public Press. Plus r/sanfrancisco, r/AskSF, r/bayarea. Output: a queue of 40 to 60 deduped candidates.</p>
+        <p class="meth-stage__detail">Dedupe: URL match, title cosine similarity over 0.85, named entity match across titles. Two outlets running the same BART vote cluster into one candidate.</p>
+      </article>
+
+      <article class="meth-stage">
+        <header class="meth-stage__head">
+          <span class="meth-stage__num">02</span>
+          <p class="meth-stage__time">5:00 AM PT</p>
+          <h3 class="meth-stage__title">Primary AI pass</h3>
+        </header>
+        <p>For each candidate, Claude Haiku scores it on four dimensions (novelty, civic significance, SF specificity, uniqueness), categorizes it, and answers three yes/no questions: is there a missed angle, a missed connection, or missing backstory? Items that fail those three are rejected. Items that pass get a 25 to 30 word TLDR and a 100 to 150 word editor's note. The note must start with an explicit angle statement: the editorial argument the rest of the note supports.</p>
+        <p class="meth-stage__detail">Uniqueness scoring is the most important dimension. A story 8 outlets are running well scores 2. A story no outlet has connected to a wider pattern scores 10. Items scoring under 6 on uniqueness or under 7 composite are auto-rejected.</p>
+      </article>
+
+      <article class="meth-stage">
+        <header class="meth-stage__head">
+          <span class="meth-stage__num">03</span>
+          <p class="meth-stage__time">5:30 AM PT</p>
+          <h3 class="meth-stage__title">AI auditor</h3>
+        </header>
+        <p>A second Claude call audits each draft against five firewall checks. Does the editor's note recap the source (firewall rule 1)? Does the first sentence state a real angle? Does the TLDR include a specific number, named person, or named place? Is the note 100 to 150 words? Does it sound like SF Times voice or like generic news brief writing? Items that pass all five auto-publish. Items that fail any one get held for editor review.</p>
+        <p class="meth-stage__detail">A random 10% of audit-passing items are also held as drift-detection spot-check. The editor reviews these to catch failures the auditor missed. This is the safety net against prompt drift.</p>
+      </article>
+
+      <article class="meth-stage">
+        <header class="meth-stage__head">
+          <span class="meth-stage__num">04</span>
+          <p class="meth-stage__time">6:30 to 7:30 AM PT</p>
+          <h3 class="meth-stage__title">Editor review and publish</h3>
+        </header>
+        <p>Eric opens the morning dashboard. The auto-publishing batch is shown for visibility. The held items get full review: edit any TLDR or editor's note that needs tightening, accept what works, reject what does not. By 7:30 AM the editor clicks publish. The audit log captures every edit so we have a record of what changed between AI draft and final.</p>
+        <p class="meth-stage__detail">Hard gate at 7:30 AM: if the editor does not click publish, the auto-batch ships anyway and held items drop. The brief publishes shorter that day but still ships. This is the structural feature that keeps the system resilient to busy mornings.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ THE 4 SIGNALS ============ -->
+  <section class="meth-section">
+    <p class="meth-section__eyebrow">THE BRIEF SIGNAL</p>
+    <h2 class="meth-section__title">Four reasons we picked this</h2>
+    <p class="meth-section__lead">Every Brief item carries one of four signal tags. The signal is the visible badge that tells readers why we picked the item. It is the trust mechanism: the signal makes the editorial argument explicit so readers can hold us accountable to it.</p>
+
+    <div class="meth-signals">
+      {SIGNALS.map((sig) => (
+        <article class={`meth-signal meth-signal--${sig.color}`}>
+          <p class={`meth-signal__pill meth-signal__pill--${sig.color}`}>{sig.label.toUpperCase()}</p>
+          <p class="meth-signal__body">{sig.description}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- ============ THE CATEGORIES ============ -->
+  <section class="meth-section">
+    <p class="meth-section__eyebrow">THE TAXONOMY</p>
+    <h2 class="meth-section__title">Thirteen categories</h2>
+    <p class="meth-section__lead">Every Brief item is tagged with exactly one category from a fixed taxonomy. The taxonomy is intentionally narrow and stable. Categories exist to help readers scan, not to encode editorial judgment. Click any category to see every Brief item in that taxonomy across all editions.</p>
+
+    <ul class="meth-categories">
+      {CATEGORIES.map((cat) => (
+        <li>
+          <a href={`/brief/category/${cat.tag.toLowerCase().replace(/\s+/g, '-')}/`}>
+            <span class="meth-category__name">{cat.tag}</span>
+            <span class="meth-category__arrow">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ============ AI: WHAT AND WHAT NOT ============ -->
+  <section class="meth-section">
+    <p class="meth-section__eyebrow">AI ASSISTANCE</p>
+    <h2 class="meth-section__title">What AI does and what it does not</h2>
+    <p class="meth-section__lead">The Brief uses AI assistance in drafting and auditing, with a named editor reviewing every held item and a weekly random sample audit. The Saturday Profile and feature work on the rest of the site use no AI at all. Both policies are disclosed at <a href="/standards#brief-ai-assistance">/standards</a>.</p>
+
+    <div class="meth-aimatrix">
+      <div class="meth-aimatrix__col meth-aimatrix__col--yes">
+        <h3 class="meth-aimatrix__head">WHAT AI DOES</h3>
+        <ul>
+          <li>Scores candidates on four dimensions and rejects below threshold.</li>
+          <li>Tags items with a category from the fixed taxonomy.</li>
+          <li>Drafts the TLDR (25 to 30 words) from the source article.</li>
+          <li>Drafts the editor's note (100 to 150 words) starting with an explicit angle statement.</li>
+          <li>Tags items with a brief signal.</li>
+          <li>Audits its own drafts against the five firewall checks.</li>
+        </ul>
+      </div>
+      <div class="meth-aimatrix__col meth-aimatrix__col--no">
+        <h3 class="meth-aimatrix__head">WHAT AI DOES NOT DO</h3>
+        <ul>
+          <li>Decide what gets published. The editor reviews held items and the system gates on the auditor pass.</li>
+          <li>Write Saturday Profile features or any feature article on this site.</li>
+          <li>Generate fake bylines or fictional reporter names.</li>
+          <li>Generate images. Source photography credit goes to the original outlet.</li>
+          <li>Make editorial judgments beyond the locked prompt spec. Drift triggers a pipeline pause and a prompt revision.</li>
+          <li>Bypass the seven firewall rules above. Ever.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACCOUNTABILITY ============ -->
+  <section class="meth-section">
+    <p class="meth-section__eyebrow">ACCOUNTABILITY</p>
+    <h2 class="meth-section__title">How to hold us accountable</h2>
+    <p class="meth-section__lead">If you find a Brief item that violates any of the seven firewall rules, tell us. Corrections run within 12 hours of detection.</p>
+
+    <ul class="meth-accountability">
+      <li>
+        <strong>Found a recap.</strong> If you can read our editor's note and skip the source article, the firewall cracked on that item. Email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a> with the URL and the words you can substitute. We will tighten or pull the item.
+      </li>
+      <li>
+        <strong>Factual error.</strong> Same address. We correct inline within 12 hours and post the correction at <a href="/corrections">/corrections</a>.
+      </li>
+      <li>
+        <strong>Broken source link.</strong> Source outlets sometimes move articles. If a Read the full reporting button leads nowhere, tell us and we will replace the link with an archive snapshot.</li>
+      </li>
+      <li>
+        <strong>Pattern complaints.</strong> If the same failure mode shows up across multiple items, the prompt has drifted. Same address. We pause the pipeline and revise.
+      </li>
+    </ul>
+  </section>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">SOURCE DOCUMENTS</p>
+    <p>The full operational specification is in <code>BRIEF-MASTER-PLAN.md</code> in the project repository. The AI prompts in their exact form are in section 7. The audit protocol is in section 9. The editorial firewall is in section 3. We publish these so readers and journalists can audit our methodology directly.</p>
+    <p class="brief-disclosure__more">
+      Browse the <a href="/brief/archive/">archive</a> · subscribe to the <a href="/brief/rss.xml">RSS feed</a> · read the full <a href="/standards#brief-ai-assistance">editorial standards</a>.
+    </p>
+  </aside>
+
+  <style>
+    .meth-section {
+      max-width: var(--max-prose);
+      margin: 0 auto 56px;
+      padding: 0 var(--gutter);
+    }
+    .meth-section__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .meth-section__title {
+      font-family: var(--display);
+      font-size: clamp(28px, 3.4vw, 40px);
+      line-height: 1.05;
+      letter-spacing: -0.005em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin: 0 0 14px;
+    }
+    .meth-section__lead {
+      font-family: var(--ui);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0 0 28px;
+      max-width: 60ch;
+    }
+    .meth-section__lead a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+
+    /* ============ FIREWALL RULES ============ */
+    .meth-rules {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: rule;
+    }
+    .meth-rules li {
+      counter-increment: rule;
+      position: relative;
+      padding: 18px 20px 18px 60px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--accent);
+      margin-bottom: 12px;
+    }
+    .meth-rules li::before {
+      content: counter(rule, decimal-leading-zero);
+      position: absolute;
+      left: 14px;
+      top: 18px;
+      font-family: var(--display);
+      font-size: 24px;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.005em;
+    }
+    .meth-rules h3 {
+      font-family: var(--display);
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: -0.005em;
+      margin: 0 0 6px;
+      color: var(--ink);
+    }
+    .meth-rules p {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0;
+    }
+    .meth-rules p a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+    /* ============ PIPELINE STAGES ============ */
+    .meth-stages {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 720px) { .meth-stages { grid-template-columns: 1fr; } }
+    .meth-stage {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 22px 22px 18px;
+    }
+    .meth-stage__head {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .meth-stage__num {
+      font-family: var(--display);
+      font-size: 36px;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+    }
+    .meth-stage__time {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    .meth-stage__title {
+      font-family: var(--display);
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: -0.005em;
+      margin: 0;
+      flex-basis: 100%;
+    }
+    .meth-stage p {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0 0 12px;
+    }
+    .meth-stage__detail {
+      font-size: 13px !important;
+      color: var(--muted) !important;
+      font-style: italic;
+      margin: 0 !important;
+    }
+
+    /* ============ SIGNAL CARDS ============ */
+    .meth-signals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 720px) { .meth-signals { grid-template-columns: 1fr; } }
+    .meth-signal {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 20px 22px;
+    }
+    .meth-signal--terracotta { border-left-color: var(--accent); }
+    .meth-signal--pacific { border-left-color: #2c5582; }
+    .meth-signal--fog { border-left-color: var(--muted); }
+    .meth-signal--ink-soft { border-left-color: var(--ink-2); }
+    .meth-signal__pill {
+      display: inline-block;
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 4px 10px;
+      color: white;
+      margin: 0 0 12px;
+    }
+    .meth-signal__pill--terracotta { background: var(--accent); }
+    .meth-signal__pill--pacific { background: #2c5582; }
+    .meth-signal__pill--fog { background: var(--muted); }
+    .meth-signal__pill--ink-soft { background: var(--ink-2); }
+    .meth-signal__body {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    /* ============ CATEGORIES ============ */
+    .meth-categories {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .meth-categories a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      transition: background 180ms, color 180ms;
+    }
+    .meth-categories a:hover {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+    .meth-category__name {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .meth-category__arrow {
+      font-family: var(--display);
+      font-size: 16px;
+      color: var(--accent);
+    }
+    .meth-categories a:hover .meth-category__arrow { color: var(--paper); }
+
+    /* ============ AI YES/NO MATRIX ============ */
+    .meth-aimatrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 720px) { .meth-aimatrix { grid-template-columns: 1fr; } }
+    .meth-aimatrix__col {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 22px 24px;
+    }
+    .meth-aimatrix__col--yes { border-top: 4px solid #0a7a3d; }
+    .meth-aimatrix__col--no { border-top: 4px solid #a82919; }
+    .meth-aimatrix__head {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin: 0 0 14px;
+    }
+    .meth-aimatrix__col--yes .meth-aimatrix__head { color: #0a7a3d; }
+    .meth-aimatrix__col--no .meth-aimatrix__head { color: #a82919; }
+    .meth-aimatrix__col ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .meth-aimatrix__col li {
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink);
+      padding: 8px 0;
+      border-top: 1px solid var(--rule);
+    }
+    .meth-aimatrix__col li:first-child { border-top: 0; padding-top: 0; }
+
+    /* ============ ACCOUNTABILITY ============ */
+    .meth-accountability {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .meth-accountability li {
+      padding: 14px 18px;
+      background: var(--paper);
+      border-left: 3px solid var(--muted);
+      margin-bottom: 8px;
+      font-family: var(--ui);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .meth-accountability strong { color: var(--accent); font-weight: 700; }
+    .meth-accountability a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-prose);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+    .brief-disclosure code {
+      font-family: var(--font-mono, monospace);
+      background: var(--paper);
+      padding: 1px 4px;
+      font-size: 12px;
+    }
+    .brief-disclosure__more a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+  </style>
+</ExhibitionLayout>

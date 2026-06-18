@@ -1,0 +1,385 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+import BriefSubNav from '../../components/BriefSubNav.astro';
+
+/**
+ * Brief archive index at /brief/archive/.
+ *
+ * Lists every published edition chronologically with date, edition number,
+ * the top headline of the day, item count, and a one-line preview. Each
+ * row links to the daily archive entry.
+ *
+ * Also displays a small category index showing which categories have
+ * coverage across all editions, with links to /brief/category/[category]/.
+ */
+const briefs = await getCollection('briefs');
+const sortedBriefs = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function longDate(d: Date): string {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function shortDate(d: Date): string {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }).toUpperCase();
+}
+
+// Compute per-edition summary data
+const editions = sortedBriefs.map((brief) => {
+  const sortedItems = [...brief.data.items].sort((a, b) => b.composite_score - a.composite_score);
+  return {
+    date: brief.data.date,
+    dateString: formatDate(brief.data.date),
+    edition: brief.data.edition,
+    editor: brief.data.editor,
+    itemCount: brief.data.items.length,
+    topItem: sortedItems[0],
+    categoriesCovered: Array.from(new Set(brief.data.items.map((i: any) => i.category))),
+  };
+});
+
+// Compute category coverage across the entire archive
+const categoryCoverage: Record<string, number> = {};
+for (const brief of briefs) {
+  for (const item of brief.data.items) {
+    categoryCoverage[item.category] = (categoryCoverage[item.category] || 0) + 1;
+  }
+}
+const sortedCategories = Object.entries(categoryCoverage)
+  .sort(([, a], [, b]) => b - a)
+  .map(([cat, count]) => ({ category: cat, count }));
+
+const totalItems = Object.values(categoryCoverage).reduce((sum, count) => sum + count, 0);
+
+const SITE_ORIGIN = 'https://sftimes.com';
+const archiveSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${SITE_ORIGIN}/brief/archive/`,
+  name: 'The Brief · Archive',
+  description: `Complete archive of SF Times Daily Brief editions. ${editions.length} editions and ${totalItems} items.`,
+  isPartOf: {
+    '@type': 'NewsMediaOrganization',
+    name: 'SF Times',
+    url: SITE_ORIGIN,
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: editions.length,
+    itemListElement: editions.map((ed, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      url: `${SITE_ORIGIN}/brief/${ed.dateString}/`,
+      name: `The Brief, ${longDate(ed.date)}`,
+    })),
+  },
+};
+---
+<ExhibitionLayout
+  title="THE BRIEF · ARCHIVE · SF Times"
+  description={`Every published edition of the daily Brief. ${editions.length} editions, ${totalItems} items across ${sortedCategories.length} categories.`}
+  active="home"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(archiveSchema)} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="ARCHIVE"
+    cutouts={[]}
+  />
+
+  <BriefSubNav active="archive" />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">ARCHIVE · {editions.length} EDITIONS · {totalItems} ITEMS</p>
+    <h1 class="ex-prose__title">EVERY BRIEF<br>WE HAVE<br>PUBLISHED.</h1>
+    <p>Every published edition of the Brief, sorted newest first. Click any edition to read the full day. Browse <a href="/brief/this-week/">the rolling weekly digest</a> or the <a href="/brief/sources/">outlets we pull from</a>. Click any category in the index below to see every item in that category across all editions.</p>
+  </article>
+
+  <!-- ============ CATEGORY INDEX ============ -->
+  <section class="brief-cat-index">
+    <h2 class="brief-cat-index__label">CATEGORY INDEX</h2>
+    <ul class="brief-cat-index__list">
+      {sortedCategories.map((cat) => (
+        <li>
+          <a href={`/brief/category/${cat.category.toLowerCase().replace(/\s+/g, '-')}/`}>
+            <span class="brief-cat-index__name">{cat.category}</span>
+            <span class="brief-cat-index__count">{cat.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ============ EDITIONS LIST ============ -->
+  <section class="brief-editions">
+    <h2 class="brief-editions__label">EDITIONS · NEWEST FIRST</h2>
+    <ol class="brief-editions__list">
+      {editions.map((ed) => (
+        <li class="brief-edition">
+          <a class="brief-edition__link" href={`/brief/${ed.dateString}/`}>
+            <div class="brief-edition__date-col">
+              <p class="brief-edition__date">{shortDate(ed.date)}</p>
+              <p class="brief-edition__edition">№{String(ed.edition).padStart(2, '0')}</p>
+            </div>
+            <div class="brief-edition__body">
+              <p class="brief-edition__top-cat">
+                <span class={`brief-edition__signal brief-edition__signal--${ed.topItem.signal}`}>
+                  {ed.topItem.signal.replace(/-/g, ' ').toUpperCase()}
+                </span>
+                <span class="brief-edition__top-label">TOP STORY · {ed.topItem.category}</span>
+              </p>
+              <h3 class="brief-edition__headline">{ed.topItem.source_headline}</h3>
+              <p class="brief-edition__angle">{ed.topItem.angle_statement}</p>
+              <p class="brief-edition__meta">
+                {ed.itemCount} items · {ed.categoriesCovered.length} categories · edited by {ed.editor}
+              </p>
+            </div>
+            <div class="brief-edition__arrow" aria-hidden="true">→</div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <aside class="brief-disclosure">
+    <p class="brief-disclosure__label">SUBSCRIBE</p>
+    <p>
+      The Brief publishes Monday through Saturday. Subscribe via <a href="/brief/rss.xml">the RSS feed</a> for daily updates.
+      Read the full <a href="/standards#brief-ai-assistance">editorial standards</a> on AI assistance in the Brief.
+    </p>
+  </aside>
+
+  <style>
+    /* ============ CATEGORY INDEX ============ */
+    .brief-cat-index {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 24px var(--gutter);
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+    }
+    .brief-cat-index__label {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 14px;
+    }
+    .brief-cat-index__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .brief-cat-index__list a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      transition: background 180ms, border-color 180ms;
+    }
+    .brief-cat-index__list a:hover {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+    .brief-cat-index__name {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .brief-cat-index__count {
+      font-family: var(--display);
+      font-size: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ============ EDITIONS LIST ============ */
+    .brief-editions {
+      max-width: var(--max-narrow);
+      margin: 0 auto 48px;
+      padding: 0 var(--gutter);
+    }
+    .brief-editions__label {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .brief-editions__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .brief-edition {
+      border-bottom: 1px solid var(--rule);
+    }
+    .brief-edition__link {
+      display: grid;
+      grid-template-columns: 80px 1fr 32px;
+      gap: 20px;
+      align-items: start;
+      padding: 22px 0;
+      color: var(--ink);
+      transition: background 180ms;
+    }
+    .brief-edition__link:hover {
+      background: var(--paper-2);
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    .brief-edition__date-col {
+      text-align: left;
+    }
+    .brief-edition__date {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    .brief-edition__edition {
+      font-family: var(--display);
+      font-size: 22px;
+      line-height: 1;
+      margin: 0;
+      color: var(--ink);
+    }
+    .brief-edition__body {
+      min-width: 0;
+    }
+    .brief-edition__top-cat {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 0 0 8px;
+    }
+    .brief-edition__signal {
+      font-family: var(--ui);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      padding: 3px 8px;
+      color: white;
+    }
+    .brief-edition__signal--first-to-connect { background: var(--accent); }
+    .brief-edition__signal--underreported { background: #2c5582; }
+    .brief-edition__signal--missing-context { background: var(--muted); }
+    .brief-edition__signal--structural-pattern { background: var(--ink-2); }
+    .brief-edition__top-label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .brief-edition__headline {
+      font-family: var(--display);
+      font-size: clamp(18px, 2.2vw, 22px);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+    .brief-edition__angle {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--accent);
+      margin: 0 0 10px;
+      font-style: italic;
+    }
+    .brief-edition__meta {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 0;
+    }
+    .brief-edition__arrow {
+      font-family: var(--display);
+      font-size: 22px;
+      color: var(--accent);
+      text-align: right;
+      padding-top: 4px;
+    }
+
+    /* ============ DISCLOSURE ============ */
+    .brief-disclosure {
+      max-width: var(--max-narrow);
+      margin: 0 auto 64px;
+      padding: 18px 22px;
+      background: var(--paper-2);
+      border-left: 3px solid var(--muted);
+    }
+    .brief-disclosure__label {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .brief-disclosure p {
+      font-family: var(--ui);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .brief-disclosure p a {
+      color: var(--accent);
+      border-bottom: 1px solid currentColor;
+    }
+
+    @media (max-width: 640px) {
+      .brief-edition__link {
+        grid-template-columns: 60px 1fr 24px;
+        gap: 14px;
+      }
+      .brief-edition__edition { font-size: 18px; }
+    }
+
+    @media (max-width: 420px) {
+      .brief-cat-index__list { grid-template-columns: 1fr 1fr; }
+      .brief-edition__link { padding: 18px 0; }
+    }
+  </style>
+</ExhibitionLayout>

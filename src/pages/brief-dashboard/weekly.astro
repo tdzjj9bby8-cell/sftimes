@@ -1,0 +1,505 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+/**
+ * Weekly Sunday audit at /brief-dashboard/weekly/.
+ *
+ * Pulls 10 random items from briefs published in the prior 7 days. Eric
+ * grades each one good / marginal / bad. If more than 2 of 10 are bad, the
+ * pipeline pauses until prompts are revised (per BRIEF-MASTER-PLAN.md
+ * section 8.3 weekly audit protocol).
+ *
+ * State persists to localStorage keyed by the audit's date window, so Eric
+ * can come back and finish or revise.
+ *
+ * Page is noindex. Will live behind basic auth in Phase G alongside the
+ * main /brief-dashboard.
+ */
+const briefs = await getCollection('briefs');
+
+// Pick the audit window: 7 days ending on the latest published brief date.
+// In production this would be "last Sunday" but for the prototype we anchor
+// to whatever data we have.
+const sortedBriefs = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latestBrief = sortedBriefs[0];
+const windowEnd = latestBrief ? new Date(latestBrief.data.date) : new Date();
+const windowStart = new Date(windowEnd.valueOf() - 6 * 24 * 60 * 60 * 1000);
+
+const inWindow = sortedBriefs.filter((b) => {
+  const d = b.data.date.valueOf();
+  return d >= windowStart.valueOf() && d <= windowEnd.valueOf();
+});
+
+// Flatten all items from the window
+const allItems = inWindow.flatMap((b) =>
+  b.data.items.map((i: any) => ({
+    ...i,
+    brief_date: b.data.date,
+    brief_date_string: b.data.date.toISOString().slice(0, 10),
+    brief_edition: b.data.edition,
+  }))
+);
+
+// Deterministic "random" sample for repeatability. Seed by window-end date so
+// the same week always shows the same 10 items, which lets Eric come back.
+function seededShuffle<T>(arr: T[], seedStr: string): T[] {
+  const a = [...arr];
+  let seed = 0;
+  for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) | 0;
+  function rng() {
+    seed = (seed * 9301 + 49297) | 0;
+    return ((seed >>> 0) % 1000) / 1000;
+  }
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const seedKey = windowEnd.toISOString().slice(0, 10);
+const sampleItems = seededShuffle(allItems, seedKey).slice(0, Math.min(10, allItems.length));
+
+function longWindow(start: Date, end: Date): string {
+  const opts: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
+  return `${start.toLocaleDateString('en-US', opts)} to ${end.toLocaleDateString('en-US', opts)}`;
+}
+function shortDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+const storageKey = `brief-weekly-audit:${seedKey}`;
+---
+<ExhibitionLayout
+  title="WEEKLY AUDIT · The Brief · SF Times"
+  description="Sample 10 random items from the prior week. Grade good/marginal/bad. Pause pipeline if >2 bad."
+  active="home"
+>
+  <meta name="robots" content="noindex, nofollow" slot="head" />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="WEEKLY AUDIT · INTERNAL"
+    cutouts={[]}
+  />
+
+  <section class="weekly-head">
+    <div class="weekly-head__inner">
+      <div class="weekly-head__row">
+        <div>
+          <p class="weekly-head__eyebrow">WEEKLY SAMPLE AUDIT · {longWindow(windowStart, windowEnd).toUpperCase()}</p>
+          <h1 class="weekly-head__title">Sunday audit</h1>
+          <p class="weekly-head__sub">
+            <strong>{sampleItems.length} of {allItems.length}</strong> items from the prior week. Grade each one.
+            <span class="weekly-head__sub-strong">More than 2 marked bad pauses the pipeline.</span>
+          </p>
+        </div>
+        <a class="weekly-head__back" href="/brief-dashboard/">← MORNING REVIEW</a>
+      </div>
+
+      <div class="weekly-head__progress" id="progressRow">
+        <span class="weekly-head__progress-item weekly-head__progress-item--good">
+          <span id="goodCount">0</span> GOOD
+        </span>
+        <span class="weekly-head__progress-item weekly-head__progress-item--marginal">
+          <span id="marginalCount">0</span> MARGINAL
+        </span>
+        <span class="weekly-head__progress-item weekly-head__progress-item--bad">
+          <span id="badCount">0</span> BAD
+        </span>
+        <span class="weekly-head__progress-item weekly-head__progress-item--pending">
+          <span id="pendingCount">{sampleItems.length}</span> PENDING
+        </span>
+      </div>
+    </div>
+  </section>
+
+  {allItems.length === 0 ? (
+    <section class="weekly-empty">
+      <p class="weekly-empty__msg">
+        No briefs published in the audit window ({longWindow(windowStart, windowEnd)}). The Sunday audit runs once you have at least one week of published editions.
+      </p>
+    </section>
+  ) : (
+    <section class="weekly-items" id="weeklyItems">
+      {sampleItems.map((item: any, idx: number) => (
+        <article class={`waudit waudit--${item.signal}`} data-id={item.id}>
+          <header class="waudit__head">
+            <div class="waudit__head-left">
+              <span class="waudit__index">{idx + 1} of {sampleItems.length}</span>
+              <span class="waudit__category">{item.category}</span>
+              <span class={`waudit__signal waudit__signal--${item.signal}`}>
+                {item.signal.replace(/-/g, ' ').toUpperCase()}
+              </span>
+            </div>
+            <span class="waudit__brief-meta">
+              From <strong>{shortDate(item.brief_date)}</strong> · Edition №{String(item.brief_edition).padStart(2, '0')}
+            </span>
+          </header>
+
+          <div class="waudit__source">
+            <p class="waudit__source-headline">{item.source_headline}</p>
+            <p class="waudit__source-line">
+              Reported by <strong>{item.source_byline}</strong> at <a href={item.source_url} rel="noopener noreferrer" target="_blank">{item.source_outlet}</a>
+            </p>
+          </div>
+
+          <div class="waudit__content">
+            <p class="waudit__angle-label">ANGLE</p>
+            <p class="waudit__angle">{item.angle_statement}</p>
+
+            <p class="waudit__tldr-label">TLDR</p>
+            <p class="waudit__tldr">{item.tldr}</p>
+
+            <p class="waudit__note-label">EDITOR'S NOTE</p>
+            <p class="waudit__note">{item.editor_note}</p>
+
+            <p class="waudit__watch-label">WHAT TO WATCH</p>
+            <p class="waudit__watch">{item.what_to_watch}</p>
+          </div>
+
+          <div class="waudit__permalink">
+            <a href={`/brief/${item.brief_date_string}/${item.slug}/`} target="_blank" rel="noopener noreferrer">
+              Open published item ↗
+            </a>
+          </div>
+
+          <div class="waudit__grade">
+            <p class="waudit__grade-label">YOUR GRADE</p>
+            <div class="waudit__grade-btns">
+              <button class="waudit__btn waudit__btn--good" data-grade="good" data-id={item.id} type="button">Good</button>
+              <button class="waudit__btn waudit__btn--marginal" data-grade="marginal" data-id={item.id} type="button">Marginal</button>
+              <button class="waudit__btn waudit__btn--bad" data-grade="bad" data-id={item.id} type="button">Bad</button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </section>
+  )}
+
+  {sampleItems.length > 0 && (
+    <section class="weekly-result" id="weeklyResult">
+      <div class="weekly-result__inner">
+        <p class="weekly-result__msg" id="weeklyResultMsg">
+          Grade every item to see the audit result. The pipeline pauses if more than 2 of {sampleItems.length} are bad.
+        </p>
+        <div class="weekly-result__btn-row">
+          <button class="weekly-result__reset" id="resetBtn" type="button">RESET AUDIT</button>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <style>
+    .weekly-head {
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+      padding: 24px 0;
+      margin: 0 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .weekly-head__inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .weekly-head__row { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 14px; }
+    .weekly-head__eyebrow {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent); font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .weekly-head__title {
+      font-family: var(--display); font-size: clamp(28px, 4vw, 40px);
+      line-height: 1; margin: 0 0 8px; letter-spacing: -0.005em;
+      text-transform: uppercase;
+    }
+    .weekly-head__sub {
+      font-family: var(--ui); font-size: 13px;
+      color: var(--muted); margin: 0; max-width: 60ch;
+    }
+    .weekly-head__sub strong { color: var(--ink); }
+    .weekly-head__sub-strong { color: var(--accent); font-weight: 700; }
+    .weekly-head__back {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em;
+      font-weight: 700; color: var(--ink); text-transform: uppercase;
+      border-bottom: 1px solid currentColor;
+    }
+    .weekly-head__progress {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      padding-top: 12px; border-top: 1px solid var(--rule);
+    }
+    .weekly-head__progress-item {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700;
+    }
+    .weekly-head__progress-item span {
+      color: var(--ink); font-size: 14px; margin-right: 4px;
+    }
+    .weekly-head__progress-item--good span { color: #0a7a3d; }
+    .weekly-head__progress-item--marginal span { color: #b8843a; }
+    .weekly-head__progress-item--bad span { color: #a82919; }
+
+    .weekly-empty {
+      max-width: 700px; margin: 0 auto 64px; padding: 48px 24px;
+      text-align: center;
+    }
+    .weekly-empty__msg {
+      font-family: var(--ui); font-size: 15px;
+      color: var(--muted); line-height: 1.55;
+    }
+
+    .weekly-items {
+      max-width: 1100px; margin: 0 auto 48px;
+      padding: 0 24px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+
+    .waudit {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 22px 26px;
+      transition: opacity 240ms, border-color 240ms;
+    }
+    .waudit--first-to-connect { border-left-color: var(--accent); }
+    .waudit--underreported { border-left-color: #2c5582; }
+    .waudit--missing-context { border-left-color: var(--muted); }
+    .waudit--structural-pattern { border-left-color: var(--ink-2); }
+    .waudit[data-grade="good"] { border-left-color: #0a7a3d; }
+    .waudit[data-grade="marginal"] { border-left-color: #b8843a; }
+    .waudit[data-grade="bad"] { border-left-color: #a82919; }
+
+    .waudit__head {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--rule);
+    }
+    .waudit__head-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .waudit__index {
+      font-family: var(--display); font-size: 20px; line-height: 1;
+      color: var(--accent); letter-spacing: -0.005em;
+    }
+    .waudit__category {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      font-weight: 700; text-transform: uppercase;
+      background: var(--paper-2); padding: 4px 10px; color: var(--ink);
+    }
+    .waudit__signal {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.14em;
+      font-weight: 700; padding: 4px 10px; color: white;
+    }
+    .waudit__signal--first-to-connect { background: var(--accent); }
+    .waudit__signal--underreported { background: #2c5582; }
+    .waudit__signal--missing-context { background: var(--muted); }
+    .waudit__signal--structural-pattern { background: var(--ink-2); }
+    .waudit__brief-meta {
+      font-family: var(--ui); font-size: 11.5px; color: var(--muted);
+    }
+    .waudit__brief-meta strong { color: var(--ink); font-weight: 700; }
+
+    .waudit__source { margin-bottom: 16px; }
+    .waudit__source-headline {
+      font-family: var(--display); font-size: 19px; line-height: 1.2;
+      letter-spacing: -0.005em; margin: 0 0 4px;
+    }
+    .waudit__source-line {
+      font-family: var(--ui); font-size: 12px;
+      color: var(--muted); margin: 0;
+    }
+    .waudit__source-line a {
+      color: var(--accent); border-bottom: 1px solid currentColor;
+    }
+    .waudit__source-line strong { color: var(--ink); font-weight: 700; }
+
+    .waudit__content { margin-bottom: 14px; }
+    .waudit__angle-label,
+    .waudit__tldr-label,
+    .waudit__note-label,
+    .waudit__watch-label {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700;
+      margin: 14px 0 6px;
+    }
+    .waudit__angle-label:first-child { margin-top: 0; }
+    .waudit__angle {
+      font-family: var(--ui); font-size: 14px; line-height: 1.5;
+      color: var(--accent); font-weight: 500;
+      padding: 10px 14px; background: rgba(217, 85, 31, 0.08);
+      border-left: 2px solid var(--accent); margin: 0;
+    }
+    .waudit__tldr,
+    .waudit__note,
+    .waudit__watch {
+      font-family: var(--ui); font-size: 14px; line-height: 1.6;
+      color: var(--ink); margin: 0;
+    }
+    .waudit__watch { font-style: italic; }
+
+    .waudit__permalink {
+      margin: 14px 0;
+      padding: 8px 0;
+      border-top: 1px solid var(--rule);
+    }
+    .waudit__permalink a {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent); font-weight: 700;
+      border-bottom: 1px solid currentColor;
+    }
+
+    .waudit__grade {
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+    }
+    .waudit__grade-label {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .waudit__grade-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .waudit__btn {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em;
+      font-weight: 700; text-transform: uppercase;
+      padding: 10px 22px; border: 1px solid var(--ink);
+      background: transparent; color: var(--ink); cursor: pointer;
+      transition: background 180ms, color 180ms;
+    }
+    .waudit__btn:hover { background: var(--ink); color: var(--paper); }
+    .waudit__btn--good:hover { background: #0a7a3d; border-color: #0a7a3d; }
+    .waudit__btn--marginal:hover { background: #b8843a; border-color: #b8843a; }
+    .waudit__btn--bad:hover { background: #a82919; border-color: #a82919; }
+    .waudit[data-grade="good"] .waudit__btn--good { background: #0a7a3d; color: white; border-color: #0a7a3d; }
+    .waudit[data-grade="marginal"] .waudit__btn--marginal { background: #b8843a; color: white; border-color: #b8843a; }
+    .waudit[data-grade="bad"] .waudit__btn--bad { background: #a82919; color: white; border-color: #a82919; }
+
+    .weekly-result {
+      background: var(--ink); color: var(--paper);
+      padding: 28px 0; margin: 0 0 64px;
+      position: sticky; bottom: 0; z-index: 50;
+    }
+    .weekly-result__inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 24px; flex-wrap: wrap;
+    }
+    .weekly-result__msg {
+      font-family: var(--display); font-size: clamp(15px, 1.8vw, 18px);
+      line-height: 1.4; margin: 0; flex: 1; min-width: 280px;
+    }
+    .weekly-result__msg--pass { color: #6fd093; }
+    .weekly-result__msg--pause { color: #ff8a73; }
+    .weekly-result__btn-row { display: flex; gap: 10px; }
+    .weekly-result__reset {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.14em;
+      font-weight: 700; background: transparent; color: rgba(255, 255, 255, 0.6);
+      padding: 10px 18px; border: 1px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer; transition: background 180ms, color 180ms;
+    }
+    .weekly-result__reset:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+
+    @media (max-width: 640px) {
+      .weekly-head__row { flex-direction: column; gap: 12px; }
+      .waudit { padding: 18px 20px; }
+      .waudit__btn { padding: 10px 16px; flex: 1; min-width: 80px; }
+      .weekly-result__inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <script is:inline define:vars={{ storageKey }}>
+    (function () {
+      const items = document.querySelectorAll('.waudit');
+      const total = items.length;
+      const goodEl = document.getElementById('goodCount');
+      const marginalEl = document.getElementById('marginalCount');
+      const badEl = document.getElementById('badCount');
+      const pendingEl = document.getElementById('pendingCount');
+      const resultMsg = document.getElementById('weeklyResultMsg');
+      const resetBtn = document.getElementById('resetBtn');
+      if (!total || !goodEl) return;
+
+      function loadState() {
+        try {
+          const raw = window.localStorage.getItem(storageKey);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) { return {}; }
+      }
+      function saveState(state) {
+        try { window.localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) {}
+      }
+
+      let state = loadState();
+
+      function applyState() {
+        items.forEach((card) => {
+          const id = card.dataset.id;
+          const grade = state[id];
+          if (grade) card.dataset.grade = grade;
+          else delete card.dataset.grade;
+        });
+        recompute();
+      }
+
+      function recompute() {
+        let good = 0, marginal = 0, bad = 0, pending = 0;
+        items.forEach((card) => {
+          const g = card.dataset.grade;
+          if (g === 'good') good++;
+          else if (g === 'marginal') marginal++;
+          else if (g === 'bad') bad++;
+          else pending++;
+        });
+        goodEl.textContent = good;
+        marginalEl.textContent = marginal;
+        badEl.textContent = bad;
+        pendingEl.textContent = pending;
+
+        const graded = good + marginal + bad;
+        if (pending === 0) {
+          if (bad > 2) {
+            resultMsg.textContent = 'Pipeline pause triggered. ' + bad + ' of ' + total + ' items graded bad (threshold: more than 2). Revise prompts before next morning publish.';
+            resultMsg.className = 'weekly-result__msg weekly-result__msg--pause';
+          } else {
+            resultMsg.textContent = 'Audit pass. ' + good + ' good, ' + marginal + ' marginal, ' + bad + ' bad. Pipeline continues, prompts hold.';
+            resultMsg.className = 'weekly-result__msg weekly-result__msg--pass';
+          }
+        } else if (graded === 0) {
+          resultMsg.textContent = 'Grade every item to see the audit result. The pipeline pauses if more than 2 of ' + total + ' are bad.';
+          resultMsg.className = 'weekly-result__msg';
+        } else {
+          resultMsg.textContent = graded + ' graded so far. ' + pending + ' to go. Pipeline pauses if more than 2 of ' + total + ' end up bad.';
+          resultMsg.className = 'weekly-result__msg';
+        }
+      }
+
+      items.forEach((card) => {
+        card.querySelectorAll('.waudit__btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const grade = btn.dataset.grade;
+            if (state[id] === grade) {
+              delete state[id];
+              delete card.dataset.grade;
+            } else {
+              state[id] = grade;
+              card.dataset.grade = grade;
+            }
+            saveState(state);
+            recompute();
+          });
+        });
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (!window.confirm('Reset all grades for this audit window?')) return;
+          state = {};
+          saveState(state);
+          applyState();
+        });
+      }
+
+      applyState();
+    })();
+  </script>
+</ExhibitionLayout>

@@ -1,0 +1,325 @@
+---
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+/**
+ * /brief-dashboard/health
+ *
+ * Visual surface for the source-health endpoint. Hits /api/brief/source-health
+ * client-side on load and renders the result. Lets Eric eyeball whether the
+ * ingest pipeline will have anything to pull from tomorrow morning.
+ *
+ * Page is noindex. Behind the same basic auth as the rest of the dashboard.
+ */
+---
+<ExhibitionLayout
+  title="THE BRIEF · SOURCE HEALTH · INTERNAL"
+  description="Live ping status of all 12 RSS sources and 3 subreddits the Brief pipeline depends on."
+  active="home"
+>
+  <meta name="robots" content="noindex, nofollow" slot="head" />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THE BRIEF"
+    subscript="SOURCE HEALTH · INTERNAL"
+    cutouts={[]}
+  />
+
+  <section class="health-head">
+    <div class="health-head__inner">
+      <div class="health-head__row">
+        <div>
+          <p class="health-head__eyebrow" id="healthEyebrow">CHECKING SOURCES…</p>
+          <h1 class="health-head__title">Source health</h1>
+          <p class="health-head__sub" id="healthSub">Pinging all 15 sources. Should complete in a few seconds.</p>
+        </div>
+        <div class="health-head__actions">
+          <a class="health-head__back" href="/brief-dashboard/">← MORNING REVIEW</a>
+          <button class="health-head__refresh" id="refreshBtn" type="button">REFRESH</button>
+        </div>
+      </div>
+
+      <div class="health-head__counts" id="healthCounts">
+        <span class="health-head__count health-head__count--healthy"><span id="healthyCount">—</span> HEALTHY</span>
+        <span class="health-head__count health-head__count--degraded"><span id="degradedCount">—</span> DEGRADED</span>
+        <span class="health-head__count health-head__count--down"><span id="downCount">—</span> DOWN</span>
+        <span class="health-head__count health-head__count--total">CHECKED <span id="checkedTime">—</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="health-list" id="healthList">
+    <p class="health-loading">Loading source data…</p>
+  </section>
+
+  <style>
+    .health-head {
+      background: var(--paper-2);
+      border-block: 1px solid var(--rule);
+      padding: 24px 0;
+      margin: 0 0 32px;
+    }
+    .health-head__inner { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    .health-head__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    .health-head__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .health-head__eyebrow--ok { color: #0a7a3d; }
+    .health-head__eyebrow--warn { color: #b8843a; }
+    .health-head__eyebrow--critical { color: #a82919; }
+    .health-head__title {
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1;
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+    }
+    .health-head__sub {
+      font-family: var(--ui);
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .health-head__actions { display: flex; gap: 8px; align-items: center; }
+    .health-head__back {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      color: var(--ink);
+      text-transform: uppercase;
+      border-bottom: 1px solid currentColor;
+    }
+    .health-head__refresh {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 8px 14px;
+      border: 0;
+      cursor: pointer;
+    }
+    .health-head__refresh:hover { background: var(--accent); }
+
+    .health-head__counts {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding-top: 12px;
+      border-top: 1px solid var(--rule);
+    }
+    .health-head__count {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .health-head__count span {
+      color: var(--ink);
+      font-size: 14px;
+      margin-right: 4px;
+    }
+    .health-head__count--healthy span { color: #0a7a3d; }
+    .health-head__count--degraded span { color: #b8843a; }
+    .health-head__count--down span { color: #a82919; }
+
+    .health-list {
+      max-width: 1000px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .health-loading {
+      font-family: var(--ui);
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      padding: 40px;
+    }
+    .health-row {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left-width: 4px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 1fr 100px 90px 80px;
+      gap: 14px;
+      align-items: center;
+    }
+    .health-row--healthy { border-left-color: #0a7a3d; }
+    .health-row--degraded { border-left-color: #b8843a; }
+    .health-row--down { border-left-color: #a82919; }
+    .health-row__name {
+      font-family: var(--display);
+      font-size: 16px;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      min-width: 0;
+    }
+    .health-row__name a {
+      color: inherit;
+      border-bottom: 1px solid var(--rule);
+    }
+    .health-row__name a:hover { color: var(--accent); }
+    .health-row__url {
+      font-family: var(--ui);
+      font-size: 11px;
+      color: var(--muted);
+      margin: 2px 0 0;
+      letter-spacing: 0.02em;
+      word-break: break-all;
+    }
+    .health-row__status {
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      text-align: center;
+      color: white;
+    }
+    .health-row__status--healthy { background: #0a7a3d; }
+    .health-row__status--degraded { background: #b8843a; }
+    .health-row__status--down { background: #a82919; }
+    .health-row__http {
+      font-family: var(--ui);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .health-row__elapsed {
+      font-family: var(--ui);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      letter-spacing: 0.04em;
+    }
+    .health-row__error {
+      grid-column: 1 / -1;
+      font-family: var(--ui);
+      font-size: 12px;
+      color: #a82919;
+      margin: 6px 0 0;
+      padding: 6px 10px;
+      background: rgba(168, 41, 25, 0.08);
+      border-left: 2px solid #a82919;
+    }
+
+    @media (max-width: 640px) {
+      .health-row { grid-template-columns: 1fr 84px; gap: 10px; }
+      .health-row__http, .health-row__elapsed { display: none; }
+    }
+  </style>
+
+  <script is:inline>
+    (function () {
+      const eyebrow = document.getElementById('healthEyebrow');
+      const sub = document.getElementById('healthSub');
+      const healthyCount = document.getElementById('healthyCount');
+      const degradedCount = document.getElementById('degradedCount');
+      const downCount = document.getElementById('downCount');
+      const checkedTime = document.getElementById('checkedTime');
+      const list = document.getElementById('healthList');
+      const refreshBtn = document.getElementById('refreshBtn');
+
+      async function loadHealth() {
+        eyebrow.textContent = 'CHECKING SOURCES…';
+        eyebrow.className = 'health-head__eyebrow';
+        sub.textContent = 'Pinging all 15 sources. Should complete in a few seconds.';
+        list.innerHTML = '<p class="health-loading">Loading source data…</p>';
+
+        try {
+          const headers = {};
+          const token = window.localStorage.getItem('brief-dashboard-token');
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+
+          const resp = await fetch('/api/brief/source-health', { headers });
+
+          if (!resp.ok) {
+            if (resp.status === 401) {
+              list.innerHTML = '<p class="health-loading">401 Unauthorized. Set DASHBOARD_TOKEN in localStorage and refresh.</p>';
+              eyebrow.textContent = 'AUTH REQUIRED';
+              eyebrow.className = 'health-head__eyebrow health-head__eyebrow--warn';
+              return;
+            }
+            // Endpoint not deployed yet
+            list.innerHTML = '<p class="health-loading">Endpoint not deployed yet. Deploy the API and try again.</p>';
+            eyebrow.textContent = 'ENDPOINT NOT DEPLOYED';
+            eyebrow.className = 'health-head__eyebrow health-head__eyebrow--warn';
+            return;
+          }
+
+          const data = await resp.json();
+          healthyCount.textContent = data.counts.healthy;
+          degradedCount.textContent = data.counts.degraded;
+          downCount.textContent = data.counts.down;
+          const checkedAt = new Date(data.checked_at);
+          checkedTime.textContent = checkedAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+          if (data.status === 'ok') {
+            eyebrow.textContent = 'ALL SOURCES HEALTHY';
+            eyebrow.className = 'health-head__eyebrow health-head__eyebrow--ok';
+            sub.textContent = 'Ingest pipeline has full source coverage. ' + data.counts.total + ' sources checked in ' + data.total_elapsed_ms + 'ms.';
+          } else if (data.status === 'warn') {
+            eyebrow.textContent = 'WARNING · DEGRADED SOURCES';
+            eyebrow.className = 'health-head__eyebrow health-head__eyebrow--warn';
+            sub.textContent = data.counts.down + ' down, ' + data.counts.degraded + ' degraded. Ingest will skip these for now.';
+          } else {
+            eyebrow.textContent = 'CRITICAL · MULTIPLE SOURCES DOWN';
+            eyebrow.className = 'health-head__eyebrow health-head__eyebrow--critical';
+            sub.textContent = data.counts.down + ' sources down. Tomorrow morning may produce a thin queue.';
+          }
+
+          list.innerHTML = '';
+          for (const src of data.sources) {
+            const row = document.createElement('div');
+            row.className = 'health-row health-row--' + src.status;
+
+            const urlDisplay = src.rss_url.replace(/^https?:\/\//, '');
+            row.innerHTML =
+              '<div class="health-row__name">' +
+                '<a href="' + src.rss_url + '" rel="noopener noreferrer" target="_blank">' + src.name + '</a>' +
+                '<p class="health-row__url">' + urlDisplay + '</p>' +
+              '</div>' +
+              '<span class="health-row__status health-row__status--' + src.status + '">' + src.status + '</span>' +
+              '<span class="health-row__http">' + (src.http_status || '—') + '</span>' +
+              '<span class="health-row__elapsed">' + src.elapsed_ms + 'ms</span>' +
+              (src.error ? '<p class="health-row__error">' + src.error + '</p>' : '');
+
+            list.appendChild(row);
+          }
+        } catch (e) {
+          list.innerHTML = '<p class="health-loading">Network error. Try again in a moment.</p>';
+          eyebrow.textContent = 'NETWORK ERROR';
+          eyebrow.className = 'health-head__eyebrow health-head__eyebrow--critical';
+        }
+      }
+
+      refreshBtn.addEventListener('click', loadHealth);
+      loadHealth();
+    })();
+  </script>
+</ExhibitionLayout>
