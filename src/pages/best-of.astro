@@ -1,7 +1,6 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
-import Placeholder from '../components/Placeholder.astro';
 import { getCollection } from 'astro:content';
 
 const cats = await getCollection('best-of');
@@ -27,13 +26,13 @@ const cutoutSrc = (c: any) => `/${c.data.hero_filename_hint.replace(/\.[^.]+$/, 
 
   <section class="ex-cards ex-cards--2">
     {cats.map((c, i) => (
-      <a class="ex-card" href={`/best-of/${c.data.url_slug}`}>
-        <div class="ex-card__media">
-          <Placeholder alt={c.data.hero_alt} filenameHint={c.data.hero_filename_hint} aspect="4:3" showLabel={false} />
-        </div>
-        <p class="ex-card__meta">№{String(i + 1).padStart(2, '0')} · EDITED BY {c.data.editor.toUpperCase()}</p>
+      <a class="ex-card ex-card--text" href={`/best-of/${c.data.url_slug}`}>
+        <span class="ex-card__issue-bg" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         <h3 class="ex-card__title">{c.data.title.toUpperCase()}</h3>
-        <p class="ex-card__deck">Quarterly refresh · {c.data.last_refreshed.toLocaleDateString('en-US',{month:'long', year:'numeric'}).toUpperCase()}</p>
+        <p class="ex-card__deck">{c.data.intro}</p>
+        <p class="ex-card__meta">
+          EDITED BY {c.data.editor.toUpperCase()} · REFRESHED {c.data.last_refreshed.toLocaleDateString('en-US',{month:'long', year:'numeric'}).toUpperCase()}
+        </p>
       </a>
     ))}
   </section>

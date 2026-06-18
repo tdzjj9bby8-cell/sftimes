@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
-import Placeholder from '../../components/Placeholder.astro';
 
 // One Exhibition-styled detail page per best-of category. Long-form list body
 // comes from the markdown via c.render(); read-next pulls three other lists.
@@ -48,30 +47,19 @@ const hasBody = c.body && c.body.trim().length > 0;
     cutouts={[]}
   />
 
-  <!-- HERO PHOTO + TITLE -->
-  <section class="story-hero">
-    <div class="story-hero__media">
-      <Placeholder
-        alt={c.data.hero_alt}
-        filenameHint={c.data.hero_filename_hint}
-        aspect="21:9"
-        showLabel={false}
-        priority={true}
-      />
-    </div>
-    <div class="story-hero__overlay">
-      <p class="story-hero__eyebrow">TOP TIER · EDITED BY {c.data.editor.toUpperCase()}</p>
-      <h1 class="story-hero__title">{c.data.title.toUpperCase()}</h1>
+  <!-- TYPOGRAPHIC HERO (Path A) -->
+  <section class="bo-hero">
+    <span class="bo-hero__num" aria-hidden="true">№{String(num).padStart(2, '0')}</span>
+    <div class="bo-hero__inner">
+      <p class="bo-hero__eyebrow">BEST OF · REFRESHED {refreshed}</p>
+      <h1 class="bo-hero__title">{c.data.title.toUpperCase()}</h1>
+      {c.data.intro && <p class="bo-hero__deck">{c.data.intro}</p>}
+      <p class="bo-hero__editor">EDITED BY {c.data.editor.toUpperCase()}</p>
     </div>
   </section>
 
-  <!-- INTRO -->
+  <!-- EDITORIAL FIREWALL -->
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">REFRESHED {refreshed} · EDITED BY {c.data.editor.toUpperCase()}</p>
-    <h1 class="ex-prose__title">{c.data.title.toUpperCase()}</h1>
-    {c.data.intro && <p>{c.data.intro}</p>}
-
-    <!-- EDITORIAL FIREWALL -->
     <div class="bo-firewall">
       Every entry is named by the editor above. No affiliate links. No credit-card-partner inventory. Promoted entries appear with a labeled badge.
     </div>
@@ -116,29 +104,75 @@ const hasBody = c.body && c.body.trim().length > 0;
   </a>
 
   <section class="ex-cards ex-cards--3">
-    {more.map((m) => (
-      <a class="ex-card" href={`/best-of/${m.data.url_slug}`}>
-        <div class="ex-card__media">
-          <Placeholder alt={m.data.hero_alt} filenameHint={m.data.hero_filename_hint} aspect="4:3" showLabel={false} />
-        </div>
-        <p class="ex-card__meta">EDITED BY {m.data.editor.toUpperCase()}</p>
+    {more.map((m, idx) => (
+      <a class="ex-card ex-card--text" href={`/best-of/${m.data.url_slug}`}>
+        <span class="ex-card__issue-bg" aria-hidden="true">{String(idx + 1).padStart(2, '0')}</span>
         <h3 class="ex-card__title">{m.data.title.toUpperCase()}</h3>
+        <p class="ex-card__deck">{(m.data.intro || '').slice(0, 120)}</p>
+        <p class="ex-card__meta">EDITED BY {m.data.editor.toUpperCase()}</p>
       </a>
     ))}
   </section>
 
   <style>
-    .story-hero { position: relative; aspect-ratio: 21/10; overflow: hidden; background: #2a2520; margin: 0 12px; }
-    .story-hero__media { position: absolute; inset: 0; }
-    .story-hero__media :global(.real-image), .story-hero__media :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
-    .story-hero__overlay {
-      position: absolute; inset: auto 0 0 0;
-      padding: 32px 28px;
-      background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 70%, transparent);
-      color: var(--paper);
+    /* TYPOGRAPHIC HERO (Path A, parallels stories/[slug] hero) */
+    .bo-hero {
+      position: relative;
+      margin: 0 12px;
+      padding: 64px 28px 56px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      overflow: hidden;
     }
-    .story-hero__eyebrow { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0 0 12px; }
-    .story-hero__title { font-family: var(--display); font-size: clamp(36px, 6vw, 96px); line-height: 1; letter-spacing: -0.005em; margin: 0; text-transform: uppercase; max-width: 20ch; }
+    .bo-hero__num {
+      position: absolute;
+      right: -12px;
+      top: -28px;
+      font-family: var(--display);
+      font-size: clamp(180px, 28vw, 360px);
+      line-height: 0.8;
+      letter-spacing: -0.04em;
+      color: rgba(189, 182, 164, 0.28);
+      pointer-events: none;
+      user-select: none;
+    }
+    .bo-hero__inner { position: relative; z-index: 1; max-width: 56rem; }
+    .bo-hero__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0 0 18px;
+    }
+    .bo-hero__title {
+      font-family: var(--display);
+      font-size: clamp(40px, 7vw, 92px);
+      line-height: 0.96;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin: 0 0 22px;
+    }
+    .bo-hero__deck {
+      font-family: var(--body);
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.45;
+      color: var(--ink-2);
+      font-style: italic;
+      margin: 0 0 24px;
+      max-width: 44ch;
+    }
+    .bo-hero__editor {
+      font-family: var(--ui);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin: 0;
+    }
 
     .bo-firewall {
       border-left: 3px solid var(--ink);

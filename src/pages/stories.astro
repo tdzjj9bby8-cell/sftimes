@@ -1,7 +1,6 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
-import Placeholder from '../components/Placeholder.astro';
 import AuthorAvatar from '../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
 
@@ -30,16 +29,22 @@ const cutoutSrc = (s: any) => `/${s.data.hero_filename_hint.replace(/\.[^.]+$/, 
 
   <section class="ex-cards ex-cards--3">
     {stories.map((s) => (
-      <a class="ex-card" href={`/stories/${s.data.url_slug}`}>
-        <div class="ex-card__media">
-          <Placeholder alt={s.data.hero_alt} filenameHint={s.data.hero_filename_hint} aspect="4:3" showLabel={false} />
+      <a class={`ex-card ex-card--text ex-card--keeper-${s.data.keeper_type || 'default'}`} href={`/stories/${s.data.url_slug}`}>
+        <span class="ex-card__issue-bg" aria-hidden="true">№{String(s.data.issue).padStart(2, '0')}</span>
+        <div class="ex-card__tags">
+          {s.data.keeper_type && (
+            <span class="ex-card__keeper">{s.data.keeper_type.toUpperCase()}</span>
+          )}
+          {s.data.neighborhood && (
+            <span class="ex-card__neighborhood">{s.data.neighborhood.toUpperCase()}</span>
+          )}
         </div>
-        <p class="ex-card__meta">
-          <AuthorAvatar name={s.data.author} size={20} />
-          <span>ISSUE №{s.data.issue} · BY {s.data.author.toUpperCase()}</span>
-        </p>
         <h3 class="ex-card__title">{s.data.title}</h3>
         <p class="ex-card__deck">{s.data.deck.slice(0, 140)}</p>
+        <p class="ex-card__meta">
+          <AuthorAvatar name={s.data.author} size={20} />
+          <span>BY {s.data.author.toUpperCase()} · {s.data.read_minutes}-MIN</span>
+        </p>
       </a>
     ))}
   </section>

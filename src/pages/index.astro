@@ -10,7 +10,6 @@
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import { getCollection } from 'astro:content';
-import Placeholder from '../components/Placeholder.astro';
 import AuthorAvatar from '../components/AuthorAvatar.astro';
 
 const stories = (await getCollection('stories')).sort(
@@ -51,6 +50,69 @@ const thisSatLabel = thisSaturday
   .toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })
   .toUpperCase();
 const nextIssue = (featured.data.issue || 0) + 1;
+
+// Brief homepage strip. Pulls top 3 items from the latest published brief.
+// The full edition lives at /brief/, archive at /brief/[date]/, and each
+// item has its own permalink at /brief/[date]/[slug]/.
+const allBriefs = await getCollection('briefs');
+const sortedBriefs = [...allBriefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latestBrief = sortedBriefs[0];
+const latestBriefDate = latestBrief ? latestBrief.data.date.toISOString().slice(0, 10) : null;
+
+// Map brief signal tags to homepage strip color tokens for the left border.
+const SIGNAL_COLOR_MAP: Record<string, string> = {
+  'first-to-connect': 'terracotta',
+  'underreported': 'pacific',
+  'missing-context': 'fog',
+  'structural-pattern': 'ink-soft',
+};
+
+function briefReadingTime(text: string): string {
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const seconds = Math.round((words / 200) * 60);
+  if (seconds < 60) return `${Math.max(20, Math.ceil(seconds / 10) * 10)} sec`;
+  if (seconds < 90) return '1 min';
+  if (seconds < 150) return '2 min';
+  return `${Math.round(seconds / 60)} min`;
+}
+
+const sortedBriefItems = latestBrief
+  ? [...latestBrief.data.items].sort((a, b) => b.composite_score - a.composite_score)
+  : [];
+
+// Hero = top item by composite. Strip = items 2-4 below the hero.
+const briefHeroRaw = sortedBriefItems[0] || null;
+const briefHero = briefHeroRaw && latestBriefDate
+  ? {
+      category: briefHeroRaw.category,
+      signal: briefHeroRaw.signal,
+      headline: briefHeroRaw.source_headline,
+      tldr: briefHeroRaw.tldr,
+      angle: briefHeroRaw.angle_statement,
+      source_outlet: briefHeroRaw.source_outlet,
+      source_byline: briefHeroRaw.source_byline,
+      read_time: briefReadingTime(briefHeroRaw.tldr + ' ' + briefHeroRaw.editor_note),
+      href: `/brief/${latestBriefDate}/${briefHeroRaw.slug}/`,
+    }
+  : null;
+
+const briefItems = sortedBriefItems
+  .slice(1, 4)
+  .map((item) => ({
+    category: item.category,
+    color: SIGNAL_COLOR_MAP[item.signal] || 'terracotta',
+    headline: item.source_headline,
+    source_outlet: item.source_outlet,
+    read_time: briefReadingTime(item.tldr + ' ' + item.editor_note),
+    href: `/brief/${latestBriefDate}/${item.slug}/`,
+  }));
+
+const briefDateLabel = latestBrief
+  ? latestBrief.data.date
+      .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      .toUpperCase()
+  : '';
+const briefTotalItems = latestBrief ? latestBrief.data.items.length : 0;
 ---
 <ExhibitionLayout
   title="THE KEEPERS · SF TIMES"
@@ -59,7 +121,7 @@ const nextIssue = (featured.data.issue || 0) + 1;
 >
   <ExhibitionMasthead slot="masthead" title="THE KEEPERS" subscript="SF TIMES" cutouts={[]} />
 
-  <p class="ex-tagline">One San Francisco keeper, every Saturday morning. Reader-funded.</p>
+  <p class="ex-tagline">One San Francisco keeper, every Saturday morning. <span class="ex-tagline__nowrap">Reader&#8209;funded.</span></p>
 
   <!-- PRESENTED-BY STRIP · single editorial sponsor credit at top of homepage.
        Mirrors how the Co-Presented credit appears at the top of each saturday letter.
@@ -73,27 +135,24 @@ const nextIssue = (featured.data.issue || 0) + 1;
     </span>
   </aside>
 
-  <!-- FEATURED CAROUSEL -->
+  <!-- FEATURED CAROUSEL · TYPOGRAPHIC (PATH A, text-first) -->
   <div class="feat" id="featCarousel">
     {carouselStories.map((s, i) => (
-      <div class={`feat__slide${i === 0 ? ' is-on' : ''}`} data-slide={i}>
-        <Placeholder
-          alt={s.data.hero_alt}
-          filenameHint={s.data.hero_filename_hint}
-          aspect="21:9"
-          showLabel={false}
-          priority={i === 0}
-          focal={s.data.hero_focal}
-        />
-        <div class="feat__overlay">
-          <h2 class="feat__title">{s.data.title.toUpperCase()}</h2>
+      <a class={`feat__slide feat__slide--keeper-${s.data.keeper_type || 'default'}${i === 0 ? ' is-on' : ''}`} data-slide={i} href={`/stories/${s.data.url_slug}`}>
+        <span class="feat__issue-bg" aria-hidden="true">№{String(s.data.issue).padStart(2, '0')}</span>
+        <div class="feat__inner">
+          <div class="feat__tags">
+            {s.data.keeper_type && <span class="feat__keeper">{s.data.keeper_type.toUpperCase()}</span>}
+            {s.data.neighborhood && <span class="feat__neighborhood">{s.data.neighborhood.toUpperCase()}</span>}
+          </div>
           <p class="feat__eyebrow">
-            <AuthorAvatar name={s.data.author} size={22} variant="light" />
-            <span>ISSUE №{s.data.issue} · BY {s.data.author.toUpperCase()} · {s.data.read_minutes}-MIN READ</span>
+            ISSUE №{s.data.issue} · BY {s.data.author.toUpperCase()} · {s.data.read_minutes}-MIN READ
           </p>
-          <a class="feat__cta" href={`/stories/${s.data.url_slug}`}>Read the Essay</a>
+          <h2 class="feat__title">{s.data.title}</h2>
+          <p class="feat__deck">{s.data.deck}</p>
+          <span class="feat__cta">Read the profile <span aria-hidden="true">→</span></span>
         </div>
-      </div>
+      </a>
     ))}
     <div class="feat__dots" id="featDots">
       {carouselStories.map((s, i) => (
@@ -126,19 +185,14 @@ const nextIssue = (featured.data.issue || 0) + 1;
        Live state: shows the most recent story with a sponsor field set.
        Empty state: soft pitch promoting /partners. -->
   {sponsoredStory ? (
-    <section class="sponsored sponsored--live" aria-label="Sponsored feature">
+    <section class={`sponsored sponsored--live sponsored--text sponsored--keeper-${sponsoredStory.data.keeper_type || 'default'}`} aria-label="Sponsored feature">
       <a class="sponsored__link" href={`/stories/${sponsoredStory.data.url_slug}`}>
-        <div class="sponsored__media">
-          <Placeholder
-            alt={sponsoredStory.data.hero_alt}
-            filenameHint={sponsoredStory.data.hero_filename_hint}
-            aspect="16:9"
-            showLabel={false}
-            focal={sponsoredStory.data.hero_focal}
-          />
-        </div>
+        <span class="sponsored__issue-bg" aria-hidden="true">№{String(sponsoredStory.data.issue).padStart(2, '0')}</span>
         <div class="sponsored__body-wrap">
           <p class="sponsored__chip">PARTNER FEATURE · IN COLLABORATION WITH {sponsoredStory.data.sponsor.name.toUpperCase()}</p>
+          {sponsoredStory.data.keeper_type && (
+            <span class="sponsored__keeper">{sponsoredStory.data.keeper_type.toUpperCase()}</span>
+          )}
           <h2 class="sponsored__title">{sponsoredStory.data.title}</h2>
           <p class="sponsored__deck">{sponsoredStory.data.deck}</p>
           <div class="sponsored__cta-row">
@@ -162,15 +216,90 @@ const nextIssue = (featured.data.issue || 0) + 1;
     </section>
   )}
 
-  <!-- KEEPERS VERTICAL BLOCK -->
+  <!-- THE BRIEF · daily news section · sits between the sponsored feature
+       and the KEEPERS vertical block. Two-tier hierarchy on the homepage:
+       (1) a lead-story hero with full editor's note preview, (2) a 3-card
+       strip with the next 3 items by composite score. Each card links to
+       its permalink at /brief/[date]/[slug]/. -->
+  {latestBrief && (
+    <section class="brief-home" aria-label="Today's Brief">
+      <div class="brief-home__head">
+        <div>
+          <p class="brief-home__eyebrow">THE BRIEF · {briefDateLabel}</p>
+          <h2 class="brief-home__title">What we read this morning.</h2>
+          <p class="brief-home__sub">Daily curated SF news. Linked out, never rewritten. Editor's note in our voice.</p>
+        </div>
+        <a class="brief-home__see-all" href="/brief/">
+          SEE ALL {briefTotalItems} IN TODAY'S BRIEF →
+        </a>
+      </div>
+
+      {briefHero && (
+        <a class={`brief-hero brief-hero--${briefHero.signal}`} href={briefHero.href}>
+          <header class="brief-hero__head">
+            <p class="brief-hero__lead-label">TODAY'S LEAD STORY</p>
+            <div class="brief-hero__tags">
+              <span class="brief-hero__category">{briefHero.category}</span>
+              <span class={`brief-hero__signal brief-hero__signal--${briefHero.signal}`}>
+                {briefHero.signal.replace(/-/g, ' ').toUpperCase()}
+              </span>
+              <span class="brief-hero__time">{briefHero.read_time}</span>
+            </div>
+          </header>
+
+          <h3 class="brief-hero__headline">{briefHero.headline}</h3>
+          <p class="brief-hero__tldr">{briefHero.tldr}</p>
+
+          <div class="brief-hero__angle">
+            <p class="brief-hero__angle-label">THE ANGLE</p>
+            <p class="brief-hero__angle-text">{briefHero.angle}</p>
+          </div>
+
+          <footer class="brief-hero__foot">
+            <p class="brief-hero__source">
+              Reported by <strong>{briefHero.source_byline}</strong> at {briefHero.source_outlet}
+            </p>
+            <span class="brief-hero__cta">Read editor's note <span aria-hidden="true">→</span></span>
+          </footer>
+        </a>
+      )}
+
+      {briefItems.length > 0 && (
+        <>
+          <p class="brief-home__more-label">MORE FROM TODAY</p>
+          <div class="brief-strip__grid">
+            {briefItems.map((item) => (
+              <a class={`brief-strip__card brief-strip__card--${item.color}`} href={item.href}>
+                <div class="brief-strip__card-head">
+                  <span class="brief-strip__category">{item.category}</span>
+                  <span class="brief-strip__time">{item.read_time}</span>
+                </div>
+                <h3 class="brief-strip__headline">{item.headline}</h3>
+                <span class="brief-strip__source">Reported by {item.source_outlet}</span>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  )}
+
+  <!-- KEEPERS VERTICAL BLOCK · TYPOGRAPHIC (PATH A)
+       Dark band with a pull quote from the featured story instead of a photo.
+       The third column carries the issue number set huge as a typographic
+       counterweight to the wordmark. -->
   <a href={`/stories/${bodyStory.data.url_slug}`} class="vbar" style="text-decoration:none;">
     <div class="vbar__brand">KEEPERS</div>
     <div class="vbar__copy">
       <p>{bodyText}</p>
       <p style="margin-top:18px; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:rgba(244,241,234,0.6);">{(bodyStory.data.pull_quote_attr || bodyStory.data.author).toUpperCase()} · ISSUE №{bodyStory.data.issue} →</p>
     </div>
-    <div class="vbar__img">
-      <Placeholder alt={bodyStory.data.hero_alt} filenameHint={bodyStory.data.hero_filename_hint} aspect="4:5" showLabel={false} focal={bodyStory.data.hero_focal} />
+    <div class="vbar__issue">
+      <span class="vbar__issue-num" aria-hidden="true">№{String(bodyStory.data.issue).padStart(2, '0')}</span>
+      <span class="vbar__issue-label">{bodyStory.data.keeper_type ? bodyStory.data.keeper_type.toUpperCase() : 'KEEPER'}</span>
+      {bodyStory.data.neighborhood && (
+        <span class="vbar__issue-neighborhood">{bodyStory.data.neighborhood.toUpperCase()}</span>
+      )}
     </div>
   </a>
 
@@ -185,12 +314,13 @@ const nextIssue = (featured.data.issue || 0) + 1;
     </div>
     <div class="archive__strip">
       {stories.slice(0, 10).map((s) => (
-        <a class="archive__item" href={`/stories/${s.data.url_slug}`}>
-          <div class="archive__media">
-            <Placeholder alt={s.data.hero_alt} filenameHint={s.data.hero_filename_hint} aspect="4:5" showLabel={false} focal={s.data.hero_focal} />
-          </div>
-          <p class="archive__meta">ISSUE №{s.data.issue} · {fmtSat(new Date(s.data.published))}</p>
+        <a class={`archive__item archive__item--text archive__item--keeper-${s.data.keeper_type || 'default'}`} href={`/stories/${s.data.url_slug}`}>
+          <span class="archive__issue" aria-hidden="true">№{String(s.data.issue).padStart(2, '0')}</span>
+          {s.data.keeper_type && (
+            <span class="archive__keeper">{s.data.keeper_type.toUpperCase()}</span>
+          )}
           <p class="archive__title">{s.data.title}</p>
+          <p class="archive__meta">{fmtSat(new Date(s.data.published))} · BY {s.data.author.toUpperCase()}</p>
         </a>
       ))}
     </div>
@@ -222,34 +352,128 @@ const nextIssue = (featured.data.issue || 0) + 1;
     text-transform: uppercase;
     color: var(--muted);
     text-align: center;
-    padding: 0 12px;
+    padding: 0 20px;
     margin: 0 0 24px;
+    line-height: 1.6;
+    hyphens: none;
+    word-break: keep-all;
   }
+  .ex-tagline__nowrap { white-space: nowrap; }
 
-  /* === FEATURED CAROUSEL === */
-  .feat { position: relative; margin: 12px 12px 0; aspect-ratio: 24/10; overflow: hidden; background: #2a2520; }
-  .feat__slide { position: absolute; inset: 0; opacity: 0; transition: opacity 500ms; pointer-events: none; }
-  .feat__slide.is-on { opacity: 1; pointer-events: auto; }
-  /* Placeholder renders the img in its own component scope, so target it
-     globally to make sure each slide's image fills the carousel container. */
-  .feat__slide :global(.real-image),
-  .feat__slide :global(.placeholder),
-  .feat__slide :global(img) {
-    width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block;
-  }
-  .feat__overlay {
+  /* === FEATURED CAROUSEL · TYPOGRAPHIC (PATH A) ===
+     Photo carousel replaced with a colored panel carousel. Each slide is
+     a paper-2 background with massive issue number watermark, keeper-typed
+     stripe, and headline at display scale. */
+  .feat { position: relative; margin: 12px 12px 0; aspect-ratio: 24/10; overflow: hidden; background: var(--paper-2); }
+  .feat__slide {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 24px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.65) 100%);
+    opacity: 0; transition: opacity 500ms;
+    pointer-events: none;
+    display: block;
+    padding: 48px 48px 56px;
+    color: var(--ink);
+    overflow: hidden;
   }
-  .feat__title { color: #fff; font-family: var(--ui); font-size: clamp(22px, 2.6vw, 36px); font-weight: 500; line-height: 1.1; letter-spacing: 0.02em; margin: 0 0 18px; max-width: 70%; text-shadow: 0 2px 12px rgba(0,0,0,0.5); }
-  .feat__eyebrow { color: rgba(255,255,255,0.85); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.55); width: 320px; margin: 0 0 22px; display: flex; align-items: center; gap: 10px; justify-content: center; }
-  .feat__cta { color: #fff; font-size: 12px; letter-spacing: 0.04em; padding-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.7); transition: opacity 150ms; }
-  .feat__cta:hover { opacity: 0.7; }
+  .feat__slide.is-on { opacity: 1; pointer-events: auto; }
+  .feat__slide::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 8px;
+    background: var(--accent);
+  }
+  .feat__slide--keeper-routine::before { background: #2c5582; }
+  .feat__slide--keeper-room::before { background: var(--muted); }
+  .feat__slide--keeper-record::before { background: var(--ink-2); }
+  .feat__slide--keeper-refusal::before { background: #a82919; }
+  .feat__issue-bg {
+    position: absolute;
+    right: -4vw;
+    top: 25%;
+    transform: translateY(-50%);
+    font-family: var(--display);
+    font-size: clamp(180px, 26vw, 360px);
+    line-height: 0.85;
+    color: rgba(189, 182, 164, 0.35);
+    letter-spacing: -0.04em;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  .feat__inner {
+    position: relative; z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .feat__tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .feat__keeper, .feat__neighborhood {
+    display: inline-block;
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .feat__keeper { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .feat__slide--keeper-routine .feat__keeper { background: #2c5582; border-color: #2c5582; }
+  .feat__slide--keeper-room .feat__keeper { background: var(--muted); border-color: var(--muted); }
+  .feat__slide--keeper-record .feat__keeper { background: var(--ink-2); border-color: var(--ink-2); }
+  .feat__slide--keeper-refusal .feat__keeper { background: #a82919; border-color: #a82919; }
+  .feat__eyebrow {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin: 0 0 16px;
+  }
+  .feat__title {
+    font-family: var(--display);
+    font-size: clamp(36px, 6vw, 84px);
+    line-height: 0.96;
+    letter-spacing: -0.015em;
+    margin: 0 0 16px;
+    color: var(--ink);
+    text-transform: uppercase;
+    max-width: 22ch;
+  }
+  .feat__deck {
+    font-family: var(--body);
+    font-size: clamp(15px, 1.6vw, 20px);
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin: 0 0 24px;
+    max-width: 56ch;
+    font-style: italic;
+  }
+  .feat__cta {
+    font-family: var(--ui);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    display: inline-block;
+  }
   .feat__dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 3; }
-  .feat__dot { width: 24px; height: 2px; background: rgba(255,255,255,0.4); cursor: pointer; transition: background 150ms; }
-  .feat__dot.is-on { background: #fff; }
+  .feat__dot { width: 24px; height: 2px; background: rgba(24, 22, 18, 0.25); cursor: pointer; transition: background 150ms; border: 0; padding: 0; }
+  .feat__dot.is-on { background: var(--ink); }
+
+  @media (max-width: 640px) {
+    .feat { aspect-ratio: 16/13; }
+    .feat__slide { padding: 36px 24px 48px; }
+    .feat__issue-bg { font-size: clamp(140px, 48vw, 220px); top: 30%; }
+    .feat__title { font-size: clamp(28px, 9vw, 44px); }
+    .feat__deck { font-size: 15px; }
+  }
 
   /* === EDITOR'S PARAGRAPH (Drift-style hyperlinked lede) === */
   .lede { padding: 80px 24px 72px; max-width: 880px; margin: 0 auto; }
@@ -289,8 +513,43 @@ const nextIssue = (featured.data.issue || 0) + 1;
   .vbar { display: grid; grid-template-columns: 360px 1.1fr 1.4fr; margin: 64px 0 0; background: var(--ink); color: var(--paper); min-height: 360px; overflow: hidden; }
   .vbar__brand { font-family: var(--display); font-size: clamp(40px, 4.4vw, 62px); line-height: 1; text-transform: uppercase; align-self: center; padding-left: 32px; letter-spacing: -0.01em; white-space: nowrap; }
   .vbar__copy { padding: 64px 36px; font-size: 14px; line-height: 1.55; color: rgba(244,241,234,0.92); align-self: center; max-width: 36ch; min-width: 0; }
-  .vbar__img { background: #2a2520; overflow: hidden; }
-  .vbar__img :global(.real-image), .vbar__img :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
+  /* Path A: third column is a typographic counterweight to the wordmark.
+     Massive issue number stacked with the keeper_type label and neighborhood. */
+  .vbar__issue {
+    background: var(--ink-2);
+    padding: 48px 36px;
+    display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+    gap: 14px;
+    color: var(--paper);
+    overflow: hidden;
+    position: relative;
+  }
+  .vbar__issue-num {
+    font-family: var(--display);
+    font-size: clamp(120px, 14vw, 220px);
+    line-height: 0.85;
+    color: rgba(244, 241, 234, 0.18);
+    letter-spacing: -0.04em;
+    margin: -8px 0 0;
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+  .vbar__issue-label {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .vbar__issue-neighborhood {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(244, 241, 234, 0.55);
+    font-weight: 500;
+  }
 
   /* === ARCHIVE STRIP === */
   /* Replaces the awkward cal+strip pair. Horizontal scroll of past issues,
@@ -305,13 +564,79 @@ const nextIssue = (featured.data.issue || 0) + 1;
   .archive__strip::-webkit-scrollbar { height: 4px; }
   .archive__strip::-webkit-scrollbar-track { background: var(--paper-2); }
   .archive__strip::-webkit-scrollbar-thumb { background: var(--rule); }
-  .archive__item { flex: 0 0 auto; width: clamp(180px, 18vw, 220px); scroll-snap-align: start; color: var(--ink); transition: opacity 200ms; }
-  .archive__item:hover { opacity: 0.85; }
-  .archive__media { background: #2a2520; aspect-ratio: 4/5; overflow: hidden; margin-bottom: 12px; }
-  .archive__media :global(.real-image), .archive__media :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; transition: transform 500ms; }
-  .archive__item:hover .archive__media :global(.real-image) { transform: scale(1.05); }
-  .archive__meta { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
-  .archive__title { font-size: 13px; line-height: 1.3; font-weight: 600; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .archive__item--text {
+    flex: 0 0 auto;
+    width: clamp(220px, 22vw, 280px);
+    scroll-snap-align: start;
+    color: var(--ink);
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-top: 4px solid var(--accent);
+    padding: 18px 20px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: background 200ms, transform 200ms;
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 200px;
+  }
+  .archive__item--text:hover { background: var(--paper); transform: translateY(-2px); }
+  .archive__item--keeper-routine { border-top-color: #2c5582; }
+  .archive__item--keeper-room { border-top-color: var(--muted); }
+  .archive__item--keeper-record { border-top-color: var(--ink-2); }
+  .archive__item--keeper-refusal { border-top-color: #a82919; }
+  .archive__issue {
+    position: absolute;
+    right: -10px;
+    top: 0;
+    font-family: var(--display);
+    font-size: 80px;
+    line-height: 0.9;
+    color: rgba(189, 182, 164, 0.35);
+    letter-spacing: -0.03em;
+    pointer-events: none;
+    user-select: none;
+  }
+  .archive__keeper {
+    display: inline-block;
+    font-family: var(--ui);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    background: var(--accent);
+    color: var(--paper);
+    align-self: flex-start;
+    position: relative;
+    z-index: 1;
+  }
+  .archive__item--keeper-routine .archive__keeper { background: #2c5582; }
+  .archive__item--keeper-room .archive__keeper { background: var(--muted); }
+  .archive__item--keeper-record .archive__keeper { background: var(--ink-2); }
+  .archive__item--keeper-refusal .archive__keeper { background: #a82919; }
+  .archive__title {
+    font-family: var(--display);
+    font-size: 18px;
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .archive__meta {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: auto 0 0;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+  }
 
   /* === PRESENTED BY STRIP === */
   .presented {
@@ -409,29 +734,60 @@ const nextIssue = (featured.data.issue || 0) + 1;
     color: var(--muted);
   }
 
-  /* Live state (article booked): photo + copy split */
+  /* Live state · TYPOGRAPHIC (PATH A): full-width text-first card with
+     issue-number watermark behind. No photo column. */
   .sponsored--live { padding: 0; margin: 0 0 64px; }
   .sponsored--live .sponsored__link {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
+    display: block;
     max-width: 1200px;
     margin: 0 auto;
     border-block: 1px solid var(--rule);
     color: var(--ink);
-    transition: opacity 200ms;
+    transition: background 200ms, transform 200ms;
+    position: relative;
+    overflow: hidden;
+    background: var(--paper-2);
   }
-  .sponsored--live .sponsored__link:hover { opacity: 0.9; }
-  @media (max-width: 880px) { .sponsored--live .sponsored__link { grid-template-columns: 1fr; } }
-  .sponsored__media { background: #2a2520; aspect-ratio: 16/9; overflow: hidden; position: relative; }
-  .sponsored__media :global(.real-image), .sponsored__media :global(.placeholder) {
-    width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block;
+  .sponsored--live .sponsored__link:hover { background: var(--paper); transform: translateY(-1px); }
+  .sponsored__issue-bg {
+    position: absolute;
+    right: -2vw;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--display);
+    font-size: clamp(180px, 26vw, 360px);
+    line-height: 0.85;
+    color: rgba(189, 182, 164, 0.30);
+    letter-spacing: -0.04em;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
   }
+  .sponsored__keeper {
+    display: inline-block;
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    background: var(--accent);
+    color: var(--paper);
+    margin-bottom: 14px;
+    align-self: flex-start;
+  }
+  .sponsored--keeper-routine .sponsored__keeper { background: #2c5582; }
+  .sponsored--keeper-room .sponsored__keeper { background: var(--muted); }
+  .sponsored--keeper-record .sponsored__keeper { background: var(--ink-2); }
+  .sponsored--keeper-refusal .sponsored__keeper { background: #a82919; }
   .sponsored__body-wrap {
-    padding: 36px 40px;
+    position: relative;
+    z-index: 1;
+    padding: 48px 48px 44px;
+    max-width: 880px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    background: var(--paper-2);
+    gap: 16px;
   }
   .sponsored--live .sponsored__chip { align-self: flex-start; margin-bottom: 4px; }
   .sponsored--live .sponsored__title { font-size: clamp(28px, 3.2vw, 42px); margin: 0; text-transform: uppercase; }
@@ -445,6 +801,296 @@ const nextIssue = (featured.data.issue || 0) + 1;
     margin: 0;
     padding-top: 12px;
     border-top: 1px solid var(--rule);
+  }
+
+  /* === THE BRIEF · HOMEPAGE SECTION === */
+  /* Daily curated news between the sponsored feature and KEEPERS block.
+     Two-tier hierarchy: hero (lead story) + strip (next 3 by composite). */
+  .brief-home {
+    max-width: 1200px;
+    margin: 0 auto 64px;
+    padding: 0 24px;
+  }
+  .brief-home__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .brief-home__eyebrow {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+  .brief-home__title {
+    font-family: var(--display);
+    font-size: clamp(28px, 3.6vw, 48px);
+    line-height: 1;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+  .brief-home__sub {
+    font-family: var(--ui);
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--muted);
+    margin: 0;
+    max-width: 56ch;
+  }
+  .brief-home__see-all {
+    font-family: var(--ui);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .brief-home__more-label {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin: 32px 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* ============ HERO LEAD STORY ============ */
+  .brief-hero {
+    display: block;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-left-width: 6px;
+    padding: 32px 40px 28px;
+    color: var(--ink);
+    transition: background 200ms, transform 200ms;
+  }
+  .brief-hero:hover {
+    background: var(--paper);
+    transform: translateY(-2px);
+  }
+  .brief-hero--first-to-connect { border-left-color: var(--accent); }
+  .brief-hero--underreported { border-left-color: #2c5582; }
+  .brief-hero--missing-context { border-left-color: var(--muted); }
+  .brief-hero--structural-pattern { border-left-color: var(--ink-2); }
+
+  .brief-hero__head {
+    margin-bottom: 18px;
+  }
+  .brief-hero__lead-label {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .brief-hero__tags {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .brief-hero__category {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--paper);
+    padding: 4px 10px;
+    color: var(--ink);
+  }
+  .brief-hero:hover .brief-hero__category { background: var(--paper-2); }
+  .brief-hero__signal {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    padding: 4px 10px;
+    color: white;
+  }
+  .brief-hero__signal--first-to-connect { background: var(--accent); }
+  .brief-hero__signal--underreported { background: #2c5582; }
+  .brief-hero__signal--missing-context { background: var(--muted); }
+  .brief-hero__signal--structural-pattern { background: var(--ink-2); }
+  .brief-hero__time {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+  .brief-hero__headline {
+    font-family: var(--display);
+    font-size: clamp(28px, 3.6vw, 42px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    color: var(--ink);
+    max-width: 26ch;
+  }
+  .brief-hero__tldr {
+    font-family: var(--ui);
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0 0 18px;
+    max-width: 58ch;
+  }
+  .brief-hero__angle {
+    padding: 14px 18px;
+    background: rgba(217, 85, 31, 0.08);
+    border-left: 3px solid var(--accent);
+    margin: 0 0 20px;
+    max-width: 58ch;
+  }
+  .brief-hero__angle-label {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .brief-hero__angle-text {
+    font-family: var(--display);
+    font-size: clamp(16px, 1.8vw, 19px);
+    line-height: 1.4;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+  .brief-hero__foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brief-hero__source {
+    font-family: var(--ui);
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.45;
+  }
+  .brief-hero__source strong { color: var(--ink); font-weight: 700; }
+  .brief-hero__cta {
+    font-family: var(--ui);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ============ STRIP (NEXT 3 ITEMS) ============ */
+  .brief-strip__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .brief-strip__card {
+    background: var(--paper-2);
+    padding: 16px 18px;
+    border-left: 3px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: background 200ms ease, transform 200ms ease;
+    color: var(--ink);
+  }
+  .brief-strip__card:hover {
+    background: #d9d3c2;
+    transform: translateY(-1px);
+  }
+  .brief-strip__card--terracotta { border-left-color: var(--accent); }
+  .brief-strip__card--pacific    { border-left-color: #2c5582; }
+  .brief-strip__card--fog        { border-left-color: var(--muted); }
+  .brief-strip__card--ink-soft   { border-left-color: var(--ink-2); }
+  .brief-strip__card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .brief-strip__category {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .brief-strip__time {
+    font-family: var(--ui);
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .brief-strip__headline {
+    font-family: var(--display);
+    font-size: clamp(16px, 1.4vw, 19px);
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    text-transform: none;
+    color: var(--ink);
+    margin: 0;
+    font-weight: 500;
+  }
+  .brief-strip__source {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-top: auto;
+  }
+
+  @media (max-width: 880px) {
+    .brief-strip__grid {
+      grid-template-columns: 1fr;
+    }
+    .brief-home__head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .brief-hero { padding: 24px 24px 22px; }
+    .brief-hero__headline { font-size: 26px; }
+    .brief-hero__tldr { font-size: 16px; }
+    .brief-hero__time { margin-left: 0; }
+  }
+
+  @media (max-width: 420px) {
+    .brief-hero { padding: 20px 18px 18px; }
+    .brief-hero__headline { font-size: 22px; }
+    .brief-hero__tldr { font-size: 15px; }
+    .brief-hero__angle { padding: 12px 14px; }
+    .brief-hero__angle-text { font-size: 15px; }
+    .brief-hero__foot { flex-direction: column; align-items: flex-start; gap: 8px; }
   }
 
   /* === CLASSIFIEDS STRIP === */

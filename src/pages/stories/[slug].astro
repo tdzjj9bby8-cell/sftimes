@@ -1,8 +1,26 @@
 ---
 import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
-import Placeholder from '../../components/Placeholder.astro';
 import AuthorAvatar from '../../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
+
+/**
+ * Saturday Profile permalink, text-first hero.
+ *
+ * Path A from the photography discussion (2026-06-13): real photographs
+ * carry the visual weight when we have them. Until then the typography
+ * does. AI-generated imagery undermines the editorial firewall on
+ * /standards which calls for reportorial, available-light, on-location
+ * photography. The fix is no images until real ones exist.
+ *
+ * Each story gets a typographic hero anchored by the issue number set
+ * large, the keeper_type pill colored by category, the headline at
+ * display scale, the deck below, and the byline with avatar.
+ *
+ * When a real photo lands on a story (via a new `hero_photo` field that
+ * does NOT default to a placeholder), the template will conditionally
+ * render the photo + overlay treatment alongside the typography. For
+ * now no photo path exists; the typography stands alone.
+ */
 
 // One Exhibition-styled article page per story. Body comes from the markdown
 // via s.render(); read-next cards come from the three next most-recent stories.
@@ -45,7 +63,6 @@ const articleSchema = {
     "url": `https://sftimes.com/team#${s.data.author.toLowerCase()}`
   },
   "publisher": { "@id": "https://sftimes.com/#org" },
-  "image": [`https://sftimes.com/${s.data.hero_filename_hint}`],
   "articleSection": s.data.keeper_type || "Profile",
   "wordCount": Math.round(s.data.read_minutes * 220),
   "inLanguage": "en-US",
@@ -55,13 +72,6 @@ const articleSchema = {
       "@type": "Place",
       "name": `${s.data.neighborhood}, San Francisco`
     }
-  }),
-  ...(s.data.photographer && s.data.photographer !== 'Staff' && {
-    "creator": [{
-      "@type": "Person",
-      "name": s.data.photographer,
-      "jobTitle": "Photographer"
-    }]
   }),
   ...(s.data.sponsor && {
     "sponsor": {
@@ -76,31 +86,41 @@ const articleSchema = {
   title={`${(s.data.seo_title || s.data.title).toUpperCase()} · The Keepers · SF Times`}
   description={s.data.deck}
   active="stories"
-  ogImage={s.data.hero_filename_hint}
   ogType="article"
 >
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(articleSchema)} />
 
-  <!-- HERO PHOTO + TITLE -->
-  <section class="story-hero">
-    <div class="story-hero__media">
-      <Placeholder
-        alt={s.data.hero_alt}
-        filenameHint={s.data.hero_filename_hint}
-        aspect="21:9"
-        showLabel={false}
-        priority={true}
-      />
-    </div>
-    <div class="story-hero__overlay">
-      {s.data.sponsor && (
-        <p class="story-hero__sponsor">IN COLLABORATION WITH <strong>{s.data.sponsor.name.toUpperCase()}</strong></p>
-      )}
+  {s.data.is_sample && (
+    <aside class="story-sample-banner" aria-label="Illustrative sample disclosure">
+      <p class="story-sample-banner__label">ILLUSTRATIVE SAMPLE · NOT REPORTED JOURNALISM</p>
+      <p class="story-sample-banner__body">This piece is a format example used to demonstrate the SF Times sponsored article structure. The subject, named characters, direct quotes, and reporter-presence scenes are constructed to show what a published piece looks like. They are not the result of an actual interview or reporting trip. Published pieces under SF Times bylines meet the standards on the <a href="/standards">standards page</a>; this one does not, and is labeled accordingly.</p>
+    </aside>
+  )}
+
+  <!-- HERO · TYPOGRAPHIC (PATH A, text-first) -->
+  <section class={`story-hero story-hero--text story-hero--keeper-${s.data.keeper_type || 'default'}`} aria-label="Story hero">
+    <span class="story-hero__issue-bg" aria-hidden="true">№{String(s.data.issue).padStart(2, '0')}</span>
+    <div class="story-hero__stripe" aria-hidden="true"></div>
+    <div class="story-hero__inner">
+      <div class="story-hero__tags">
+        {s.data.sponsor && (
+          <span class="story-hero__sponsor">IN COLLABORATION WITH <strong>{s.data.sponsor.name.toUpperCase()}</strong></span>
+        )}
+        {s.data.keeper_type && (
+          <span class="story-hero__keeper">{s.data.keeper_type.toUpperCase()}</span>
+        )}
+        {s.data.neighborhood && (
+          <span class="story-hero__neighborhood">{s.data.neighborhood.toUpperCase()}</span>
+        )}
+      </div>
+
       <p class="story-hero__eyebrow">ISSUE №{s.data.issue} · {dateLong} · {s.data.read_minutes}-MIN READ</p>
-      <h1 class="story-hero__title">{s.data.title.toUpperCase()}</h1>
+      <h1 class="story-hero__title">{s.data.title}</h1>
+      <p class="story-hero__deck">{s.data.deck}</p>
+
       <p class="story-hero__byline">
-        <AuthorAvatar name={s.data.author} size={28} variant="light" />
-        <span>BY {s.data.author.toUpperCase()} · PHOTOGRAPHS BY {(s.data.photographer && s.data.photographer !== 'Staff' ? s.data.photographer : 'SF TIMES STAFF').toUpperCase()}</span>
+        <AuthorAvatar name={s.data.author} size={28} />
+        <span>BY {s.data.author.toUpperCase()}</span>
       </p>
     </div>
   </section>
@@ -181,43 +201,276 @@ const articleSchema = {
 
   <section class="ex-cards ex-cards--3">
     {more.map((m) => (
-      <a class="ex-card" href={`/stories/${m.data.url_slug}`}>
-        <div class="ex-card__media">
-          <Placeholder alt={m.data.hero_alt} filenameHint={m.data.hero_filename_hint} aspect="4:3" showLabel={false} />
+      <a class={`ex-card ex-card--text ex-card--keeper-${m.data.keeper_type || 'default'}`} href={`/stories/${m.data.url_slug}`}>
+        <span class="ex-card__issue-bg" aria-hidden="true">№{String(m.data.issue).padStart(2, '0')}</span>
+        <div class="ex-card__tags">
+          {m.data.keeper_type && (
+            <span class="ex-card__keeper">{m.data.keeper_type.toUpperCase()}</span>
+          )}
+          {m.data.neighborhood && (
+            <span class="ex-card__neighborhood">{m.data.neighborhood.toUpperCase()}</span>
+          )}
         </div>
+        <h3 class="ex-card__title">{m.data.title}</h3>
+        <p class="ex-card__deck">{m.data.deck}</p>
         <p class="ex-card__meta">
           <AuthorAvatar name={m.data.author} size={20} />
-          <span>ISSUE №{m.data.issue} · BY {m.data.author.toUpperCase()}</span>
+          <span>BY {m.data.author.toUpperCase()} · {m.data.read_minutes}-MIN READ</span>
         </p>
-        <h3 class="ex-card__title">{m.data.title}</h3>
       </a>
     ))}
   </section>
 
   <style>
-    .story-hero { position: relative; aspect-ratio: 21/10; overflow: hidden; background: #2a2520; margin: 0 12px; }
-    .story-hero__media { position: absolute; inset: 0; }
-    .story-hero__media :global(.real-image), .story-hero__media :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
-    .story-hero__overlay {
-      position: absolute; inset: auto 0 0 0;
-      padding: 32px 28px;
-      background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4) 70%, transparent);
-      color: var(--paper);
+    /* ============ STORY HERO · TYPOGRAPHIC (PATH A) ============
+       Photo-led hero replaced with display-type hero. The issue number
+       sits in the background at massive scale, a colored stripe runs
+       the top edge, the title takes 6 to 12 vw of vertical space.
+       Each keeper_type gets a distinct stripe color. */
+    .story-hero {
+      position: relative;
+      margin: 0;
+      padding: 64px 28px 56px;
+      background: var(--paper-2);
+      overflow: hidden;
+      border-bottom: 1px solid var(--rule);
+    }
+    .story-hero__inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .story-hero__issue-bg {
+      position: absolute;
+      right: -6vw;
+      top: 30%;
+      transform: translateY(-50%);
+      font-family: var(--display);
+      font-size: clamp(180px, 28vw, 380px);
+      line-height: 0.85;
+      color: rgba(189, 182, 164, 0.35);
+      letter-spacing: -0.04em;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .story-hero__stripe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: var(--accent);
+      z-index: 2;
+    }
+    .story-hero--keeper-recipe .story-hero__stripe { background: var(--accent); }
+    .story-hero--keeper-routine .story-hero__stripe { background: #2c5582; }
+    .story-hero--keeper-room .story-hero__stripe { background: var(--muted); }
+    .story-hero--keeper-record .story-hero__stripe { background: var(--ink-2); }
+    .story-hero--keeper-refusal .story-hero__stripe { background: #a82919; }
+    .story-hero--keeper-default .story-hero__stripe { background: var(--accent); }
+
+    .story-hero__tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
     }
     .story-hero__sponsor {
       display: inline-block;
       background: var(--accent);
       color: var(--paper);
       padding: 5px 12px;
+      font-family: var(--ui);
       font-size: 10px;
       letter-spacing: 0.18em;
-      margin: 0 0 14px;
+      font-weight: 700;
       text-transform: uppercase;
     }
     .story-hero__sponsor strong { font-weight: 700; }
-    .story-hero__eyebrow { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0 0 12px; }
-    .story-hero__title { font-family: var(--display); font-size: clamp(36px, 6vw, 96px); line-height: 1; letter-spacing: -0.005em; margin: 0 0 12px; text-transform: uppercase; max-width: 20ch; }
-    .story-hero__byline { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.85); margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .story-hero__keeper,
+    .story-hero__neighborhood {
+      display: inline-block;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 5px 12px;
+      font-family: var(--ui);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: 1px solid var(--rule);
+    }
+    .story-hero__keeper {
+      background: var(--accent);
+      color: var(--paper);
+      border-color: var(--accent);
+    }
+    .story-hero--keeper-routine .story-hero__keeper { background: #2c5582; border-color: #2c5582; }
+    .story-hero--keeper-room .story-hero__keeper { background: var(--muted); border-color: var(--muted); }
+    .story-hero--keeper-record .story-hero__keeper { background: var(--ink-2); border-color: var(--ink-2); }
+    .story-hero--keeper-refusal .story-hero__keeper { background: #a82919; border-color: #a82919; }
+
+    .story-hero__eyebrow {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin: 0 0 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .story-hero__title {
+      font-family: var(--display);
+      font-size: clamp(40px, 7vw, 92px);
+      line-height: 0.96;
+      letter-spacing: -0.015em;
+      margin: 0 0 24px;
+      color: var(--ink);
+      text-transform: uppercase;
+      max-width: 22ch;
+    }
+    .story-hero__deck {
+      font-family: var(--body);
+      font-size: clamp(18px, 2vw, 24px);
+      line-height: 1.45;
+      color: var(--ink-2);
+      margin: 0 0 28px;
+      max-width: 52ch;
+      font-style: italic;
+    }
+    .story-hero__byline {
+      font-family: var(--ui);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+    }
+
+    @media (max-width: 640px) {
+      .story-hero { padding: 40px 20px 36px; }
+      .story-hero__issue-bg { font-size: clamp(140px, 50vw, 240px); top: 22%; right: -10vw; }
+      .story-hero__title { font-size: clamp(32px, 11vw, 52px); }
+      .story-hero__deck { font-size: 16px; }
+    }
+
+    /* ============ TEXT-FIRST EX-CARDS for Read Next ============ */
+    .ex-card--text {
+      position: relative;
+      display: block;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      padding: 22px 24px 24px;
+      overflow: hidden;
+      transition: background 200ms, transform 200ms;
+      color: var(--ink);
+    }
+    .ex-card--text:hover {
+      background: var(--paper-2);
+      transform: translateY(-2px);
+    }
+    .ex-card--text::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent);
+    }
+    .ex-card--keeper-routine.ex-card--text::before { background: #2c5582; }
+    .ex-card--keeper-room.ex-card--text::before { background: var(--muted); }
+    .ex-card--keeper-record.ex-card--text::before { background: var(--ink-2); }
+    .ex-card--keeper-refusal.ex-card--text::before { background: #a82919; }
+    .ex-card__issue-bg {
+      position: absolute;
+      right: -8px;
+      top: 4px;
+      font-family: var(--display);
+      font-size: 64px;
+      line-height: 1;
+      color: rgba(189, 182, 164, 0.35);
+      letter-spacing: -0.03em;
+      pointer-events: none;
+      user-select: none;
+    }
+    .ex-card--text .ex-card__tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 6px 0 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .ex-card--text .ex-card__keeper,
+    .ex-card--text .ex-card__neighborhood {
+      display: inline-block;
+      font-family: var(--ui);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+    }
+    .ex-card--text .ex-card__keeper {
+      background: var(--accent);
+      color: var(--paper);
+    }
+    .ex-card--keeper-routine.ex-card--text .ex-card__keeper { background: #2c5582; }
+    .ex-card--keeper-room.ex-card--text .ex-card__keeper { background: var(--muted); }
+    .ex-card--keeper-record.ex-card--text .ex-card__keeper { background: var(--ink-2); }
+    .ex-card--keeper-refusal.ex-card--text .ex-card__keeper { background: #a82919; }
+    .ex-card--text .ex-card__neighborhood {
+      background: var(--paper-2);
+      color: var(--ink);
+      border: 1px solid var(--rule);
+    }
+    .ex-card--text .ex-card__title {
+      font-family: var(--display);
+      font-size: clamp(20px, 2.4vw, 26px);
+      line-height: 1.1;
+      letter-spacing: -0.005em;
+      margin: 0 0 12px;
+      color: var(--ink);
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+    .ex-card--text .ex-card__deck {
+      font-family: var(--body);
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink-2);
+      margin: 0 0 16px;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+    .ex-card--text .ex-card__meta {
+      font-family: var(--ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin: 0;
+      padding-top: 12px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
 
     .story-firewall {
       max-width: 880px;
@@ -253,6 +506,35 @@ const articleSchema = {
       text-transform: uppercase;
       font-size: 11px;
       letter-spacing: 0.12em;
+    }
+
+    .story-sample-banner {
+      max-width: 880px;
+      margin: 24px auto 0;
+      padding: 18px 24px;
+      background: #fef3e6;
+      border: 1px solid var(--accent);
+      border-left-width: 4px;
+    }
+    .story-sample-banner__label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .story-sample-banner__body {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+    }
+    .story-sample-banner__body a {
+      color: var(--ink);
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 1px;
+      font-weight: 600;
     }
     .story-deck { font-family: var(--display); font-size: clamp(22px, 2.6vw, 38px); line-height: 1.2; text-transform: none; letter-spacing: -0.005em; margin: 0; max-width: 36ch; }
     .story-pull { padding: 32px 0; border-block: 1px solid var(--rule); margin: 32px 0; text-align: center; }

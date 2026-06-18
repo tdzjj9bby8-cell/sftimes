@@ -181,9 +181,11 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
   .ex-drawer__sublink:hover { opacity: 0.55; }
 
   /* === SECTION NAV === */
+  /* Desktop: 7-item grid with padding column. Mobile: horizontal scroll
+     so labels never wrap to two lines. */
   .ex-secnav { display: grid; grid-template-columns: 60px repeat(7, 1fr); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); height: 56px; align-items: center; }
   .ex-secnav__pad { border-right: 1px solid var(--rule); height: 100%; }
-  .ex-secnav__item { padding: 0 20px; font-size: 14px; color: var(--ink); position: relative; transition: opacity 150ms; }
+  .ex-secnav__item { padding: 0 20px; font-size: 14px; color: var(--ink); position: relative; transition: opacity 150ms; white-space: nowrap; }
   .ex-secnav__item:hover { opacity: 0.6; }
   .ex-secnav__item.is-active::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: -1px; height: 2px; background: var(--ink); }
 
@@ -280,14 +282,126 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
   .ex-card__title { font-family: var(--ui); font-size: 18px; font-weight: 600; line-height: 1.2; margin: 0 0 6px; }
   .ex-card__deck { font-size: 13px; line-height: 1.45; color: var(--muted); margin: 0; }
 
+  /* === TEXT-FIRST CARD (PATH A) ===
+     Used on /stories, /best-of, and Read Next blocks. No photo column.
+     Issue number watermark + keeper-typed top stripe + display headline. */
+  .ex-card--text {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 22px 24px 24px;
+    overflow: hidden;
+    transition: background 200ms, transform 200ms;
+    color: var(--ink);
+  }
+  .ex-card--text:hover { background: var(--paper-2); transform: translateY(-2px); }
+  .ex-card--text::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--accent);
+  }
+  .ex-card--keeper-routine.ex-card--text::before { background: #2c5582; }
+  .ex-card--keeper-room.ex-card--text::before { background: var(--muted); }
+  .ex-card--keeper-record.ex-card--text::before { background: var(--ink-2); }
+  .ex-card--keeper-refusal.ex-card--text::before { background: #a82919; }
+  .ex-card__issue-bg {
+    position: absolute;
+    right: -8px;
+    top: 4px;
+    font-family: var(--display);
+    font-size: 64px;
+    line-height: 1;
+    color: rgba(189, 182, 164, 0.35);
+    letter-spacing: -0.03em;
+    pointer-events: none;
+    user-select: none;
+  }
+  .ex-card--text .ex-card__tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 6px 0 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .ex-card--text .ex-card__keeper,
+  .ex-card--text .ex-card__neighborhood {
+    display: inline-block;
+    font-family: var(--ui);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+  }
+  .ex-card--text .ex-card__keeper {
+    background: var(--accent);
+    color: var(--paper);
+  }
+  .ex-card--keeper-routine.ex-card--text .ex-card__keeper { background: #2c5582; }
+  .ex-card--keeper-room.ex-card--text .ex-card__keeper { background: var(--muted); }
+  .ex-card--keeper-record.ex-card--text .ex-card__keeper { background: var(--ink-2); }
+  .ex-card--keeper-refusal.ex-card--text .ex-card__keeper { background: #a82919; }
+  .ex-card--text .ex-card__neighborhood {
+    background: var(--paper-2);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .ex-card--text .ex-card__title {
+    font-family: var(--display);
+    font-size: clamp(20px, 2.4vw, 26px);
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+    margin: 0 0 12px;
+    color: var(--ink);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+  .ex-card--text .ex-card__deck {
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin: 0 0 16px;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+  }
+  .ex-card--text .ex-card__meta {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
   /* === NEWSLETTER === */
-  .ex-nl { background: var(--ink); color: var(--paper); padding: 28px; }
-  .ex-nl form { display: flex; align-items: stretch; gap: 0; }
+  .ex-nl { background: var(--ink); color: var(--paper); padding: 48px 28px 56px; }
+  .ex-nl__inner { max-width: 56rem; margin: 0 auto; }
+  .ex-nl__eyebrow { font-family: var(--ui); font-size: 11px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; color: var(--accent); margin: 0 0 18px; }
+  .ex-nl__hed { font-family: var(--display); font-size: clamp(36px, 6vw, 72px); line-height: 0.96; letter-spacing: -0.01em; text-transform: uppercase; color: var(--paper); margin: 0 0 18px; }
+  .ex-nl__deck { font-family: var(--body); font-size: 16px; line-height: 1.55; color: rgba(244,241,234,0.78); font-style: italic; margin: 0 0 28px; max-width: 52ch; }
+  .ex-nl form { display: flex; align-items: stretch; gap: 0; max-width: 480px; }
   .ex-nl input { flex: 1; padding: 14px 18px; background: transparent; border: 1px solid rgba(244,241,234,0.3); color: var(--paper); font-family: var(--ui); font-size: 14px; border-radius: 0; }
   .ex-nl input::placeholder { color: rgba(244,241,234,0.5); text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; }
-  .ex-nl button { padding: 14px 28px; background: var(--paper); color: var(--ink); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--paper); transition: opacity 150ms; }
+  .ex-nl button { padding: 14px 28px; background: var(--paper); color: var(--ink); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--paper); transition: opacity 150ms; font-weight: 700; cursor: pointer; }
   .ex-nl button:hover { opacity: 0.85; }
-  .ex-nl__thanks { font-family: var(--display); font-size: 28px; text-transform: uppercase; padding: 12px 0; }
+  .ex-nl button:disabled { opacity: 0.5; cursor: wait; }
+  .ex-nl__thanks { font-family: var(--display); font-size: clamp(24px, 3vw, 32px); text-transform: uppercase; padding: 18px 0 4px; color: var(--accent); margin: 0; }
+  .ex-nl__error { font-family: var(--ui); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #e89a72; padding: 12px 0 0; margin: 0; }
+  .ex-nl__fineprint { font-family: var(--ui); font-size: 11px; letter-spacing: 0.06em; color: rgba(244,241,234,0.5); margin: 20px 0 0; max-width: 52ch; }
 
   /* === FOOTER === */
   .ex-ft { background: var(--ink); color: var(--paper); }
@@ -316,12 +430,38 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
   @media (max-width: 980px) {
     .ex-util { grid-template-columns: 48px 1fr auto; }
     .ex-secnav { grid-template-columns: 48px repeat(7, 1fr); }
-    .ex-secnav__item { padding: 0 10px; font-size: 12px; }
+    .ex-secnav__item { padding: 0 14px; font-size: 12px; }
     .ex-drawer__inner { padding: 40px 24px; }
     .ex-cards--3 { grid-template-columns: repeat(2, 1fr); }
   }
+  /* Very small screens: convert section nav to horizontal scroll so labels stay one line. */
   @media (max-width: 640px) {
+    .ex-secnav {
+      display: flex;
+      grid-template-columns: none;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      height: 48px;
+    }
+    .ex-secnav::-webkit-scrollbar { display: none; }
+    .ex-secnav__pad { display: none; }
+    .ex-secnav__item {
+      flex: 0 0 auto;
+      padding: 0 16px;
+      font-size: 13px;
+      line-height: 48px;
+    }
+    .ex-secnav__item:first-of-type { padding-left: 18px; }
+    .ex-secnav__item:last-of-type { padding-right: 24px; }
+    .ex-secnav__item.is-active::after { left: 16px; right: 16px; }
     .ex-cards--3, .ex-cards--2 { grid-template-columns: 1fr; }
+    /* Tighter masthead band on small screens so the wordmark + subscript fit without dominating */
+    .ex-masthead { padding: 12px 0 8px; gap: 2px; }
+    .ex-masthead__svg { max-height: clamp(80px, 22vw, 140px); padding: 0 14px; }
+    .ex-masthead__sub { font-size: clamp(14px, 4vw, 22px); margin: 0 16px 0 0; }
+    /* Footer discover grid: single column on tiny screens for thumb scrolling */
+    .ex-ft__discover { padding: 32px 18px 24px; gap: 24px; }
   }
 </style>
 <slot name="head" />
@@ -372,11 +512,18 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
 </main>
 
 <section class="ex-nl" id="exNewsletter">
-  <form id="exNlForm">
-    <input type="email" name="email" placeholder="ENTER YOUR E-MAIL" required>
-    <button type="submit">Subscribe</button>
-  </form>
-  <p class="ex-nl__thanks" id="exNlThanks" hidden>THANKS. SATURDAY MORNING IN YOUR INBOX.</p>
+  <div class="ex-nl__inner">
+    <p class="ex-nl__eyebrow">THE SATURDAY LETTER · FREE · WEEKLY</p>
+    <h2 class="ex-nl__hed">ONE SF KEEPER<br>EVERY SATURDAY.</h2>
+    <p class="ex-nl__deck">A real human profile of one San Francisco place, person, or routine worth keeping. Reader-funded, no parent company, no AI bylines. Unsubscribe in one click.</p>
+    <form id="exNlForm" novalidate>
+      <input type="email" name="email" placeholder="ENTER YOUR E-MAIL" required aria-label="Email address">
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="ex-nl__thanks" id="exNlThanks" hidden>THANKS. SATURDAY MORNING IN YOUR INBOX.</p>
+    <p class="ex-nl__error" id="exNlError" hidden>SOMETHING BROKE. TRY AGAIN OR EMAIL hello@sftimes.com.</p>
+    <p class="ex-nl__fineprint">We never sell or share your email. Two letters a year are sponsored, labeled at the top.</p>
+  </div>
 </section>
 
 <footer class="ex-ft">
@@ -490,17 +637,38 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
   (function () {
     const form = document.getElementById('exNlForm');
     const thanks = document.getElementById('exNlThanks');
+    const errorEl = document.getElementById('exNlError');
     if (!form) return;
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = (form.querySelector('input[type=email]') || {}).value || '';
-      if (!email) return;
+      const input = form.querySelector('input[type=email]');
+      const button = form.querySelector('button[type=submit]');
+      const email = ((input || {}).value || '').trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (errorEl) { errorEl.textContent = 'ENTER A VALID EMAIL.'; errorEl.hidden = false; }
+        return;
+      }
+      if (errorEl) errorEl.hidden = true;
+      if (button) { button.disabled = true; button.textContent = 'Saving...'; }
+
+      // Local fallback so captures aren't lost before ESP is wired.
       try {
         const KEY = 'keepers-newsletter';
         const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
-        arr.push({ email: email.trim(), at: new Date().toISOString() });
+        arr.push({ email, at: new Date().toISOString(), page: location.pathname });
         localStorage.setItem(KEY, JSON.stringify(arr));
       } catch (_) {}
+
+      // Endpoint placeholder. Wire to ESP (Buttondown, ConvertKit, Beehiiv) when ready.
+      // Until then this just succeeds quietly so the UX is intact.
+      try {
+        await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: location.pathname }),
+        }).catch(() => null);
+      } catch (_) {}
+
       form.hidden = true;
       if (thanks) thanks.hidden = false;
     });
