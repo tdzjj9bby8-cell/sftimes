@@ -2,7 +2,7 @@
 title: "The Mission donut shop the same Greek family has run for four generations"
 title_em: "four generations"
 deck: "Athena's Donuts on 16th Street has been open 24 hours a day since 1962. The same family. The same recipe. Three deaths and three weddings later, the fryer has not gone cold."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-05-24
 issue: 50

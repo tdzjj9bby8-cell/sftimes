@@ -2,7 +2,7 @@
 title: "The Sunset boba shop owner who teaches free ESL on Sundays"
 title_em: "free ESL on Sundays"
 deck: "Wendy Lin runs a boba shop on Irving Street. She closes it Sunday afternoons to teach English to her customers' grandparents. Forty-one Sundays a year, twelve years."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-05-10
 issue: 52

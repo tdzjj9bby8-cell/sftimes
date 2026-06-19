@@ -2,7 +2,7 @@
 title: "The Oakland Chinatown lion dance teacher whose students' grandparents he taught"
 title_em: "whose grandparents he taught"
 deck: "Sifu Wu is 76. He has taught lion dance in the same basement on Eighth Street for 43 years. His current students include three grandchildren of his original students."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-08-09
 issue: 39

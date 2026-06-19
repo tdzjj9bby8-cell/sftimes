@@ -1,7 +1,7 @@
 ---
 title: "Rose Akiyama Throws Forty Bowls a Week. She Will Not Throw Forty-One."
 deck: "Six years in a Dogpatch studio. The waitlist is fifteen months long. She has turned down every wholesale offer that would change the math."
-author: "Daisy"
+author: "Eric"
 photographer: "Kiwi"
 published: 2026-05-02
 issue: 53

@@ -2,7 +2,7 @@
 title: "The Pacific Heights block where every house has a piano"
 title_em: "every house has a piano"
 deck: "On a single block of Vallejo Street, eighteen of nineteen homes have a working piano. Six of them are tuned by the same man."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2026-01-31
 issue: 5

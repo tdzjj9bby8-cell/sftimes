@@ -2,7 +2,7 @@
 title: "The SFFD mechanic who has kept Engine 3 running since 1989 and slept in the bay twice"
 title_em: "slept in the bay twice"
 deck: "Sergio Banales is 62. He has been the lead mechanic for one San Francisco fire engine, Engine 3, out of the Tenderloin, for 36 years. He has slept in the apparatus bay twice. He has cried in it once. The engine has not failed to start in 11 years."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-03-29
 issue: 58

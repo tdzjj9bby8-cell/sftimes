@@ -2,7 +2,7 @@
 title: "The Mission mariachi trumpet player on Friday nights, three venues, since 1988"
 title_em: "three venues, since 1988"
 deck: "Don Beto Vargas plays a 30-minute trumpet set at three Mission restaurants every Friday night. The walk between them is part of the act. He has not missed a Friday since 2003."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-07-12
 issue: 43

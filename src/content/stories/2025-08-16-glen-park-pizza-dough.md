@@ -2,7 +2,7 @@
 title: "The Glen Park pizza dough mixer who has used the same recipe since 1971"
 title_em: "the same recipe since 1971"
 deck: "Antonio Russo bought the recipe from his uncle in Naples for $200 and three bottles of grappa. The dough has not changed. The neighborhood around it has."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-08-16
 issue: 38

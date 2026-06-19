@@ -1,7 +1,7 @@
 ---
 title: "Marcus the Locksmith Who Will Not Open Your Apartment Without ID"
 deck: "On Geary Boulevard since 2008. The cheapest locksmith in the city and the slowest. Both of those things are choices."
-author: "Nicholas"
+author: "Eric"
 photographer: "Kiwi"
 published: 2026-05-09
 issue: 54

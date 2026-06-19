@@ -2,7 +2,7 @@
 title: "The retired meteorologist who blogs the fog every morning"
 title_em: "blogs the fog"
 deck: "David Hsu, 71, climbs Twin Peaks at sunrise every weekday and sends a hand-typed fog report to a private email list. He has 1,400 subscribers. He has not missed a weekday in seven years."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-05-03
 issue: 53

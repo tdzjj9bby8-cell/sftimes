@@ -2,7 +2,7 @@
 title: "The Mission's Last Mariachi Tailor"
 title_em: "Mariachi Tailor"
 deck: "Don Ramiro has been hand-stitching trajes for 41 years. His children are arguing about the shop."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2026-04-18
 issue: 16

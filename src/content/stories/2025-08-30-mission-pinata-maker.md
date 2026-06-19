@@ -2,7 +2,7 @@
 title: "The Mission piñata maker, 78 years old, who has made one for every birthday on his block since 1979"
 title_em: "every birthday on his block"
 deck: "Don Julio Mendoza's garage on Folsom is half-piñata, all the time. He charges what he charged in 1989. He has never run out of newspaper."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-08-30
 issue: 36

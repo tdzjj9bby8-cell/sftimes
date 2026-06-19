@@ -2,7 +2,7 @@
 title: "The Marina rope splicer who has 8 fingers and 41 years of work on the Wharf"
 title_em: "8 fingers and 41 years"
 deck: "Captain Frank Costa has spliced rope for every fishing boat on Fisherman's Wharf since 1984. He lost two fingers in 1991. The splicing did not slow down."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-06-14
 issue: 47

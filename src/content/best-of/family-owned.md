@@ -2,7 +2,7 @@
 title: "Best Family-Owned Restaurants"
 url_slug: "family-owned"
 intro: "Five San Francisco restaurants owned and run by the same family for at least fifteen years. Compiled from public records and in-person visits where the editor has been a regular. Named on every menu. Real recipes, real grandmothers, real kids working the register. Refreshed quarterly once the column is in regular rotation."
-editor: Daisy
+editor: Eric
 last_refreshed: 2026-05-25
 hero_alt: "Best Family-Owned Restaurants category card"
 hero_filename_hint: "best-of/family-owned.jpg"
@@ -39,4 +39,4 @@ The Sanchez family has owned this since 1973. The current generation has refused
 
 The rule for inclusion is at least fifteen years of continuous family ownership and visible family involvement on the floor or in the kitchen during the editor's visits. Two restaurants we love did not make this list because they have ceded daily operations to managers, however good the food still is. Family-owned, on this list, means the family is still actually there.
 
-Daisy.
+Eric.

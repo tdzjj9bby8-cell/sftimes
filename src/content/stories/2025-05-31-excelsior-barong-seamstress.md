@@ -2,7 +2,7 @@
 title: "The Excelsior seamstress who sews every barong tagalog in the Filipino community"
 title_em: "every barong tagalog"
 deck: "Tita Aurora Reyes has hand-sewn barongs for Filipino weddings, baptisms, and graduations in the Excelsior since 1984. She has finished about 6,000 of them."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-05-31
 issue: 49

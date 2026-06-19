@@ -2,7 +2,7 @@
 title: "The Sunnyside man who has lined the bocce court at 6 a.m. for 27 years"
 title_em: "lined the bocce court"
 deck: "Aldo Pacelli sweeps and chalks the bocce court behind St. Finn Barr every morning. He has lived three blocks away since 1971. He is 78. The court has never had a closed sign."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-10-18
 issue: 28

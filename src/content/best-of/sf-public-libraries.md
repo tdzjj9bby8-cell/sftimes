@@ -1,8 +1,8 @@
 ---
 title: "Best Public Libraries Worth Sitting In"
 url_slug: "sf-public-libraries"
-intro: "Five San Francisco Public Library branches that are not just lending desks. They are rooms you can spend an afternoon in. Edited by Nicholas. Rule for inclusion: good light, a place to actually work or read, staff who treat regulars as regulars, and a holdings depth beyond bestsellers. Refreshed quarterly. All locations are SFPL branches; library cards are free with any California ID."
-editor: Nicholas
+intro: "Five San Francisco Public Library branches that are not just lending desks. They are rooms you can spend an afternoon in. Edited by Eric. Rule for inclusion: good light, a place to actually work or read, staff who treat regulars as regulars, and a holdings depth beyond bestsellers. Refreshed quarterly. All locations are SFPL branches; library cards are free with any California ID."
+editor: Eric
 last_refreshed: 2026-06-01
 hero_alt: "Best Public Libraries Worth Sitting In category card"
 hero_filename_hint: "best-of/sf-public-libraries.jpg"
@@ -43,4 +43,4 @@ If you want a quiet place to work for an afternoon, the Main fifth-floor room is
 
 A reminder: SFPL gives you free use of every museum in the city with a library card, on rotation. The pass system is at sfpl.org. The librarians can walk you through it.
 
-Nicholas.
+Eric.

@@ -2,7 +2,7 @@
 title: "The Mission community kitchen where everyone eats Wednesday at 3 p.m."
 title_em: "everyone eats"
 deck: "Comedor Comunitario opens its doors every Wednesday afternoon. There is no menu, no charge, and no questions."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2026-02-14
 issue: 7

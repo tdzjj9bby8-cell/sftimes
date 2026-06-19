@@ -1,7 +1,7 @@
 ---
 title: "The Tutor Room at 826 Valencia That Has Been Open Since 2002"
 deck: "Twenty-four years, fourteen thousand kids, the same five rules on the wall. The current program director has held the room together by refusing to let it grow."
-author: "Daisy"
+author: "Eric"
 photographer: "Kiwi"
 published: 2026-05-16
 issue: 55

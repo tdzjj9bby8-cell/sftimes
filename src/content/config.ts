@@ -10,7 +10,7 @@ const stories = defineCollection({
     // full string + brand suffix fits Google's ~60-char display limit.
     seo_title: z.string().max(60).optional(),
     deck: z.string(),
-    author: z.enum(['Eric', 'Nicholas', 'Daisy']),
+    author: z.enum(['Eric']),
     photographer: z.string().default('Staff'),
     published: z.coerce.date(),
     issue: z.number().int().positive(),
@@ -58,7 +58,7 @@ const bestOf = defineCollection({
     title: z.string(),
     url_slug: z.string(),
     intro: z.string(),
-    editor: z.enum(['Eric', 'Nicholas', 'Daisy']),
+    editor: z.enum(['Eric']),
     last_refreshed: z.coerce.date(),
     hero_alt: z.string(),
     hero_filename_hint: z.string(),
@@ -95,7 +95,7 @@ const briefs = defineCollection({
     /** Edition number. Increments by one each publish day. */
     edition: z.number().int().positive(),
     /** Named editor who published this edition. Currently only 'Eric'. */
-    editor: z.enum(['Eric', 'Nicholas', 'Daisy']),
+    editor: z.enum(['Eric']),
     /** Optional editor's intro at the top of the brief page. */
     intro: z.string().optional(),
     /** AI assistance disclosure. Defaults to the standard statement;

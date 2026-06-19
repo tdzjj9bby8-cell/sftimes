@@ -2,7 +2,7 @@
 title: "The Daly City pho shop run by a 19-year-old after her father died"
 title_em: "after her father died"
 deck: "Pho Anh has been on Mission Street for 22 years. Last September, the owner died. His daughter took over the kitchen the same week."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2026-02-28
 issue: 9

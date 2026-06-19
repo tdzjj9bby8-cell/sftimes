@@ -16,28 +16,6 @@ const team = [
     location: 'Mission, San Francisco',
   },
   {
-    name: 'NICHOLAS',
-    slug: 'nicholas',
-    role: 'REPORTER',
-    bio: 'Profiles, reported features, civic accountability.',
-    longBio: "Nicholas joined in issue twelve. He writes the deeper profiles and the reported features that take more than one Saturday to finish. Background: investigative reporting for two local outlets before the keepers, plus a master's in journalism that he doesn't bring up unless someone asks. He covers civic accountability beats: courts, housing, the places where the city's promises meet the city's pavement.",
-    beats: ['Reported profiles', 'Civic accountability', 'Housing', 'Courts'],
-    sinceIssue: 12,
-    issuesAuthored: 14,
-    location: 'Outer Richmond, San Francisco',
-  },
-  {
-    name: 'DAISY',
-    slug: 'daisy',
-    role: 'REPORTER',
-    bio: 'Culture, neighborhoods, small business beats.',
-    longBio: "Daisy joined in issue twenty-one. She owns the culture and small-business beats and writes most of the Top Tier best-of guides. Background: ten years freelancing for food and culture magazines around the Bay, plus a previous life as a cook in a Mission restaurant that closed in 2019. She knows the food world from both sides of the counter, which shows up in the work.",
-    beats: ['Culture features', 'Small business profiles', 'Best Of editor', 'Restaurants'],
-    sinceIssue: 21,
-    issuesAuthored: 9,
-    location: 'Bernal Heights, San Francisco',
-  },
-  {
     name: 'KIWI',
     slug: 'kiwi',
     role: 'PHOTOGRAPHER',
@@ -58,12 +36,12 @@ const team = [
   <ExhibitionMasthead
     slot="masthead"
     title="THE TEAM"
-    subscript="4 HUMANS"
+    subscript="2 HUMANS"
     cutouts={[]}
   />
 
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">NAMED BYLINES · NO AI · FOUR HUMANS</p>
+    <p class="ex-prose__eyebrow">NAMED BYLINES · NO AI · ONE EDITOR FOR NOW</p>
     <h1 class="ex-prose__title">THE PEOPLE BEHIND<br>THE SATURDAY LETTER.</h1>
     <p>Every byline is a real person. We don't run AI-generated copy, we don't run syndicated filler, and the editor who picks a best of list is named on the list. Here's everyone.</p>
   </article>
@@ -123,48 +101,29 @@ const team = [
     ))}
   </section>
 
-  <!-- HIRING -->
+  <!-- HIRING: two open masthead positions, plain spoken -->
   <section class="hiring" id="hiring">
     <div class="hiring__head">
-      <p class="hiring__eyebrow">OPEN ROLES · INTERNS · FIELD JOURNALISTS</p>
-      <h2 class="hiring__title">JOIN THE TEAM.</h2>
-      <p class="hiring__sub">Small pay. Real bylines. The blocks of San Francisco, on foot, on the record.</p>
+      <p class="hiring__eyebrow">TWO OPEN MASTHEAD POSITIONS</p>
+      <h2 class="hiring__title">WE'RE HIRING.</h2>
+      <p class="hiring__sub">The publication is one editor right now. Two beats are open for the right writers.</p>
     </div>
 
     <div class="hiring__roles">
       <article class="hiring__role">
-        <p class="hiring__role-tag">ROLE №01</p>
-        <h3 class="hiring__role-name">EDITORIAL INTERN</h3>
-        <p class="hiring__role-what">For students or career-shifters who want to learn how a small publication actually runs. You'll pitch features, draft and edit copy, sit in on interviews, and help on saturday production. Real bylines from week one if your work clears the editor.</p>
-        <ul class="hiring__role-perks">
-          <li>Published work under your name</li>
-          <li>1:1 editing time every week</li>
-          <li>Minimum wage, plus gas and food covered on assignment days</li>
-          <li>Flexible hours, part-time to start</li>
-        </ul>
+        <p class="hiring__role-tag">BEAT №01</p>
+        <h3 class="hiring__role-name">DEEPER REPORTED FEATURES</h3>
+        <p class="hiring__role-what">Long-form profiles where a Saturday Profile won't fit, plus investigations the editor isn't already running. If you want to talk about either role, email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>.</p>
       </article>
 
       <article class="hiring__role">
-        <p class="hiring__role-tag">ROLE №02</p>
-        <h3 class="hiring__role-name">FIELD JOURNALIST</h3>
-        <p class="hiring__role-what">For reporters who want to walk the city and meet the keepers. You'll run interviews, write profiles, hold the editorial line, and ship one feature per saturday. Two-week mentorship to start, permanent if it clicks.</p>
-        <ul class="hiring__role-perks">
-          <li>Named byline on every piece</li>
-          <li>Editing that respects your voice</li>
-          <li>Minimum wage, plus gas, food, and on-assignment expenses</li>
-          <li>Print zine credit when we go to print quarterly</li>
-        </ul>
+        <p class="hiring__role-tag">BEAT №02</p>
+        <h3 class="hiring__role-name">CULTURE AND SMALL BUSINESS</h3>
+        <p class="hiring__role-what">Food, music, neighborhood institutions, the day-to-day texture work that doesn't fit the Saturday Profile cadence. If you want to talk about either role, email <a href="mailto:eric@sftimes.com">eric@sftimes.com</a>.</p>
       </article>
     </div>
 
-    <p class="hiring__honest">We're a small operation. Pay is what we can afford right now: California minimum wage, plus gas and food on the days you're out reporting. We're upfront about that because we want people who care about the work, not just the paycheck. When we grow, you grow with us.</p>
-
-    <div class="hiring__apply">
-      <a href="mailto:eric@seod.com?subject=keepers%20application" class="hiring__cta">
-        <span>SEND A PITCH AND A WRITING SAMPLE</span>
-        <strong>eric@seod.com</strong>
-      </a>
-    </div>
+    <p class="hiring__honest">Small operation. Pay is what the publication can afford right now: California minimum wage, plus gas and food on the days you're out reporting. The masthead names get added when the hires happen, not before.</p>
   </section>
 
   <a href="/submit" class="ex-colmark__link">
@@ -174,7 +133,7 @@ const team = [
   </a>
 
   <style>
-    .team { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 0 12px 48px; }
+    .team { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 0 12px 48px; max-width: 720px; margin: 0 auto; }
     .team-card__photo { aspect-ratio: 1/1; background: #2a2520; overflow: hidden; margin-bottom: 16px; }
     .team-card__photo :global(.real-image), .team-card__photo :global(.placeholder) { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto !important; display: block; }
     .team-card__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 6px; }

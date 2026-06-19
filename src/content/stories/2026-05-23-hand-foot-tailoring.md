@@ -1,7 +1,7 @@
 ---
 title: "Hand & Foot Tailoring and the Cantonese Hem Rule"
 deck: "Auntie Lai has been hemming pants on Irving Street since 1994. She speaks Cantonese, Mandarin, and a working English. She has alterations in by Thursday for $14, the same price she charged last year, and the year before that."
-author: "Nicholas"
+author: "Eric"
 photographer: "Kiwi"
 published: 2026-05-23
 issue: 56

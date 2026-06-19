@@ -2,7 +2,7 @@
 title: "The Visitacion Valley mechanic who fixes congregants' cars in the church parking lot, for free"
 title_em: "in the church parking lot, for free"
 deck: "Reggie Smalls has fixed the cars of his Pentecostal congregation in the church parking lot every Saturday for nineteen years. He charges nothing. He has fixed about 4,400 cars."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-07-19
 issue: 42

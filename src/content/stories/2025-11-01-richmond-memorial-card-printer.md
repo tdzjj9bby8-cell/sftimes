@@ -2,7 +2,7 @@
 title: "The Outer Richmond memorial card printer almost every Chinese funeral goes through"
 title_em: "almost every Chinese funeral"
 deck: "Mei Lin runs a one-person letterpress shop on Clement Street. She has printed memorial cards for about 11,000 Chinese funerals in 19 years. She has never lost a name."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-11-01
 issue: 30

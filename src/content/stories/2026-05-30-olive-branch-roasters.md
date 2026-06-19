@@ -1,7 +1,7 @@
 ---
 title: "Olive Branch Roasters and the Two-Lot Theory of Coffee"
 deck: "On a back street in Bernal Heights, Marisa Padilla roasts twelve pounds a day from two farms. She names the growers. She refuses every wholesale order under a written promise."
-author: "Daisy"
+author: "Eric"
 photographer: "Kiwi"
 published: 2026-05-30
 issue: 57

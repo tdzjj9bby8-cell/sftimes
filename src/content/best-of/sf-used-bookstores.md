@@ -1,8 +1,8 @@
 ---
 title: "Best Used Bookstores in San Francisco"
 url_slug: "sf-used-bookstores"
-intro: "Five used bookstores worth a Saturday afternoon. Edited by Daisy. The rule for inclusion: deep stock, fair pricing, staff who will actually pull something off a shelf for you. No museum-store rare-book rooms, no curated-coffee-table-only inventory, no chains."
-editor: Daisy
+intro: "Five used bookstores worth a Saturday afternoon. Edited by Eric. The rule for inclusion: deep stock, fair pricing, staff who will actually pull something off a shelf for you. No museum-store rare-book rooms, no curated-coffee-table-only inventory, no chains."
+editor: Eric
 last_refreshed: 2026-06-01
 hero_alt: "Best Used Bookstores in San Francisco category card"
 hero_filename_hint: "best-of/sf-used-bookstores.jpg"
@@ -41,4 +41,4 @@ A few used bookstores did not make this list. Some have shrunk their used sectio
 
 Send a pick to [hello@sftimes.com](mailto:hello@sftimes.com). I read every email.
 
-Daisy.
+Eric.

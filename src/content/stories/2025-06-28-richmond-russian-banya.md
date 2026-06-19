@@ -2,7 +2,7 @@
 title: "The last Russian banya in San Francisco, 81-year-old keeper, still open six nights a week"
 title_em: "still open six nights a week"
 deck: "Yuri Kraevski has run Banya Sokol on Geary since 1965. The wood-fired sauna has not gone cold in 19 years. Same regulars. Same towels."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-06-28
 issue: 45

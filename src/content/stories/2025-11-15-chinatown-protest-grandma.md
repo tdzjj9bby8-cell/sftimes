@@ -2,7 +2,7 @@
 title: "The Chinatown grandmother who has been at every San Francisco protest since 1973"
 title_em: "every protest since 1973"
 deck: "Mrs. Lin Chen is 89. She carries the same wooden sign with rotating cardboard inserts. She has been arrested twice and lost no friends to it."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-11-15
 issue: 32

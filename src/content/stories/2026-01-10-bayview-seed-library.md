@@ -2,7 +2,7 @@
 title: "The Bayview seed library where every seed is free"
 title_em: "every seed is free"
 deck: "Behind a converted laundromat on Third Street, the Bayview Seed Library has held about 1,800 varieties of seed since 2014. There is no fee. There is one rule: bring something back."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2026-01-10
 issue: 20

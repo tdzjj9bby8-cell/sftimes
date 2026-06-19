@@ -2,7 +2,7 @@
 title: "The Excelsior woman who writes letters for the elderly who can't write English"
 title_em: "who can't write English"
 deck: "Auntie Lourdes Aquino has written about 4,200 letters in 27 years. Most of them to landlords, to Social Security, to grandchildren. She does not charge."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-12-13
 issue: 22

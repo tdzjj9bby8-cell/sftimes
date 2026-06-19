@@ -2,7 +2,7 @@
 title: "The Marina dog walker who can tell when each dog is sick before the owner can"
 title_em: "before the owner can"
 deck: "Tariq Sims has walked the same twelve dogs at 6:30 a.m. for fourteen years. He has called four owners over the years to say, take your dog to the vet. He has been right four times."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-10-04
 issue: 26

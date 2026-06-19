@@ -2,7 +2,7 @@
 title: "The Outer Sunset bookstore that opens at midnight"
 title_em: "opens at midnight"
 deck: "The Last Word opens from 1 a.m. to 4 a.m., three nights a week. The owner is 39. He sells about $11 in books a night. He has no plans to close."
-author: Daisy
+author: Eric
 photographer: "Kiwi"
 published: 2025-09-06
 issue: 35

@@ -2,7 +2,7 @@
 title: "The Sunset surf school for kids who can't swim"
 title_em: "kids who can't swim"
 deck: "Lulu Garcia teaches kids from inland neighborhoods to swim and surf. There is no fee. There is a waitlist."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2026-03-21
 issue: 12

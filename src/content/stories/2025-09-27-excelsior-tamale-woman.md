@@ -2,7 +2,7 @@
 title: "The Excelsior tamale woman who feeds the school cafeteria staff"
 title_em: "feeds the school cafeteria staff"
 deck: "Doña Luz Estrada has cooked tamales for the women who serve school lunches in the Excelsior every weekday since 2003. They feed children. She feeds them."
-author: Nicholas
+author: Eric
 photographer: "Kiwi"
 published: 2025-09-27
 issue: 25
