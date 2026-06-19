@@ -8,7 +8,11 @@
     { "path": "/api/cron/brief-hard-gate","schedule": "30 15 * * 1-6" }
   ],
   "functions": {
-    "api/**/*.ts": { "memory": 1024, "maxDuration": 300 }
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 300,
+      "includeFiles": "src/content/briefs/**"
+    }
   },
   "redirects": [
     { "source": "/exhibition", "destination": "/", "permanent": true },

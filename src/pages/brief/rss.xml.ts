@@ -1,7 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 
-const SITE = 'https://sftimes.com';
+const SITE = 'https://www.sftimes.com';
 
 /**
  * RSS feed for the daily Brief.

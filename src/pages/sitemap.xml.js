@@ -4,7 +4,7 @@ export async function GET() {
   const stories = await getCollection('stories');
   const bestOf = await getCollection('best-of');
   const briefs = await getCollection('briefs');
-  const site = 'https://sftimes.com';
+  const site = 'https://www.sftimes.com';
 
   // Page priority + change frequency per URL family.
   // Pages in `EXCLUDE` are deliberately omitted (noindex destinations).

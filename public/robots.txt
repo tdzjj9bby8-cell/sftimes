@@ -69,4 +69,4 @@ Crawl-delay: 5
 User-agent: Slurp
 Crawl-delay: 10
 
-Sitemap: https://sftimes.com/sitemap.xml
+Sitemap: https://www.sftimes.com/sitemap.xml

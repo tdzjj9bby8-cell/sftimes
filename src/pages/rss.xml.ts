@@ -1,7 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 
-const SITE = 'https://sftimes.com';
+const SITE = 'https://www.sftimes.com';
 
 export async function GET(context: { site?: URL } & Record<string, unknown>) {
   const all = await getCollection('stories');
@@ -39,7 +39,7 @@ export async function GET(context: { site?: URL } & Record<string, unknown>) {
     customData: '<language>en-us</language><copyright>SF Times · Curry Village Media</copyright>',
     xmlns: {
       dc: 'http://purl.org/dc/elements/1.1/',
-      sftimes: 'https://sftimes.com/rss-ns',
+      sftimes: 'https://www.sftimes.com/rss-ns',
     },
     stylesheet: false,
   });

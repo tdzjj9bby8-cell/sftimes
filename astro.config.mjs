@@ -5,7 +5,7 @@ import { defineConfig } from 'astro/config';
 // Re-enable after upgrading to a compatible version.
 
 export default defineConfig({
-  site: 'https://sftimes.com',
+  site: 'https://www.sftimes.com',
   output: 'static',
   trailingSlash: 'ignore',
   build: {

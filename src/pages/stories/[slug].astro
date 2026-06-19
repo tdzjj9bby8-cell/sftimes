@@ -48,10 +48,10 @@ const dateLong = s.data.published
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "NewsArticle",
-  "@id": `https://sftimes.com/stories/${s.data.url_slug}#article`,
+  "@id": `https://www.sftimes.com/stories/${s.data.url_slug}#article`,
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": `https://sftimes.com/stories/${s.data.url_slug}`
+    "@id": `https://www.sftimes.com/stories/${s.data.url_slug}`
   },
   "headline": s.data.title,
   "description": s.data.deck,
@@ -60,9 +60,9 @@ const articleSchema = {
   "author": {
     "@type": "Person",
     "name": s.data.author,
-    "url": `https://sftimes.com/team#${s.data.author.toLowerCase()}`
+    "url": `https://www.sftimes.com/team#${s.data.author.toLowerCase()}`
   },
-  "publisher": { "@id": "https://sftimes.com/#org" },
+  "publisher": { "@id": "https://www.sftimes.com/#org" },
   "articleSection": s.data.keeper_type || "Profile",
   "wordCount": Math.round(s.data.read_minutes * 220),
   "inLanguage": "en-US",

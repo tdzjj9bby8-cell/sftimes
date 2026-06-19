@@ -24,7 +24,7 @@ const {
   ogType = 'website',
 } = Astro.props;
 
-const SITE = 'https://sftimes.com';
+const SITE = 'https://www.sftimes.com';
 const canonicalUrl = new URL(Astro.url.pathname, SITE).toString();
 const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.replace(/^\//, '')}`;
 ---
@@ -63,22 +63,22 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
 <script type="application/ld+json" set:html={JSON.stringify({
   "@context": "https://schema.org",
   "@type": "NewsMediaOrganization",
-  "@id": "https://sftimes.com/#org",
+  "@id": "https://www.sftimes.com/#org",
   "name": "SF Times",
   "alternateName": "The Keepers",
-  "url": "https://sftimes.com",
+  "url": "https://www.sftimes.com",
   "logo": {
     "@type": "ImageObject",
-    "url": "https://sftimes.com/og-image.svg",
+    "url": "https://www.sftimes.com/og-image.svg",
     "width": 1200,
     "height": 630
   },
   "foundingDate": "2025",
-  "publishingPrinciples": "https://sftimes.com/standards",
-  "ethicsPolicy": "https://sftimes.com/standards",
-  "actionableFeedbackPolicy": "https://sftimes.com/corrections",
-  "diversityPolicy": "https://sftimes.com/standards",
-  "correctionsPolicy": "https://sftimes.com/corrections",
+  "publishingPrinciples": "https://www.sftimes.com/standards",
+  "ethicsPolicy": "https://www.sftimes.com/standards",
+  "actionableFeedbackPolicy": "https://www.sftimes.com/corrections",
+  "diversityPolicy": "https://www.sftimes.com/standards",
+  "correctionsPolicy": "https://www.sftimes.com/corrections",
   "areaServed": {
     "@type": "City",
     "name": "San Francisco",
@@ -88,7 +88,7 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
     }
   },
   "sameAs": [
-    "https://sftimes.com"
+    "https://www.sftimes.com"
   ],
   "founder": {
     "@type": "Person",
@@ -102,11 +102,11 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : `${SITE}/${ogImage.rep
 <script type="application/ld+json" set:html={JSON.stringify({
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "@id": "https://sftimes.com/#website",
-  "url": "https://sftimes.com",
+  "@id": "https://www.sftimes.com/#website",
+  "url": "https://www.sftimes.com",
   "name": "SF Times · The Keepers",
   "description": "A weekly San Francisco profile publication, reader-funded.",
-  "publisher": { "@id": "https://sftimes.com/#org" },
+  "publisher": { "@id": "https://www.sftimes.com/#org" },
   "inLanguage": "en-US"
 })} />
 <style is:global>

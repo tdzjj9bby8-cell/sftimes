@@ -12,7 +12,7 @@ import { getCollection } from 'astro:content';
  * programmatically.
  */
 
-const SITE = 'https://sftimes.com';
+const SITE = 'https://www.sftimes.com';
 
 export async function GET() {
   const briefs = await getCollection('briefs');

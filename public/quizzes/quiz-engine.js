@@ -647,7 +647,7 @@
       provider: {
         '@type': 'NewsMediaOrganization',
         name: 'The San Francisco Times',
-        url: 'https://sftimes.com/',
+        url: 'https://www.sftimes.com/',
       },
       hasPart: items.map((it) => ({
         '@type': 'Question',
