@@ -16,7 +16,8 @@
     "guard": "node scripts/check-placeholders.mjs --post",
     "brief:ingest": "tsx scripts/brief-ingest.ts",
     "brief:ai": "tsx scripts/brief-ai.ts",
-    "brief:publish": "tsx scripts/brief-publish.ts"
+    "brief:publish": "tsx scripts/brief-publish.ts",
+    "brief:check": "node --env-file-if-exists=.env.local scripts/check-brief-pipeline.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.7",
