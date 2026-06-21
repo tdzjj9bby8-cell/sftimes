@@ -3,200 +3,122 @@ import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
 /**
- * Three sections of three packages. Lowered prices around a $1,500
- * anchor so the funnel runs hot. Hardcoded slot availability creates
- * urgency without faking sales we don't have.
+ * Three distinct products, two tiers each. Per GOOGLE-NEWS-AUDIT-AND-PLAN.md
+ * Phase 4 spec, pre-launch language only: no invented audience metrics, no
+ * Stripe checkout, no fabricated case-study numbers. Editorial firewall on
+ * every placement, integrity caps surfaced.
  */
 
-// SECTION ONE: ONE SATURDAY. Text-only credits on a single issue.
-// Light commitment, easy entry, builds the pipeline.
-const saturdayPkgs = [
+// THE PROFILE: a Saturday Profile feature article with backlink and forever URL.
+const profilePkgs = [
   {
-    price: 'FROM $149 / SATURDAY',
-    name: 'THE CLASSIFIED',
-    sub: 'One line, one saturday. The lightest way in.',
-    slots: '4 of 6 slots open for June',
-    features: [
-      'One-line editor-written mention at the bottom of the saturday letter',
-      'Link visible on the archived web version',
-      'Six classified slots per issue, alphabetized by sponsor',
-      'No homepage mention, no newsletter blurb',
-      'Lowest-commitment way to test reader response',
-    ],
-  },
-  {
-    price: 'FROM $400 / SATURDAY',
-    name: 'THE PATRON',
-    sub: 'Named sponsor credit at the close of one saturday letter.',
-    slots: '2 of 4 slots open for June',
+    price: '$1,500',
+    name: 'THE PROFILE · STANDARD',
+    sub: 'One Saturday Profile feature, 1,200 to 2,000 words.',
     featured: true,
     features: [
-      'Editor-written sponsor credit at issue close',
-      'Text only, no logos, no images, no banners',
-      'Same credit on the archived web version forever',
-      'Name on the supporters wall on the about page',
-      'Four patron slots per month, capped',
+      '1,200 to 2,000-word feature in the SF Times voice',
+      'Original photography by Kiwi, available-light reportorial',
+      'DoFollow backlink in the body, indexed by Google',
+      'Permanent permalink at sftimes.com forever',
+      '"In Collaboration With" chip above the headline',
+      'Editorial firewall disclosure block on the page',
+      'Optional 30-second print-zine credit when quarterly print ships',
     ],
   },
   {
-    price: 'FROM $900 / SATURDAY',
-    name: 'THE CO-PRESENTED',
-    sub: 'A full saturday issue, in collaboration with your name.',
-    slots: '1 of 4 slots open for June',
+    price: '$2,500',
+    name: 'THE PROFILE · EXTENDED',
+    sub: 'Deeper reporting, 2,000 to 3,500 words.',
     features: [
-      '"Presented by" credit at the top of one issue',
-      'Editor-written 80-word sponsor blurb inside',
-      'Name on the homepage feature card that week',
-      'Inclusion in the print archive page',
-      'One co-presenter per saturday',
+      '2,000 to 3,500-word in-depth feature',
+      'Original photography by Kiwi, multiple frames',
+      'DoFollow backlink in the body',
+      'Permanent permalink at sftimes.com forever',
+      '"In Collaboration With" chip above the headline',
+      'Editorial firewall disclosure block on the page',
+      'Optional 30-second print-zine credit when quarterly print ships',
     ],
   },
 ];
 
-// SECTION TWO: ONE STORY. Sponsored editorial.
-// $1,500 anchors the middle. SEO/backlink play, lives forever.
-const storyPkgs = [
+// THE SPOTLIGHT: newsletter-only placement in one Saturday letter.
+// No permanent permalink page. Higher cadence than Profile, lower commitment.
+const spotlightPkgs = [
   {
-    price: 'FROM $1,500',
-    name: 'THE PROFILE',
-    sub: 'One feature, one backlink, one saturday newsletter.',
-    slots: '2 of 3 slots open for June',
+    price: '$350',
+    name: 'THE SPOTLIGHT · MID-LETTER',
+    sub: '200 to 300-word block, mid-letter placement.',
+    features: [
+      '200 to 300-word summary block inside one Saturday letter',
+      'Newsletter only, no permanent permalink page',
+      'One editor-selected photo',
+      'Outbound link to your site',
+      'Labeled "Spotlight" placement',
+      'Mid-letter position (above-fold sold first)',
+    ],
+  },
+  {
+    price: '$500',
+    name: 'THE SPOTLIGHT · ABOVE-FOLD',
+    sub: '200 to 300-word block, top of letter.',
     featured: true,
     features: [
-      '1,200-word feature in our voice',
-      'One DoFollow backlink in the body',
-      'Lives at sftimes.com forever',
-      'Promoted in one saturday newsletter',
-      'One round of revisions',
-      'Editor-labeled "in collaboration with" tag',
-    ],
-  },
-  {
-    price: 'FROM $2,800',
-    name: 'THE FEATURE',
-    sub: 'Deeper reporting, multiple links, homepage rotation.',
-    slots: '1 of 2 slots open for June',
-    features: [
-      '2,500-word in-depth piece',
-      'Up to 3 DoFollow backlinks',
-      'Lives forever, indexed in google',
-      'Featured slot on homepage for one week',
-      'Promoted in one saturday + tease',
-      'Three rounds of revisions, custom photography included',
-    ],
-  },
-  {
-    price: 'FROM $5,500',
-    name: 'THE BESPOKE',
-    sub: 'Personal brand piece, durable, multi-channel.',
-    slots: 'Next slot: July (currently booked through June)',
-    features: [
-      '3,500-word durable article',
-      'Up to 5 DoFollow backlinks',
-      'Lives forever, fully customizable layout',
-      'Homepage hero slot for two weeks',
-      'Promoted in two saturday newsletters',
-      'Unlimited revisions, photography + video b-roll, advisory call',
+      '200 to 300-word summary block inside one Saturday letter',
+      'Newsletter only, no permanent permalink page',
+      'One editor-selected photo',
+      'Outbound link to your site',
+      'Labeled "Spotlight" placement',
+      'Above-fold position, first paid block readers see',
     ],
   },
 ];
 
-// SECTION THREE: MORE THAN ONE. Bundles and annual commitments.
-// The Founding Bundle is the primary conversion target for serious partners.
-const partnershipPkgs = [
+// THE BRIEF MENTION: inline block at top of one daily Brief reader surface.
+// Reader-surface only. Not in RSS, JSON Feed, or category landings.
+const briefPkgs = [
   {
-    price: 'FROM $1,400',
-    name: 'THE QUARTERLY',
-    sub: 'Four saturdays in a row. Same slot, same audience.',
-    slots: '2 of 3 quarters open in 2026',
+    price: '$100 / DAY',
+    name: 'THE BRIEF MENTION · ONE DAY',
+    sub: 'Inline mention at top of one daily Brief.',
     features: [
-      'Four consecutive saturdays at Patron tier',
-      'About 12% off standalone Patron pricing',
-      'Named on the supporters wall throughout the quarter',
-      'First option to renew at the same rate',
-      'One reinforcement window, one audience locked in',
+      '"TODAY\'S BRIEF IS BROUGHT TO YOU BY [name + line + link]"',
+      'Inline block at top of /brief/{date} archive page',
+      'Reader surface only',
+      'Not in RSS feed, JSON Feed, or category landings',
+      'Preserves syndicated-feed editorial integrity',
     ],
   },
   {
-    price: 'FROM $2,800',
-    name: 'THE FOUNDING BUNDLE',
-    sub: 'One profile + four patrons + your name on /about.',
-    slots: '5 of 24 slots open',
+    price: '$400 / 5 DAYS',
+    name: 'THE BRIEF MENTION · FIVE DAYS',
+    sub: 'Five Brief days at a $100 discount.',
     featured: true,
     features: [
-      'One Profile article (1,200 words, backlink, forever URL)',
-      'Four Patron credits over the following two months',
-      'Name on the founding-partners section of /about for 6 months',
-      'Locked 2026 pricing on any renewal',
-      'About 10% off standalone package pricing',
-      'Capped at 24 bundles total. Then closed.',
-    ],
-  },
-  {
-    price: 'FROM $18,000 / YEAR',
-    name: 'THE PILLAR',
-    sub: 'Annual partner, masthead recognition, print and event.',
-    slots: '3 of 3 slots open for 2026',
-    features: [
-      'Annual masthead credit for 12 months',
-      'Four co-presented saturdays a year',
-      'Back cover credit on the annual print zine',
-      'Named as founding underwriter, perpetual',
-      'Co-host slot at the annual reader dinner',
-      'Three pillars per year, limited',
+      'Same inline placement, five days',
+      'Days do not need to be consecutive',
+      'Reader surface only, not in RSS or JSON Feed or categories',
+      '$100 off versus five single-day buys',
+      'One Brief sponsor per day, max one same-sponsor in any 30-day window',
     ],
   },
 ];
-
-// Next 8 saturdays + hardcoded slot availability per date.
-// Update these by hand as real bookings come in.
-function nextSaturdays(n: number): Date[] {
-  const out: Date[] = [];
-  const d = new Date();
-  const daysUntilSat = (6 - d.getDay() + 7) % 7 || 7;
-  d.setDate(d.getDate() + daysUntilSat);
-  for (let i = 0; i < n; i++) {
-    out.push(new Date(d));
-    d.setDate(d.getDate() + 7);
-  }
-  return out;
-}
-const saturdayDates = nextSaturdays(8);
-// Each entry: [classifiedOpen, patronOpen, coPresentedOpen, profileOpen]
-// out of 6, 4, 1, 1 totals. Tweak per real bookings.
-const saturdayAvail = [
-  [4, 2, 0, 0],  // this saturday, heavily booked
-  [3, 1, 1, 0],
-  [5, 2, 1, 1],
-  [6, 3, 1, 1],
-  [6, 4, 1, 1],
-  [6, 4, 1, 1],
-  [6, 4, 1, 1],
-  [6, 4, 1, 1],
-];
-const saturdays = saturdayDates.map((d, i) => ({
-  date: d,
-  label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-  iso: d.toISOString().slice(0, 10),
-  classified: { open: saturdayAvail[i][0], total: 6 },
-  patron:     { open: saturdayAvail[i][1], total: 4 },
-  coPres:     { open: saturdayAvail[i][2], total: 1 },
-  profile:    { open: saturdayAvail[i][3], total: 1 },
-}));
 
 const faqs = [
-  { q: "Can we pick the angle of the article?", a: "You can suggest one. We write the piece. Editorial firewall holds: if we can't honestly cover what you want covered, we'll tell you before we accept the project, not after." },
-  { q: "What if you don't take our pitch?", a: "We talk it through first. We won't accept money for a piece we can't write with integrity. If a project isn't a fit, we'll say so on the intro call and refer you to honest alternatives." },
-  { q: "How long until our piece ships?", a: "The Profile typically lands in 3–4 weeks. The Feature in 4–6. The Bespoke in 6–8. We block one saturday's slot per partner and don't double-book." },
-  { q: "Is the backlink really DoFollow?", a: "Yes. Marked DoFollow in the HTML and indexed by Google. We don't believe in NoFollow trickery. The article lives at a real URL on a real publication, which carries more SEO weight than a directory listing." },
-  { q: "Can we see what the placement looks like before signing?", a: "Yes. Ask us on the call and we'll send links to a sample article placement and a sample saturday letter with sponsor credit. We treat every partner the same way." },
-  { q: "Why no banner ads?", a: "Because we promised our readers we wouldn't. The promise is the product. We monetize through editorial sponsorship and underwriting instead, which keeps readers reading and keeps your name in front of an audience that trusts what they read." },
-  { q: "What happens when a slot runs out for the month?", a: "We roll you to the next available saturday. Most tiers fill 2–4 weeks ahead. If you want a specific date, book early. We don't oversell." },
+  { q: 'Can we pick the angle of the article?', a: 'You can suggest one. The editor selects the angle. Editorial firewall holds: if we cannot honestly cover what you want covered, we tell you on the intro call, not after.' },
+  { q: 'What if you decline the project?', a: 'We talk it through first. We will not accept money for a piece we cannot write with integrity. If the project is not a fit, we say so on the intro call and refer you to honest alternatives.' },
+  { q: 'How long until the Profile ships?', a: 'Standard typically lands in 3 to 4 weeks from contract signoff. Extended in 4 to 6. We block one Saturday slot per partner and do not double-book.' },
+  { q: 'Is the backlink really DoFollow?', a: 'Yes. Marked DoFollow in the HTML and indexed by Google. We do not believe in NoFollow trickery. The article lives at a real URL on a real publication, which carries more SEO weight than a directory listing.' },
+  { q: 'What does the Spotlight look like in the letter?', a: 'A 200 to 300-word block with one photo and an outbound link, labeled "Spotlight." Above-fold is the first paid block readers see. Mid-letter sits between sections. Both are clearly differentiated from editorial.' },
+  { q: 'Where does the Brief Mention appear?', a: 'At the top of one daily Brief archive page at /brief/{date}. Reader surface only. Not in the RSS feed, not in the JSON Feed, not in category landing pages. Syndicated-feed integrity is the reason.' },
+  { q: 'Why no banner ads?', a: 'Because we promised our readers. The promise is the product. We monetize through editorial sponsorship instead, which keeps readers reading and keeps your name in front of an audience that trusts what they read.' },
+  { q: 'Can we see what the placement looks like before signing?', a: 'Yes. Ask on the intro call and we send a sample article, sample Spotlight, and sample Brief Mention. We treat every partner the same way.' },
+  { q: 'How do we pay?', a: 'Check, bank transfer, or Zelle. We do not run a Stripe checkout. We invoice once the angle is signed off and ship after payment clears. Refund-if-killed clause applies on the contract.' },
 ];
 ---
 <ExhibitionLayout
   title="WORK WITH US · The Keepers · SF Times"
-  description="Three ways into the keepers: saturday underwriting, sponsored articles, ongoing partnerships. Nine packages, capped, named, audited. No banner ads, ever."
+  description="Three distinct products: The Profile, The Spotlight, The Brief Mention. Editorial firewall on every placement. Integrity caps in writing. No banner ads, ever."
   active="support"
 >
   <ExhibitionMasthead
@@ -207,259 +129,173 @@ const faqs = [
   />
 
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">PARTNERSHIPS · CAPPED · NAMED · AUDITED</p>
-    <h1 class="ex-prose__title">TELL YOUR STORY.<br>REACH SATURDAY<br>MORNING.</h1>
-    <p>Five thousand newsletter subscribers. One issue every saturday. Readers who pay attention because we earn it. Three ways in: saturday underwriting, sponsored articles, ongoing partnerships. No banner ads, no pop-ups, no tracking pixels. Just your name, in our voice, in front of readers who already trust the publication.</p>
+    <p class="ex-prose__eyebrow">EDITORIAL PARTNERSHIPS · CAPPED · NAMED · FIREWALL</p>
+    <h1 class="ex-prose__title">TELL YOUR STORY.<br>READ FOR REAL.</h1>
+    <p>Pre-launch. Founding-supporter cohort building now. Three distinct products: a Saturday Profile feature (The Profile), a 200 to 300-word block in one Saturday letter (The Spotlight), and an inline mention at the top of one daily Brief (The Brief Mention). Editorial firewall on every placement. No banner ads, no pop-ups, no tracking pixels.</p>
   </article>
-
-  <!-- AUDIENCE METRICS -->
-  <section class="metrics">
-    <div class="metric"><span>5,127</span><p>SATURDAY SUBSCRIBERS</p></div>
-    <div class="metric"><span>62%</span><p>AVG. OPEN RATE</p></div>
-    <div class="metric"><span>78%</span><p>SF BAY AREA</p></div>
-    <div class="metric"><span>57</span><p>ISSUES SHIPPED</p></div>
-    <div class="metric"><span>100%</span><p>HUMAN BYLINES</p></div>
-    <div class="metric"><span>0</span><p>BANNER ADS, EVER</p></div>
-    <div class="metric"><span>4.2 MIN</span><p>AVG. TIME ON ARTICLE</p></div>
-    <div class="metric"><span>$0</span><p>PAYWALL · NEVER</p></div>
-  </section>
-  <p class="metrics-disclosure">Pre-launch projections. The subscriber, open rate, time-on-article, and SF Bay Area percentages above are targets based on early signups and comparable indie newsletter benchmarks, not yet audited at full scale. Issues shipped, human bylines, banner ads, and paywall figures are real. We replace projections with audited numbers once the Saturday newsletter has run twelve consecutive weeks.</p>
-
-  <!-- The "live activity" strip (inquiries this week, last inquiry, slot refresh countdown)
-       was removed during the fabrication cleanup. Pre-launch, those numbers had no real
-       source. We restore the strip when the partner inbox is live and we have real counts
-       to publish. -->
-
-
-  <!-- THIS MONTH'S AVAILABILITY · the scarcity strip -->
-  <section class="availability">
-    <p class="availability__label">THIS MONTH'S AVAILABILITY</p>
-    <div class="availability__bars">
-      <div class="ab"><span class="ab__name">CLASSIFIED</span><span class="ab__count">4 / 6 OPEN</span></div>
-      <div class="ab ab--low"><span class="ab__name">PATRON</span><span class="ab__count">2 / 4 OPEN</span></div>
-      <div class="ab ab--critical"><span class="ab__name">CO-PRESENTED</span><span class="ab__count">1 / 4 OPEN</span></div>
-      <div class="ab"><span class="ab__name">PROFILE</span><span class="ab__count">2 / 3 OPEN</span></div>
-      <div class="ab ab--critical"><span class="ab__name">FEATURE</span><span class="ab__count">1 / 2 OPEN</span></div>
-      <div class="ab ab--booked"><span class="ab__name">BESPOKE</span><span class="ab__count">JUNE FULL</span></div>
-    </div>
-    <p class="availability__foot">Slots refresh on the first of each month. Most tiers fill 2–4 weeks ahead. Booking now lands you in june.</p>
-  </section>
-
-  <!-- 8-WEEK BOOKING CALENDAR · concrete week-by-week availability -->
-  <section class="cal">
-    <div class="cal__head">
-      <p class="cal__label">THE NEXT EIGHT SATURDAYS</p>
-      <p class="cal__sub">Real availability for the next two months. Updated as bookings come in. Tiers that are full for a given Saturday are struck through.</p>
-    </div>
-    <div class="cal__legend">
-      <span class="cal__legend-item"><span class="cal__dot cal__dot--open"></span> OPEN</span>
-      <span class="cal__legend-item"><span class="cal__dot cal__dot--some"></span> LIMITED</span>
-      <span class="cal__legend-item"><span class="cal__dot cal__dot--full"></span> FULL</span>
-    </div>
-    <div class="cal__grid">
-      <div class="cal__row cal__row--head">
-        <span>SATURDAY</span>
-        <span>CLASSIFIED</span>
-        <span>PATRON</span>
-        <span>CO-PRESENTED</span>
-        <span>PROFILE</span>
-      </div>
-      {saturdays.map((s) => (
-        <div class="cal__row">
-          <span class="cal__date">{s.label}</span>
-          <span class={`cal__slot ${s.classified.open === 0 ? 'cal__slot--full' : s.classified.open <= 2 ? 'cal__slot--some' : 'cal__slot--open'}`}>
-            <span class="cal__dot"></span>
-            {s.classified.open === 0 ? 'Full' : `${s.classified.open} of ${s.classified.total}`}
-          </span>
-          <span class={`cal__slot ${s.patron.open === 0 ? 'cal__slot--full' : s.patron.open <= 1 ? 'cal__slot--some' : 'cal__slot--open'}`}>
-            <span class="cal__dot"></span>
-            {s.patron.open === 0 ? 'Full' : `${s.patron.open} of ${s.patron.total}`}
-          </span>
-          <span class={`cal__slot ${s.coPres.open === 0 ? 'cal__slot--full' : 'cal__slot--open'}`}>
-            <span class="cal__dot"></span>
-            {s.coPres.open === 0 ? 'Booked' : 'Open'}
-          </span>
-          <span class={`cal__slot ${s.profile.open === 0 ? 'cal__slot--full' : 'cal__slot--open'}`}>
-            <span class="cal__dot"></span>
-            {s.profile.open === 0 ? 'Booked' : 'Open'}
-          </span>
-        </div>
-      ))}
-    </div>
-    <p class="cal__foot"><a href="#contact">Want a specific Saturday?</a> Tell us on the intro call and we will hold the slot for 48 hours while you decide.</p>
-  </section>
-
-  <!-- FOUNDING COHORT BLOCK -->
-  <section class="founders">
-    <div class="founders__inner">
-      <p class="founders__eyebrow">EARLY PARTNER COHORT · NOW OPEN</p>
-      <h2 class="founders__title">FOUNDING PARTNERS<br>NAMED FOREVER.<br>SEVEN SPOTS LEFT.</h2>
-      <p class="founders__copy">We reserved the first twelve partnership slots for businesses founded in or operating from the bay area. Founding partners are named on the about page in perpetuity, get first option on annual renewals before public open, and lock in 2026 rates against future price increases. Five are taken. Seven remain. When they're gone, the cohort closes.</p>
-      <div class="founders__count">
-        <span class="founders__count-num">7</span>
-        <span class="founders__count-lbl">slots remaining</span>
-      </div>
-    </div>
-  </section>
 
   <!-- EDITOR'S NOTE -->
   <section class="editor-note">
     <div class="editor-note__inner">
       <p class="editor-note__label">A NOTE FROM THE EDITOR</p>
-      <p class="editor-note__body">I pick every sponsor. If a business doesn't pass the bar we hold the bylines to, I'll say no on the intro call and you keep your money. The bar is honest: do you treat your people well, are you specific about what you do, and would your story make a saturday letter our readers actually want to open? If yes, let's talk. If you're not sure, the call is the right place to find out.</p>
+      <p class="editor-note__body">I pick every sponsor. If a business does not pass the bar we hold the bylines to, I say no on the intro call and you keep your money. The bar is honest: do you treat your people well, are you specific about what you do, and would your story make a Saturday letter or Brief day our readers actually want to open? If yes, let us talk. If you are not sure, the call is the right place to find out.</p>
       <p class="editor-note__sign">Eric, founder &amp; editor</p>
     </div>
   </section>
 
-  <!-- SAMPLE CASE STUDY · illustrative format only, no real partnership shipped yet -->
+  <!-- SAMPLE CASE STUDY: illustrative format only, no fabricated metrics -->
   <section class="case">
     <div class="case__head">
       <p class="case__label">SAMPLE CASE STUDY · ILLUSTRATIVE FORMAT</p>
-      <h2 class="case__title">What a Saturday partnership would look like.</h2>
-      <p class="case__intro">SF Times has not yet shipped a paid sponsored Profile. The card below shows the format a real partnership would take, the kind of numbers a Profile would be expected to produce in its first 30 days based on average newsletter performance, and the framing the editor would use. The story title, partner name, and metrics are constructed for demonstration. The first real case study replaces this card.</p>
+      <h2 class="case__title">What a Saturday Profile partnership looks like.</h2>
+      <p class="case__intro">SF Times has not yet shipped a paid sponsored Profile. The card below shows the format a real partnership would take, the framing the editor would use, and the structural deliverables that ship with every placement. The first real case study replaces this card with real numbers and a quote from the partner.</p>
     </div>
 
     <div class="case__body">
       <div class="case__story">
         <p class="case__story-eyebrow">SAMPLE · IN COLLABORATION WITH [YOUR BUSINESS]</p>
         <h3 class="case__story-title">A Profile of Your Business, in Our Voice</h3>
-        <p class="case__story-deck">A 1,200-word reported feature by a named editor, in the SF Times voice, with a DoFollow backlink to your site and a permanent URL on sftimes.com.</p>
+        <p class="case__story-deck">A 1,200 to 2,000-word reported feature by Eric, with a DoFollow backlink to your site and a permanent URL on sftimes.com that lives forever.</p>
         <a class="case__story-link" href="/stories/olive-branch-roasters-bernal">READ A FORMAT SAMPLE →</a>
       </div>
 
       <div class="case__metrics">
-        <p class="case__metrics-label">EXPECTED RESULTS · ESTIMATED FROM CURRENT READERSHIP</p>
-        <div class="case__metric"><span class="case__num">~3,200</span><p>UNIQUE READERS</p></div>
-        <div class="case__metric"><span class="case__num">~62%</span><p>EMAIL OPEN RATE</p></div>
-        <div class="case__metric"><span class="case__num">~5 MIN</span><p>AVG. TIME ON ARTICLE</p></div>
-        <div class="case__metric"><span class="case__num">~400</span><p>OUTBOUND CLICKS</p></div>
-        <div class="case__metric"><span class="case__num">~185</span><p>NEW EMAIL SIGNUPS</p></div>
+        <p class="case__metrics-label">STRUCTURAL DELIVERABLES · NOT AUDIENCE PROJECTIONS</p>
+        <div class="case__metric"><span class="case__num">1,200+</span><p>WORDS, EDITOR-WRITTEN</p></div>
         <div class="case__metric"><span class="case__num">∞</span><p>DOFOLLOW BACKLINK · FOREVER</p></div>
+        <div class="case__metric"><span class="case__num">1</span><p>SATURDAY LETTER PROMOTION</p></div>
+        <div class="case__metric"><span class="case__num">∞</span><p>PERMANENT URL · INDEXED</p></div>
       </div>
     </div>
 
-    <p class="case__note">All numbers above are estimates based on average performance across our current Saturday newsletter (around 5,000 subscribers, around 62% open rate). The publication has not yet shipped a paid sponsored article. The first real partnership replaces this card with real numbers and a quote from the actual partner.</p>
+    <p class="case__note">Structural deliverables are real. Audience reach numbers are deliberately not shown until the publication has audited weekly performance to report.</p>
   </section>
 
-  <!-- SECTION ONE: ONE SATURDAY -->
-  <a href="#saturday" class="ex-colmark__link">
-    <section class="ex-colmark" id="saturday">
-      <h2 class="ex-colmark__text">ONE: SATURDAY UNDERWRITING</h2>
+  <!-- OVERALL INTEGRITY CAPS: the structural rules across all 3 products -->
+  <section class="caps">
+    <div class="caps__inner">
+      <p class="caps__label">INTEGRITY CAPS · ACROSS EVERY PRODUCT</p>
+      <h2 class="caps__title">THE RULES THAT HOLD<br>EVERY PLACEMENT.</h2>
+      <ul class="caps__list">
+        <li><strong>Editorial firewall.</strong> Every placement carries the firewall language linked to <a href="/standards">/standards</a>. Sponsor approves facts, never angle.</li>
+        <li><strong>Editor selects every partner.</strong> Before any money changes hands. If a business cannot pass the editorial bar, we decline on the intro call.</li>
+        <li><strong>Fact-check window.</strong> Sponsor sees the draft 72 hours before publish for fact-correction only. Angle is not up for revision.</li>
+        <li><strong>Right to kill.</strong> If the sponsor objects to a fact-correct angle and we cannot resolve, we refund the placement fee and kill the piece.</li>
+        <li><strong>Combined sponsored-letter cap.</strong> No more than 2 sponsored Saturday letters per year across The Profile + The Spotlight $500 above-fold tier.</li>
+        <li><strong>One Brief sponsor per day.</strong> Same sponsor cannot repeat within a rolling 30-day window.</li>
+        <li><strong>One Spotlight per Saturday letter.</strong> Mid-letter only when above-fold is unsold. Max 4 Spotlight placements in any rolling 8-week window.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SECTION 1: THE PROFILE -->
+  <a href="#profile" class="ex-colmark__link">
+    <section class="ex-colmark" id="profile">
+      <h2 class="ex-colmark__text">THE PROFILE</h2>
     </section>
   </a>
 
   <article class="ex-prose">
-    <p>Three ways to put your name in front of saturday readers. Text only, named by the editor. The lightest commitment in the room and the fastest way to test whether our audience matches yours.</p>
+    <p>A Saturday Profile feature article. Editor-written in the SF Times voice with you as the subject. Original photography by Kiwi. DoFollow backlink. Permanent permalink at sftimes.com. Lives forever, indexed by Google. Standard is 1,200 to 2,000 words; Extended doubles depth.</p>
   </article>
 
-  <!-- Visual mockup of underwriting placements -->
+  <!-- Profile mockup -->
   <section class="mock-section">
-    <p class="mock-section__label">HOW EACH SATURDAY UNDERWRITING TIER APPEARS LIVE</p>
-    <div class="mocks">
-      <div class="mock mock--patron">
-        <span class="mock__chip">THE CLASSIFIED · ONE LINE, BOTTOM OF LETTER</span>
-        <div class="mock__divider"></div>
-        <p class="mock__patron-text">CLASSIFIEDS</p>
-        <p class="mock__classified-line"><strong>LOCAL COFFEE CO.</strong> · Roasting in the Mission since 2011. localcoffeeco.com</p>
-        <p class="mock__classified-line"><strong>22ND STREET BOOKSTORE</strong> · Used and rare, since 1978.</p>
-      </div>
-      <div class="mock mock--patron">
-        <span class="mock__chip">THE PATRON · CLOSE OF SATURDAY LETTER</span>
-        <div class="mock__divider"></div>
-        <p class="mock__patron-text">· TODAY'S LETTER IS SUPPORTED BY ·</p>
-        <p class="mock__patron-name"><strong>LOCAL COFFEE CO.</strong></p>
-        <p class="mock__patron-line">Roasting in the Mission since 2011. Single-origin pour-overs at 22nd &amp; Mission.</p>
-      </div>
-      <div class="mock mock--copresented">
-        <span class="mock__chip">THE CO-PRESENTED · TOP OF ISSUE</span>
-        <p class="mock__copresented-presented">PRESENTED BY <strong>LOCAL COFFEE CO.</strong></p>
-        <h4 class="mock__copresented-title">ISSUE №57 · THE MARIACHI TAILOR</h4>
-        <p class="mock__copresented-blurb">Local Coffee Co. has been roasting on 22nd Street since 2011. Carlos and his team source single-origin lots and cup every batch by hand. This saturday letter is brought to you by their belief that the city deserves coffee made by people who name their growers.</p>
-      </div>
-    </div>
-    <p class="mock-section__note">Mockups use a placeholder name. Real placements look identical with yours in its place.</p>
-  </section>
-
-  <section class="pkgs">
-    {saturdayPkgs.map((p) => (
-      <article class={`pkg${p.featured ? ' pkg--featured' : ''}`}>
-        {p.featured && <span class="pkg__badge">MOST CHOSEN</span>}
-        <p class="pkg__price">{p.price}</p>
-        <h3 class="pkg__name">{p.name}</h3>
-        <p class="pkg__sub">{p.sub}</p>
-        <p class="pkg__slots">{p.slots}</p>
-        <ul>{p.features.map((f) => <li>{f}</li>)}</ul>
-      </article>
-    ))}
-  </section>
-
-  <!-- SECTION TWO: ONE STORY -->
-  <a href="#stories" class="ex-colmark__link">
-    <section class="ex-colmark" id="stories">
-      <h2 class="ex-colmark__text">TWO: SPONSORED ARTICLES</h2>
-    </section>
-  </a>
-
-  <article class="ex-prose">
-    <p>We write the story. You keep the backlink, forever. Three article packages. Each one is reported and written by a named editor in our voice, with you as the subject. Lives on the keepers site at a real URL, indexed by google, DoFollow backlink to your site.</p>
-  </article>
-
-  <section class="mock-section">
-    <p class="mock-section__label">HOW A SPONSORED ARTICLE APPEARS LIVE</p>
+    <p class="mock-section__label">HOW THE PROFILE APPEARS LIVE</p>
     <div class="mock mock--article">
-      <p class="mock__eyebrow">ISSUE №46 · BY ERIC · IN COLLABORATION WITH <strong>LOCAL COFFEE CO.</strong></p>
-      <h3 class="mock__title">THE 22ND STREET ROASTER WHO STILL CUPS EVERY LOT BY HAND.</h3>
-      <p class="mock__deck">Carlos has been roasting on 22nd since 2011. Last week he sourced a microlot from Yirgacheffe and gave the whole staff a tasting. Visit at <a href="#mock">localcoffeeco.com</a>.</p>
+      <p class="mock__eyebrow">ISSUE №X · BY ERIC · IN COLLABORATION WITH <strong>[YOUR BUSINESS]</strong></p>
+      <h3 class="mock__title">A 1,200 TO 2,000-WORD PROFILE OF YOUR BUSINESS, IN OUR VOICE.</h3>
+      <p class="mock__deck">Lede paragraph with specifics: what you do, where, since when, why it matters in the neighborhood. Visit at <a href="#mock">yoursite.com</a>.</p>
       <p class="mock__firewall">EDITORIAL FIREWALL: SPONSOR APPROVED FACTS, NOT ANGLE. EDITOR WROTE EVERY WORD.</p>
     </div>
   </section>
 
-  <section class="pkgs">
-    {storyPkgs.map((p) => (
+  <section class="pkgs pkgs--two">
+    {profilePkgs.map((p) => (
       <article class={`pkg${p.featured ? ' pkg--featured' : ''}`}>
         {p.featured && <span class="pkg__badge">MOST CHOSEN</span>}
         <p class="pkg__price">{p.price}</p>
         <h3 class="pkg__name">{p.name}</h3>
         <p class="pkg__sub">{p.sub}</p>
-        <p class="pkg__slots">{p.slots}</p>
         <ul>{p.features.map((f) => <li>{f}</li>)}</ul>
       </article>
     ))}
   </section>
 
-  <!-- SECTION THREE: MORE THAN ONE -->
-  <a href="#ongoing" class="ex-colmark__link">
-    <section class="ex-colmark" id="ongoing">
-      <h2 class="ex-colmark__text">THREE: ONGOING PARTNERSHIPS</h2>
+  <p class="section-cta">Inquire about The Profile: <a href="mailto:eric@seod.com?subject=The%20Profile%20inquiry">eric@seod.com</a> or call 707-718-3579.</p>
+
+  <!-- SECTION 2: THE SPOTLIGHT -->
+  <a href="#spotlight" class="ex-colmark__link">
+    <section class="ex-colmark" id="spotlight">
+      <h2 class="ex-colmark__text">THE SPOTLIGHT</h2>
     </section>
   </a>
 
   <article class="ex-prose">
-    <p>For partners who want presence over time. Each tier locks in below standalone pricing and reserves your slot before public open. The Founding Bundle is our most-chosen entry for serious partners, capped at twelve and not reopening.</p>
+    <p>A 200 to 300-word block in one Saturday letter. Newsletter only, no permanent permalink page. One editor-selected photo, outbound link to your site, labeled "Spotlight" placement. Above-fold is the first paid block readers see; mid-letter sits between sections.</p>
   </article>
 
+  <!-- Spotlight mockup -->
   <section class="mock-section">
-    <p class="mock-section__label">HOW THE PILLAR APPEARS LIVE</p>
-    <div class="mock mock--pillar">
-      <span class="mock__chip">THE PILLAR · MASTHEAD CREDIT</span>
-      <div class="mock__pillar-mast">THE KEEPERS</div>
-      <div class="mock__pillar-sub">SF TIMES</div>
-      <p class="mock__pillar-credit">FOUNDING UNDERWRITER · <strong>LOCAL COFFEE CO.</strong></p>
+    <p class="mock-section__label">HOW THE SPOTLIGHT APPEARS LIVE</p>
+    <div class="mock mock--article">
+      <span class="mock__chip">THE SPOTLIGHT · IN-LETTER BLOCK</span>
+      <p class="mock__eyebrow">SPOTLIGHT · ABOVE-FOLD</p>
+      <h3 class="mock__title">[YOUR BUSINESS] · 200 TO 300 WORDS, ONE PHOTO.</h3>
+      <p class="mock__deck">Editor-selected photo on the left. Two-paragraph editor-written description on the right with one outbound link. Labeled "Spotlight" so readers know it is paid placement, not editorial.</p>
+      <p class="mock__firewall">SPOTLIGHT PLACEMENT · CLEARLY LABELED · NEWSLETTER ONLY</p>
     </div>
   </section>
 
-  <section class="pkgs">
-    {partnershipPkgs.map((p) => (
+  <section class="pkgs pkgs--two">
+    {spotlightPkgs.map((p) => (
       <article class={`pkg${p.featured ? ' pkg--featured' : ''}`}>
         {p.featured && <span class="pkg__badge">MOST CHOSEN</span>}
         <p class="pkg__price">{p.price}</p>
         <h3 class="pkg__name">{p.name}</h3>
         <p class="pkg__sub">{p.sub}</p>
-        <p class="pkg__slots">{p.slots}</p>
         <ul>{p.features.map((f) => <li>{f}</li>)}</ul>
       </article>
     ))}
   </section>
+
+  <p class="section-cta">Inquire about The Spotlight: <a href="mailto:eric@seod.com?subject=The%20Spotlight%20inquiry">eric@seod.com</a> or call 707-718-3579.</p>
+
+  <!-- SECTION 3: THE BRIEF MENTION -->
+  <a href="#brief" class="ex-colmark__link">
+    <section class="ex-colmark" id="brief">
+      <h2 class="ex-colmark__text">THE BRIEF MENTION</h2>
+    </section>
+  </a>
+
+  <article class="ex-prose">
+    <p>An inline block at the top of one daily Brief archive page at /brief/[date]. Reader surface only. Not in RSS, not in JSON Feed, not in category landings. Preserves syndicated-feed editorial integrity. One Brief sponsor per day. Same sponsor cannot repeat within 30 days.</p>
+  </article>
+
+  <!-- Brief mockup -->
+  <section class="mock-section">
+    <p class="mock-section__label">HOW THE BRIEF MENTION APPEARS LIVE</p>
+    <div class="mock mock--article">
+      <span class="mock__chip">THE BRIEF MENTION · TOP OF DAILY ARCHIVE</span>
+      <p class="mock__eyebrow">TODAY'S BRIEF IS BROUGHT TO YOU BY <strong>[YOUR BUSINESS]</strong></p>
+      <p class="mock__deck">[Your one-line description and outbound link.] yoursite.com</p>
+      <p class="mock__firewall">BRIEF MENTION · READER SURFACE ONLY · NOT IN RSS OR JSON FEED</p>
+    </div>
+  </section>
+
+  <section class="pkgs pkgs--two">
+    {briefPkgs.map((p) => (
+      <article class={`pkg${p.featured ? ' pkg--featured' : ''}`}>
+        {p.featured && <span class="pkg__badge">MOST CHOSEN</span>}
+        <p class="pkg__price">{p.price}</p>
+        <h3 class="pkg__name">{p.name}</h3>
+        <p class="pkg__sub">{p.sub}</p>
+        <ul>{p.features.map((f) => <li>{f}</li>)}</ul>
+      </article>
+    ))}
+  </section>
+
+  <p class="section-cta">Inquire about The Brief Mention: <a href="mailto:eric@seod.com?subject=The%20Brief%20Mention%20inquiry">eric@seod.com</a> or call 707-718-3579.</p>
 
   <!-- FAQ -->
   <a href="#faq" class="ex-colmark__link">
@@ -479,7 +315,7 @@ const faqs = [
 
   <section class="contact" id="contact">
     <h2>START A CONVERSATION.</h2>
-    <p>All starting prices above are a floor. We gate the real number behind a conversation so we can match the package to your business. Tell us what you're working on, what you want readers to know, and what success looks like. We reply within two business days.</p>
+    <p>All prices above are starting prices for the structural product. We gate the final scope behind a conversation so we can match the package to your business. Tell us what you are working on, what you want readers to know, and what success looks like. We reply within two business days.</p>
     <div class="contact__methods">
       <a href="mailto:eric@seod.com?subject=keepers%20partnership%20inquiry">
         <span>EMAIL</span>
@@ -493,119 +329,25 @@ const faqs = [
   </section>
 
   <style>
-    /* METRICS: 8 numbers */
-    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 32px; padding: 0 12px 24px; }
-    .metric { padding: 12px 0; }
-    .metric span { font-family: var(--display); font-size: clamp(36px, 4.5vw, 56px); line-height: 1; display: block; }
-    .metric p { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); margin: 8px 0 0; text-transform: uppercase; }
-    @media (max-width: 880px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
-    .metrics-disclosure {
-      max-width: 880px;
-      margin: 0 12px 56px;
-      padding: 14px 18px;
-      background: #fef3e6;
-      border-left: 3px solid var(--accent, #b8473a);
-      border-bottom: 1px solid var(--rule);
-      font-size: 12.5px;
-      line-height: 1.55;
-      color: var(--ink);
-    }
+    /* PACKAGES */
+    .pkgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 12px 16px; }
+    .pkgs--two { grid-template-columns: repeat(2, 1fr); max-width: 800px; margin: 0 auto; }
+    @media (max-width: 980px) { .pkgs, .pkgs--two { grid-template-columns: 1fr; } }
+    .pkg { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); position: relative; display: flex; flex-direction: column; gap: 14px; }
+    .pkg--featured { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .pkg--featured .pkg__price, .pkg--featured .pkg__sub, .pkg--featured ul li { color: rgba(244,241,234,0.85); }
+    .pkg__badge { position: absolute; top: -12px; left: 16px; background: var(--ink); color: var(--paper); padding: 5px 12px; font-size: 10px; letter-spacing: 0.18em; }
+    .pkg--featured .pkg__badge { background: var(--paper); color: var(--ink); }
+    .pkg__price { font-size: 11px; letter-spacing: 0.18em; margin: 0; }
+    .pkg__name { font-family: var(--display); font-size: clamp(22px, 2.4vw, 30px); line-height: 1.1; margin: 0; text-transform: uppercase; }
+    .pkg__sub { font-size: 14px; line-height: 1.45; margin: 0; }
+    .pkg ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid currentColor; padding-top: 14px; }
+    .pkg li { font-size: 13px; line-height: 1.5; padding: 4px 0 4px 16px; position: relative; }
+    .pkg li::before { content: '·'; position: absolute; left: 4px; font-weight: bold; }
 
-    /* LIVE ACTIVITY STRIP: three signals across the top */
-    .live-activity { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border-block: 1px solid var(--rule); margin: 0 0 48px; }
-    @media (max-width: 720px) { .live-activity { grid-template-columns: 1fr; } }
-    .la { background: var(--paper); padding: 22px 24px; display: flex; flex-direction: column; gap: 8px; }
-    .la__label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
-    .la__value { font-family: var(--display); font-size: clamp(22px, 2.6vw, 32px); line-height: 1; letter-spacing: -0.005em; color: var(--ink); }
-    .la--countdown .la__value { color: #d9551f; }
-
-    /* AVAILABILITY STRIP: scarcity at a glance */
-    .availability { max-width: 1080px; margin: 48px auto; padding: 32px 24px; border: 1px solid var(--rule); background: var(--paper-2); }
-    .availability__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); margin: 0 0 18px; font-weight: 700; }
-    .availability__bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; }
-    @media (max-width: 880px) { .availability__bars { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .availability__bars { grid-template-columns: 1fr; } }
-    .ab { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
-    .ab__name { color: var(--ink); font-weight: 600; }
-    .ab__count { color: var(--muted); }
-    .ab--low .ab__count { color: #b8580f; }
-    .ab--critical .ab__count { color: #d9551f; font-weight: 700; }
-    .ab--booked .ab__count { color: var(--muted); text-decoration: line-through; }
-    .availability__foot { font-size: 12px; color: var(--muted); margin: 18px 0 0; line-height: 1.5; }
-
-    /* 8-WEEK BOOKING CALENDAR */
-    .cal { max-width: 1080px; margin: 0 auto 48px; padding: 0 12px; }
-    .cal__head { margin-bottom: 18px; }
-    .cal__label { font-family: var(--display); font-size: clamp(20px, 2.2vw, 28px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 8px; }
-    .cal__sub { font-size: 13px; color: var(--muted); margin: 0; max-width: 60ch; }
-    .cal__legend { display: flex; gap: 18px; margin: 0 0 18px; flex-wrap: wrap; padding: 12px 0; border-block: 1px solid var(--rule); }
-    .cal__legend-item { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-    .cal__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block; }
-    .cal__dot--open { background: #2d8a4a; }
-    .cal__dot--some { background: #b8580f; }
-    .cal__dot--full { background: var(--rule); }
-    .cal__grid { border: 1px solid var(--rule); }
-    .cal__row { display: grid; grid-template-columns: 120px repeat(4, 1fr); align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--rule); font-size: 13px; }
-    .cal__row:last-child { border-bottom: 0; }
-    .cal__row--head { background: var(--paper-2); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 14px 16px; }
-    .cal__date { font-family: var(--display); font-size: 16px; letter-spacing: -0.005em; }
-    .cal__slot { display: inline-flex; align-items: center; gap: 8px; }
-    .cal__slot--open { color: #2d8a4a; font-weight: 600; }
-    .cal__slot--some { color: #b8580f; font-weight: 600; }
-    .cal__slot--full { color: var(--muted); text-decoration: line-through; }
-    .cal__slot--open .cal__dot { background: #2d8a4a; }
-    .cal__slot--some .cal__dot { background: #b8580f; }
-    .cal__slot--full .cal__dot { background: var(--rule); }
-    .cal__foot { font-size: 12px; color: var(--muted); margin: 18px 0 0; }
-    .cal__foot a { color: var(--ink); font-weight: 600; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
-    @media (max-width: 720px) {
-      .cal__row { grid-template-columns: 1fr 1fr; gap: 8px 16px; padding: 14px 16px; }
-      .cal__row--head { display: none; }
-      .cal__date { grid-column: 1 / -1; padding-bottom: 4px; border-bottom: 1px solid var(--rule); margin-bottom: 6px; }
-      .cal__slot::before { content: attr(data-tier) ' · '; font-weight: 400; color: var(--muted); }
-    }
-
-    /* RECENT PARTNER CASE STUDY */
-    .case { background: var(--paper-2); padding: 48px 12px; margin: 0 0 48px; border-block: 1px solid var(--rule); }
-    .case__head { max-width: 880px; margin: 0 auto 32px; padding: 0 4px; }
-    .case__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; font-weight: 700; }
-    .case__title { font-family: var(--display); font-size: clamp(28px, 3.4vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0; }
-    .case__body {
-      max-width: 1080px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 36px;
-      padding: 0 4px;
-    }
-    @media (max-width: 880px) { .case__body { grid-template-columns: 1fr; } }
-    .case__story { background: var(--paper); padding: 32px 28px; border: 1px solid var(--rule); }
-    .case__story-eyebrow { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
-    .case__story-title { font-family: var(--display); font-size: clamp(22px, 2.2vw, 30px); line-height: 1.1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 14px; }
-    .case__story-deck { font-size: 14px; line-height: 1.55; margin: 0 0 18px; color: var(--ink); }
-    .case__story-link { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 600; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
-
-    .case__metrics { background: var(--ink); color: var(--paper); padding: 32px 28px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 18px; align-content: start; }
-    .case__metrics-label { grid-column: 1 / -1; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,241,234,0.6); margin: 0 0 6px; font-weight: 700; }
-    .case__metric { padding: 6px 0; }
-    .case__num { font-family: var(--display); font-size: clamp(28px, 3vw, 40px); line-height: 1; display: block; }
-    .case__metric p { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(244,241,234,0.7); margin: 6px 0 0; }
-
-    .case__quote { max-width: 720px; margin: 32px auto 18px; padding: 24px 28px; background: var(--paper); border-left: 3px solid var(--ink); }
-    .case__quote p { font-family: var(--display); font-size: clamp(18px, 2.2vw, 24px); line-height: 1.3; letter-spacing: -0.005em; margin: 0 0 12px; }
-    .case__quote cite { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); font-style: normal; }
-    .case__note { font-size: 11px; color: var(--muted); margin: 0 auto; max-width: 60ch; text-align: center; font-style: italic; }
-
-    /* FOUNDING COHORT */
-    .founders { background: var(--ink); color: var(--paper); padding: 64px 12px; margin: 48px 0; }
-    .founders__inner { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 48px; align-items: center; padding: 0 4px; }
-    @media (max-width: 880px) { .founders__inner { grid-template-columns: 1fr; gap: 32px; } }
-    .founders__eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,241,234,0.6); margin: 0 0 18px; }
-    .founders__title { font-family: var(--display); font-size: clamp(36px, 4.6vw, 64px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 20px; color: var(--paper); }
-    .founders__copy { font-size: 15px; line-height: 1.6; color: rgba(244,241,234,0.85); margin: 0; max-width: 56ch; }
-    .founders__count { text-align: center; padding: 28px; border: 1px solid rgba(244,241,234,0.3); }
-    .founders__count-num { font-family: var(--display); font-size: clamp(80px, 12vw, 160px); line-height: 1; display: block; color: var(--paper); }
-    .founders__count-lbl { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,241,234,0.7); display: block; margin-top: 6px; }
+    /* SECTION CTA: one line per product, mailto + phone */
+    .section-cta { text-align: center; font-size: 13px; color: var(--muted); padding: 14px 0; border-top: 1px solid var(--rule); max-width: 880px; margin: 0 auto 48px; }
+    .section-cta a { color: var(--ink); font-weight: 600; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
 
     /* EDITOR'S NOTE */
     .editor-note { padding: 0 12px 56px; }
@@ -614,61 +356,49 @@ const faqs = [
     .editor-note__body { font-size: 16px; line-height: 1.7; margin: 0 0 14px; color: var(--ink); }
     .editor-note__sign { font-family: var(--display); font-size: 18px; letter-spacing: -0.005em; margin: 0; color: var(--ink); }
 
-    /* MOCKUP SECTIONS */
-    .mock-section { padding: 0 12px 48px; max-width: 1080px; margin: 0 auto; }
+    /* CASE STUDY: illustrative format */
+    .case { background: var(--paper-2); padding: 48px 12px; margin: 0 0 48px; border-block: 1px solid var(--rule); }
+    .case__head { max-width: 880px; margin: 0 auto 32px; padding: 0 4px; }
+    .case__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; font-weight: 700; }
+    .case__title { font-family: var(--display); font-size: clamp(28px, 3.4vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0; }
+    .case__intro { font-size: 14px; line-height: 1.6; color: var(--ink); margin: 16px 0 0; max-width: 60ch; }
+    .case__body { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 36px; padding: 0 4px; }
+    @media (max-width: 880px) { .case__body { grid-template-columns: 1fr; } }
+    .case__story { background: var(--paper); padding: 32px 28px; border: 1px solid var(--rule); }
+    .case__story-eyebrow { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+    .case__story-title { font-family: var(--display); font-size: clamp(22px, 2.2vw, 30px); line-height: 1.1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 14px; }
+    .case__story-deck { font-size: 14px; line-height: 1.55; margin: 0 0 18px; color: var(--ink); }
+    .case__story-link { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 600; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+    .case__metrics { background: var(--ink); color: var(--paper); padding: 32px 28px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 18px; align-content: start; }
+    .case__metrics-label { grid-column: 1 / -1; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,241,234,0.6); margin: 0 0 6px; font-weight: 700; }
+    .case__metric { padding: 6px 0; }
+    .case__num { font-family: var(--display); font-size: clamp(28px, 3vw, 40px); line-height: 1; display: block; }
+    .case__metric p { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(244,241,234,0.7); margin: 6px 0 0; }
+    .case__note { font-size: 11px; color: var(--muted); margin: 24px auto 0; max-width: 60ch; text-align: center; font-style: italic; }
+
+    /* INTEGRITY CAPS */
+    .caps { padding: 0 12px 56px; }
+    .caps__inner { max-width: 880px; margin: 0 auto; padding: 36px 36px; background: var(--ink); color: var(--paper); }
+    .caps__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,241,234,0.6); margin: 0 0 18px; font-weight: 700; }
+    .caps__title { font-family: var(--display); font-size: clamp(28px, 3.4vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 24px; color: var(--paper); }
+    .caps__list { list-style: none; padding: 0; margin: 0; }
+    .caps__list li { padding: 12px 0; border-bottom: 1px solid rgba(244,241,234,0.18); font-size: 14px; line-height: 1.6; color: rgba(244,241,234,0.9); }
+    .caps__list li:last-child { border-bottom: 0; }
+    .caps__list strong { color: var(--paper); font-weight: 600; }
+    .caps__list a { color: var(--paper); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+
+    /* MOCKUPS */
+    .mock-section { padding: 0 12px 32px; max-width: 720px; margin: 0 auto; }
     .mock-section__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; padding-left: 4px; }
-    .mock-section__note { font-size: 11px; color: var(--muted); margin: 18px 0 0; text-align: center; font-style: italic; }
-
-    .mocks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    @media (max-width: 980px) { .mocks { grid-template-columns: 1fr; } }
-
     .mock { background: var(--paper); border: 1px solid var(--rule); padding: 28px; position: relative; }
     .mock__chip { position: absolute; top: -10px; left: 16px; background: var(--ink); color: var(--paper); padding: 4px 12px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; }
-
     .mock--article { padding: 32px 36px; }
     .mock__eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
     .mock__eyebrow strong { color: var(--ink); }
-    .mock__title { font-family: var(--display); font-size: clamp(22px, 2.4vw, 32px); line-height: 1.1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 12px; }
+    .mock__title { font-family: var(--display); font-size: clamp(20px, 2.4vw, 28px); line-height: 1.1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 12px; }
     .mock__deck { font-size: 14px; line-height: 1.55; margin: 0 0 18px; color: var(--ink); }
     .mock__deck a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
     .mock__firewall { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0; padding-top: 14px; border-top: 1px solid var(--rule); }
-
-    .mock--patron { text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; padding-top: 36px; }
-    .mock__divider { height: 1px; background: var(--rule); width: 60%; margin: 0 auto 18px; }
-    .mock__patron-text { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
-    .mock__patron-name { font-family: var(--display); font-size: 22px; letter-spacing: -0.005em; margin: 0 0 8px; }
-    .mock__patron-line { font-size: 13px; line-height: 1.45; color: var(--muted); margin: 0; max-width: 36ch; margin-inline: auto; }
-    .mock__classified-line { font-size: 12px; line-height: 1.5; color: var(--ink); margin: 0 0 6px; max-width: 40ch; margin-inline: auto; }
-    .mock__classified-line strong { font-weight: 700; }
-
-    .mock--copresented { padding-top: 36px; }
-    .mock__copresented-presented { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 16px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
-    .mock__copresented-presented strong { color: var(--ink); }
-    .mock__copresented-title { font-family: var(--display); font-size: clamp(20px, 2.4vw, 28px); text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 14px; line-height: 1.1; }
-    .mock__copresented-blurb { font-size: 13px; line-height: 1.55; color: var(--ink); margin: 0; font-style: italic; }
-
-    .mock--pillar { text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; padding-top: 36px; max-width: 600px; margin: 0 auto; }
-    .mock__pillar-mast { font-family: var(--display); font-size: 36px; line-height: 1; text-transform: uppercase; letter-spacing: -0.01em; }
-    .mock__pillar-sub { font-family: var(--display); font-size: 14px; letter-spacing: 0.06em; transform: skewX(-10deg); transform-origin: center; margin: 4px 0 18px; color: var(--ink); }
-    .mock__pillar-credit { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0; padding-top: 14px; border-top: 1px solid var(--rule); }
-    .mock__pillar-credit strong { color: var(--ink); }
-
-    /* PACKAGES */
-    .pkgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 12px 48px; }
-    @media (max-width: 980px) { .pkgs { grid-template-columns: 1fr; } }
-    .pkg { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); position: relative; display: flex; flex-direction: column; gap: 14px; }
-    .pkg--featured { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-    .pkg--featured .pkg__price, .pkg--featured .pkg__sub, .pkg--featured .pkg__slots, .pkg--featured ul li { color: rgba(244,241,234,0.85); }
-    .pkg__badge { position: absolute; top: -12px; left: 16px; background: var(--ink); color: var(--paper); padding: 5px 12px; font-size: 10px; letter-spacing: 0.18em; }
-    .pkg--featured .pkg__badge { background: var(--paper); color: var(--ink); }
-    .pkg__price { font-size: 11px; letter-spacing: 0.18em; margin: 0; }
-    .pkg__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; margin: 0; text-transform: uppercase; }
-    .pkg__sub { font-size: 14px; line-height: 1.45; margin: 0; }
-    .pkg__slots { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #d9551f; font-weight: 600; margin: 0; padding: 8px 12px; background: rgba(217, 85, 31, 0.08); border-left: 2px solid #d9551f; }
-    .pkg--featured .pkg__slots { color: #ff9966; background: rgba(255, 153, 102, 0.12); border-left-color: #ff9966; }
-    .pkg ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid currentColor; padding-top: 14px; }
-    .pkg li { font-size: 13px; line-height: 1.5; padding: 4px 0 4px 16px; position: relative; }
-    .pkg li::before { content: '·'; position: absolute; left: 4px; font-weight: bold; }
 
     /* FAQ */
     .faq { padding: 0 12px 64px; max-width: 880px; margin: 0 auto; }
@@ -691,29 +421,4 @@ const faqs = [
     .contact__methods span { font-size: 11px; letter-spacing: 0.16em; color: rgba(244,241,234,0.6); }
     .contact__methods strong { font-family: var(--display); font-size: clamp(22px, 2.4vw, 32px); font-weight: 400; letter-spacing: -0.005em; }
   </style>
-
-  <script is:inline>
-    // Live countdown to next month's slot refresh (first of next month, 00:00 local).
-    (function () {
-      const el = document.getElementById('laCountdown');
-      if (!el) return;
-      function nextRefresh() {
-        const now = new Date();
-        return new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
-      }
-      function tick() {
-        const now = new Date();
-        const target = nextRefresh();
-        const diff = target - now;
-        if (diff <= 0) { el.textContent = 'OPENING NOW'; return; }
-        const days = Math.floor(diff / 86400000);
-        const hours = Math.floor((diff % 86400000) / 3600000);
-        const mins = Math.floor((diff % 3600000) / 60000);
-        if (days > 0) el.textContent = `${days}d ${hours}h ${mins}m`;
-        else el.textContent = `${hours}h ${mins}m`;
-      }
-      tick();
-      setInterval(tick, 60000);
-    })();
-  </script>
 </ExhibitionLayout>

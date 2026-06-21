@@ -2,12 +2,14 @@
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
-const tiers = [
-  { price: '$5 / MONTH',  name: 'READER+',   what: 'Keeps the lights on. Newsletter. Our thanks, by name, on the supporters page.' },
-  { price: '$10 / MONTH', name: 'SUSTAINER', what: 'One hour of student reporting, every month, paid for by you. Plus the keepers-only quarterly note.', featured: true },
-  { price: '$25 / MONTH', name: 'PATRON',    what: 'Named in the masthead. The annual print zine, mailed. An open invite to the once-a-year reader dinner.' },
-  { price: 'YOU DECIDE',  name: 'CUSTOM',    what: 'One-time or recurring, your number. Helpful if you want to underwrite a single saturday issue.' },
-];
+/**
+ * Per GOOGLE-NEWS-AUDIT-AND-PLAN.md Phase 4: contact-driven 2-lane model.
+ * Lane A: Fund (Zelle, bank, check). Lane B: Volunteer (3 roles).
+ * No Stripe checkout. No suggested tier amounts. No fabricated supporter
+ * count or fabricated subscriber count. Gifts are not tax-deductible
+ * (SF Times is for-profit).
+ */
+
 const orgs = [
   { n: '01', name: 'SF-MARIN FOOD BANK',     what: 'Feeds 53,000 households a week across SF and Marin.' },
   { n: '02', name: 'LA COCINA',              what: 'Mission incubator for immigrant women food entrepreneurs.' },
@@ -16,65 +18,109 @@ const orgs = [
   { n: '05', name: 'SELF-HELP FOR ELDERLY',  what: 'Citywide senior services, delivered in English, Cantonese, and Mandarin.' },
 ];
 
-// ============================================================================
-// FOUNDING SUPPORTERS: 15 placeholder Bay Area names generated 2026-06-04 per
-// Eric's approved direction ("Generate 15 plausible placeholder names, swap
-// real names later"). Replace each name as real supporters confirm. Slots 16+
-// are intentionally open for new supporters as they sign up: every pledge
-// after the first 15 adds a new row to this list, capped only when Eric
-// decides to close the founding-supporter cohort.
-// ============================================================================
-const founders = [
-  { n: '01', name: 'Adrian Park',         hood: 'Inner Sunset' },
-  { n: '02', name: 'Mei-Ling Tam',        hood: 'Outer Richmond' },
-  { n: '03', name: 'Devon Whitaker',      hood: 'Bernal Heights' },
-  { n: '04', name: 'Carolina Velasquez',  hood: 'Mission' },
-  { n: '05', name: 'Hiroshi Okada',       hood: 'Japantown' },
-  { n: '06', name: 'Aisha Bekele',        hood: 'Fillmore' },
-  { n: '07', name: 'Jonathan Bradford',   hood: 'NoPa' },
-  { n: '08', name: 'Priya Krishnan',      hood: 'Hayes Valley' },
-  { n: '09', name: 'Sebastián Reyes',     hood: 'Excelsior' },
-  { n: '10', name: 'Linnea Brunner',      hood: 'Cole Valley' },
-  { n: '11', name: 'David Chen',          hood: 'Chinatown' },
-  { n: '12', name: 'Sofia Galante',       hood: 'North Beach' },
-  { n: '13', name: 'Marcus Joseph',       hood: 'Bayview' },
-  { n: '14', name: 'Yael Stein',          hood: 'Glen Park' },
-  { n: '15', name: 'Tomás Aguilar',       hood: 'Dogpatch' },
+const volunteerRoles = [
+  {
+    name: 'PHOTO SUPPORT',
+    sub: 'Extra eyes and lenses on Saturday shoots.',
+    what: 'Especially when Kiwi is booked. Available-light reportorial work only, no staged.',
+    subject: 'Volunteer · Photo support',
+  },
+  {
+    name: 'NEIGHBORHOOD TIPSTERS',
+    sub: 'Notice a keeper in your corridor.',
+    what: 'Send us 3 sentences. We do not publish your name unless you want us to.',
+    subject: 'Volunteer · Neighborhood tipster',
+  },
+  {
+    name: 'COPY-EDIT',
+    sub: 'Extra read on the Saturday letter before it goes out.',
+    what: 'Strong attention to detail required. Roughly 30 minutes per week.',
+    subject: 'Volunteer · Copy-edit',
+  },
 ];
 ---
 <ExhibitionLayout
   title="KEEP IT ALIVE · The Keepers · SF Times"
-  description="Reader-funded. 75% to operations. 25% to local Bay Area charities. Named, listed, audited."
+  description="Reader-funded. Two ways to support: fund the publication (Zelle, bank, check) or volunteer (photo support, tipsters, copy-edit). Pre-launch. Contact the editor directly."
   active="support"
 >
   <ExhibitionMasthead
     slot="masthead"
     title="KEEP IT ALIVE"
-    subscript="75 / 25"
+    subscript="2 LANES"
     cutouts={[]}
   />
 
   <article class="ex-prose">
     <p class="ex-prose__eyebrow">READER-FUNDED · NO BANNER ADS · NO PAYWALL</p>
     <h1 class="ex-prose__title">YOU READ IT FREE.<br>SOMEONE HAS<br>TO FUND IT.</h1>
-    <p>No banner ads, no tracking, no paywall. Just readers who think a saturday letter about the city is worth ten dollars a month. Or twenty-five. Or whatever you decide. Stripe checkout lands before public launch.</p>
-    <a class="support-hero-cta" href="mailto:eric@seod.com?subject=keepers%20pledge">PLEDGE TO SUPPORT &rarr;</a>
+    <p>Two ways in: fund the publication with money, or volunteer your time on a real role. No tiers, no suggested amounts, no checkout page. Both lanes route through the editor directly.</p>
   </article>
 
-  <section class="tiers">
-    {tiers.map((t) => (
-      <article class={`tier${t.featured ? ' tier--featured' : ''}`}>
-        {t.featured && <span class="tier__badge">MOST CHOSEN</span>}
-        <p class="tier__price">{t.price}</p>
-        <h3 class="tier__name">{t.name}</h3>
-        <p class="tier__what">{t.what}</p>
-        <a class="tier__pledge" href={`mailto:eric@seod.com?subject=${encodeURIComponent(t.name)}%20pledge`}>PLEDGE THIS TIER &rarr;</a>
+  <!-- LANE A: FUND -->
+  <a href="#fund" class="ex-colmark__link">
+    <section class="ex-colmark" id="fund">
+      <h2 class="ex-colmark__text">LANE A: FUND THE PUBLICATION</h2>
+    </section>
+  </a>
+
+  <section class="lane">
+    <div class="lane__intro">
+      <p>Three payment paths. You pick the amount. You pick the cadence. We send a thank-you and your name goes on the supporters wall if you want it there.</p>
+      <p class="lane__legal"><strong>SF Times is a for-profit publication. Gifts are not tax-deductible.</strong> If you need a tax-deductible donation, the five named charities below are good places to send it directly.</p>
+    </div>
+
+    <div class="paths">
+      <article class="path">
+        <p class="path__label">PATH 01</p>
+        <h3 class="path__name">ZELLE</h3>
+        <p class="path__what">Fastest path. Direct bank transfer, no fees.<!-- TODO: Eric provides Zelle email/phone. Currently routes to mailto. --></p>
+        <a class="path__cta" href="mailto:eric@seod.com?subject=Zelle%20support%20%2D%20need%20handle">EMAIL FOR ZELLE HANDLE &rarr;</a>
       </article>
-    ))}
+
+      <article class="path">
+        <p class="path__label">PATH 02</p>
+        <h3 class="path__name">BANK TRANSFER / WIRE</h3>
+        <p class="path__what">For larger or recurring support. We send routing details on request.</p>
+        <a class="path__cta" href="mailto:eric@seod.com?subject=Bank%20transfer%20support%20%2D%20need%20routing">EMAIL FOR ROUTING &rarr;</a>
+      </article>
+
+      <article class="path">
+        <p class="path__label">PATH 03</p>
+        <h3 class="path__name">CHECK BY MAIL</h3>
+        <p class="path__what">Old school works. We send mailing address on request.</p>
+        <a class="path__cta" href="mailto:eric@seod.com?subject=Check%20by%20mail%20support%20%2D%20need%20address">EMAIL FOR ADDRESS &rarr;</a>
+      </article>
+    </div>
   </section>
 
-  <a href="/support" class="ex-colmark__link">
-    <section class="ex-colmark">
+  <!-- LANE B: VOLUNTEER -->
+  <a href="#volunteer" class="ex-colmark__link">
+    <section class="ex-colmark" id="volunteer">
+      <h2 class="ex-colmark__text">LANE B: VOLUNTEER</h2>
+    </section>
+  </a>
+
+  <section class="lane">
+    <div class="lane__intro">
+      <p>Three real roles. Real time commitment, real bylines or named credits where it makes sense. Email the editor with the role you want and a sentence about why.</p>
+    </div>
+
+    <div class="roles">
+      {volunteerRoles.map((r) => (
+        <article class="role">
+          <h3 class="role__name">{r.name}</h3>
+          <p class="role__sub">{r.sub}</p>
+          <p class="role__what">{r.what}</p>
+          <a class="role__cta" href={`mailto:eric@seod.com?subject=${encodeURIComponent(r.subject)}`}>EMAIL THE EDITOR &rarr;</a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- WHERE THE MONEY GOES: architectural commitment, not a published metric -->
+  <a href="#money" class="ex-colmark__link">
+    <section class="ex-colmark" id="money">
       <h2 class="ex-colmark__text">WHERE THE MONEY GOES</h2>
     </section>
   </a>
@@ -84,14 +130,14 @@ const founders = [
       <span class="split__pct">75%</span>
       <div>
         <p class="split__label">OPERATIONS</p>
-        <p class="split__detail">Student stipends, editor pay, hosting, photography. The reporting, in other words.</p>
+        <p class="split__detail">Editor pay, hosting, photography, and the costs of shipping the Saturday letter and the daily Brief. Commitment, not yet audited because the publication has not run a full revenue year. First annual audit publishes 12 months after the first paid Profile.</p>
       </div>
     </div>
     <div class="split__row">
       <span class="split__pct">25%</span>
       <div>
         <p class="split__label">LOCAL BAY AREA CHARITIES</p>
-        <p class="split__detail">Named below. Audited annually. Reported on the corrections page so you can check our math.</p>
+        <p class="split__detail">The five organizations below. Distributed annually once the publication has revenue to distribute. Reported on the corrections page so you can check our math.</p>
       </div>
     </div>
   </section>
@@ -114,36 +160,7 @@ const founders = [
     ))}
   </section>
 
-  <a href="#founders" class="ex-colmark__link">
-    <section class="ex-colmark" id="founders">
-      <h2 class="ex-colmark__text">FOUNDING SUPPORTERS</h2>
-    </section>
-  </a>
-
-  <p class="founders-intro">The first fifteen readers who pledged. Every name below is here because they put a pledge in before public launch. Slots sixteen onward open as new readers pledge. We do not sort by amount. We sort by order of arrival.</p>
-
-  <section class="founders">
-    {founders.map((s) => (
-      <article class="founder">
-        <span class="founder__num">{s.n}</span>
-        <div>
-          <h3 class="founder__name">{s.name}</h3>
-          <p class="founder__hood">{s.hood}</p>
-        </div>
-      </article>
-    ))}
-    <article class="founder founder--open">
-      <span class="founder__num">16</span>
-      <div>
-        <h3 class="founder__name">Your name here.</h3>
-        <p class="founder__hood">First open slot. Pledge any tier to claim it.</p>
-      </div>
-    </article>
-  </section>
-
-  <p class="founders-foot"><a href="mailto:eric@seod.com?subject=keepers%20founding%20supporter" class="founders-foot__cta">Pledge to be number 16 &rarr;</a></p>
-
-  <!-- WORK WITH US: link strip surfacing the 4 conversion paths -->
+  <!-- WORK WITH US strip preserved from prior interlinking -->
   <section class="work-with-strip" aria-label="Work with the keepers">
     <p class="work-with-strip__label">WORK WITH US</p>
     <ul class="work-with-strip__list">
@@ -155,126 +172,41 @@ const founders = [
   </section>
 
   <style>
-    .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 12px 48px; }
-    .tier { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); position: relative; }
-    .tier--featured { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-    .tier--featured .tier__price, .tier--featured .tier__what { color: rgba(244,241,234,0.85); }
-    .tier__badge { position: absolute; top: -12px; left: 16px; background: var(--ink); color: var(--paper); padding: 5px 12px; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
-    .tier--featured .tier__badge { background: var(--paper); color: var(--ink); }
-    .tier__price { font-size: 11px; letter-spacing: 0.18em; color: var(--muted); margin: 0 0 12px; text-transform: uppercase; }
-    .tier__name { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); line-height: 1; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 16px; }
-    .tier__what { font-size: 14px; line-height: 1.5; margin: 0; }
-    .tier__pledge {
-      display: block;
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--rule);
-      font-size: 11px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--ink);
-      transition: opacity 150ms;
-    }
-    .tier__pledge:hover { opacity: 0.6; }
-    .tier--featured .tier__pledge {
-      border-top-color: rgba(244,241,234,0.3);
-      color: var(--paper);
-    }
+    /* LANE intro + structure */
+    .lane { padding: 0 12px 48px; max-width: 1080px; margin: 0 auto; }
+    .lane__intro { max-width: 720px; margin: 0 auto 32px; padding: 0 4px; }
+    .lane__intro p { font-size: 15px; line-height: 1.6; color: var(--ink); margin: 0 0 16px; }
+    .lane__legal { font-size: 13px; color: var(--muted); line-height: 1.55; padding: 14px 18px; background: var(--paper-2); border-left: 3px solid var(--ink); }
+    .lane__legal strong { color: var(--ink); }
 
-    .support-hero-cta {
-      display: inline-block;
-      margin-top: 28px;
-      padding: 16px 28px;
-      background: var(--ink);
-      color: var(--paper);
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      transition: opacity 200ms;
-    }
-    .support-hero-cta:hover { opacity: 0.85; }
+    /* PATHS (fund) and ROLES (volunteer) share the same 3-card grid pattern */
+    .paths, .roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 880px) { .paths, .roles { grid-template-columns: 1fr; } }
+    .path, .role { padding: 28px; border: 1px solid var(--rule); background: var(--paper-2); display: flex; flex-direction: column; gap: 12px; }
+    .path__label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin: 0; }
+    .path__name, .role__name { font-family: var(--display); font-size: clamp(22px, 2.4vw, 30px); line-height: 1.1; margin: 0; text-transform: uppercase; letter-spacing: -0.005em; }
+    .path__what, .role__what { font-size: 14px; line-height: 1.55; margin: 0; color: var(--ink); }
+    .role__sub { font-size: 13px; line-height: 1.45; margin: 0; color: var(--muted); font-style: italic; }
+    .path__cta, .role__cta { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); }
+    .path__cta:hover, .role__cta:hover { opacity: 0.6; }
 
-    .split { padding: 0 12px 48px; }
+    /* WHERE THE MONEY GOES: 75/25 split */
+    .split { padding: 0 12px 48px; max-width: 1080px; margin: 0 auto; }
     .split__row { display: grid; grid-template-columns: 320px 1fr; gap: 40px; padding: 44px 0; border-top: 1px solid var(--rule); align-items: start; }
     .split__row:last-child { border-bottom: 1px solid var(--rule); }
     .split__pct { font-family: var(--display); font-size: clamp(56px, 7.5vw, 100px); line-height: 1; padding-right: 16px; }
     .split__label { font-family: var(--display); font-size: 22px; text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 8px; padding-top: 18px; }
     .split__detail { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; max-width: 56ch; }
+    @media (max-width: 640px) { .split__row { grid-template-columns: 1fr; } }
 
-    .orgs { padding: 0 12px 48px; }
+    /* FIVE ORGS */
+    .orgs { padding: 0 12px 48px; max-width: 1080px; margin: 0 auto; }
     .org { display: grid; grid-template-columns: 80px 1fr; gap: 28px; padding: 28px 0; border-top: 1px solid var(--rule); align-items: baseline; }
     .org:last-child { border-bottom: 1px solid var(--rule); }
     .org__num { font-family: var(--display); font-size: 36px; line-height: 1; color: var(--ink); }
     .org__name { font-family: var(--display); font-size: clamp(22px, 2.4vw, 32px); text-transform: uppercase; letter-spacing: -0.005em; margin: 0 0 6px; }
     .org__what { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; }
-
-    .founders-intro {
-      padding: 32px 12px 0;
-      max-width: 720px;
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--ink);
-      margin: 0;
-    }
-    .founders {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0 32px;
-      padding: 24px 12px 32px;
-    }
-    .founder {
-      display: grid;
-      grid-template-columns: 56px 1fr;
-      gap: 18px;
-      padding: 22px 0;
-      border-top: 1px solid var(--rule);
-      align-items: baseline;
-    }
-    .founder:nth-last-child(-n+2) { border-bottom: 1px solid var(--rule); }
-    .founder__num {
-      font-family: var(--display);
-      font-size: 24px;
-      line-height: 1;
-      color: var(--muted);
-    }
-    .founder__name {
-      font-family: var(--display);
-      font-size: 22px;
-      line-height: 1.15;
-      letter-spacing: -0.005em;
-      margin: 0 0 4px;
-      color: var(--ink);
-    }
-    .founder__hood {
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 0;
-    }
-    .founder--open .founder__num { color: var(--ink); }
-    .founder--open .founder__name { font-style: italic; }
-    .founders-foot {
-      padding: 8px 12px 56px;
-      margin: 0;
-    }
-    .founders-foot__cta {
-      display: inline-block;
-      font-size: 12px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--ink);
-      border-bottom: 2px solid var(--ink);
-      padding-bottom: 4px;
-    }
-    .founders-foot__cta:hover { opacity: 0.6; }
-    @media (max-width: 640px) {
-      .founders { grid-template-columns: 1fr; gap: 0; }
-      .founder { grid-template-columns: 48px 1fr; gap: 14px; padding: 18px 0; }
-    }
-
-    @media (max-width: 980px) { .tiers { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .tiers { grid-template-columns: 1fr; } .split__row { grid-template-columns: 1fr; } .org { grid-template-columns: 1fr; gap: 8px; } }
+    @media (max-width: 640px) { .org { grid-template-columns: 1fr; gap: 8px; } }
 
     /* Work-with-us link strip: horizontal row of 4 destinations */
     .work-with-strip { max-width: 1100px; margin: 56px auto; padding: 32px 12px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
