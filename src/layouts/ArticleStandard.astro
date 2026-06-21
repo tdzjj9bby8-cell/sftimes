@@ -43,12 +43,24 @@ const articleSchema = {
   headline: data.title,
   description: data.deck,
   datePublished: data.published.toISOString(),
+  dateModified: data.published.toISOString(),
   author: { '@type': 'Person', name: data.author },
   publisher: {
     '@type': 'NewsMediaOrganization',
-    name: 'the keepers.',
-    logo: { '@type': 'ImageObject', url: 'https://www.sftimes.com/logo.png' },
+    name: 'SF Times',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://www.sftimes.com/logo-news.png',
+      width: 600,
+      height: 60,
+    },
   },
+  image: data.hero_filename_hint
+    ? `https://www.sftimes.com/${data.hero_filename_hint.replace(/^\//, '')}`
+    : 'https://www.sftimes.com/og-image.svg',
+  articleSection: data.keeper_type
+    ? data.keeper_type.charAt(0).toUpperCase() + data.keeper_type.slice(1)
+    : 'Profile',
   mainEntityOfPage: `https://www.sftimes.com/stories/${data.url_slug}`,
 };
 ---

@@ -62,7 +62,19 @@ const articleSchema = {
     "name": s.data.author,
     "url": `https://www.sftimes.com/team#${s.data.author.toLowerCase()}`
   },
-  "publisher": { "@id": "https://www.sftimes.com/#org" },
+  "publisher": {
+    "@type": "NewsMediaOrganization",
+    "name": "SF Times",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.sftimes.com/logo-news.png",
+      "width": 600,
+      "height": 60
+    }
+  },
+  "image": s.data.hero_filename_hint
+    ? `https://www.sftimes.com/${s.data.hero_filename_hint.replace(/^\//, '')}`
+    : "https://www.sftimes.com/og-image.svg",
   "articleSection": s.data.keeper_type || "Profile",
   "wordCount": Math.round(s.data.read_minutes * 220),
   "inLanguage": "en-US",
