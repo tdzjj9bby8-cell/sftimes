@@ -11,7 +11,7 @@
     "api/**/*.ts": {
       "memory": 1024,
       "maxDuration": 300,
-      "includeFiles": "src/content/briefs/**"
+      "includeFiles": "{src/content/briefs/**,scripts/**}"
     }
   },
   "redirects": [
