@@ -207,6 +207,14 @@ The pattern of scope-narrow message + scope-wide diff recurred 4 times in the 20
 
 ---
 
+## Serverless function bundling
+
+Serverless handlers only bundle what `includeFiles` declares. Vercel functions at `api/**` only pull files from `/api/` plus paths matching `vercel.json` `functions.*.includeFiles`. Any import from outside `/api/` (for example `../../scripts/brief-ai`, a future `../../lib/*`, or `../../shared/*`) resolves at TypeScript build time but crashes at runtime with `FUNCTION_INVOCATION_FAILED` on the deployed function. This bit us in June 2026 (commit 22bdc76) when `scripts/` wasn't in `includeFiles`.
+
+Current `includeFiles` pattern: `{src/content/briefs/**,scripts/**}`. Brace-expansion is the only viable form since Vercel accepts a single glob string per functions entry, not an array. When adding any new directory that `api/**` handlers import from, extend the brace expansion.
+
+---
+
 ## File map (most useful)
 
 ```
