@@ -31,9 +31,9 @@
  * 40-60 candidates.
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Candidate } from './brief-ingest.js';
+import { getQueue, putQueue, kvEnabled } from './lib/queue-store.js';
 
 // ============ TYPES ============
 
@@ -390,12 +390,11 @@ export async function aiPass(opts: RunOpts = {}): Promise<AuditedItem[]> {
   const outputDir = opts.outputDir ?? inputDir;
   const dateString = runDate.toISOString().slice(0, 10);
 
-  const inputPath = path.join(inputDir, `${dateString}-ingested.json`);
-  const outputPath = path.join(outputDir, `${dateString}-audited.json`);
-
-  console.log(`[ai] Loading candidates from ${inputPath}`);
-  const raw = await readFile(inputPath, 'utf-8');
-  const candidates: Candidate[] = JSON.parse(raw);
+  console.log(`[ai] Loading candidates for ${dateString} (${kvEnabled() ? 'KV' : 'filesystem'})`);
+  const candidates = await getQueue<Candidate[]>(dateString, 'ingested', { baseDir: inputDir });
+  if (!candidates || candidates.length === 0) {
+    throw new Error(`No ingested queue for ${dateString}. Run brief-ingest for that date first.`);
+  }
   console.log(`[ai] Processing ${candidates.length} candidates against ${MODEL}`);
 
   const results = await processCandidates(candidates);
@@ -408,8 +407,8 @@ export async function aiPass(opts: RunOpts = {}): Promise<AuditedItem[]> {
   console.log(`[ai] Held for editor: ${held.length}`);
   console.log(`[ai] Dropped: ${dropped.length}`);
 
-  await writeFile(outputPath, JSON.stringify(results, null, 2), 'utf-8');
-  console.log(`[ai] Wrote ${results.length} audited records to ${outputPath}`);
+  await putQueue(dateString, 'audited', results, { baseDir: outputDir });
+  console.log(`[ai] Wrote ${results.length} audited records for ${dateString}`);
 
   return results;
 }

@@ -18,9 +18,8 @@
  * Author: SF Times. Single file by design so it's auditable end to end.
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { putQueue, kvEnabled } from './lib/queue-store.js';
 
 // ============ CONFIG ============
 
@@ -129,12 +128,10 @@ export async function ingest(opts: RunOpts = {}): Promise<Candidate[]> {
     console.warn(`[ingest] Volume cap hit: dropped ${deduped.length - capped.length} candidates`);
   }
 
-  // Write output
-  if (!existsSync(outputDir)) await mkdir(outputDir, { recursive: true });
+  // Persist the candidate queue. Vercel KV in production, filesystem for local dev.
   const dateString = runDate.toISOString().slice(0, 10);
-  const outputPath = path.join(outputDir, `${dateString}-ingested.json`);
-  await writeFile(outputPath, JSON.stringify(capped, null, 2), 'utf-8');
-  console.log(`[ingest] Wrote ${capped.length} candidates to ${outputPath}`);
+  await putQueue(dateString, 'ingested', capped, { baseDir: outputDir });
+  console.log(`[ingest] Wrote ${capped.length} candidates for ${dateString} (${kvEnabled() ? 'KV' : 'filesystem'})`);
 
   return capped;
 }

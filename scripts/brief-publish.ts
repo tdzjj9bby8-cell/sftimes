@@ -39,10 +39,11 @@
  *   GOOGLE_INDEXING_API_KEY  (optional, used for Indexing API ping)
  */
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { AuditedItem, BriefSignal, Category } from './brief-ai.js';
+import { getQueue, putQueue, kvEnabled } from './lib/queue-store.js';
 
 // ============ CONFIG ============
 
@@ -83,18 +84,17 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
   const contentDir = opts.contentDir ?? CONTENT_DIR_DEFAULT;
   const dateString = runDate.toISOString().slice(0, 10);
 
-  const auditedPath = path.join(queueDir, `${dateString}-audited.json`);
-  const decisionsPath = path.join(queueDir, `${dateString}-decisions.json`);
+  console.log(`[publish] Loading audited queue for ${dateString} (${kvEnabled() ? 'KV' : 'filesystem'})`);
+  const audited = await getQueue<AuditedItem[]>(dateString, 'audited', { baseDir: queueDir });
+  if (!audited) {
+    throw new Error(`No audited queue for ${dateString}. Run brief-ai for that date first.`);
+  }
 
-  console.log(`[publish] Loading audited queue from ${auditedPath}`);
-  const audited: AuditedItem[] = JSON.parse(await readFile(auditedPath, 'utf-8'));
-
-  let decisions: Decisions | null = null;
-  if (existsSync(decisionsPath)) {
-    decisions = JSON.parse(await readFile(decisionsPath, 'utf-8'));
+  const decisions = await getQueue<Decisions>(dateString, 'decisions', { baseDir: queueDir });
+  if (decisions) {
     console.log(`[publish] Editor decisions loaded`);
   } else {
-    console.warn(`[publish] No decisions file. Hard gate may have fired. Publishing auto-batch only.`);
+    console.warn(`[publish] No decisions. Hard gate may have fired. Publishing auto-batch only.`);
   }
 
   // Auto-publishing batch: audit_pass items not removed by editor and not spot-check
@@ -145,6 +145,16 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
 
   // Log the edit deltas for audit trail
   await writeAuditLog(queueDir, dateString, audited, decisions);
+
+  // Record a published marker so later runs (and the hard gate) know this
+  // edition already shipped. Vercel KV in production, filesystem for local dev.
+  await putQueue(dateString, 'published', {
+    date: dateString,
+    edition,
+    item_count: final.length,
+    editor,
+    published_at: decisions?.published_at ?? new Date().toISOString(),
+  }, { baseDir: queueDir });
 
   if (!opts.skipDeploy) {
     await triggerDeploy();
