@@ -209,9 +209,9 @@ The pattern of scope-narrow message + scope-wide diff recurred 4 times in the 20
 
 ## Serverless function bundling
 
-Serverless handlers only bundle what `includeFiles` declares. Vercel functions at `api/**` only pull files from `/api/` plus paths matching `vercel.json` `functions.*.includeFiles`. Any import from outside `/api/` (for example `../../scripts/brief-ai`, a future `../../lib/*`, or `../../shared/*`) resolves at TypeScript build time but crashes at runtime with `FUNCTION_INVOCATION_FAILED` on the deployed function. This bit us in June 2026 (commit 22bdc76) when `scripts/` wasn't in `includeFiles`.
+**`"type": "module"` projects need explicit `.js` on every relative import in `api/**`.** Node's ESM loader rejects extensionless specifiers AND raw `.ts` files at runtime, even after esbuild bundling. If `package.json` declares `"type": "module"`, every cross-directory relative import in a serverless handler must end in `.js` (never `.ts`, never bare). This bit us in June 2026 (commit bedbfaf) when `dry-run.ts` imported `'../../scripts/brief-ai'` with no extension and crashed with `FUNCTION_INVOCATION_FAILED` on cold start. The 22bdc76 includeFiles fix delivered the source files but didn't resolve the import; bedbfaf added `.js` and fixed it.
 
-Current `includeFiles` pattern: `{src/content/briefs/**,scripts/**}`. Brace-expansion is the only viable form since Vercel accepts a single glob string per functions entry, not an array. When adding any new directory that `api/**` handlers import from, extend the brace expansion.
+**Secondary requirement: `includeFiles` must cover every path `api/**` imports from.** `vercel.json` `functions.*.includeFiles` copies files into the lambda so esbuild can trace them. Current pattern: `{src/content/briefs/**,scripts/**}` (brace expansion, one glob string per functions entry). When adding any new directory that `api/**` imports from, extend the brace expansion AND ensure every relative import ends in `.js`.
 
 ---
 
