@@ -12,7 +12,7 @@
  * doing any work.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ingest } from '../../scripts/brief-ingest';
+import { ingest } from '../../scripts/brief-ingest.js';
 
 function authorized(req: VercelRequest): boolean {
   const expected = process.env.CRON_SECRET;

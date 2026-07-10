@@ -33,8 +33,8 @@
  *     -d @sample-article.json
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { runScoring, runCategory, runDraft, runAuditor } from '../../scripts/brief-ai';
-import type { Candidate } from '../../scripts/brief-ingest';
+import { runScoring, runCategory, runDraft, runAuditor } from '../../scripts/brief-ai.js';
+import type { Candidate } from '../../scripts/brief-ingest.js';
 
 function authorized(req: VercelRequest): boolean {
   const expected = process.env.CRON_SECRET;

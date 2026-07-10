@@ -12,7 +12,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { publish } from '../../scripts/brief-publish';
+import { publish } from '../../scripts/brief-publish.js';
 
 function authorized(req: VercelRequest): boolean {
   const expected = process.env.CRON_SECRET;

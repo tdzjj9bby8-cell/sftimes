@@ -24,7 +24,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { publish } from '../../scripts/brief-publish';
+import { publish } from '../../scripts/brief-publish.js';
 
 function authorized(req: VercelRequest): boolean {
   // Production: replace with real session check / basic auth.

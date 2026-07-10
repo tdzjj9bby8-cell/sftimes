@@ -9,7 +9,7 @@
  * editor dashboard and the publish stage.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { aiPass } from '../../scripts/brief-ai';
+import { aiPass } from '../../scripts/brief-ai.js';
 
 function authorized(req: VercelRequest): boolean {
   const expected = process.env.CRON_SECRET;
