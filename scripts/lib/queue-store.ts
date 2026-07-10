@@ -32,8 +32,9 @@ import path from 'node:path';
 
 // ============ TYPES ============
 
-/** The four queue payloads the pipeline hands between stages. */
-export type QueueKind = 'ingested' | 'audited' | 'decisions' | 'published';
+/** The queue payloads the pipeline hands between stages, plus the audit-log
+ *  written at publish time. All persist in KV (prod) or the filesystem (dev). */
+export type QueueKind = 'ingested' | 'audited' | 'decisions' | 'published' | 'audit-log';
 
 /** Optional per-call override of the local-dev queue directory. Ignored in KV mode. */
 interface StoreOpts {

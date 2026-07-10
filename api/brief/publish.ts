@@ -21,10 +21,8 @@
  * on the /api/brief/* prefix or check a session cookie before running.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 import { publish } from '../../scripts/brief-publish.js';
+import { putQueue } from '../../scripts/lib/queue-store.js';
 
 function authorized(req: VercelRequest): boolean {
   // Production: replace with real session check / basic auth.
@@ -64,9 +62,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const queueDir = path.join(process.cwd(), 'scripts', 'queue');
-    if (!existsSync(queueDir)) await mkdir(queueDir, { recursive: true });
-
     const decisions = {
       accepted_held: body.accepted_held ?? [],
       rejected_held: body.rejected_held ?? [],
@@ -78,8 +73,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       published_at: new Date().toISOString(),
     };
 
-    const decisionsPath = path.join(queueDir, `${body.date}-decisions.json`);
-    await writeFile(decisionsPath, JSON.stringify(decisions, null, 2), 'utf-8');
+    // Persist decisions via the queue store (KV in prod) so the publish stage
+    // reads the same record. A filesystem write EROFS-fails on Vercel.
+    await putQueue(body.date, 'decisions', decisions);
 
     const runDate = new Date(body.date + 'T08:00:00Z');
     await publish({ runDate });

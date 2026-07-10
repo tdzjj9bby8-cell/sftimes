@@ -50,6 +50,15 @@ import { getQueue, putQueue, kvEnabled } from './lib/queue-store.js';
 const SITE_ORIGIN = 'https://sftimes.com';
 const CONTENT_DIR_DEFAULT = path.join(process.cwd(), 'src', 'content', 'briefs');
 
+// GitHub Contents API target. The git repo root IS the astro/ directory, so the
+// content-collection path is repo-relative `src/content/briefs/...` (NOT
+// `astro/src/content/briefs/...`). Committing to the wrong path would land the
+// file where Vercel never builds it.
+const GITHUB_REPO = 'tdzjj9bby8-cell/sftimes';
+const GITHUB_API = 'https://api.github.com';
+const BOT_NAME = 'SF Times Brief Bot';
+const BOT_EMAIL = 'brief-bot@sftimes.com';
+
 interface Decisions {
   accepted_held: string[];
   rejected_held: string[];
@@ -138,13 +147,30 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
     return markdown;
   }
 
-  if (!existsSync(contentDir)) await mkdir(contentDir, { recursive: true });
-  const outputPath = path.join(contentDir, `${dateString}.md`);
-  await writeFile(outputPath, markdown, 'utf-8');
-  console.log(`[publish] Wrote ${outputPath}`);
+  // Persist the edition. In production commit the markdown to the repo via the
+  // GitHub Contents API: Vercel's function filesystem is read-only, and a write
+  // there would never reach the deployed site anyway. The commit to main
+  // auto-triggers a Vercel rebuild. For local dev without a token, write to the
+  // filesystem so the content collection works offline.
+  const repoPath = `src/content/briefs/${dateString}.md`;
+  const commitMessage = `Publish Brief edition ${dateString}`;
+  let deployedViaCommit = false;
 
-  // Log the edit deltas for audit trail
-  await writeAuditLog(queueDir, dateString, audited, decisions);
+  if (githubEnabled()) {
+    const commitUrl = await commitBriefToGitHub(repoPath, markdown, commitMessage);
+    console.log(`[publish] Committed ${repoPath} to ${GITHUB_REPO}: ${commitUrl}`);
+    deployedViaCommit = true;
+  } else {
+    console.log(`[publish] GITHUB_TOKEN unset. Intended request: PUT ${GITHUB_API}/repos/${GITHUB_REPO}/contents/${repoPath} (${Buffer.byteLength(markdown, 'utf-8')} bytes, message "${commitMessage}"). Writing to the local filesystem instead (dev mode).`);
+    if (!existsSync(contentDir)) await mkdir(contentDir, { recursive: true });
+    const outputPath = path.join(contentDir, `${dateString}.md`);
+    await writeFile(outputPath, markdown, 'utf-8');
+    console.log(`[publish] Wrote ${outputPath}`);
+  }
+
+  // Log the edit deltas for the audit trail (via the queue store so it persists
+  // on Vercel's read-only filesystem too).
+  await writeAuditLog(dateString, audited, decisions, queueDir);
 
   // Record a published marker so later runs (and the hard gate) know this
   // edition already shipped. Vercel KV in production, filesystem for local dev.
@@ -156,11 +182,13 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
     published_at: decisions?.published_at ?? new Date().toISOString(),
   }, { baseDir: queueDir });
 
-  if (!opts.skipDeploy) {
-    await triggerDeploy();
-    await pingIndexingApis(runDate, final);
+  if (opts.skipDeploy) {
+    console.log('[publish] --skip-deploy: skipping deploy trigger and indexing pings');
   } else {
-    console.log('[publish] --skip-deploy: skipping Vercel webhook and indexing pings');
+    // A GitHub commit already triggers Vercel's rebuild; only hit the deploy
+    // hook on the local/webhook path where nothing was pushed.
+    if (!deployedViaCommit) await triggerDeploy();
+    await pingIndexingApis(runDate, final);
   }
 
   console.log(`[publish] OK ${dateString}`);
@@ -255,7 +283,7 @@ async function nextEdition(contentDir: string): Promise<number> {
 
 // ============ AUDIT LOG ============
 
-async function writeAuditLog(queueDir: string, dateString: string, audited: AuditedItem[], decisions: Decisions | null) {
+async function writeAuditLog(dateString: string, audited: AuditedItem[], decisions: Decisions | null, queueDir: string) {
   const log = {
     date: dateString,
     decisions_present: !!decisions,
@@ -272,9 +300,59 @@ async function writeAuditLog(queueDir: string, dateString: string, audited: Audi
     editor: decisions?.editor ?? 'system',
     published_at: decisions?.published_at ?? new Date().toISOString(),
   };
-  const auditDir = path.join(queueDir, 'audit-log');
-  if (!existsSync(auditDir)) await mkdir(auditDir, { recursive: true });
-  await writeFile(path.join(auditDir, `${dateString}.json`), JSON.stringify(log, null, 2), 'utf-8');
+  // Via the queue store (KV in prod) so it does not hit the read-only filesystem.
+  await putQueue(dateString, 'audit-log', log, { baseDir: queueDir });
+}
+
+// ============ GITHUB PUBLISH ============
+
+/** True when a GitHub token is available to commit the brief markdown. */
+function githubEnabled(): boolean {
+  return !!process.env.GITHUB_TOKEN;
+}
+
+/**
+ * Commit the brief markdown to the repo via the GitHub Contents API. Creates the
+ * file, or updates it in place (idempotent) when an edition already exists for
+ * that date: we look up the current blob SHA first and include it on update, so
+ * a re-publish of the same day is a no-drama overwrite rather than a 409/422.
+ * Returns the resulting commit's html_url.
+ */
+async function commitBriefToGitHub(repoPath: string, content: string, message: string): Promise<string> {
+  const token = process.env.GITHUB_TOKEN as string;
+  const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${repoPath}`;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'sftimes-brief-bot',
+  };
+
+  // Idempotency: fetch the existing file's blob SHA (if any) so the PUT updates
+  // rather than failing. A 404 means the file does not exist yet (create path).
+  let existingSha: string | undefined;
+  const getRes = await fetch(url, { headers });
+  if (getRes.ok) {
+    const existing = (await getRes.json()) as { sha?: string };
+    existingSha = existing.sha;
+  } else if (getRes.status !== 404) {
+    throw new Error(`GitHub GET ${repoPath} failed: HTTP ${getRes.status} ${await getRes.text()}`);
+  }
+
+  const body: Record<string, unknown> = {
+    message,
+    content: Buffer.from(content, 'utf-8').toString('base64'),
+    committer: { name: BOT_NAME, email: BOT_EMAIL },
+    branch: 'main',
+  };
+  if (existingSha) body.sha = existingSha;
+
+  const putRes = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+  if (!putRes.ok) {
+    throw new Error(`GitHub PUT ${repoPath} failed: HTTP ${putRes.status} ${await putRes.text()}`);
+  }
+  const result = (await putRes.json()) as { commit?: { html_url?: string } };
+  return result.commit?.html_url ?? '(committed)';
 }
 
 // ============ DEPLOY + INDEX ============

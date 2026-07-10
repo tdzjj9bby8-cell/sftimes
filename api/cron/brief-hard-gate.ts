@@ -10,9 +10,8 @@
  * Wired in vercel.json at 15:30 UTC (7:30 AM PT).
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 import { publish } from '../../scripts/brief-publish.js';
+import { getQueue } from '../../scripts/lib/queue-store.js';
 
 function authorized(req: VercelRequest): boolean {
   const expected = process.env.CRON_SECRET;
@@ -29,11 +28,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const runDate = new Date();
     const dateString = runDate.toISOString().slice(0, 10);
-    const queueDir = path.join(process.cwd(), 'scripts', 'queue');
-    const decisionsPath = path.join(queueDir, `${dateString}-decisions.json`);
 
-    // If the editor already published, skip silently.
-    if (existsSync(decisionsPath)) {
+    // If the editor already published today, a published marker exists in the
+    // queue store (KV in prod). Skip silently. The old existsSync(decisionsPath)
+    // filesystem check broke after the KV migration (always empty on Vercel).
+    const alreadyPublished = await getQueue(dateString, 'published');
+    if (alreadyPublished) {
       return res.status(200).json({
         status: 'ok',
         stage: 'hard-gate',

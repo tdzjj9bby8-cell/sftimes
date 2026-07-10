@@ -215,6 +215,16 @@ The pattern of scope-narrow message + scope-wide diff recurred 4 times in the 20
 
 ---
 
+## Dashboard + API auth posture
+
+`/brief-dashboard` is a private editorial surface. Use **Vercel Deployment Protection** (platform password or SSO) as the human gate for `/brief-dashboard` and the same-origin `/api/brief/*` routes. The browser rides its auth cookie on same-origin fetches, which is why `brief-dashboard.astro` uses `credentials: 'same-origin'` and no bearer token.
+
+The `DASHBOARD_TOKEN` env var stays **UNSET** for browser-visible routes: a static page cannot hold a server secret, so a `DASHBOARD_TOKEN` bearer gate would 401 the dashboard's own fetch. If we later need script-only callers of `/api/brief/*`, set `DASHBOARD_TOKEN` then and have only those scripts send it. Do not add `DASHBOARD_TOKEN` gates that would 401 the browser dashboard.
+
+Publish persistence: `/api/brief/publish` writes editor decisions to the queue store (KV), and `scripts/brief-publish.ts` commits the brief markdown to the repo via the GitHub Contents API (env `GITHUB_TOKEN`, a fine-grained PAT with Contents:write on this repo only). Both avoid the read-only serverless filesystem; the commit to `main` auto-triggers a Vercel rebuild.
+
+---
+
 ## File map (most useful)
 
 ```
