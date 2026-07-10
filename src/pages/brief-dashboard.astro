@@ -10,275 +10,19 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 //   2. AUTO-PUBLISHING — items that cleared both the primary AI pass and the
 //      auditor pass. Eric sees a compact list for visibility but takes no action.
 //
+// Data is fetched CLIENT-SIDE from /api/brief/candidates on page load (real
+// KV-backed cron output as of the KV migration). The queue for "today" only
+// exists after the 3 AM ingest + 5:30 AM AI cron have run, so the page ships
+// static and hydrates: a loading state, then either the two rendered sections
+// or a friendly empty state for pre-cron mornings.
+//
+// Page is noindex + robots-disallowed. Intended to sit behind Vercel
+// deployment protection (platform basic auth) in production; the API endpoints
+// additionally honor an optional DASHBOARD_TOKEN bearer gate for direct hits.
+//
 // Morning budget: 5 to 10 minutes.
 // Hard gate at 7:30 AM: if Eric does not publish, held items are dropped, the
 // auto-publishing batch ships anyway. Most of the brief publishes without him.
-//
-// Page is noindex. Will be repurposed as the live /brief-dashboard/ behind
-// basic auth in Phase G.
-
-type BriefSignal = 'first-to-connect' | 'underreported' | 'missing-context' | 'structural-pattern';
-
-interface AuditResult {
-  audit_pass: boolean;
-  fail_reasons: string[];
-  spot_check?: boolean; // true if held for random spot-check rather than audit failure
-}
-
-interface Candidate {
-  id: string;
-  category: string;
-  signal: BriefSignal;
-  source_headline: string;
-  source_outlet: string;
-  source_byline: string;
-  source_url: string;
-  source_date: string;
-  composite: number;
-  uniqueness: number;
-  angle_statement: string;
-  tldr: string;
-  editor_note: string;
-  what_to_watch: string;
-  audit: AuditResult;
-}
-
-const candidates: Candidate[] = [
-  // ============ AUTO-PUBLISHING (9 items, all 5 auditor checks pass) ============
-  {
-    id: 'c01',
-    category: 'POLITICS',
-    signal: 'structural-pattern',
-    source_headline: 'Lurie, Mahmood hit brakes on controversial S.F. real-estate tax cut',
-    source_outlet: 'Mission Local',
-    source_byline: 'Eleni Balakrishnan',
-    source_url: 'https://missionlocal.org/2026/06/sf-mayor-mahmood-brakes-transfer-tax-cut/',
-    source_date: '2026-06-08',
-    composite: 8.8,
-    uniqueness: 8,
-    angle_statement: 'The pause is a real recalibration of Lurie\'s first-six-months tax strategy, not a procedural delay.',
-    tldr: 'Mayor Lurie and Supervisor Bilal Mahmood paused their plan to halve the city\'s transfer tax on multimillion-dollar property sales. Both said the budget crisis is forcing them to find new revenue first.',
-    editor_note: 'The pause is a real recalibration of Lurie\'s first-six-months tax strategy, not a procedural delay. The BUILD Act was the cornerstone real-estate policy of his administration, betting that lower transfer-tax friction would unfreeze the downtown office market. The trigger for the pause was the May budget projection landing $87 million worse than the December baseline, which made the political case for cutting any revenue source untenable. Mahmood was the lead supervisor sponsor and his retreat matters more than the mayor\'s. He still wants the cut. He just wants a revenue replacement named first. The commercial foreclosure tax now moving in parallel (see Item 4) is the substitute he is shopping. Watch whether Connie Chan signs on or holds out.',
-    what_to_watch: 'Budget reconciliation vote in late July, and whether a transfer-tax pilot returns in Q1 2027.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c02',
-    category: 'HOUSING',
-    signal: 'missing-context',
-    source_headline: 'This group just built affordable housing in SF for half the price and twice as fast',
-    source_outlet: 'SF Standard',
-    source_byline: 'Staff',
-    source_url: 'https://sfstandard.com/2026/06/03/affordable-housing-accelerator-fund-valencia/',
-    source_date: '2026-06-03',
-    composite: 9.0,
-    uniqueness: 8,
-    angle_statement: 'The 19-month build time is the headline but the cost-per-unit replicability question is the one that decides whether this approach scales.',
-    tldr: 'The SF Housing Accelerator Fund opened 145 units for formerly homeless seniors at 1633 Valencia in 19 months at roughly $525,000 per unit. Bay Area affordable housing typically costs around $1 million per unit and takes years longer.',
-    editor_note: 'The 19-month build time is the headline but the cost-per-unit replicability question is the one that decides whether this approach scales. The Accelerator Fund\'s structural innovation is buying land at acquisition prices the city\'s tax-credit financing structure cannot match, then layering in modular construction and a single general-contractor relationship instead of the standard low-bid process. The Valencia site was a vacant lot the fund got below market because the prior owner was in distress. The next four projects in the pipeline are on harder sites: two are conversions of stalled market-rate condos in SoMa, two are infill on city-owned parcels with restricted-covenant baggage. If the cost-per-unit holds on those, the fund changes the trajectory of how SF builds. If not, Valencia stays the outlier.',
-    what_to_watch: 'SoMa conversion project pricing at the September Housing Authority meeting.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c03',
-    category: 'HOUSING',
-    signal: 'first-to-connect',
-    source_headline: 'Landlord is raising SF family\'s rent by 90%. Thanks to a loophole, it might be legal',
-    source_outlet: 'SF Standard',
-    source_byline: 'Staff',
-    source_url: 'https://sfstandard.com/2026/06/02/extreme-rent-hike-richmond-district-sf/',
-    source_date: '2026-06-02',
-    composite: 8.2,
-    uniqueness: 7,
-    angle_statement: 'The Waldman case is the visible example of a cluster pattern the Tenants Union has logged seven of since January.',
-    tldr: 'A Richmond District family at 6838 Geary Boulevard faces a rent increase from $3,695 to $7,000 starting September 1. The new owner is using a state-law exemption that overrides SF\'s rent ordinance.',
-    editor_note: 'The Waldman case is the visible example of a cluster pattern the Tenants Union has logged seven of since January, all on small condo buildings that changed ownership in the same window. Condo units built after 1979 fall outside SF\'s rent ordinance, which means a new owner can reset rent to market without the protections that apply to apartments. The Costa-Hawkins state-law exemption is the backstop that keeps the city from closing the loophole locally. The legal theory the Waldmans are testing is constructive eviction, which has worked twice in SF court since 2022 but is jurisdiction-dependent. If they prevail, the precedent applies citywide. If they lose, the legislative fix has to come from Sacramento, which already failed once this session.',
-    what_to_watch: 'First hearing in the case scheduled for late August.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c04',
-    category: 'POLITICS',
-    signal: 'first-to-connect',
-    source_headline: 'Lurie, Mahmood Introduce Commercial Foreclosure Tax Following Pause on BUILD Act',
-    source_outlet: 'SFist',
-    source_byline: 'Leanne Maxwell',
-    source_url: 'https://sfist.com/2026/06/11/lurie-mahmood-introduce-commercial-foreclosure-tax-following-pause-on-build-act/',
-    source_date: '2026-06-11',
-    composite: 9.2,
-    uniqueness: 8,
-    angle_statement: 'The introduction in the same week as the BUILD Act pause is the move that signals the administration\'s revised tax theory, and other outlets are running it as a separate policy story rather than a paired strategy.',
-    tldr: 'Mayor Lurie and Supervisor Mahmood introduced a commercial foreclosure tax projected to raise $67 million annually. The measure follows their pause this week on the BUILD Act transfer tax cut and is positioned as a replacement revenue source.',
-    editor_note: 'The introduction in the same week as the BUILD Act pause is the move that signals the administration\'s revised tax theory, and other outlets are running it as a separate policy story rather than a paired strategy. The political calculation: a foreclosure tax falls on distressed commercial assets, which polls better than a tax cut for owners of $10M-plus properties. The $67 million estimate uses the FY26 foreclosure-volume data from the SF Assessor, which is real but volatile (foreclosure waves cluster, so the year-over-year projection has wide error bars). The Mahmood team\'s working theory is that the tax holds at this revenue level for two to three years, declines as the office market clears, and self-extinguishes by 2029 once commercial rentals stabilize. Watch whether BOMA endorses or opposes.',
-    what_to_watch: 'BOMA position paper due late June. Supervisor introduction vote week of July 7.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c05',
-    category: 'TRANSIT',
-    signal: 'structural-pattern',
-    source_headline: 'A California environmental board voted to cut $202M from SF\'s eco-friendly transit',
-    source_outlet: 'SF Standard',
-    source_byline: 'Garrett Leahy',
-    source_url: 'https://sfstandard.com/2026/06/04/california-environmental-board-muni-cuts/',
-    source_date: '2026-06-04',
-    composite: 8.6,
-    uniqueness: 7,
-    angle_statement: 'The cut reframes the SFMTA\'s stated case for the November Connect Bay Area measure, which is a connection no other outlet is making.',
-    tldr: 'The California Air Resources Board voted 10 to 3 to cut $202 million SFMTA was counting on for emissions-reduction transit projects. The shortfall hits during the agency\'s worst budget year on record.',
-    editor_note: 'The cut reframes the SFMTA\'s stated case for the November Connect Bay Area measure, which is a connection no other outlet is making. The state\'s Cap-and-Trade transit set-aside was the funding source SFMTA built into its 2026 capital plan for electric bus procurement, the 38 Geary electrification, and the Mission Street bus-rapid-transit project. None of those are guaranteed dead, but all three lose their timeline. The political angle: opponents of the November measure will cite this as evidence Sacramento does not back SF transit. Supporters will cite it as proof that local funding is the only reliable path. Both arguments land. Both are correct. The campaign that frames this first wins the median voter who is undecided in late September.',
-    what_to_watch: 'SFMTA board response and CARB-cut workaround proposal due by June 24.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c06',
-    category: 'PUBLIC SAFETY',
-    signal: 'structural-pattern',
-    source_headline: 'Cancer Death of Retired SF Firefighter Reignites Calls to Reform Blue Shield Coverage',
-    source_outlet: 'SFist',
-    source_byline: 'Zack Ruskin',
-    source_url: 'https://sfist.com/2026/06/07/cancer-death-of-retired-sf-firefighter-reignites-calls-to-reform-blue-shield-coverage/',
-    source_date: '2026-06-07',
-    composite: 8.9,
-    uniqueness: 8,
-    angle_statement: 'The Jones death is one of 23 active firefighter cancer cases the city is now adjudicating against the Blue Shield contract, and how it handles his case sets the precedent for the other 22.',
-    tldr: 'Retired SF firefighter Ken Jones died Saturday from stage 4 lung cancer following a four-month public fight with Blue Shield, the city\'s designated insurance provider. Advocates say the delays cost him treatment.',
-    editor_note: 'The Jones death is one of 23 active firefighter cancer cases the city is now adjudicating against the Blue Shield contract, and how it handles his case sets the precedent for the other 22. Jones became the public face of a structural complaint that has been building since 2023, when the city renewed its Blue Shield contract over Local 798\'s objections. The presumption-of-occupational-cause clause for firefighter cancers is in the contract but has been narrowly interpreted by the insurer. Supervisor Connie Chan has telegraphed a Government Audit and Oversight Committee hearing, and the union is pushing for a contract renegotiation rather than a single-case fix. The political weight is now on the city\'s response, not the union\'s demands. Watch which path Lurie\'s office signals before the hearing.',
-    what_to_watch: 'Government Audit and Oversight hearing scheduled for late June.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c07',
-    category: 'PUBLIC SAFETY',
-    signal: 'underreported',
-    source_headline: 'SF Faces Second Class-Action Lawsuit Over Treatment of Women at County Jail',
-    source_outlet: 'SFist',
-    source_byline: 'Staff',
-    source_url: 'https://sfist.com/2026/06/10/san-francisco-faces-second-class-action-lawsuit-over-treatment-of-women-at-county-jail/',
-    source_date: '2026-06-10',
-    composite: 8.5,
-    uniqueness: 8,
-    angle_statement: 'Two class-action suits within six months on overlapping conditions signals that the plaintiffs\' bar sees a viable broader litigation strategy the Sheriff\'s Department thought it had managed after the 2024 federal monitor agreement.',
-    tldr: 'A second class-action lawsuit filed Tuesday claims conditions for women in custody at the SF county jail are materially worse than those for men. The first suit, filed in January, is still active.',
-    editor_note: 'Two class-action suits within six months on overlapping conditions signals that the plaintiffs\' bar sees a viable broader litigation strategy the Sheriff\'s Department thought it had managed after the 2024 federal monitor agreement. The specific complaint set (overcrowding, medical access delays, mental-health bed shortages) overlaps substantially between the two cases, but the plaintiff pools and counsel are different, which makes consolidation likely. If consolidated, the case becomes the largest jail-conditions matter in SF since the 2008 settlement, with potential structural-injunction remedies. The Sheriff\'s Department\'s response strategy is to argue the post-monitor reforms have addressed the conditions; the plaintiffs\' bar is positioning the cases as proof the reforms have not held. Both lawyers are betting their reputation on this.',
-    what_to_watch: 'Consolidation motion expected by mid-July.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c09',
-    category: 'CLOSINGS',
-    signal: 'structural-pattern',
-    source_headline: 'This Week In Food: Farewell to Shuggie\'s and Anomaly',
-    source_outlet: 'SFist',
-    source_byline: 'Staff',
-    source_url: 'https://sfist.com/2026/06/12/farewell-shuggies-anomaly-bonjour-esme/',
-    source_date: '2026-06-12',
-    composite: 8.0,
-    uniqueness: 7,
-    angle_statement: 'Two acclaimed restaurants closing in the same week sit on different sides of the SF restaurant economics question, and the corridor effect is the larger pattern other outlets are missing.',
-    tldr: 'Anomaly closes after June 20 over chef-owner Mike Lanham\'s health and family time. Shuggie\'s, the Mission upcycled-pizza spot from Kayla Abe and David Murphy, closes July 11. Both were on the 2024 critics\' lists.',
-    editor_note: 'Two acclaimed restaurants closing in the same week sit on different sides of the SF restaurant economics question, and the corridor effect is the larger pattern other outlets are missing. Anomaly\'s closure is personal (Lanham\'s health), which makes it the harder kind of loss because the concept itself was working. Shuggie\'s closure is structural: the waste-stream sourcing model that made the restaurant distinctive was also what made the COGS volatile, and the Mission location\'s lunch traffic never recovered the volume the operators projected at launch. The combined effect on the Mission restaurant cluster between 22nd and 25th matters. The corridor has lost six full-service operators in 18 months. The cluster is still functioning but the density of named-chef restaurants that defined the corridor from 2018 to 2022 is gone.',
-    what_to_watch: 'Esme opening, Shuggie\'s final-week reservations, and the Anomaly space lease availability.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  {
-    id: 'c10',
-    category: 'TECH',
-    signal: 'missing-context',
-    source_headline: 'The SF Fed chief has two words she won\'t say about the AI boom',
-    source_outlet: 'SF Standard',
-    source_byline: 'Jessica Blough',
-    source_url: 'https://sfstandard.com/2026/06/04/sf-federal-reserve-ai-tech-economy/',
-    source_date: '2026-06-04',
-    composite: 7.6,
-    uniqueness: 7,
-    angle_statement: 'Daly\'s avoidance of bubble framing in public is partly market signaling and partly a message to the SFMTA, the city Controller, and the property-tax assessors, all of whom are using SF Fed signals to set their 2027 revenue baselines.',
-    tldr: 'SF Federal Reserve President Mary Daly told the Bloomberg Tech Conference she will not use the words "recession" or "bubble" in conversations about the current AI boom. She also declined to forecast IPO timing for OpenAI or Anthropic.',
-    editor_note: 'Daly\'s avoidance of bubble framing in public is partly market signaling and partly a message to the SFMTA, the city Controller, and the property-tax assessors, all of whom are using SF Fed signals to set their 2027 revenue baselines. The SF Fed publishes the regional employment, lending, and consumer-credit data the city relies on for budget forecasting. Daly\'s actual published research from this year flags the labor-market disconnect (AI capex up sharply, headcount roughly flat) as the analytic question she is watching. Read against the recent KPMG and BCG reports, the Fed is leaning toward a soft-landing read on the AI cycle, not a crash narrative. The city\'s revenue forecasts assume the same. If both are wrong, the FY28 budget gets ugly.',
-    what_to_watch: 'SF Fed regional Beige Book release on June 24.',
-    audit: { audit_pass: true, fail_reasons: [] },
-  },
-  // ============ HELD FOR REVIEW ============
-  // c08: random spot-check (audit passed but pulled for drift detection)
-  {
-    id: 'c08',
-    category: 'CLOSINGS',
-    signal: 'structural-pattern',
-    source_headline: 'A Year and a Half After Reopening, Park Tavern Is Closing For Good',
-    source_outlet: 'SFist',
-    source_byline: 'Jay Barmann',
-    source_url: 'https://sfist.com/2026/06/11/a-year-and-a-half-after-reopening-park-tavern-is-closing-for-good/',
-    source_date: '2026-06-11',
-    composite: 7.6,
-    uniqueness: 7,
-    angle_statement: 'The Park Tavern arc is the specific case study of the celebrity-chef revival model not working at SF\'s post-2020 rent baseline.',
-    tldr: 'Park Tavern in North Beach announced on Instagram it will close for good on June 21. The closure follows a November 2024 revival from original partner James Nicholas and chef Jonathan Waxman that lasted 19 months.',
-    editor_note: 'The Park Tavern arc is the specific case study of the celebrity-chef revival model not working at SF\'s post-2020 rent baseline. The 2024 relaunch read well on paper: original partner Nicholas knew the space, Waxman has the national name, North Beach foot traffic is back to roughly 78% of pre-2020 levels, and the Anna Weinberg operator network was nominally supportive. The piece that did not pencil was the labor cost. The kitchen staff Waxman wanted was not available at the budget the space could carry, and the second-tier team could not deliver the experience the brand promised. The closure is the third high-profile North Beach loss this year (Sotto Mare and Original Joe\'s are the others holding the corridor). The corridor sustainability question is the larger one.',
-    what_to_watch: 'Whether Anna Weinberg announces a replacement concept for the space by Q3.',
-    audit: { audit_pass: true, fail_reasons: [], spot_check: true },
-  },
-  {
-    id: 'c11',
-    category: 'TECH',
-    signal: 'underreported',
-    source_headline: 'Police Search For Potential Co-Conspirator In OpenAI Firebomb Attack',
-    source_outlet: 'SFist',
-    source_byline: 'Staff',
-    source_url: 'https://sfist.com/2026/06/11/police-search-for-potential-co-conspirator-in-openai-firebomb-attack/',
-    source_date: '2026-06-11',
-    composite: 7.1,
-    uniqueness: 5,
-    angle_statement: 'The hotel-call detail is the first public sign that prosecutors think this was planned, and the AI-corridor security spend cascade is the larger story.',
-    tldr: 'Police are searching for an unidentified woman who called the Union Square Plaza Hotel on April 8 to request a late checkout for Daniel Moreno-Gama, the 20-year-old charged in the OpenAI firebomb attack. Investigators now believe he had help.',
-    editor_note: 'The hotel-call detail is the first public sign that prosecutors think this was planned, and the AI-corridor security spend cascade is the larger story. The April attack on Sam Altman\'s home and the attempted arson at OpenAI\'s Mission Street headquarters was the first major coordinated incident targeting an AI company in the city. The civic angle is the security spend that has now cascaded across the AI corridor. OpenAI, Anthropic, and the four other top-floor AI tenants in the SoMa and Mission Bay clusters have all hired private security in the eight weeks since, which is reshaping the demand profile for SF\'s executive-protection firms. Watch for whether the DA charges conspiracy at the next scheduled hearing.',
-    what_to_watch: 'Moreno-Gama preliminary hearing scheduled for July 14.',
-    audit: { audit_pass: false, fail_reasons: ['Check 1 (recap test) borderline: editor\'s note may carry too much of the investigation detail. Reader could understand the news without clicking.'] },
-  },
-  {
-    id: 'c12',
-    category: 'TRANSIT',
-    signal: 'missing-context',
-    source_headline: 'Long-Awaited Powell Street Redesign Advances After Lurie Signs Private Funding Measure',
-    source_outlet: 'SFist',
-    source_byline: 'Leanne Maxwell',
-    source_url: 'https://sfist.com/2026/06/11/long-awaited-powell-street-redesign-advances-after-lurie-signs-private-funding-measure/',
-    source_date: '2026-06-11',
-    composite: 6.8,
-    uniqueness: 4,
-    angle_statement: 'The private-funding route is the new model the Downtown Development Corporation has been quietly piloting, and the Powell project is the template for the Embarcadero and Mid-Market refreshes.',
-    tldr: 'Mayor Lurie signed the measure allowing private donations to fund the Powell Street Promenade refresh, backed by a $14.5 million commitment from the SF Downtown Development Corporation. Groundbreaking is targeted for this fall.',
-    editor_note: 'The private-funding route is the new model the Downtown Development Corporation has been quietly piloting, and the Powell project is the template for the Embarcadero and Mid-Market refreshes. The redesign has been promised since 2017 and died twice under prior administrations over the question of who pays. The three-block stretch between Market and Geary is the cable car queue and the highest tourist foot-traffic block in the city, so the construction sequencing matters more than the design.',
-    what_to_watch: 'First lane closure scheduled for late September.',
-    audit: { audit_pass: false, fail_reasons: ['Check 4 (word count): editor\'s note is 82 words, under the 100-word minimum. Needs expansion or rejection.'] },
-  },
-  {
-    id: 'c14',
-    category: 'POLITICS',
-    signal: 'missing-context',
-    source_headline: 'Mayor Daniel Lurie Gets Shouted Down By LGBTQ Protesters at Two Separate Events',
-    source_outlet: 'SFist',
-    source_byline: 'Jay Barmann',
-    source_url: 'https://sfist.com/2026/06/09/mayor-daniel-lurie-gets-shouted-down-by-lgbtq-protesters-at-two-separate-events-as-pride-month-kicks-off/',
-    source_date: '2026-06-09',
-    composite: 6.9,
-    uniqueness: 4,
-    angle_statement: 'The administration has restored small cuts under similar pressure twice since January, and the protest organizers are leaning into that pattern.',
-    tldr: 'Mayor Lurie was heckled at both the City Hall rainbow flag raising and the Pride kickoff variety show on Monday over proposed grant cuts to LGBTQ-serving nonprofits. The cuts are part of the May budget package facing a July vote.',
-    editor_note: 'The administration has restored small cuts under similar pressure twice since January, and the protest organizers are leaning into that pattern. The grants in question are the seven nonprofit contracts the Department on the Status of Women and the HOPE program use to fund LGBTQ-specific direct services. Total dollars are around $4.1 million annually, which is small in budget terms but operationally critical for the organizations that depend on the contracts. This is important because it shows how the budget process is going to play out for the rest of the cycle. Watch whether Supervisor Jackie Fielder forces the restoration as an amendment to the July budget vote.',
-    what_to_watch: 'Budget amendment hearing in late June.',
-    audit: { audit_pass: false, fail_reasons: ['Check 5 (voice test): the phrase "This is important because it shows how..." is generic news brief filler. Needs SF Times voice revision.'] },
-  },
-];
-
-const heldItems = candidates.filter((c) => !c.audit.audit_pass || c.audit.spot_check);
-const autoItems = candidates.filter((c) => c.audit.audit_pass && !c.audit.spot_check);
-
-const today = new Date('2026-06-13');
-const todayLabel = today.toLocaleDateString('en-US', {
-  weekday: 'long',
-  month: 'long',
-  day: 'numeric',
-}).toUpperCase();
 ---
 <ExhibitionLayout
   title="THE BRIEF · DASHBOARD · INTERNAL"
@@ -298,10 +42,10 @@ const todayLabel = today.toLocaleDateString('en-US', {
     <div class="dash-head__inner">
       <div class="dash-head__top">
         <div>
-          <p class="dash-head__eyebrow">{todayLabel} · AUDITOR PASS COMPLETE</p>
+          <p class="dash-head__eyebrow"><span id="dateLabel">Loading</span> · <span id="auditState">FETCHING QUEUE</span></p>
           <h1 class="dash-head__title">Morning review</h1>
           <p class="dash-head__sub">
-            <strong>{heldItems.length} items held for review</strong> · {autoItems.length} items auto-publishing · Hard gate at 7:30 AM
+            <strong><span id="heldCountHead">0</span> items held for review</strong> · <span id="autoCountHead">0</span> items auto-publishing · Hard gate at 7:30 AM
           </p>
         </div>
         <div class="dash-head__timer-wrap">
@@ -317,8 +61,8 @@ const todayLabel = today.toLocaleDateString('en-US', {
       <div class="dash-head__status" id="status">
         <span class="dash-head__status-item dash-head__status-item--accepted"><span id="acceptedCount">0</span> ACCEPTED</span>
         <span class="dash-head__status-item dash-head__status-item--rejected"><span id="rejectedCount">0</span> REJECTED</span>
-        <span class="dash-head__status-item dash-head__status-item--pending"><span id="pendingCount">{heldItems.length}</span> PENDING</span>
-        <span class="dash-head__status-item dash-head__status-item--auto">{autoItems.length} AUTO-PUBLISHING</span>
+        <span class="dash-head__status-item dash-head__status-item--pending"><span id="pendingCount">0</span> PENDING</span>
+        <span class="dash-head__status-item dash-head__status-item--auto"><span id="autoCountStatus">0</span> AUTO-PUBLISHING</span>
         <a class="dash-head__weekly-link" href="/brief-dashboard/weekly/">WEEKLY AUDIT →</a>
         <a class="dash-head__weekly-link" href="/brief-dashboard/health/">SOURCE HEALTH →</a>
       </div>
@@ -411,8 +155,11 @@ const todayLabel = today.toLocaleDateString('en-US', {
     </div>
   </div>
 
+  <!-- ============ QUEUE STATE BANNER ============ -->
+  <div class="dash-banner" id="queueStatus" role="status" aria-live="polite">Loading today's queue…</div>
+
   <!-- ============ HELD FOR REVIEW ============ -->
-  <section class="dash-section">
+  <section class="dash-section" id="heldSection" hidden>
     <div class="dash-section__head">
       <p class="dash-section__eyebrow">SECTION 1 OF 2 · REQUIRES REVIEW</p>
       <h2 class="dash-section__title">Held for your review</h2>
@@ -422,118 +169,38 @@ const todayLabel = today.toLocaleDateString('en-US', {
       </p>
     </div>
 
-    <div class="dash-queue">
-      {heldItems.map((c) => (
-        <article class={`cand cand--${c.signal}`} data-id={c.id}>
-          <header class="cand__head">
-            <div class="cand__head-left">
-              <span class="cand__category">{c.category}</span>
-              <span class={`cand__signal cand__signal--${c.signal}`}>{c.signal.replace(/-/g, ' ').toUpperCase()}</span>
-              <span class="cand__score">COMPOSITE {c.composite.toFixed(1)} · UNIQUENESS {c.uniqueness}</span>
-            </div>
-            <div class="cand__head-right">
-              {c.audit.spot_check ? (
-                <span class="cand__hold-badge cand__hold-badge--spot">RANDOM SPOT-CHECK</span>
-              ) : (
-                <span class="cand__hold-badge cand__hold-badge--fail">AUDITOR FLAGGED</span>
-              )}
-            </div>
-          </header>
-
-          {!c.audit.spot_check && c.audit.fail_reasons.length > 0 && (
-            <div class="cand__audit-fails">
-              <p class="cand__audit-label">AUDITOR REASONS</p>
-              {c.audit.fail_reasons.map((reason) => (
-                <p class="cand__audit-reason">{reason}</p>
-              ))}
-            </div>
-          )}
-
-          <div class="cand__source">
-            <p class="cand__source-headline">{c.source_headline}</p>
-            <p class="cand__source-meta">
-              <a href={c.source_url} rel="noopener noreferrer" target="_blank">{c.source_outlet}</a>
-              <span> · </span>
-              <span>{c.source_byline}</span>
-              <span> · </span>
-              <span>{c.source_date}</span>
-            </p>
-          </div>
-
-          <div class="cand__fields">
-            <label class="cand__field">
-              <span class="cand__field-label">Angle statement</span>
-              <textarea class="cand__field-input cand__field-input--angle" rows="2" data-field="angle">{c.angle_statement}</textarea>
-            </label>
-            <label class="cand__field">
-              <span class="cand__field-label">TLDR</span>
-              <textarea class="cand__field-input" rows="3" data-field="tldr">{c.tldr}</textarea>
-            </label>
-            <label class="cand__field">
-              <span class="cand__field-label">Editor's note</span>
-              <textarea class="cand__field-input cand__field-input--long" rows="7" data-field="note">{c.editor_note}</textarea>
-            </label>
-            <label class="cand__field">
-              <span class="cand__field-label">What to watch</span>
-              <textarea class="cand__field-input" rows="2" data-field="watch">{c.what_to_watch}</textarea>
-            </label>
-          </div>
-
-          <div class="cand__actions">
-            <button class="cand__btn cand__btn--accept" data-action="accept" data-id={c.id} type="button">Accept (A)</button>
-            <button class="cand__btn cand__btn--reject" data-action="reject" data-id={c.id} type="button">Reject (R)</button>
-          </div>
-        </article>
-      ))}
-    </div>
+    <div class="dash-queue" id="heldQueue"></div>
   </section>
 
   <!-- ============ AUTO-PUBLISHING ============ -->
-  <section class="dash-section dash-section--auto">
+  <section class="dash-section dash-section--auto" id="autoSection" hidden>
     <div class="dash-section__head">
       <p class="dash-section__eyebrow">SECTION 2 OF 2 · NO ACTION REQUIRED</p>
       <h2 class="dash-section__title">Auto-publishing batch</h2>
       <p class="dash-section__sub">
-        {autoItems.length} items cleared both the primary AI pass and the auditor.
+        <span id="autoCountSub">0</span> items cleared both the primary AI pass and the auditor.
         Publishing automatically when you hit the button below. Click any item to spot-check.
       </p>
     </div>
 
-    <ul class="dash-auto">
-      {autoItems.map((c) => (
-        <li class="auto-item" data-id={c.id}>
-          <details>
-            <summary>
-              <span class={`auto-item__signal auto-item__signal--${c.signal}`}></span>
-              <span class="auto-item__category">{c.category}</span>
-              <span class="auto-item__headline">{c.source_headline}</span>
-              <span class="auto-item__meta">{c.source_outlet} · {c.composite.toFixed(1)}</span>
-              <button class="auto-item__remove" data-action="remove" data-id={c.id} type="button" aria-label="Remove from auto-publishing batch">×</button>
-            </summary>
-            <div class="auto-item__body">
-              <p class="auto-item__angle"><strong>Angle:</strong> {c.angle_statement}</p>
-              <p class="auto-item__tldr"><strong>TLDR:</strong> {c.tldr}</p>
-              <p class="auto-item__note">{c.editor_note}</p>
-              <p class="auto-item__watch"><strong>Watch:</strong> {c.what_to_watch}</p>
-            </div>
-          </details>
-        </li>
-      ))}
-    </ul>
+    <ul class="dash-auto" id="autoList"></ul>
   </section>
 
   <!-- ============ PUBLISH BAR ============ -->
-  <section class="dash-publish">
+  <section class="dash-publish" id="publishBar" hidden>
     <div class="dash-publish__inner">
       <div>
         <p class="dash-publish__label">Ready to ship</p>
-        <p class="dash-publish__sub" id="publishMsg">Review the {heldItems.length} held items first. The auto-publishing batch is locked in unless you remove items.</p>
+        <p class="dash-publish__sub" id="publishMsg">Waiting for today's queue…</p>
       </div>
       <button class="dash-publish__btn" id="publishBtn" type="button" disabled>PUBLISH TODAY'S BRIEF</button>
     </div>
   </section>
 
-  <style>
+  <!-- Global because the held/auto cards are created client-side (createElement)
+       and would not carry Astro's scoped-style marker. All class names are
+       page-prefixed and this block only loads on /brief-dashboard. -->
+  <style is:global>
     /* ============ HEAD ============ */
     .dash-head {
       background: var(--paper-2);
@@ -585,6 +252,18 @@ const todayLabel = today.toLocaleDateString('en-US', {
       font-weight: 700; color: var(--accent);
       border-bottom: 1px solid currentColor; padding-bottom: 1px;
     }
+
+    /* ============ QUEUE STATE BANNER ============ */
+    .dash-banner {
+      max-width: 1200px; margin: 0 auto 40px; padding: 40px 24px;
+      font-family: var(--ui); font-size: 14px; line-height: 1.6; color: var(--muted);
+      background: var(--paper-2); border: 1px solid var(--rule);
+      text-align: center;
+    }
+    .dash-banner strong { color: var(--ink); font-weight: 700; }
+    .dash-banner--error { color: #a82919; border-color: #a82919; background: #fef0ed; }
+    .dash-banner[hidden] { display: none; }
+    .dash-section[hidden], .dash-publish[hidden] { display: none; }
 
     /* ============ HELP MODAL ============ */
     .dash-help[hidden] { display: none; }
@@ -867,6 +546,7 @@ const todayLabel = today.toLocaleDateString('en-US', {
 
   <script is:inline>
     (function () {
+      // ============ ELEMENT REFS ============
       const timerEl = document.getElementById('timer');
       const timerBtn = document.getElementById('timerBtn');
       const acceptedEl = document.getElementById('acceptedCount');
@@ -874,27 +554,43 @@ const todayLabel = today.toLocaleDateString('en-US', {
       const pendingEl = document.getElementById('pendingCount');
       const publishBtn = document.getElementById('publishBtn');
       const publishMsg = document.getElementById('publishMsg');
-      const heldCards = document.querySelectorAll('.cand');
-      const autoCards = document.querySelectorAll('.auto-item');
-      const heldTotal = heldCards.length;
 
+      const dateLabelEl = document.getElementById('dateLabel');
+      const auditStateEl = document.getElementById('auditState');
+      const heldCountHead = document.getElementById('heldCountHead');
+      const autoCountHead = document.getElementById('autoCountHead');
+      const autoCountStatus = document.getElementById('autoCountStatus');
+      const autoCountSub = document.getElementById('autoCountSub');
+
+      const queueStatus = document.getElementById('queueStatus');
+      const heldSection = document.getElementById('heldSection');
+      const autoSection = document.getElementById('autoSection');
+      const publishBar = document.getElementById('publishBar');
+      const heldQueue = document.getElementById('heldQueue');
+      const autoList = document.getElementById('autoList');
+
+      const SIGNALS = ['first-to-connect', 'underreported', 'missing-context', 'structural-pattern'];
+
+      // Live card node lists, repopulated after each render.
+      let heldCards = [];
+      let autoCards = [];
+      let activeIdx = 0;
+
+      // ============ TIMER ============
       let startedAt = null;
       let tickHandle = null;
-      let activeIdx = 0;
 
       function fmtTime(seconds) {
         const m = Math.floor(seconds / 60).toString().padStart(2, '0');
         const s = (seconds % 60).toString().padStart(2, '0');
         return m + ':' + s;
       }
-
       function tick() {
         if (!startedAt) return;
         const elapsed = Math.floor((Date.now() - startedAt) / 1000);
         timerEl.textContent = fmtTime(elapsed);
         if (elapsed > 10 * 60) timerEl.classList.add('over');
       }
-
       function startTimer() {
         if (startedAt) return;
         startedAt = Date.now();
@@ -903,13 +599,167 @@ const todayLabel = today.toLocaleDateString('en-US', {
         tickHandle = setInterval(tick, 1000);
         tick();
       }
-
       function startTimerIfNeeded() {
         if (!startedAt) startTimer();
       }
-
       timerBtn.addEventListener('click', startTimer);
 
+      // ============ DOM HELPERS ============
+      // Build via createElement + textContent so fetched RSS/AI text can never
+      // inject markup into the internal dashboard.
+      function el(tag, cls, text) {
+        const n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+      }
+      function safeSignal(s) {
+        return SIGNALS.indexOf(s) >= 0 ? s : 'underreported';
+      }
+
+      // ============ NORMALIZE ============
+      // /api/brief/candidates returns AuditedItem[] (nested scoring/draft/audit).
+      // Flatten to the shape the cards render. Items without an audit block were
+      // dropped before the auditor and are filtered out before this runs.
+      function normalize(item) {
+        const draft = item.draft || {};
+        const scoring = item.scoring || {};
+        const audit = item.audit || {};
+        return {
+          id: item.id,
+          category: item.category || 'POLITICS',
+          signal: safeSignal(draft.brief_signal),
+          source_headline: item.original_headline || '(no headline)',
+          source_outlet: item.source_outlet || '',
+          source_byline: item.source_byline || 'Staff',
+          source_url: item.source_url || '#',
+          source_date: (item.published_at || '').slice(0, 10),
+          composite: typeof scoring.composite === 'number' ? scoring.composite : 0,
+          uniqueness: typeof scoring.uniqueness === 'number' ? scoring.uniqueness : 0,
+          angle_statement: draft.angle_statement || '',
+          tldr: draft.tldr || '',
+          editor_note: draft.editor_note || '',
+          what_to_watch: draft.what_to_watch || '',
+          audit_pass: !!audit.audit_pass,
+          spot_check: !!audit.spot_check,
+          fail_reasons: Array.isArray(audit.fail_reasons) ? audit.fail_reasons : [],
+        };
+      }
+
+      // ============ CARD RENDERERS ============
+      function fieldEl(label, value, field, rows, inputCls) {
+        const wrap = el('label', 'cand__field');
+        wrap.appendChild(el('span', 'cand__field-label', label));
+        const ta = document.createElement('textarea');
+        ta.className = inputCls;
+        ta.rows = rows;
+        ta.dataset.field = field;
+        ta.value = value || '';
+        wrap.appendChild(ta);
+        return wrap;
+      }
+
+      function renderHeldCard(c) {
+        const sig = c.signal;
+        const article = el('article', 'cand cand--' + sig);
+        article.dataset.id = c.id;
+
+        const head = el('header', 'cand__head');
+        const left = el('div', 'cand__head-left');
+        left.appendChild(el('span', 'cand__category', c.category));
+        left.appendChild(el('span', 'cand__signal cand__signal--' + sig, sig.replace(/-/g, ' ').toUpperCase()));
+        left.appendChild(el('span', 'cand__score', 'COMPOSITE ' + c.composite.toFixed(1) + ' · UNIQUENESS ' + c.uniqueness));
+        head.appendChild(left);
+        const right = el('div', 'cand__head-right');
+        right.appendChild(
+          c.spot_check
+            ? el('span', 'cand__hold-badge cand__hold-badge--spot', 'RANDOM SPOT-CHECK')
+            : el('span', 'cand__hold-badge cand__hold-badge--fail', 'AUDITOR FLAGGED')
+        );
+        head.appendChild(right);
+        article.appendChild(head);
+
+        if (!c.spot_check && c.fail_reasons.length > 0) {
+          const fails = el('div', 'cand__audit-fails');
+          fails.appendChild(el('p', 'cand__audit-label', 'AUDITOR REASONS'));
+          c.fail_reasons.forEach((r) => fails.appendChild(el('p', 'cand__audit-reason', r)));
+          article.appendChild(fails);
+        }
+
+        const source = el('div', 'cand__source');
+        source.appendChild(el('p', 'cand__source-headline', c.source_headline));
+        const meta = el('p', 'cand__source-meta');
+        const a = el('a', null, c.source_outlet);
+        a.href = c.source_url;
+        a.rel = 'noopener noreferrer';
+        a.target = '_blank';
+        meta.appendChild(a);
+        meta.appendChild(document.createTextNode(' · ' + c.source_byline + ' · ' + c.source_date));
+        source.appendChild(meta);
+        article.appendChild(source);
+
+        const fields = el('div', 'cand__fields');
+        fields.appendChild(fieldEl('Angle statement', c.angle_statement, 'angle', 2, 'cand__field-input cand__field-input--angle'));
+        fields.appendChild(fieldEl('TLDR', c.tldr, 'tldr', 3, 'cand__field-input'));
+        fields.appendChild(fieldEl("Editor's note", c.editor_note, 'note', 7, 'cand__field-input cand__field-input--long'));
+        fields.appendChild(fieldEl('What to watch', c.what_to_watch, 'watch', 2, 'cand__field-input'));
+        article.appendChild(fields);
+
+        const actions = el('div', 'cand__actions');
+        const accept = el('button', 'cand__btn cand__btn--accept', 'Accept (A)');
+        accept.type = 'button';
+        accept.dataset.action = 'accept';
+        accept.dataset.id = c.id;
+        const reject = el('button', 'cand__btn cand__btn--reject', 'Reject (R)');
+        reject.type = 'button';
+        reject.dataset.action = 'reject';
+        reject.dataset.id = c.id;
+        actions.appendChild(accept);
+        actions.appendChild(reject);
+        article.appendChild(actions);
+
+        return article;
+      }
+
+      function bodyLine(cls, label, value) {
+        const p = el('p', cls);
+        const strong = document.createElement('strong');
+        strong.textContent = label;
+        p.appendChild(strong);
+        p.appendChild(document.createTextNode(value));
+        return p;
+      }
+
+      function renderAutoItem(c) {
+        const sig = c.signal;
+        const li = el('li', 'auto-item');
+        li.dataset.id = c.id;
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.appendChild(el('span', 'auto-item__signal auto-item__signal--' + sig));
+        summary.appendChild(el('span', 'auto-item__category', c.category));
+        summary.appendChild(el('span', 'auto-item__headline', c.source_headline));
+        summary.appendChild(el('span', 'auto-item__meta', c.source_outlet + ' · ' + c.composite.toFixed(1)));
+        const rm = el('button', 'auto-item__remove', '×');
+        rm.type = 'button';
+        rm.dataset.action = 'remove';
+        rm.dataset.id = c.id;
+        rm.setAttribute('aria-label', 'Remove from auto-publishing batch');
+        summary.appendChild(rm);
+        details.appendChild(summary);
+
+        const body = el('div', 'auto-item__body');
+        body.appendChild(bodyLine('auto-item__angle', 'Angle: ', c.angle_statement));
+        body.appendChild(bodyLine('auto-item__tldr', 'TLDR: ', c.tldr));
+        body.appendChild(el('p', 'auto-item__note', c.editor_note));
+        body.appendChild(bodyLine('auto-item__watch', 'Watch: ', c.what_to_watch));
+        details.appendChild(body);
+
+        li.appendChild(details);
+        return li;
+      }
+
+      // ============ STATUS / STATE ============
       function recomputeStatus() {
         let accepted = 0, rejected = 0, pending = 0;
         heldCards.forEach((c) => {
@@ -918,7 +768,6 @@ const todayLabel = today.toLocaleDateString('en-US', {
           else if (s === 'rejected') rejected++;
           else pending++;
         });
-
         acceptedEl.textContent = accepted;
         rejectedEl.textContent = rejected;
         pendingEl.textContent = pending;
@@ -935,46 +784,95 @@ const todayLabel = today.toLocaleDateString('en-US', {
         }
       }
 
-      heldCards.forEach((card, idx) => {
-        card.querySelectorAll('.cand__btn').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            startTimerIfNeeded();
-            const action = btn.dataset.action;
-            card.dataset.state = action === 'accept' ? 'accepted' : 'rejected';
-            card.classList.remove('cand--accepted', 'cand--rejected');
-            card.classList.add('cand--' + card.dataset.state);
-            recomputeStatus();
-            // Auto-scroll to next pending card
-            setTimeout(() => {
-              for (let i = idx + 1; i < heldCards.length; i++) {
-                if (!heldCards[i].dataset.state) {
-                  heldCards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  activeIdx = i;
-                  return;
+      function showBanner(text, isError) {
+        queueStatus.textContent = text;
+        queueStatus.classList.toggle('dash-banner--error', !!isError);
+        queueStatus.hidden = false;
+        heldSection.hidden = true;
+        autoSection.hidden = true;
+        publishBar.hidden = true;
+      }
+      function showLoaded() {
+        queueStatus.hidden = true;
+        heldSection.hidden = false;
+        autoSection.hidden = false;
+        publishBar.hidden = false;
+      }
+
+      // ============ EVENT WIRING (post-render) ============
+      function wireEvents() {
+        heldCards = Array.prototype.slice.call(heldQueue.querySelectorAll('.cand'));
+        autoCards = Array.prototype.slice.call(autoList.querySelectorAll('.auto-item'));
+        activeIdx = 0;
+
+        heldCards.forEach((card, idx) => {
+          card.querySelectorAll('.cand__btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              startTimerIfNeeded();
+              const action = btn.dataset.action;
+              card.dataset.state = action === 'accept' ? 'accepted' : 'rejected';
+              card.classList.remove('cand--accepted', 'cand--rejected');
+              card.classList.add('cand--' + card.dataset.state);
+              recomputeStatus();
+              // Auto-scroll to next pending card
+              setTimeout(() => {
+                for (let i = idx + 1; i < heldCards.length; i++) {
+                  if (!heldCards[i].dataset.state) {
+                    heldCards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    activeIdx = i;
+                    return;
+                  }
                 }
-              }
-            }, 200);
+              }, 200);
+            });
+          });
+          card.querySelectorAll('textarea').forEach((ta) => {
+            ta.addEventListener('focus', startTimerIfNeeded);
           });
         });
-        card.querySelectorAll('textarea').forEach((ta) => {
-          ta.addEventListener('focus', startTimerIfNeeded);
-        });
-      });
 
-      autoCards.forEach((card) => {
-        const removeBtn = card.querySelector('.auto-item__remove');
-        if (removeBtn) {
-          removeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            startTimerIfNeeded();
-            card.dataset.state = card.dataset.state === 'removed' ? '' : 'removed';
-            recomputeStatus();
-          });
+        autoCards.forEach((card) => {
+          const removeBtn = card.querySelector('.auto-item__remove');
+          if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              startTimerIfNeeded();
+              card.dataset.state = card.dataset.state === 'removed' ? '' : 'removed';
+              recomputeStatus();
+            });
+          }
+        });
+
+        recomputeStatus();
+      }
+
+      // ============ RENDER ============
+      function render(items) {
+        const mapped = (items || []).filter((i) => i && i.audit).map(normalize);
+        const held = mapped.filter((c) => !c.audit_pass || c.spot_check);
+        const auto = mapped.filter((c) => c.audit_pass && !c.spot_check);
+
+        heldQueue.innerHTML = '';
+        autoList.innerHTML = '';
+        held.forEach((c) => heldQueue.appendChild(renderHeldCard(c)));
+        auto.forEach((c) => autoList.appendChild(renderAutoItem(c)));
+
+        heldCountHead.textContent = held.length;
+        autoCountHead.textContent = auto.length;
+        autoCountStatus.textContent = auto.length;
+        if (autoCountSub) autoCountSub.textContent = auto.length;
+        auditStateEl.textContent = mapped.length > 0 ? 'AUDITOR PASS COMPLETE' : 'NO ITEMS';
+
+        if (mapped.length === 0) {
+          showBanner('No queue for today yet. The ingest cron runs at 3 AM PT and the AI pass completes around 5:30 AM PT. Check back after that, or pass ?date=YYYY-MM-DD to review a past edition.', false);
+          return;
         }
-      });
+        showLoaded();
+        wireEvents();
+      }
 
-      // Help modal
+      // ============ HELP MODAL ============
       const helpModal = document.getElementById('helpModal');
       const helpBtn = document.getElementById('helpBtn');
       const helpClose = document.getElementById('helpClose');
@@ -996,7 +894,7 @@ const todayLabel = today.toLocaleDateString('en-US', {
       if (helpClose) helpClose.addEventListener('click', closeHelp);
       if (helpBackdrop) helpBackdrop.addEventListener('click', closeHelp);
 
-      // Keyboard shortcuts
+      // ============ KEYBOARD SHORTCUTS ============
       document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -1014,6 +912,7 @@ const todayLabel = today.toLocaleDateString('en-US', {
           return;
         }
         if (helpOpen) return; // swallow other shortcuts while help is open
+        if (!heldCards.length) return; // nothing to drive until the queue renders
         if (key === 'a' || key === 'r') {
           e.preventDefault();
           startTimerIfNeeded();
@@ -1032,18 +931,32 @@ const todayLabel = today.toLocaleDateString('en-US', {
         }
       });
 
+      // ============ PUBLISH ============
       publishBtn.addEventListener('click', async () => {
         if (publishBtn.disabled) return;
         clearInterval(tickHandle);
         const elapsed = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : 0;
 
-        // Gather editor decisions for the API. Each held card carries
-        // data-id; the auto-removed items are tracked similarly.
+        // Gather editor decisions. Inline textarea edits ride along per accepted
+        // id so the publish stage applies them over the AI draft.
         const acceptedHeld = [];
         const rejectedHeld = [];
+        const edits = {};
         heldCards.forEach((c) => {
-          if (c.dataset.state === 'accepted') acceptedHeld.push(c.dataset.id);
-          else if (c.dataset.state === 'rejected') rejectedHeld.push(c.dataset.id);
+          if (c.dataset.state === 'accepted') {
+            acceptedHeld.push(c.dataset.id);
+            const e = {};
+            c.querySelectorAll('textarea').forEach((ta) => {
+              const f = ta.dataset.field;
+              if (f === 'angle') e.angle_statement = ta.value;
+              else if (f === 'tldr') e.tldr = ta.value;
+              else if (f === 'note') e.editor_note = ta.value;
+              else if (f === 'watch') e.what_to_watch = ta.value;
+            });
+            edits[c.dataset.id] = e;
+          } else if (c.dataset.state === 'rejected') {
+            rejectedHeld.push(c.dataset.id);
+          }
         });
         const removedAuto = [];
         let autoActive = 0;
@@ -1058,6 +971,7 @@ const todayLabel = today.toLocaleDateString('en-US', {
           accepted_held: acceptedHeld,
           rejected_held: rejectedHeld,
           removed_auto: removedAuto,
+          edits: edits,
         };
 
         publishBtn.textContent = 'PUBLISHING…';
@@ -1068,13 +982,14 @@ const todayLabel = today.toLocaleDateString('en-US', {
           const resp = await fetch('/api/brief/publish', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
             body: JSON.stringify(decisions),
           });
 
           if (resp.ok) {
             const data = await resp.json();
             publishBtn.textContent = 'PUBLISHED · ' + data.date;
-            publishMsg.textContent = 'Live publish OK. ' + (data.items_accepted + autoActive) + ' items shipped. ' + (data.edits_count || 0) + ' edits applied. Review time: ' + fmtTime(elapsed) + '.';
+            publishMsg.textContent = 'Live publish OK. ' + ((data.items_accepted || 0) + autoActive) + ' items shipped. ' + (data.edits_count || 0) + ' edits applied. Review time: ' + fmtTime(elapsed) + '.';
           } else if (resp.status === 404 || resp.status === 405) {
             // API not deployed yet: fall back to simulation
             publishBtn.textContent = 'PUBLISHED · SIMULATED';
@@ -1092,7 +1007,41 @@ const todayLabel = today.toLocaleDateString('en-US', {
         }
       });
 
-      recomputeStatus();
+      // ============ BOOT: FETCH TODAY'S QUEUE ============
+      async function boot() {
+        const today = new Date().toISOString().slice(0, 10);
+        // Allow ?date=YYYY-MM-DD override for reviewing a past edition.
+        const params = new URLSearchParams(window.location.search);
+        const date = params.get('date') || today;
+
+        dateLabelEl.textContent = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
+          weekday: 'long', month: 'long', day: 'numeric',
+        }).toUpperCase();
+        auditStateEl.textContent = 'FETCHING QUEUE';
+        showBanner('Loading the queue for ' + date + '…', false);
+
+        try {
+          // No bearer token from the browser: the dashboard is gated by Vercel
+          // deployment protection at the platform level, whose auth cookie rides
+          // on this same-origin request. DASHBOARD_TOKEN gates direct API hits.
+          const resp = await fetch('/api/brief/candidates?date=' + encodeURIComponent(date), {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' },
+          });
+          if (!resp.ok) {
+            auditStateEl.textContent = 'ERROR';
+            showBanner('Could not load the queue (HTTP ' + resp.status + '). If this is a 401, open the dashboard through Vercel deployment protection so the auth cookie is present.', true);
+            return;
+          }
+          const data = await resp.json();
+          render(data.items || []);
+        } catch (e) {
+          auditStateEl.textContent = 'ERROR';
+          showBanner('Could not reach /api/brief/candidates: ' + (e && e.message ? e.message : e), true);
+        }
+      }
+
+      boot();
     })();
   </script>
 </ExhibitionLayout>
