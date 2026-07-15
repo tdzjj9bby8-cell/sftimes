@@ -3,13 +3,14 @@ import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
 // The public corrections log. Add entries here as they happen.
-// Format: { date: 'YYYY-MM-DD', issue: number, story: 'Story title', slug: 'url-slug' (optional, links to article), what: 'What was wrong', fix: 'What we corrected to' }
+// Format: { date: 'YYYY-MM-DD', issue: number, story: 'Story title', slug: 'url-slug' (optional, links to article), what: 'What was wrong', points: string[] (optional itemized list), fix: 'What we corrected to' }
 const corrections: Array<{
   date: string;
   issue?: number;
   story: string;
   slug?: string;
   what: string;
+  points?: string[];
   fix: string;
 }> = [
   // Example shape, swap in real entries as they happen:
@@ -21,6 +22,23 @@ const corrections: Array<{
   //   what: "Original text stated Auntie Lai opened the shop in 1992. She opened it in 1994.",
   //   fix: "Updated body text to read '1994' throughout. Issue archive page corrected on 2026-05-25.",
   // },
+  {
+    date: '2026-07-15',
+    issue: 5,
+    story: 'Daily Brief, Edition 5',
+    what: 'An earlier five-item edition of the 2026-07-15 Brief was published for approximately an hour before being replaced by a six-item corrected edition. The earlier draft, produced by an ad-hoc in-session pipeline run using only RSS snippets rather than full source articles, contained the following fabricated details caught by the post-publish audit:',
+    points: [
+      'The inclusionary-rate item named "Chan and Melgar" as the two no votes. Actual dissents were Shamann Walton and Chyanne Chen. Myrna Melgar co-sponsored the ordinance.',
+      "The same item claimed the Mission District's 17-percent inclusionary carve-out was eliminated. Jackie Fielder's amendment setting the Mission at 8 percent passed 6-5.",
+      'The Clay by the Bay item cited "unsustainable rent" as founder Rebecca Olbright\'s stated reason for closing. Olbright cited declining health; the landlord separately alleged unpaid rent.',
+      'The drug-free supportive housing item cited "4,200 existing supportive-housing beds." The source figure is 8,500 units.',
+      'The same item cited a Department of Homelessness statement about absorbing the shift over 18 months. No such statement appears in the source.',
+      'The AB 1482 loophole item cited "the Waldman case" as an ongoing legal test. No such case appears in the source article or any other outlet\'s coverage.',
+      'The South Park item invented pre-2020 restaurant counts and a 45-percent return-to-office figure. None are attributable to reporting.',
+      'All bylines were rendered as "Staff." Real bylines: Aaliyah Español-Rivas, Adriana Gutierrez, Jennifer Wadsworth, Rosina Boehm.',
+    ],
+    fix: 'Root cause: the ad-hoc run bypassed the mandatory full-body source-fetch step in the Brief pipeline playbook. Guardrail added to prevent recurrence. The corrected six-item 2026-07-15 edition is the current authoritative version.',
+  },
 ];
 ---
 <ExhibitionLayout
@@ -78,6 +96,11 @@ const corrections: Array<{
               {c.slug ? <a href={`/stories/${c.slug}`}>{c.story}</a> : c.story}
             </h3>
             <p class="corr-item__what"><strong>WHAT WE GOT WRONG.</strong> {c.what}</p>
+            {c.points && (
+              <ul class="corr-item__points">
+                {c.points.map((p) => <li>{p}</li>)}
+              </ul>
+            )}
             <p class="corr-item__fix"><strong>WHAT WE CORRECTED.</strong> {c.fix}</p>
           </li>
         ))}
@@ -102,5 +125,7 @@ const corrections: Array<{
     .corr-item__title a { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
     .corr-item__what, .corr-item__fix { font-size: 14px; line-height: 1.6; margin: 0 0 8px; color: var(--ink); }
     .corr-item__what strong, .corr-item__fix strong { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); font-weight: 700; }
+    .corr-item__points { margin: 4px 0 12px; padding-left: 1.2em; }
+    .corr-item__points li { font-size: 14px; line-height: 1.6; color: var(--ink); margin: 0 0 6px; }
   </style>
 </ExhibitionLayout>
