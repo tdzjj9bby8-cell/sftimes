@@ -1,31 +1,38 @@
 /**
  * /api/brief/publish
  *
- * Editor publish endpoint. Called by the dashboard PUBLISH button.
+ * Editor publish endpoint (Path 1). Called by the /brief-dashboard PUBLISH button.
+ *
+ * In the editor-review model the dashboard POSTs the accepted items directly,
+ * already reviewed and edited by the editor. This endpoint composes the edition
+ * markdown straight from that payload and commits it to
+ * src/content/briefs/<date>.md via the GitHub Contents API (which triggers a
+ * Vercel rebuild). It does NOT read the audited queue or a decisions record from
+ * KV: the POST body is the source of truth for what publishes.
  *
  * Body shape (JSON, posted from /brief-dashboard):
  * {
- *   "date": "2026-06-14",
+ *   "date": "2026-07-20",
  *   "editor": "Eric",
- *   "accepted_held": ["id1", "id2", ...],
- *   "rejected_held": [...],
- *   "removed_auto": [...],
- *   "edits": { "id1": { "tldr": "...", "editor_note": "...", ... } }
+ *   "edition": 6,                 // optional; defaults to the next edition number
+ *   "intro": "...",               // optional editor intro
+ *   "items": [                    // accepted items, edits already applied
+ *     {
+ *       "source_headline": "...", "source_outlet": "...", "source_url": "...",
+ *       "source_date": "2026-07-20", "category": "HOUSING", "signal": "structural-pattern",
+ *       "composite_score": 8.1, "uniqueness_score": 8,
+ *       "angle_statement": "...", "tldr": "...", "editor_note": "...", "what_to_watch": "..."
+ *     }
+ *   ]
  * }
  *
- * Writes the decisions file and invokes the publish handler. Returns the
- * resulting markdown path and the deploy trigger status.
- *
- * Auth: this endpoint must sit behind the same basic auth that protects
- * /brief-dashboard/. In production, configure Vercel password-protection
- * on the /api/brief/* prefix or check a session cookie before running.
+ * Auth: sits behind the same Vercel deployment protection as /brief-dashboard.
+ * DASHBOARD_TOKEN optionally gates direct (non-browser) callers.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { publish } from '../../scripts/brief-publish.js';
-import { putQueue } from '../../scripts/lib/queue-store.js';
+import { publishFromItems, type PublishItemInput } from '../../scripts/brief-publish.js';
 
 function authorized(req: VercelRequest): boolean {
-  // Production: replace with real session check / basic auth.
   const expected = process.env.DASHBOARD_TOKEN;
   if (!expected) return true; // dev mode
   const got = req.headers.authorization || '';
@@ -37,15 +44,7 @@ interface PublishBody {
   editor?: 'Eric' | 'Nicholas' | 'Daisy';
   edition?: number;
   intro?: string;
-  accepted_held: string[];
-  rejected_held: string[];
-  removed_auto: string[];
-  edits?: Record<string, {
-    tldr?: string;
-    editor_note?: string;
-    angle_statement?: string;
-    what_to_watch?: string;
-  }>;
+  items: PublishItemInput[];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -60,33 +59,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!body?.date) {
     return res.status(400).json({ error: 'Missing required field: date' });
   }
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    return res.status(400).json({ error: 'No accepted items to publish' });
+  }
 
   try {
-    const decisions = {
-      accepted_held: body.accepted_held ?? [],
-      rejected_held: body.rejected_held ?? [],
-      removed_auto: body.removed_auto ?? [],
-      edits: body.edits ?? {},
+    const result = await publishFromItems({
+      date: body.date,
       editor: body.editor ?? 'Eric',
-      edition: body.edition ?? 1,
+      edition: body.edition,
       intro: body.intro,
-      published_at: new Date().toISOString(),
-    };
-
-    // Persist decisions via the queue store (KV in prod) so the publish stage
-    // reads the same record. A filesystem write EROFS-fails on Vercel.
-    await putQueue(body.date, 'decisions', decisions);
-
-    const runDate = new Date(body.date + 'T08:00:00Z');
-    await publish({ runDate });
+      items: body.items,
+    });
 
     return res.status(200).json({
       status: 'ok',
       date: body.date,
-      items_accepted: decisions.accepted_held.length,
-      items_removed_from_auto: decisions.removed_auto.length,
-      edits_count: Object.keys(decisions.edits).length,
-      published_at: decisions.published_at,
+      edition: result.edition,
+      items_accepted: result.item_count,
+      committed: result.committed,
+      commit_url: result.commitUrl,
+      path: result.path,
+      published_at: new Date().toISOString(),
     });
   } catch (err: any) {
     console.error('[api/brief/publish] FAIL', err);

@@ -1,14 +1,18 @@
 /**
- * /api/brief/candidates
+ * /api/brief/staged
  *
- * Returns today's audited candidate queue for the dashboard to render.
- * Falls back to sample data if the queue file does not exist yet, so the
- * dashboard renders something during development.
+ * Returns today's staged draft queue for the dashboard to render. In the Path 1
+ * editor-review model the Cowork brief-daily task drafts and audits every
+ * candidate, then writes them all (audit-passing and audit-failing alike) to the
+ * staging file scripts/queue/YYYY-MM-DD-staged.json. This endpoint reads that
+ * file so the dashboard can present every drafted item for editor review. The
+ * task never auto-publishes; nothing here decides what ships.
  *
  * Query params:
  *   ?date=YYYY-MM-DD   optional date override (defaults to today)
  *
- * Response shape: array of AuditedItem (see scripts/brief-ai.ts).
+ * Response shape: { date, source, item_count, items } where items is
+ * AuditedItem[] (see scripts/brief-ai.ts), each carrying its audit result.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getQueue } from '../../scripts/lib/queue-store.js';
@@ -32,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store, must-revalidate');
 
   try {
-    const items = await getQueue<AuditedItem[]>(dateParam, 'audited');
+    const items = await getQueue<AuditedItem[]>(dateParam, 'staged');
     if (items && items.length > 0) {
       return res.status(200).json({
         date: dateParam,
@@ -42,18 +46,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // No queue yet for this date. The dashboard renders its empty state.
+    // No staging file yet for this date. The dashboard renders its empty state.
     return res.status(200).json({
       date: dateParam,
       source: 'no-queue-found',
       item_count: 0,
       items: [],
-      hint: `No audited queue for ${dateParam}. Run npm run brief:ai -- --date ${dateParam} first.`,
+      hint: `No staged queue for ${dateParam}. The Cowork brief-daily task writes scripts/queue/${dateParam}-staged.json when it runs.`,
     });
   } catch (err: any) {
     // KV unreachable or a malformed payload: degrade to the friendly empty
     // state rather than 500ing the whole dashboard.
-    console.error('[api/brief/candidates] queue read failed', err);
+    console.error('[api/brief/staged] queue read failed', err);
     return res.status(200).json({
       date: dateParam,
       source: 'queue-error',

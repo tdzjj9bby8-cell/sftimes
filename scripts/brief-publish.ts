@@ -195,6 +195,163 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
   return markdown;
 }
 
+// ============ EDITOR-DRIVEN PUBLISH (Path 1) ============
+//
+// The Path 1 dashboard POSTs the accepted items directly (already reviewed and
+// edited by the editor). This path composes the edition markdown straight from
+// that payload and commits it via the GitHub Contents API. It does NOT read the
+// audited queue or a decisions record from KV: the POST body is the source of
+// truth for what publishes.
+
+/** One accepted item as the dashboard POSTs it. Flat, self-contained: no nested
+ *  scoring/draft/audit. Every field the content collection needs is here. */
+export interface PublishItemInput {
+  id?: string;
+  slug?: string;
+  category?: string;
+  signal?: string;
+  source_headline: string;
+  source_outlet: string;
+  source_byline?: string;
+  source_url: string;
+  source_date: string;
+  composite_score?: number;
+  uniqueness_score?: number;
+  angle_statement: string;
+  tldr: string;
+  editor_note: string;
+  what_to_watch: string;
+}
+
+export interface PublishFromItemsArgs {
+  date: string; // YYYY-MM-DD
+  editor?: 'Eric' | 'Nicholas' | 'Daisy';
+  edition?: number;
+  intro?: string;
+  items: PublishItemInput[];
+  contentDir?: string;
+  dryRun?: boolean;
+}
+
+export interface PublishFromItemsResult {
+  markdown: string;
+  committed: boolean;
+  commitUrl?: string;
+  path: string;
+  edition: number;
+  item_count: number;
+}
+
+/** Compose + commit an edition from the editor-accepted items the dashboard
+ *  POSTs. Refuses a zero-item edition. Commits via GitHub in production, writes
+ *  to the local content collection in dev (no token). Never reads KV. */
+export async function publishFromItems(args: PublishFromItemsArgs): Promise<PublishFromItemsResult> {
+  const contentDir = args.contentDir ?? CONTENT_DIR_DEFAULT;
+  const items = args.items ?? [];
+  if (items.length === 0) {
+    throw new Error('Empty brief: refusing to publish a zero-item edition');
+  }
+
+  const editor = args.editor ?? 'Eric';
+  const edition = args.edition ?? (await nextEdition(contentDir));
+  const markdown = composeMarkdownFromInputs({
+    date: args.date,
+    edition,
+    editor,
+    intro: args.intro,
+    items,
+  });
+
+  const repoPath = `src/content/briefs/${args.date}.md`;
+
+  if (args.dryRun) {
+    return { markdown, committed: false, path: repoPath, edition, item_count: items.length };
+  }
+
+  if (githubEnabled()) {
+    const commitUrl = await commitBriefToGitHub(repoPath, markdown, `Publish Brief edition ${args.date}`);
+    console.log(`[publishFromItems] Committed ${repoPath}: ${commitUrl}`);
+    return { markdown, committed: true, commitUrl, path: repoPath, edition, item_count: items.length };
+  }
+
+  // Dev fallback (no GITHUB_TOKEN): write to the local content collection so the
+  // editor can preview offline. Nothing is pushed.
+  if (!existsSync(contentDir)) await mkdir(contentDir, { recursive: true });
+  await writeFile(path.join(contentDir, `${args.date}.md`), markdown, 'utf-8');
+  console.log(`[publishFromItems] GITHUB_TOKEN unset. Wrote ${repoPath} to the local filesystem (dev mode).`);
+  return { markdown, committed: false, path: repoPath, edition, item_count: items.length };
+}
+
+const VALID_CATEGORIES = ['TRANSIT', 'HOUSING', 'FOOD', 'POLITICS', 'TECH', 'CULTURE', 'ARTS', 'BUSINESS', 'PUBLIC SAFETY', 'OPENINGS', 'CLOSINGS', 'WEATHER', 'SPORTS'];
+const VALID_SIGNALS = ['first-to-connect', 'underreported', 'missing-context', 'structural-pattern'];
+
+function sanitizeCategory(c?: string): string {
+  return c && VALID_CATEGORIES.includes(c) ? c : 'POLITICS';
+}
+function sanitizeSignal(s?: string): string {
+  return s && VALID_SIGNALS.includes(s) ? s : 'underreported';
+}
+function clampUniqueness(n: unknown): number {
+  const v = Math.round(Number(n));
+  if (!Number.isFinite(v)) return 1;
+  return Math.max(1, Math.min(10, v));
+}
+
+function composeMarkdownFromInputs(args: {
+  date: string;
+  edition: number;
+  editor: 'Eric' | 'Nicholas' | 'Daisy';
+  intro?: string;
+  items: PublishItemInput[];
+}): string {
+  const sorted = [...args.items].sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0));
+  const itemsYaml = sorted.map((item, i) => composeInputItemYaml(item, args.date, i)).join('\n');
+  const lines = [
+    '---',
+    `date: ${args.date}`,
+    `edition: ${args.edition}`,
+    `editor: ${args.editor}`,
+  ];
+  if (args.intro) {
+    lines.push('intro: |');
+    for (const line of args.intro.split('\n')) lines.push(`  ${line}`);
+  }
+  lines.push('items:');
+  lines.push(itemsYaml);
+  lines.push('---');
+  lines.push('');
+  const human = new Date(args.date + 'T12:00:00Z').toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+  });
+  lines.push(`Edition №${String(args.edition).padStart(2, '0')} of the daily Brief, published ${human}.`);
+  lines.push('');
+  return lines.join('\n');
+}
+
+function composeInputItemYaml(item: PublishItemInput, briefDate: string, index: number): string {
+  const slug = item.slug ? slugify(item.slug) : slugify(item.source_headline);
+  const indent = '  ';
+  const lines: string[] = [];
+  lines.push(`${indent}- id: ${briefDate}-${String(index + 1).padStart(3, '0')}`);
+  lines.push(`${indent}  slug: ${slug}`);
+  lines.push(`${indent}  category: ${sanitizeCategory(item.category)}`);
+  lines.push(`${indent}  signal: ${sanitizeSignal(item.signal)}`);
+  lines.push(`${indent}  source_headline: ${yamlString(item.source_headline ?? '')}`);
+  lines.push(`${indent}  source_outlet: ${yamlString(item.source_outlet ?? '')}`);
+  lines.push(`${indent}  source_byline: ${yamlString(item.source_byline || 'Staff')}`);
+  lines.push(`${indent}  source_url: ${yamlString(item.source_url ?? '')}`);
+  lines.push(`${indent}  source_date: ${(item.source_date || briefDate).slice(0, 10)}`);
+  lines.push(`${indent}  composite_score: ${Number(item.composite_score ?? 0)}`);
+  lines.push(`${indent}  uniqueness_score: ${clampUniqueness(item.uniqueness_score)}`);
+  lines.push(`${indent}  auto_published: false`);
+  lines.push(`${indent}  angle_statement: ${yamlString(item.angle_statement || '')}`);
+  lines.push(`${indent}  tldr: ${yamlString(item.tldr || '')}`);
+  lines.push(`${indent}  editor_note: |`);
+  for (const noteLine of (item.editor_note || '').split('\n')) lines.push(`${indent}    ${noteLine}`);
+  lines.push(`${indent}  what_to_watch: ${yamlString(item.what_to_watch || '')}`);
+  return lines.join('\n');
+}
+
 // ============ MARKDOWN COMPOSITION ============
 
 interface ComposeArgs {
@@ -274,7 +431,7 @@ function slugify(s: string): string {
     .slice(0, 80);
 }
 
-async function nextEdition(contentDir: string): Promise<number> {
+export async function nextEdition(contentDir: string): Promise<number> {
   if (!existsSync(contentDir)) return 1;
   const { readdir } = await import('node:fs/promises');
   const files = await readdir(contentDir);
@@ -307,7 +464,7 @@ async function writeAuditLog(dateString: string, audited: AuditedItem[], decisio
 // ============ GITHUB PUBLISH ============
 
 /** True when a GitHub token is available to commit the brief markdown. */
-function githubEnabled(): boolean {
+export function githubEnabled(): boolean {
   return !!process.env.GITHUB_TOKEN;
 }
 
@@ -318,7 +475,7 @@ function githubEnabled(): boolean {
  * a re-publish of the same day is a no-drama overwrite rather than a 409/422.
  * Returns the resulting commit's html_url.
  */
-async function commitBriefToGitHub(repoPath: string, content: string, message: string): Promise<string> {
+export async function commitBriefToGitHub(repoPath: string, content: string, message: string): Promise<string> {
   const token = process.env.GITHUB_TOKEN as string;
   const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${repoPath}`;
   const headers = {
