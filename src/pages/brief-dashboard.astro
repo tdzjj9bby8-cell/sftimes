@@ -2,31 +2,33 @@
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
-// Phase C dashboard (revised after Path 3 / AI auditor decision).
+// Path 1 dashboard (editor reviews every item).
 //
-// Two sections:
-//   1. HELD FOR REVIEW — items the AI auditor flagged for one of five firewall
-//      check failures, plus a random spot-check sample. Eric reviews each.
-//   2. AUTO-PUBLISHING — items that cleared both the primary AI pass and the
-//      auditor pass. Eric sees a compact list for visibility but takes no action.
+// After the 2026-07-15 quarantine event, the Brief moved off the auditor
+// auto-publish model. The Cowork brief-daily task now drafts and audits every
+// candidate and STAGES all of them (audit-passing and audit-failing alike). It
+// publishes nothing. This dashboard is where the editor reviews every drafted
+// item, accepts / rejects / edits each, and publishes the accepted set.
 //
-// Data is fetched CLIENT-SIDE from /api/brief/candidates on page load (real
-// KV-backed cron output as of the KV migration). The queue for "today" only
-// exists after the 3 AM ingest + 5:30 AM AI cron have run, so the page ships
-// static and hydrates: a loading state, then either the two rendered sections
-// or a friendly empty state for pre-cron mornings.
+// One queue. No held-vs-auto split. The audit result on each card is advisory
+// (it tells the editor which items cleared all five firewall checks and which
+// failed, and why), but it does not gate anything: the editor decides.
 //
-// Page is noindex + robots-disallowed. Intended to sit behind Vercel
-// deployment protection (platform basic auth) in production; the API endpoints
-// additionally honor an optional DASHBOARD_TOKEN bearer gate for direct hits.
+// Data is fetched CLIENT-SIDE from /api/brief/staged on page load. The staging
+// file for "today" only exists after the Cowork task has run, so the page ships
+// static and hydrates: a loading state, then the review queue, or a friendly
+// empty state before the task has run.
 //
-// Morning budget: 5 to 10 minutes.
-// Hard gate at 7:30 AM: if Eric does not publish, held items are dropped, the
-// auto-publishing batch ships anyway. Most of the brief publishes without him.
+// Page is noindex + robots-disallowed. Intended to sit behind Vercel deployment
+// protection (platform basic auth) in production; the API endpoints additionally
+// honor an optional DASHBOARD_TOKEN bearer gate for direct hits.
+//
+// Publish POSTs the accepted items to /api/brief/publish, which composes the
+// edition markdown and commits it via the GitHub Contents API (Vercel rebuilds).
 ---
 <ExhibitionLayout
   title="THE BRIEF · DASHBOARD · INTERNAL"
-  description="Path 3 / AI auditor model. Morning review of held items only."
+  description="Path 1 editor-review model. Review every drafted item before publish."
   active="home"
 >
   <meta name="robots" content="noindex, nofollow" slot="head" />
@@ -43,9 +45,9 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       <div class="dash-head__top">
         <div>
           <p class="dash-head__eyebrow"><span id="dateLabel">Loading</span> · <span id="auditState">FETCHING QUEUE</span></p>
-          <h1 class="dash-head__title">Morning review</h1>
+          <h1 class="dash-head__title">Editorial review</h1>
           <p class="dash-head__sub">
-            <strong><span id="heldCountHead">0</span> items held for review</strong> · <span id="autoCountHead">0</span> items auto-publishing · Hard gate at 7:30 AM
+            <strong><span id="itemCountHead">0</span> items drafted for review</strong> · Nothing publishes without your approval
           </p>
         </div>
         <div class="dash-head__timer-wrap">
@@ -62,7 +64,6 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         <span class="dash-head__status-item dash-head__status-item--accepted"><span id="acceptedCount">0</span> ACCEPTED</span>
         <span class="dash-head__status-item dash-head__status-item--rejected"><span id="rejectedCount">0</span> REJECTED</span>
         <span class="dash-head__status-item dash-head__status-item--pending"><span id="pendingCount">0</span> PENDING</span>
-        <span class="dash-head__status-item dash-head__status-item--auto"><span id="autoCountStatus">0</span> AUTO-PUBLISHING</span>
         <a class="dash-head__weekly-link" href="/brief-dashboard/weekly/">WEEKLY AUDIT →</a>
         <a class="dash-head__weekly-link" href="/brief-dashboard/health/">SOURCE HEALTH →</a>
       </div>
@@ -83,19 +84,19 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         <dl class="dash-help__kbds">
           <div class="dash-help__kbd-row">
             <dt><kbd>A</kbd></dt>
-            <dd>Accept the active held item (also confirms the firewall)</dd>
+            <dd>Accept the active item (include it in today's brief)</dd>
           </div>
           <div class="dash-help__kbd-row">
             <dt><kbd>R</kbd></dt>
-            <dd>Reject the active held item</dd>
+            <dd>Reject the active item (drop it)</dd>
           </div>
           <div class="dash-help__kbd-row">
             <dt><kbd>J</kbd> or <kbd>↓</kbd></dt>
-            <dd>Move to the next held item</dd>
+            <dd>Move to the next item</dd>
           </div>
           <div class="dash-help__kbd-row">
             <dt><kbd>K</kbd> or <kbd>↑</kbd></dt>
-            <dd>Move to the previous held item</dd>
+            <dd>Move to the previous item</dd>
           </div>
           <div class="dash-help__kbd-row">
             <dt><kbd>?</kbd></dt>
@@ -110,7 +111,8 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       </section>
 
       <section class="dash-help__section">
-        <h3 class="dash-help__h3">Why items get held: the five auditor checks</h3>
+        <h3 class="dash-help__h3">The five firewall checks (advisory)</h3>
+        <p class="dash-help__note">Each card shows whether the AI auditor passed or failed the item on these five checks. The result is a signal, not a gate. You decide what publishes.</p>
         <ol class="dash-help__checks">
           <li>
             <strong>Recap test.</strong> Could a reader skip the source article and still understand the news from our editor's note alone? If yes, the note crossed into rewrite territory. Tighten it or reject.
@@ -131,26 +133,22 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       </section>
 
       <section class="dash-help__section">
-        <h3 class="dash-help__h3">Other badges</h3>
+        <h3 class="dash-help__h3">Audit badges</h3>
         <dl class="dash-help__badges">
           <div class="dash-help__badge-row">
-            <dt><span class="dash-help__pill dash-help__pill--fail">AUDITOR FLAGGED</span></dt>
-            <dd>Item failed one or more of the five checks. Read the auditor reasons and decide.</dd>
+            <dt><span class="dash-help__pill dash-help__pill--pass">AUDIT PASSED</span></dt>
+            <dd>Item cleared all five firewall checks. Still yours to accept, edit, or reject.</dd>
           </div>
           <div class="dash-help__badge-row">
-            <dt><span class="dash-help__pill dash-help__pill--spot">RANDOM SPOT-CHECK</span></dt>
-            <dd>Item passed the auditor but was randomly selected for your spot-check (10% of audit-passing items). Usually accept fine, but the spot-check exists to catch drift the auditor misses.</dd>
-          </div>
-          <div class="dash-help__badge-row">
-            <dt><span class="dash-help__pill dash-help__pill--auto">AUTO-PUBLISHING</span></dt>
-            <dd>Item cleared both the primary AI pass and the auditor. Publishes without action unless you click the × to remove it from the batch.</dd>
+            <dt><span class="dash-help__pill dash-help__pill--fail">AUDIT FLAGGED</span></dt>
+            <dd>Item failed one or more of the five checks. Read the auditor reasons, then edit and accept, or reject.</dd>
           </div>
         </dl>
       </section>
 
       <section class="dash-help__section">
-        <h3 class="dash-help__h3">If you miss the 7:30 AM gate</h3>
-        <p>Held items get dropped (they failed the audit or were spot-check, so dropping them is the safe default). The auto-publishing batch ships anyway. The brief publishes with fewer items that day but still ships. This is the structural benefit of the auditor model: the system is resilient to your morning.</p>
+        <h3 class="dash-help__h3">Nothing publishes without you</h3>
+        <p>The Cowork task drafts and audits, then stops. It publishes nothing. Every item in this queue is here because it was drafted, not because it was approved. The brief goes live only when you accept items and hit publish. If you do nothing, nothing ships that day.</p>
       </section>
     </div>
   </div>
@@ -158,32 +156,18 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
   <!-- ============ QUEUE STATE BANNER ============ -->
   <div class="dash-banner" id="queueStatus" role="status" aria-live="polite">Loading today's queue…</div>
 
-  <!-- ============ HELD FOR REVIEW ============ -->
-  <section class="dash-section" id="heldSection" hidden>
+  <!-- ============ REVIEW QUEUE ============ -->
+  <section class="dash-section" id="reviewSection" hidden>
     <div class="dash-section__head">
-      <p class="dash-section__eyebrow">SECTION 1 OF 2 · REQUIRES REVIEW</p>
-      <h2 class="dash-section__title">Held for your review</h2>
+      <p class="dash-section__eyebrow">REQUIRES REVIEW</p>
+      <h2 class="dash-section__title">All drafted items</h2>
       <p class="dash-section__sub">
-        Items the AI auditor flagged for a firewall check failure, plus a random spot-check sample.
-        Review each. Accept to include in today's brief, reject to drop it.
+        Every item the Cowork task drafted and audited today. Accept to include it in the brief,
+        reject to drop it. Edit any field inline before you accept. The audit badge is advisory.
       </p>
     </div>
 
-    <div class="dash-queue" id="heldQueue"></div>
-  </section>
-
-  <!-- ============ AUTO-PUBLISHING ============ -->
-  <section class="dash-section dash-section--auto" id="autoSection" hidden>
-    <div class="dash-section__head">
-      <p class="dash-section__eyebrow">SECTION 2 OF 2 · NO ACTION REQUIRED</p>
-      <h2 class="dash-section__title">Auto-publishing batch</h2>
-      <p class="dash-section__sub">
-        <span id="autoCountSub">0</span> items cleared both the primary AI pass and the auditor.
-        Publishing automatically when you hit the button below. Click any item to spot-check.
-      </p>
-    </div>
-
-    <ul class="dash-auto" id="autoList"></ul>
+    <div class="dash-queue" id="reviewQueue"></div>
   </section>
 
   <!-- ============ PUBLISH BAR ============ -->
@@ -193,11 +177,11 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         <p class="dash-publish__label">Ready to ship</p>
         <p class="dash-publish__sub" id="publishMsg">Waiting for today's queue…</p>
       </div>
-      <button class="dash-publish__btn" id="publishBtn" type="button" disabled>PUBLISH TODAY'S BRIEF</button>
+      <button class="dash-publish__btn" id="publishBtn" type="button" disabled>PUBLISH ACCEPTED ITEMS</button>
     </div>
   </section>
 
-  <!-- Global because the held/auto cards are created client-side (createElement)
+  <!-- Global because the review cards are created client-side (createElement)
        and would not carry Astro's scoped-style marker. All class names are
        page-prefixed and this block only loads on /brief-dashboard. -->
   <style is:global>
@@ -352,9 +336,8 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       font-weight: 700; padding: 3px 9px; text-transform: uppercase;
       display: inline-block;
     }
+    .dash-help__pill--pass { background: #0a7a3d; color: white; }
     .dash-help__pill--fail { background: #a82919; color: white; }
-    .dash-help__pill--spot { background: var(--muted); color: white; }
-    .dash-help__pill--auto { background: #0a7a3d; color: white; }
     @media (max-width: 600px) {
       .dash-help__panel { padding: 22px; }
       .dash-help__kbd-row, .dash-help__badge-row { grid-template-columns: 88px 1fr; gap: 10px; }
@@ -370,7 +353,6 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
     .dash-head__status-item span { color: var(--ink); font-size: 14px; margin-right: 4px; }
     .dash-head__status-item--accepted span { color: #0a7a3d; }
     .dash-head__status-item--rejected span { color: #a82919; }
-    .dash-head__status-item--auto { color: #0a7a3d; }
 
     /* ============ SECTIONS ============ */
     .dash-section { max-width: 1200px; margin: 0 auto 48px; padding: 0 24px; }
@@ -379,14 +361,13 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       font-family: var(--ui); font-size: 11px; letter-spacing: 0.18em;
       text-transform: uppercase; color: var(--accent); margin: 0 0 6px; font-weight: 700;
     }
-    .dash-section--auto .dash-section__eyebrow { color: var(--muted); }
     .dash-section__title {
       font-family: var(--display); font-size: clamp(24px, 3vw, 32px);
       line-height: 1.05; margin: 0 0 8px; text-transform: uppercase;
     }
     .dash-section__sub { font-family: var(--ui); font-size: 13px; color: var(--muted); margin: 0; max-width: 60ch; }
 
-    /* ============ HELD CANDIDATES ============ */
+    /* ============ REVIEW CARDS ============ */
     .dash-queue { display: flex; flex-direction: column; gap: 18px; }
     .cand {
       background: var(--paper); border: 1px solid var(--rule); border-left-width: 4px;
@@ -424,8 +405,8 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
       font-weight: 700; padding: 3px 9px; text-transform: uppercase;
     }
+    .cand__hold-badge--pass { background: #0a7a3d; color: white; }
     .cand__hold-badge--fail { background: #a82919; color: white; }
-    .cand__hold-badge--spot { background: var(--muted); color: white; }
 
     .cand__audit-fails {
       background: #fef0ed; border-left: 3px solid #a82919;
@@ -474,48 +455,6 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
     .cand[data-state=accepted] .cand__btn--accept { background: #0a7a3d; color: white; border-color: #0a7a3d; }
     .cand[data-state=rejected] .cand__btn--reject { background: #a82919; color: white; border-color: #a82919; }
 
-    /* ============ AUTO-PUBLISHING LIST ============ */
-    .dash-auto { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1px; background: var(--rule); }
-    .auto-item { background: var(--paper); transition: background 180ms; }
-    .auto-item:hover { background: var(--paper-2); }
-    .auto-item[data-state=removed] { opacity: 0.3; }
-    .auto-item details summary {
-      list-style: none; cursor: pointer; padding: 12px 18px;
-      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-    }
-    .auto-item details summary::-webkit-details-marker { display: none; }
-    .auto-item__signal { width: 4px; height: 18px; display: block; }
-    .auto-item__signal--first-to-connect { background: var(--accent); }
-    .auto-item__signal--underreported { background: #2c5582; }
-    .auto-item__signal--missing-context { background: #6b6357; }
-    .auto-item__signal--structural-pattern { background: var(--ink-2); }
-    .auto-item__category {
-      font-family: var(--ui); font-size: 10px; letter-spacing: 0.16em;
-      font-weight: 700; text-transform: uppercase; color: var(--muted); min-width: 100px;
-    }
-    .auto-item__headline {
-      font-family: var(--ui); font-size: 14px; color: var(--ink); font-weight: 500;
-      flex: 1; min-width: 220px;
-    }
-    .auto-item__meta {
-      font-family: var(--ui); font-size: 11px; color: var(--muted); margin-left: auto;
-    }
-    .auto-item__remove {
-      font-family: var(--ui); font-size: 18px; line-height: 1;
-      background: transparent; border: 1px solid var(--rule); color: var(--muted);
-      width: 28px; height: 28px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .auto-item__remove:hover { background: #a82919; border-color: #a82919; color: white; }
-    .auto-item[data-state=removed] .auto-item__remove { background: #a82919; border-color: #a82919; color: white; }
-    .auto-item__body {
-      padding: 14px 22px 18px; background: var(--paper-2); border-top: 1px solid var(--rule);
-      font-family: var(--ui); font-size: 13px; line-height: 1.55; color: var(--ink);
-    }
-    .auto-item__body p { margin: 0 0 10px; }
-    .auto-item__body p:last-child { margin: 0; }
-    .auto-item__angle { color: var(--accent); }
-
     /* ============ PUBLISH BAR ============ */
     .dash-publish {
       background: var(--ink); color: var(--paper); padding: 28px 0; margin: 0 0 64px;
@@ -557,24 +496,32 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
       const dateLabelEl = document.getElementById('dateLabel');
       const auditStateEl = document.getElementById('auditState');
-      const heldCountHead = document.getElementById('heldCountHead');
-      const autoCountHead = document.getElementById('autoCountHead');
-      const autoCountStatus = document.getElementById('autoCountStatus');
-      const autoCountSub = document.getElementById('autoCountSub');
+      const itemCountHead = document.getElementById('itemCountHead');
 
       const queueStatus = document.getElementById('queueStatus');
-      const heldSection = document.getElementById('heldSection');
-      const autoSection = document.getElementById('autoSection');
+      const reviewSection = document.getElementById('reviewSection');
       const publishBar = document.getElementById('publishBar');
-      const heldQueue = document.getElementById('heldQueue');
-      const autoList = document.getElementById('autoList');
+      const reviewQueue = document.getElementById('reviewQueue');
 
       const SIGNALS = ['first-to-connect', 'underreported', 'missing-context', 'structural-pattern'];
+      const CHECK_LABELS = {
+        check_1_recap: 'Recap',
+        check_2_angle: 'Angle',
+        check_3_specificity: 'Specificity',
+        check_4_word_count: 'Word count',
+        check_5_voice: 'Voice',
+      };
 
-      // Live card node lists, repopulated after each render.
-      let heldCards = [];
-      let autoCards = [];
+      // Normalized items keyed by id, so publish can rebuild the full payload
+      // (static source fields from here, edited text fields from the DOM).
+      const itemsById = {};
+
+      // Live card node list, repopulated after each render.
+      let cards = [];
       let activeIdx = 0;
+
+      // Publish context (the date being reviewed).
+      let reviewDate = new Date().toISOString().slice(0, 10);
 
       // ============ TIMER ============
       let startedAt = null;
@@ -618,13 +565,17 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       }
 
       // ============ NORMALIZE ============
-      // /api/brief/candidates returns AuditedItem[] (nested scoring/draft/audit).
+      // /api/brief/staged returns AuditedItem[] (nested scoring/draft/audit).
       // Flatten to the shape the cards render. Items without an audit block were
       // dropped before the auditor and are filtered out before this runs.
       function normalize(item) {
         const draft = item.draft || {};
         const scoring = item.scoring || {};
         const audit = item.audit || {};
+        const failedChecks = [];
+        Object.keys(CHECK_LABELS).forEach((k) => {
+          if (audit[k] === 'fail') failedChecks.push(CHECK_LABELS[k]);
+        });
         return {
           id: item.id,
           category: item.category || 'POLITICS',
@@ -641,12 +592,12 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
           editor_note: draft.editor_note || '',
           what_to_watch: draft.what_to_watch || '',
           audit_pass: !!audit.audit_pass,
-          spot_check: !!audit.spot_check,
+          failed_checks: failedChecks,
           fail_reasons: Array.isArray(audit.fail_reasons) ? audit.fail_reasons : [],
         };
       }
 
-      // ============ CARD RENDERERS ============
+      // ============ CARD RENDERER ============
       function fieldEl(label, value, field, rows, inputCls) {
         const wrap = el('label', 'cand__field');
         wrap.appendChild(el('span', 'cand__field-label', label));
@@ -659,7 +610,7 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         return wrap;
       }
 
-      function renderHeldCard(c) {
+      function renderCard(c) {
         const sig = c.signal;
         const article = el('article', 'cand cand--' + sig);
         article.dataset.id = c.id;
@@ -672,16 +623,19 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         head.appendChild(left);
         const right = el('div', 'cand__head-right');
         right.appendChild(
-          c.spot_check
-            ? el('span', 'cand__hold-badge cand__hold-badge--spot', 'RANDOM SPOT-CHECK')
-            : el('span', 'cand__hold-badge cand__hold-badge--fail', 'AUDITOR FLAGGED')
+          c.audit_pass
+            ? el('span', 'cand__hold-badge cand__hold-badge--pass', 'AUDIT PASSED · 5/5')
+            : el('span', 'cand__hold-badge cand__hold-badge--fail', 'AUDIT FLAGGED · ' + c.failed_checks.length + ' CHECK' + (c.failed_checks.length === 1 ? '' : 'S'))
         );
         head.appendChild(right);
         article.appendChild(head);
 
-        if (!c.spot_check && c.fail_reasons.length > 0) {
+        if (!c.audit_pass && (c.failed_checks.length > 0 || c.fail_reasons.length > 0)) {
           const fails = el('div', 'cand__audit-fails');
-          fails.appendChild(el('p', 'cand__audit-label', 'AUDITOR REASONS'));
+          const label = c.failed_checks.length > 0
+            ? 'AUDITOR FLAGGED: ' + c.failed_checks.join(', ').toUpperCase()
+            : 'AUDITOR REASONS';
+          fails.appendChild(el('p', 'cand__audit-label', label));
           c.fail_reasons.forEach((r) => fails.appendChild(el('p', 'cand__audit-reason', r)));
           article.appendChild(fails);
         }
@@ -721,48 +675,10 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         return article;
       }
 
-      function bodyLine(cls, label, value) {
-        const p = el('p', cls);
-        const strong = document.createElement('strong');
-        strong.textContent = label;
-        p.appendChild(strong);
-        p.appendChild(document.createTextNode(value));
-        return p;
-      }
-
-      function renderAutoItem(c) {
-        const sig = c.signal;
-        const li = el('li', 'auto-item');
-        li.dataset.id = c.id;
-        const details = document.createElement('details');
-        const summary = document.createElement('summary');
-        summary.appendChild(el('span', 'auto-item__signal auto-item__signal--' + sig));
-        summary.appendChild(el('span', 'auto-item__category', c.category));
-        summary.appendChild(el('span', 'auto-item__headline', c.source_headline));
-        summary.appendChild(el('span', 'auto-item__meta', c.source_outlet + ' · ' + c.composite.toFixed(1)));
-        const rm = el('button', 'auto-item__remove', '×');
-        rm.type = 'button';
-        rm.dataset.action = 'remove';
-        rm.dataset.id = c.id;
-        rm.setAttribute('aria-label', 'Remove from auto-publishing batch');
-        summary.appendChild(rm);
-        details.appendChild(summary);
-
-        const body = el('div', 'auto-item__body');
-        body.appendChild(bodyLine('auto-item__angle', 'Angle: ', c.angle_statement));
-        body.appendChild(bodyLine('auto-item__tldr', 'TLDR: ', c.tldr));
-        body.appendChild(el('p', 'auto-item__note', c.editor_note));
-        body.appendChild(bodyLine('auto-item__watch', 'Watch: ', c.what_to_watch));
-        details.appendChild(body);
-
-        li.appendChild(details);
-        return li;
-      }
-
       // ============ STATUS / STATE ============
       function recomputeStatus() {
         let accepted = 0, rejected = 0, pending = 0;
-        heldCards.forEach((c) => {
+        cards.forEach((c) => {
           const s = c.dataset.state || 'pending';
           if (s === 'accepted') accepted++;
           else if (s === 'rejected') rejected++;
@@ -772,15 +688,22 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         rejectedEl.textContent = rejected;
         pendingEl.textContent = pending;
 
-        let autoActive = 0;
-        autoCards.forEach((a) => { if (a.dataset.state !== 'removed') autoActive++; });
+        if (cards.length === 0) {
+          publishBtn.disabled = true;
+          publishMsg.textContent = 'No items to review.';
+          return;
+        }
 
         if (pending === 0) {
-          publishBtn.disabled = false;
-          publishMsg.textContent = accepted + ' held accepted + ' + autoActive + ' auto-publishing = ' + (accepted + autoActive) + ' items ready. Click to ship.';
+          publishBtn.disabled = accepted === 0;
+          if (accepted === 0) {
+            publishMsg.textContent = 'All ' + rejected + ' items rejected. Nothing to publish.';
+          } else {
+            publishMsg.textContent = accepted + ' accepted, ' + rejected + ' rejected, 0 pending. Publish the ' + accepted + ' accepted ' + (accepted === 1 ? 'item' : 'items') + '.';
+          }
         } else {
           publishBtn.disabled = true;
-          publishMsg.textContent = pending + ' held items still need accept or reject. Auto-publishing batch is ' + autoActive + ' items.';
+          publishMsg.textContent = accepted + ' accepted, ' + rejected + ' rejected, ' + pending + ' pending. Decide every item to enable publish.';
         }
       }
 
@@ -788,24 +711,21 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         queueStatus.textContent = text;
         queueStatus.classList.toggle('dash-banner--error', !!isError);
         queueStatus.hidden = false;
-        heldSection.hidden = true;
-        autoSection.hidden = true;
+        reviewSection.hidden = true;
         publishBar.hidden = true;
       }
       function showLoaded() {
         queueStatus.hidden = true;
-        heldSection.hidden = false;
-        autoSection.hidden = false;
+        reviewSection.hidden = false;
         publishBar.hidden = false;
       }
 
       // ============ EVENT WIRING (post-render) ============
       function wireEvents() {
-        heldCards = Array.prototype.slice.call(heldQueue.querySelectorAll('.cand'));
-        autoCards = Array.prototype.slice.call(autoList.querySelectorAll('.auto-item'));
+        cards = Array.prototype.slice.call(reviewQueue.querySelectorAll('.cand'));
         activeIdx = 0;
 
-        heldCards.forEach((card, idx) => {
+        cards.forEach((card, idx) => {
           card.querySelectorAll('.cand__btn').forEach((btn) => {
             btn.addEventListener('click', () => {
               startTimerIfNeeded();
@@ -816,9 +736,9 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
               recomputeStatus();
               // Auto-scroll to next pending card
               setTimeout(() => {
-                for (let i = idx + 1; i < heldCards.length; i++) {
-                  if (!heldCards[i].dataset.state) {
-                    heldCards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                for (let i = idx + 1; i < cards.length; i++) {
+                  if (!cards[i].dataset.state) {
+                    cards[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
                     activeIdx = i;
                     return;
                   }
@@ -831,41 +751,25 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
           });
         });
 
-        autoCards.forEach((card) => {
-          const removeBtn = card.querySelector('.auto-item__remove');
-          if (removeBtn) {
-            removeBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              startTimerIfNeeded();
-              card.dataset.state = card.dataset.state === 'removed' ? '' : 'removed';
-              recomputeStatus();
-            });
-          }
-        });
-
         recomputeStatus();
       }
 
       // ============ RENDER ============
       function render(items) {
         const mapped = (items || []).filter((i) => i && i.audit).map(normalize);
-        const held = mapped.filter((c) => !c.audit_pass || c.spot_check);
-        const auto = mapped.filter((c) => c.audit_pass && !c.spot_check);
 
-        heldQueue.innerHTML = '';
-        autoList.innerHTML = '';
-        held.forEach((c) => heldQueue.appendChild(renderHeldCard(c)));
-        auto.forEach((c) => autoList.appendChild(renderAutoItem(c)));
+        reviewQueue.innerHTML = '';
+        Object.keys(itemsById).forEach((k) => delete itemsById[k]);
+        mapped.forEach((c) => {
+          itemsById[c.id] = c;
+          reviewQueue.appendChild(renderCard(c));
+        });
 
-        heldCountHead.textContent = held.length;
-        autoCountHead.textContent = auto.length;
-        autoCountStatus.textContent = auto.length;
-        if (autoCountSub) autoCountSub.textContent = auto.length;
-        auditStateEl.textContent = mapped.length > 0 ? 'AUDITOR PASS COMPLETE' : 'NO ITEMS';
+        itemCountHead.textContent = mapped.length;
+        auditStateEl.textContent = mapped.length > 0 ? 'DRAFTED · AWAITING REVIEW' : 'NO ITEMS';
 
         if (mapped.length === 0) {
-          showBanner('No queue for today yet. The ingest cron runs at 3 AM PT and the AI pass completes around 5:30 AM PT. Check back after that, or pass ?date=YYYY-MM-DD to review a past edition.', false);
+          showBanner('No staged queue for this date yet. The Cowork brief-daily task drafts and stages items each morning; check back after it runs, or pass ?date=YYYY-MM-DD to review another day.', false);
           return;
         }
         showLoaded();
@@ -912,22 +816,22 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
           return;
         }
         if (helpOpen) return; // swallow other shortcuts while help is open
-        if (!heldCards.length) return; // nothing to drive until the queue renders
+        if (!cards.length) return; // nothing to drive until the queue renders
         if (key === 'a' || key === 'r') {
           e.preventDefault();
           startTimerIfNeeded();
-          const card = heldCards[activeIdx];
+          const card = cards[activeIdx];
           if (!card || card.dataset.state) return;
           const btn = card.querySelector(key === 'a' ? '.cand__btn--accept' : '.cand__btn--reject');
           if (btn) btn.click();
         } else if (key === 'j' || key === 'arrowdown') {
           e.preventDefault();
-          activeIdx = Math.min(activeIdx + 1, heldCards.length - 1);
-          heldCards[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          activeIdx = Math.min(activeIdx + 1, cards.length - 1);
+          cards[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else if (key === 'k' || key === 'arrowup') {
           e.preventDefault();
           activeIdx = Math.max(activeIdx - 1, 0);
-          heldCards[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          cards[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       });
 
@@ -937,94 +841,103 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         clearInterval(tickHandle);
         const elapsed = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : 0;
 
-        // Gather editor decisions. Inline textarea edits ride along per accepted
-        // id so the publish stage applies them over the AI draft.
-        const acceptedHeld = [];
-        const rejectedHeld = [];
-        const edits = {};
-        heldCards.forEach((c) => {
-          if (c.dataset.state === 'accepted') {
-            acceptedHeld.push(c.dataset.id);
-            const e = {};
-            c.querySelectorAll('textarea').forEach((ta) => {
-              const f = ta.dataset.field;
-              if (f === 'angle') e.angle_statement = ta.value;
-              else if (f === 'tldr') e.tldr = ta.value;
-              else if (f === 'note') e.editor_note = ta.value;
-              else if (f === 'watch') e.what_to_watch = ta.value;
-            });
-            edits[c.dataset.id] = e;
-          } else if (c.dataset.state === 'rejected') {
-            rejectedHeld.push(c.dataset.id);
-          }
-        });
-        const removedAuto = [];
-        let autoActive = 0;
-        autoCards.forEach((a) => {
-          if (a.dataset.state === 'removed') removedAuto.push(a.dataset.id);
-          else autoActive++;
+        // Gather accepted items as the flat PublishItemInput shape the endpoint
+        // expects. Static source fields come from itemsById; the four editable
+        // text fields come from the card's current textarea values.
+        const items = [];
+        cards.forEach((card) => {
+          if (card.dataset.state !== 'accepted') return;
+          const base = itemsById[card.dataset.id];
+          if (!base) return;
+          const edits = {};
+          card.querySelectorAll('textarea').forEach((ta) => {
+            const f = ta.dataset.field;
+            if (f === 'angle') edits.angle_statement = ta.value;
+            else if (f === 'tldr') edits.tldr = ta.value;
+            else if (f === 'note') edits.editor_note = ta.value;
+            else if (f === 'watch') edits.what_to_watch = ta.value;
+          });
+          items.push({
+            id: base.id,
+            category: base.category,
+            signal: base.signal,
+            source_headline: base.source_headline,
+            source_outlet: base.source_outlet,
+            source_byline: base.source_byline,
+            source_url: base.source_url,
+            source_date: base.source_date,
+            composite_score: base.composite,
+            uniqueness_score: base.uniqueness,
+            angle_statement: edits.angle_statement != null ? edits.angle_statement : base.angle_statement,
+            tldr: edits.tldr != null ? edits.tldr : base.tldr,
+            editor_note: edits.editor_note != null ? edits.editor_note : base.editor_note,
+            what_to_watch: edits.what_to_watch != null ? edits.what_to_watch : base.what_to_watch,
+          });
         });
 
-        const decisions = {
-          date: new Date().toISOString().slice(0, 10),
+        if (items.length === 0) {
+          publishMsg.textContent = 'No accepted items to publish.';
+          return;
+        }
+
+        const payload = {
+          date: reviewDate,
           editor: 'Eric',
-          accepted_held: acceptedHeld,
-          rejected_held: rejectedHeld,
-          removed_auto: removedAuto,
-          edits: edits,
+          items: items,
         };
 
         publishBtn.textContent = 'PUBLISHING…';
         publishBtn.disabled = true;
-        publishMsg.textContent = 'Sending decisions to /api/brief/publish…';
+        publishMsg.textContent = 'Sending ' + items.length + ' accepted items to /api/brief/publish…';
 
         try {
           const resp = await fetch('/api/brief/publish', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',
-            body: JSON.stringify(decisions),
+            body: JSON.stringify(payload),
           });
 
           if (resp.ok) {
             const data = await resp.json();
             publishBtn.textContent = 'PUBLISHED · ' + data.date;
-            publishMsg.textContent = 'Live publish OK. ' + ((data.items_accepted || 0) + autoActive) + ' items shipped. ' + (data.edits_count || 0) + ' edits applied. Review time: ' + fmtTime(elapsed) + '.';
+            publishMsg.textContent = 'Live publish OK. Edition ' + (data.edition || '?') + ', ' + (data.items_accepted || items.length) + ' items shipped' + (data.committed ? ' (committed to main)' : ' (written locally, dev mode)') + '. Review time: ' + fmtTime(elapsed) + '.';
           } else if (resp.status === 404 || resp.status === 405) {
             // API not deployed yet: fall back to simulation
             publishBtn.textContent = 'PUBLISHED · SIMULATED';
-            publishMsg.textContent = 'Simulation mode (no /api/brief/publish endpoint). ' + (acceptedHeld.length + autoActive) + ' items would publish. Review time: ' + fmtTime(elapsed) + '. Phase C target is under 10:00.';
+            publishMsg.textContent = 'Simulation mode (no /api/brief/publish endpoint). ' + items.length + ' items would publish. Review time: ' + fmtTime(elapsed) + '.';
           } else {
             const err = await resp.text();
             publishBtn.textContent = 'PUBLISH FAILED';
             publishBtn.disabled = false;
-            publishMsg.textContent = 'Publish error: HTTP ' + resp.status + '. ' + err.slice(0, 120);
+            publishMsg.textContent = 'Publish error: HTTP ' + resp.status + '. ' + err.slice(0, 160);
           }
         } catch (e) {
           // Network error: assume API isn't available, fall back to simulation
           publishBtn.textContent = 'PUBLISHED · SIMULATED';
-          publishMsg.textContent = 'Simulation mode (API unreachable). ' + (acceptedHeld.length + autoActive) + ' items would publish. Review time: ' + fmtTime(elapsed) + '.';
+          publishMsg.textContent = 'Simulation mode (API unreachable). ' + items.length + ' items would publish. Review time: ' + fmtTime(elapsed) + '.';
         }
       });
 
       // ============ BOOT: FETCH TODAY'S QUEUE ============
       async function boot() {
         const today = new Date().toISOString().slice(0, 10);
-        // Allow ?date=YYYY-MM-DD override for reviewing a past edition.
+        // Allow ?date=YYYY-MM-DD override for reviewing a different day.
         const params = new URLSearchParams(window.location.search);
         const date = params.get('date') || today;
+        reviewDate = date;
 
         dateLabelEl.textContent = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
           weekday: 'long', month: 'long', day: 'numeric',
         }).toUpperCase();
         auditStateEl.textContent = 'FETCHING QUEUE';
-        showBanner('Loading the queue for ' + date + '…', false);
+        showBanner('Loading the staged queue for ' + date + '…', false);
 
         try {
           // No bearer token from the browser: the dashboard is gated by Vercel
           // deployment protection at the platform level, whose auth cookie rides
           // on this same-origin request. DASHBOARD_TOKEN gates direct API hits.
-          const resp = await fetch('/api/brief/candidates?date=' + encodeURIComponent(date), {
+          const resp = await fetch('/api/brief/staged?date=' + encodeURIComponent(date), {
             credentials: 'same-origin',
             headers: { 'Accept': 'application/json' },
           });
@@ -1037,7 +950,7 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
           render(data.items || []);
         } catch (e) {
           auditStateEl.textContent = 'ERROR';
-          showBanner('Could not reach /api/brief/candidates: ' + (e && e.message ? e.message : e), true);
+          showBanner('Could not reach /api/brief/staged: ' + (e && e.message ? e.message : e), true);
         }
       }
 
