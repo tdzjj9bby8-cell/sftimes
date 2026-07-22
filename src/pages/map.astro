@@ -1,5 +1,6 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import NominateKeeperCTA from '../components/NominateKeeperCTA.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import { getCollection } from 'astro:content';
 
@@ -134,6 +135,8 @@ const pinned = ordered.map((s, i) => ({
       </ol>
     </aside>
   </section>
+
+  <NominateKeeperCTA size="compact" />
 
   <!-- SUBMIT A KEEPER STRIP -->
   <a href="/submit" class="ex-colmark__link">

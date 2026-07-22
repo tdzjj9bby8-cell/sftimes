@@ -1,5 +1,6 @@
 ---
 import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import NominateKeeperCTA from '../../components/NominateKeeperCTA.astro';
 import AuthorAvatar from '../../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
 
@@ -232,6 +233,8 @@ const articleSchema = {
       </a>
     ))}
   </section>
+
+  <NominateKeeperCTA size="block" />
 
   <style>
     /* ============ STORY HERO · TYPOGRAPHIC (PATH A) ============

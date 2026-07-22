@@ -1,5 +1,6 @@
 ---
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import NominateKeeperCTA from '../components/NominateKeeperCTA.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import AuthorAvatar from '../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
@@ -26,6 +27,8 @@ const cutoutSrc = (s: any) => `/${s.data.hero_filename_hint.replace(/\.[^.]+$/, 
     <h1 class="ex-prose__title">EVERY KEEPER<br>WE HAVE EVER HELD.</h1>
     <p>Weekly profiles, back to issue one. One saturday letter at a time, and yes, every single byline is a real human.</p>
   </article>
+
+  <NominateKeeperCTA size="block" />
 
   <section class="ex-cards ex-cards--3">
     {stories.map((s) => (

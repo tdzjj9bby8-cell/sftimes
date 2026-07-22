@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import NominateKeeperCTA from '../../../components/NominateKeeperCTA.astro';
 import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
 import BriefSubNav from '../../../components/BriefSubNav.astro';
 
@@ -203,6 +204,8 @@ const newsArticleSchema = {
         SIGNAL · {item.signal.replace(/-/g, ' ').toUpperCase()} · WHY WE PICKED THIS
       </figcaption>
     </figure>
+
+    <NominateKeeperCTA size="compact" />
 
     <section class="brief-permalink__note">
       <p class="brief-permalink__note-label">EDITOR'S NOTE · BY {brief.data.editor.toUpperCase()}</p>

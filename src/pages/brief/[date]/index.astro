@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import ExhibitionLayout from '../../../layouts/ExhibitionLayout.astro';
+import NominateKeeperCTA from '../../../components/NominateKeeperCTA.astro';
 import ExhibitionMasthead from '../../../components/ExhibitionMasthead.astro';
 import BriefSubNav from '../../../components/BriefSubNav.astro';
 
@@ -218,6 +219,8 @@ const collectionSchema = {
       </p>
     </section>
   )}
+
+  <NominateKeeperCTA size="block" />
 
   <!-- ARCHIVE NAVIGATION ============ -->
   <nav class="brief-nav">

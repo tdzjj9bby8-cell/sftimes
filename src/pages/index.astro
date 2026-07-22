@@ -8,6 +8,7 @@
  * homepage-specific content blocks and the carousel rotation script live here.
  */
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
+import NominateKeeperCTA from '../components/NominateKeeperCTA.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import { getCollection } from 'astro:content';
 import AuthorAvatar from '../components/AuthorAvatar.astro';
@@ -335,6 +336,8 @@ const weeklyDeck = latestWeekly
       )}
     </div>
   </a>
+
+  <NominateKeeperCTA size="compact" />
 
   <!-- ARCHIVE STRIP: clean horizontal scroll of past issues -->
   <section class="archive">

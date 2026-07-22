@@ -1,0 +1,91 @@
+---
+/**
+ * NominateKeeperCTA.astro
+ *
+ * Shared subject-acquisition CTA. Every reader touchpoint becomes a lightweight
+ * lead source for the Saturday Profile funnel (PROFILE-PRODUCTION-KIT Stage 10).
+ * All variants link to the existing /tell-your-story form. No form here.
+ *
+ * Path A tokens only: paper background, thin terracotta accent stripe, Anton
+ * headline. Quiet by design, never a bright fill that breaks the paper aesthetic.
+ *
+ * Props:
+ *   size="block"   (default) multi-line box with spacing above/below
+ *   size="compact" single inline line (sub-copy hidden)
+ */
+export interface Props {
+  size?: 'compact' | 'block';
+}
+const { size = 'block' } = Astro.props;
+---
+<aside class={`nominate nominate--${size}`} aria-label="Nominate a keeper">
+  <div class="nominate__text">
+    <p class="nominate__headline">Know an SF keeper we should meet?</p>
+    <p class="nominate__sub">Send us three sentences about someone the city would lose without.</p>
+  </div>
+  <a class="nominate__btn" href="/tell-your-story">Nominate a keeper <span aria-hidden="true">&rarr;</span></a>
+</aside>
+
+<style>
+  .nominate {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .nominate--block {
+    max-width: 880px;
+    margin: 48px auto;
+    padding: 24px 28px;
+  }
+  .nominate--compact {
+    max-width: 880px;
+    margin: 24px auto;
+    padding: 14px 18px;
+    gap: 14px;
+  }
+  .nominate__text { min-width: 0; }
+  .nominate__headline {
+    font-family: var(--display);
+    font-size: clamp(18px, 2vw, 24px);
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+  }
+  .nominate--compact .nominate__headline {
+    font-size: clamp(15px, 1.6vw, 18px);
+  }
+  .nominate__sub {
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin: 8px 0 0;
+    max-width: 54ch;
+  }
+  .nominate--compact .nominate__sub { display: none; }
+  .nominate__btn {
+    font-family: var(--ui);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--accent);
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nominate__btn:hover { opacity: 0.7; }
+
+  @media (max-width: 520px) {
+    .nominate { align-items: flex-start; }
+  }
+</style>
