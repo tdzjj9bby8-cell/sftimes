@@ -1,0 +1,120 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+/**
+ * /this-week/
+ *
+ * Landing page for the "This Week in SF" weekly digest. Lists every published
+ * weekly post, newest first. Data comes from the weeklies content collection.
+ * Renders a friendly empty state before the first weekly ships.
+ */
+const weeklies = await getCollection('weeklies');
+const sorted = [...weeklies].sort((a, b) => b.data.end_date.valueOf() - a.data.end_date.valueOf());
+
+function longDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+function shortRange(start: Date, end: Date): string {
+  const s = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const e = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${s} to ${e}`;
+}
+
+// Deck: first two sentences of the intro, so the landing reads as a real index.
+function deck(intro: string): string {
+  const parts = intro.split(/(?<=[.!?])\s+/).filter(Boolean);
+  return parts.slice(0, 2).join(' ');
+}
+---
+<ExhibitionLayout
+  title="THIS WEEK IN SF · SF Times"
+  description="The weekly SF Times digest. Every week's top stories, the pattern behind them, and what's coming up next."
+  active="home"
+>
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THIS WEEK IN SF"
+    subscript="THE WEEKLY DIGEST"
+    cutouts={[]}
+  />
+
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">WEEKLY · THE PATTERN BEHIND THE WEEK'S NEWS</p>
+    <h1 class="ex-prose__title">WHAT THE<br>WEEK MEANT.</h1>
+    <p>Every week, one digest. The top stories from the daily Brief, the through-line only we are naming, and what we're watching next. Published Sunday, edited by Eric.</p>
+  </article>
+
+  {sorted.length > 0 ? (
+    <section class="twl-list-wrap">
+      <ul class="twl-list">
+        {sorted.map((entry) => (
+          <li>
+            <a class="twl-item" href={`/this-week/${entry.data.week_id}/`}>
+              <p class="twl-item__meta">
+                {shortRange(entry.data.start_date, entry.data.end_date).toUpperCase()} · {entry.data.week_id}
+              </p>
+              <h2 class="twl-item__title">Week of {longDate(entry.data.start_date)}</h2>
+              <p class="twl-item__deck">{deck(entry.data.intro)}</p>
+              <span class="twl-item__cta">Read the week <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : (
+    <section class="twl-empty">
+      <p class="twl-empty__label">NOTHING PUBLISHED YET</p>
+      <p class="twl-empty__text">
+        The first weekly digest lands soon. In the meantime, the daily Brief publishes
+        Monday through Saturday at <a href="/brief/">/brief</a>, and you can follow the
+        <a href="https://instagram.com/kiyongericlee" target="_blank" rel="noopener">Editor on Instagram</a>.
+      </p>
+    </section>
+  )}
+
+  <style>
+    .twl-list-wrap { max-width: 880px; margin: 0 auto 64px; padding: 0 12px; }
+    .twl-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--rule); }
+    .twl-item {
+      display: block; color: var(--ink);
+      padding: 28px 4px; border-bottom: 1px solid var(--rule);
+      transition: padding-left 200ms, background 200ms;
+    }
+    .twl-item:hover { padding-left: 16px; background: var(--paper-2); }
+    .twl-item__meta {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 8px;
+    }
+    .twl-item__title {
+      font-family: var(--display); font-size: clamp(26px, 3.4vw, 44px);
+      line-height: 1.02; letter-spacing: -0.01em; text-transform: uppercase;
+      margin: 0 0 10px; color: var(--ink);
+    }
+    .twl-item__deck {
+      font-family: 'Newsreader', Georgia, serif; font-style: italic;
+      font-size: clamp(15px, 1.4vw, 18px); line-height: 1.55;
+      color: var(--ink-2); margin: 0 0 12px; max-width: 62ch;
+    }
+    .twl-item__cta {
+      font-family: var(--ui); font-size: 12px; letter-spacing: 0.14em;
+      text-transform: uppercase; font-weight: 700; color: var(--accent);
+      border-bottom: 1px solid currentColor; padding-bottom: 2px;
+    }
+
+    .twl-empty {
+      max-width: 880px; margin: 0 auto 80px; padding: 48px 24px;
+      background: var(--paper-2); border: 1px solid var(--rule); text-align: center;
+    }
+    .twl-empty__label {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 12px;
+    }
+    .twl-empty__text {
+      font-family: var(--ui); font-size: 15px; line-height: 1.6; color: var(--ink);
+      margin: 0 auto; max-width: 52ch;
+    }
+    .twl-empty__text a { color: var(--accent); border-bottom: 1px solid currentColor; }
+  </style>
+</ExhibitionLayout>

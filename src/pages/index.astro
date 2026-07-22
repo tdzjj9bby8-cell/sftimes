@@ -113,6 +113,20 @@ const briefDateLabel = latestBrief
       .toUpperCase()
   : '';
 const briefTotalItems = latestBrief ? latestBrief.data.items.length : 0;
+
+// This Week strip. Pulls the latest published weekly digest, if any exists.
+// Rendered between the news blocks and the KEEPERS vertical. Empty until the
+// first weekly ships (the section simply doesn't render).
+const allWeeklies = await getCollection('weeklies');
+const latestWeekly = [...allWeeklies].sort(
+  (a, b) => b.data.end_date.valueOf() - a.data.end_date.valueOf()
+)[0];
+const weeklyRange = latestWeekly
+  ? `${latestWeekly.data.start_date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} to ${latestWeekly.data.end_date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`
+  : '';
+const weeklyDeck = latestWeekly
+  ? latestWeekly.data.intro.split(/(?<=[.!?])\s+/).filter(Boolean).slice(0, 2).join(' ')
+  : '';
 ---
 <ExhibitionLayout
   title="THE KEEPERS · SF TIMES"
@@ -281,6 +295,25 @@ const briefTotalItems = latestBrief ? latestBrief.data.items.length : 0;
           </div>
         </>
       )}
+    </section>
+  )}
+
+  <!-- THIS WEEK IN SF · weekly digest strip · sits between the news blocks
+       and the KEEPERS vertical. Renders only when a weekly has been published;
+       links to the latest /this-week/[week_id] post. -->
+  {latestWeekly && (
+    <section class="thisweek-home" aria-label="This week in SF">
+      <a class="thisweek-home__link" href={`/this-week/${latestWeekly.data.week_id}/`}>
+        <div class="thisweek-home__label-col">
+          <p class="thisweek-home__eyebrow">THIS WEEK IN SF</p>
+          <p class="thisweek-home__range">{weeklyRange}</p>
+        </div>
+        <div class="thisweek-home__body">
+          <h2 class="thisweek-home__title">The week, made sense of.</h2>
+          <p class="thisweek-home__deck">{weeklyDeck}</p>
+          <span class="thisweek-home__cta">Read this week's digest <span aria-hidden="true">→</span></span>
+        </div>
+      </a>
     </section>
   )}
 
@@ -1091,6 +1124,75 @@ const briefTotalItems = latestBrief ? latestBrief.data.items.length : 0;
     .brief-hero__angle { padding: 12px 14px; }
     .brief-hero__angle-text { font-size: 15px; }
     .brief-hero__foot { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+
+  /* === THIS WEEK IN SF · HOMEPAGE STRIP === */
+  .thisweek-home { max-width: 1200px; margin: 0 auto 64px; padding: 0 24px; }
+  .thisweek-home__link {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 32px;
+    align-items: center;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-left: 6px solid var(--accent);
+    padding: 32px 40px;
+    color: var(--ink);
+    transition: background 200ms, transform 200ms;
+  }
+  .thisweek-home__link:hover { background: var(--paper); transform: translateY(-2px); }
+  .thisweek-home__eyebrow {
+    font-family: var(--display);
+    font-size: clamp(22px, 2.4vw, 32px);
+    line-height: 1;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 8px;
+  }
+  .thisweek-home__range {
+    font-family: var(--ui);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin: 0;
+  }
+  .thisweek-home__title {
+    font-family: var(--display);
+    font-size: clamp(22px, 2.6vw, 32px);
+    line-height: 1.05;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 10px;
+  }
+  .thisweek-home__deck {
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(15px, 1.4vw, 18px);
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin: 0 0 14px;
+    max-width: 60ch;
+  }
+  .thisweek-home__cta {
+    font-family: var(--ui);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--accent);
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+  }
+  @media (max-width: 880px) {
+    .thisweek-home__link {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 24px 24px;
+    }
   }
 
   /* === CLASSIFIEDS STRIP === */

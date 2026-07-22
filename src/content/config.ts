@@ -160,8 +160,70 @@ const briefs = defineCollection({
   }),
 });
 
+/**
+ * Weeklies collection · "This Week in SF" digest posts.
+ *
+ * Each markdown file in src/content/weeklies/ is one weekly digest.
+ * Filename pattern: YYYY-Www.md (e.g., 2026-W29.md).
+ *
+ * The weekly is the editorial voice-add on top of the daily Brief: it reads
+ * the week's published briefs, picks the top items, and adds a
+ * pattern-of-the-week note that names the through-line only we are drawing.
+ * Composed by the brief-weekly Cowork task (see BRIEF-WEEKLY-PLAYBOOK.md),
+ * staged, then reviewed and published by the editor in /brief-dashboard/weekly.
+ *
+ * Routes:
+ *   /this-week/            landing (all weeklies, newest first)
+ *   /this-week/[week_id]/  single weekly post
+ */
+const weeklies = defineCollection({
+  type: 'content',
+  schema: z.object({
+    /** ISO week id, "YYYY-Www" form. Drives routing and sort. */
+    week_id: z.string(),
+    /** Monday of the covered week. */
+    start_date: z.coerce.date(),
+    /** Sunday of the covered week. */
+    end_date: z.coerce.date(),
+    /** Named editor. Currently only 'Eric'. */
+    editor: z.enum(['Eric']).default('Eric'),
+    /** Editor's intro at the top of the post. */
+    intro: z.string(),
+    /** AI assistance disclosure, same style as the daily Brief. */
+    ai_disclosure: z.string().default(
+      'This digest is composed with AI assistance from the week\'s published Brief items, then reviewed and edited by Eric before publish. AI does not write the news. Original reporting is always linked, always credited.'
+    ),
+    /** The 3 to 5 lead items of the week. Each links out to the source reporter. */
+    top_stories: z.array(
+      z.object({
+        source_headline: z.string(),
+        source_outlet: z.string(),
+        source_url: z.string().url(),
+        source_date: z.coerce.date(),
+        /** One-line reader summary in SF Times voice. */
+        one_line: z.string(),
+        /** Category tag (13-value taxonomy, uppercase). */
+        category: z.string(),
+        /** Why it mattered, pulled from the editor's note angle. */
+        why_it_mattered: z.string(),
+      })
+    ),
+    /** The editorial through-line for the week. The reason the weekly exists. */
+    pattern_of_the_week: z.object({
+      title: z.string(),
+      /** 200 to 300 words naming the cross-item pattern. */
+      note: z.string(),
+      /** The items or threads this pattern connects. */
+      connections: z.array(z.string()).default([]),
+    }),
+    /** Forward-looking bullets, composed from the week's what_to_watch fields. */
+    coming_up: z.array(z.string()).default([]),
+  }),
+});
+
 export const collections = {
   stories,
   'best-of': bestOf,
   briefs,
+  weeklies,
 };

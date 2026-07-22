@@ -1,0 +1,275 @@
+---
+import { getCollection } from 'astro:content';
+import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
+import ExhibitionMasthead from '../../components/ExhibitionMasthead.astro';
+
+/**
+ * /this-week/[week_id]
+ *
+ * A single "This Week in SF" digest post. Editorial voice-add on top of the
+ * daily Brief: the week's top items, plus a pattern-of-the-week note naming the
+ * through-line, plus what's coming up. Data comes from the weeklies content
+ * collection (see src/content/config.ts). Composed by the brief-weekly Cowork
+ * task, reviewed and published by the editor in /brief-dashboard/weekly.
+ */
+export async function getStaticPaths() {
+  const weeklies = await getCollection('weeklies');
+  return weeklies.map((entry) => ({
+    params: { week_id: entry.data.week_id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const w = entry.data;
+const { Content } = await entry.render();
+
+function longDate(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+const rangeLabel = `${longDate(w.start_date)} to ${longDate(w.end_date)}`;
+const startLabel = w.start_date
+  .toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+  .toUpperCase();
+
+const SITE_ORIGIN = 'https://www.sftimes.com';
+const INSTAGRAM_URL = 'https://instagram.com/kiyongericlee';
+
+// Schema.org NewsArticle for the weekly digest. The article body is the
+// pattern-of-the-week note; the top stories are cited source articles.
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  '@id': `${SITE_ORIGIN}/this-week/${w.week_id}/`,
+  headline: `This Week in SF · Week of ${longDate(w.start_date)}`,
+  description: w.intro,
+  datePublished: w.end_date.toISOString(),
+  dateModified: w.end_date.toISOString(),
+  author: { '@type': 'Person', name: w.editor },
+  publisher: { '@id': `${SITE_ORIGIN}/#org` },
+  isAccessibleForFree: true,
+  citation: w.top_stories.map((s) => ({
+    '@type': 'CreativeWork',
+    name: s.source_headline,
+    url: s.source_url,
+    publisher: { '@type': 'Organization', name: s.source_outlet },
+  })),
+};
+---
+<ExhibitionLayout
+  title={`THIS WEEK IN SF · WEEK OF ${startLabel} · SF Times`}
+  description={w.intro}
+  active="home"
+  ogType="article"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <ExhibitionMasthead
+    slot="masthead"
+    title="THIS WEEK IN SF"
+    subscript={`WEEK OF ${startLabel}`}
+    cutouts={[]}
+  />
+
+  <!-- ============ INTRO ============ -->
+  <article class="ex-prose">
+    <p class="ex-prose__eyebrow">{rangeLabel.toUpperCase()} · EDITED BY {w.editor.toUpperCase()}</p>
+    <h1 class="ex-prose__title">SAN FRANCISCO,<br>THE WEEK<br>THAT WAS.</h1>
+    <p>{w.intro}</p>
+    <Content />
+  </article>
+
+  <!-- ============ TOP STORIES ============ -->
+  {w.top_stories.length > 0 && (
+    <section class="tw-section">
+      <header class="tw-section__head">
+        <p class="tw-section__eyebrow">TOP THIS WEEK</p>
+        <h2 class="tw-section__title">What we kept coming back to</h2>
+      </header>
+
+      <ol class="tw-stories">
+        {w.top_stories.map((s, idx) => (
+          <li>
+            <a class="tw-story" href={s.source_url} target="_blank" rel="noopener noreferrer">
+              <span class="tw-story__num" aria-hidden="true">{String(idx + 1).padStart(2, '0')}</span>
+              <div class="tw-story__body">
+                <div class="tw-story__tags">
+                  <span class="tw-story__category">{s.category}</span>
+                  <span class="tw-story__date">{longDate(s.source_date).toUpperCase()}</span>
+                </div>
+                <h3 class="tw-story__headline">{s.source_headline}</h3>
+                <p class="tw-story__oneline">{s.one_line}</p>
+                <p class="tw-story__why"><span class="tw-story__why-label">WHY IT MATTERED</span> {s.why_it_mattered}</p>
+                <p class="tw-story__source">Reported by {s.source_outlet} <span aria-hidden="true">↗</span></p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  <!-- ============ PATTERN OF THE WEEK ============ -->
+  <section class="tw-pattern">
+    <div class="tw-pattern__inner">
+      <p class="tw-pattern__eyebrow">PATTERN OF THE WEEK</p>
+      <h2 class="tw-pattern__title">{w.pattern_of_the_week.title}</h2>
+      <p class="tw-pattern__note">{w.pattern_of_the_week.note}</p>
+      {w.pattern_of_the_week.connections.length > 0 && (
+        <ul class="tw-pattern__connections">
+          {w.pattern_of_the_week.connections.map((c) => (
+            <li>{c}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <!-- ============ COMING UP ============ -->
+  {w.coming_up.length > 0 && (
+    <section class="tw-section">
+      <header class="tw-section__head">
+        <p class="tw-section__eyebrow">COMING UP</p>
+        <h2 class="tw-section__title">What we're watching next</h2>
+      </header>
+      <ul class="tw-coming">
+        {w.coming_up.map((c) => (
+          <li>{c}</li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <!-- ============ FOLLOW / DISCLOSURE ============ -->
+  <section class="tw-follow">
+    <p class="tw-follow__label">READ ON</p>
+    <p class="tw-follow__text">
+      The daily Brief publishes Monday through Saturday. Follow the
+      <a href={INSTAGRAM_URL} target="_blank" rel="noopener">Editor on Instagram</a>, subscribe to the
+      <a href="/rss.xml">RSS feed</a>, or browse the
+      <a href="/this-week/">weekly archive</a>.
+    </p>
+    <p class="tw-follow__disclosure">{w.ai_disclosure}</p>
+  </section>
+
+  <style>
+    /* ============ SECTIONS ============ */
+    .tw-section { max-width: 880px; margin: 0 auto 56px; padding: 0 12px; }
+    .tw-section__head { margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+    .tw-section__eyebrow {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.20em;
+      text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0 0 6px;
+    }
+    .tw-section__title {
+      font-family: var(--display); font-size: clamp(24px, 2.8vw, 34px);
+      line-height: 1.05; letter-spacing: -0.005em; text-transform: uppercase; margin: 0;
+    }
+
+    /* ============ TOP STORIES ============ */
+    .tw-stories { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+    .tw-story {
+      display: grid; grid-template-columns: 64px 1fr; gap: 18px;
+      background: var(--paper); border: 1px solid var(--rule); border-left-width: 4px;
+      border-left-color: var(--accent);
+      padding: 20px 22px; color: var(--ink);
+      transition: background 180ms, transform 180ms;
+    }
+    .tw-story:hover { background: var(--paper-2); transform: translateY(-1px); }
+    .tw-story__num {
+      font-family: var(--display); font-size: 40px; line-height: 1;
+      color: var(--accent); letter-spacing: -0.01em;
+    }
+    .tw-story__body { min-width: 0; }
+    .tw-story__tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .tw-story__category {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      font-weight: 700; text-transform: uppercase; background: var(--paper-2);
+      padding: 3px 9px; color: var(--ink);
+    }
+    .tw-story__date {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.10em;
+      color: var(--muted); font-weight: 700;
+    }
+    .tw-story__headline {
+      font-family: var(--display); font-size: clamp(18px, 2.2vw, 24px);
+      line-height: 1.18; letter-spacing: -0.005em; margin: 0 0 10px;
+    }
+    .tw-story__oneline {
+      font-family: var(--ui); font-size: 15px; line-height: 1.55; color: var(--ink);
+      margin: 0 0 10px; max-width: 58ch;
+    }
+    .tw-story__why {
+      font-family: var(--ui); font-size: 13px; line-height: 1.5; color: var(--ink);
+      margin: 0 0 12px; padding: 8px 12px;
+      background: rgba(217, 85, 31, 0.08); border-left: 2px solid var(--accent);
+      max-width: 58ch;
+    }
+    .tw-story__why-label {
+      font-weight: 700; letter-spacing: 0.14em; color: var(--accent); margin-right: 6px;
+    }
+    .tw-story__source {
+      font-family: var(--ui); font-size: 11.5px; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0;
+    }
+
+    /* ============ PATTERN OF THE WEEK ============ */
+    .tw-pattern { background: var(--ink); color: var(--paper); padding: 56px 12px; margin: 0 0 56px; }
+    .tw-pattern__inner { max-width: 760px; margin: 0 auto; }
+    .tw-pattern__eyebrow {
+      font-family: var(--ui); font-size: 11px; letter-spacing: 0.20em;
+      text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0 0 14px;
+    }
+    .tw-pattern__title {
+      font-family: var(--display); font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.02; letter-spacing: -0.01em; text-transform: uppercase;
+      color: var(--paper); margin: 0 0 22px;
+    }
+    .tw-pattern__note {
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: clamp(16px, 1.4vw, 19px); line-height: 1.65;
+      color: rgba(244, 241, 234, 0.92); margin: 0 0 22px; max-width: 62ch;
+    }
+    .tw-pattern__connections {
+      list-style: none; padding: 0; margin: 0;
+      border-top: 1px solid rgba(244, 241, 234, 0.18); padding-top: 18px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .tw-pattern__connections li {
+      font-family: var(--ui); font-size: 13px; line-height: 1.5;
+      color: rgba(244, 241, 234, 0.78); padding-left: 18px; position: relative;
+    }
+    .tw-pattern__connections li::before {
+      content: '→'; position: absolute; left: 0; color: var(--accent);
+    }
+
+    /* ============ COMING UP ============ */
+    .tw-coming { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    .tw-coming li {
+      font-family: var(--ui); font-size: 15px; line-height: 1.5; color: var(--ink);
+      padding: 12px 16px; background: var(--paper-2); border-left: 3px solid var(--accent);
+    }
+
+    /* ============ FOLLOW / DISCLOSURE ============ */
+    .tw-follow { max-width: 880px; margin: 0 auto 64px; padding: 22px 12px 0; }
+    .tw-follow__label {
+      font-family: var(--ui); font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 8px;
+    }
+    .tw-follow__text {
+      font-family: var(--ui); font-size: 15px; line-height: 1.6; color: var(--ink);
+      margin: 0 0 18px; max-width: 60ch;
+    }
+    .tw-follow__text a { color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+    .tw-follow__disclosure {
+      font-family: var(--ui); font-size: 12px; line-height: 1.55; color: var(--muted);
+      margin: 0; padding: 14px 16px; background: var(--paper-2); border-left: 3px solid var(--muted);
+      max-width: 66ch;
+    }
+
+    @media (max-width: 640px) {
+      .tw-story { grid-template-columns: 44px 1fr; gap: 12px; padding: 16px 16px; }
+      .tw-story__num { font-size: 28px; }
+    }
+  </style>
+</ExhibitionLayout>

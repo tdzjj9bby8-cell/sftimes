@@ -1,0 +1,3 @@
+# Keeps the weeklies content collection directory tracked before the first
+# "This Week in SF" digest is published. Weekly posts land here as YYYY-Www.md,
+# composed by the brief-weekly Cowork task and published from /brief-dashboard/weekly.

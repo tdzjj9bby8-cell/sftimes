@@ -11,11 +11,25 @@ export async function GET(context: { site?: URL } & Record<string, unknown>) {
     .filter((s) => s.data.published.valueOf() <= now.valueOf())
     .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
 
+  // "This Week in SF" weekly digests ride the same reader feed, newest first.
+  const weeklies = await getCollection('weeklies');
+  const weeklyItems = weeklies
+    .filter((w) => w.data.end_date.valueOf() <= now.valueOf())
+    .map((w) => ({
+      title: `This Week in SF · Week of ${w.data.start_date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`,
+      description: w.data.intro,
+      link: `/this-week/${w.data.week_id}`,
+      pubDate: w.data.end_date,
+      author: `${w.data.editor.toLowerCase()}@sftimes.com (${w.data.editor})`,
+      categories: ['This Week'],
+      customData: '',
+    }));
+
   return rss({
     title: 'SF Times · The Keepers',
     description: 'One San Francisco keeper every Saturday morning. Reader-funded. No banner ads.',
     site: (context.site ?? new URL(SITE)).toString(),
-    items: stories.map((s) => ({
+    items: [...weeklyItems, ...stories.map((s) => ({
       title: s.data.title,
       description: s.data.deck,
       link: `/stories/${s.data.url_slug}`,
@@ -35,7 +49,7 @@ export async function GET(context: { site?: URL } & Record<string, unknown>) {
           ? `<sftimes:sponsor>${escapeXml(s.data.sponsor.name)}</sftimes:sponsor>`
           : '',
       ].filter(Boolean).join(''),
-    })),
+    }))].sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf()),
     customData: '<language>en-us</language><copyright>SF Times · Curry Village Media</copyright>',
     xmlns: {
       dc: 'http://purl.org/dc/elements/1.1/',

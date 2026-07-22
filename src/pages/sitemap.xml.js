@@ -4,6 +4,7 @@ export async function GET() {
   const stories = await getCollection('stories');
   const bestOf = await getCollection('best-of');
   const briefs = await getCollection('briefs');
+  const weeklies = await getCollection('weeklies');
   const site = 'https://www.sftimes.com';
 
   // Page priority + change frequency per URL family.
@@ -37,6 +38,7 @@ export async function GET() {
     { path: '/brief/sources', priority: '0.6', freq: 'monthly' },
     { path: '/brief/this-week', priority: '0.8', freq: 'daily' },
     { path: '/brief/explore', priority: '0.7', freq: 'daily' },
+    { path: '/this-week', priority: '0.8', freq: 'weekly' },
     { path: '/submit', priority: '0.5', freq: 'yearly' },
     { path: '/standards', priority: '0.4', freq: 'yearly' },
     { path: '/corrections', priority: '0.5', freq: 'weekly' },
@@ -110,6 +112,17 @@ export async function GET() {
     });
   }
 
+  // Weeklies: one URL per published "This Week in SF" digest. lastmod is the
+  // week's end date. Newest weeks get a slightly higher priority.
+  const weeklyEntries = [...weeklies]
+    .sort((a, b) => b.data.end_date.valueOf() - a.data.end_date.valueOf())
+    .map((w, i) => ({
+      path: `/this-week/${w.data.week_id}`,
+      priority: i === 0 ? '0.8' : '0.6',
+      freq: i === 0 ? 'weekly' : 'monthly',
+      lastmod: w.data.end_date.toISOString().slice(0, 10),
+    }));
+
   const allEntries = [
     ...homepageUrls,
     ...sectionUrls,
@@ -117,6 +130,7 @@ export async function GET() {
     ...storyEntries,
     ...bestOfEntries,
     ...briefEntries,
+    ...weeklyEntries,
   ].filter((e) => !EXCLUDE.has(e.path));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
