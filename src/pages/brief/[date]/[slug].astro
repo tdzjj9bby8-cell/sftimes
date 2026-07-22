@@ -257,7 +257,7 @@ const newsArticleSchema = {
     .brief-permalink {
       max-width: var(--max-prose);
       margin: 0 auto 64px;
-      padding: 0 var(--gutter);
+      padding: 0 clamp(24px, 7vw, 104px);
     }
 
     .brief-permalink__head {
@@ -422,6 +422,16 @@ const newsArticleSchema = {
       margin: 0 0 16px;
     }
     .brief-permalink__note-body p:last-child { margin-bottom: 0; }
+    .brief-permalink__note-body {
+      max-width: 62ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .brief-permalink__watch-body {
+      max-width: 62ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
     .brief-permalink__watch-body {
       font-family: var(--ui);
       font-size: 15px;
