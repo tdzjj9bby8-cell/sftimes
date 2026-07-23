@@ -1,0 +1,282 @@
+{
+  "date": "2026-07-23",
+  "generated_by": "brief-daily Cowork scheduled task",
+  "playbook": "BRIEF-COWORK-PLAYBOOK.md",
+  "item_count": 8,
+  "items": [
+    {
+      "id": "concord-mega-hearings-sf-immigration-courts",
+      "source_url": "https://www.berkeleyside.org/2026/07/22/deportation-orders-trump-administration-mega-master-hearings",
+      "source_outlet": "Mission Local",
+      "source_byline": "Mission Local",
+      "source_headline": "Deportation orders rise in Bay Area for immigrants who miss Trump admin's new mega-hearings",
+      "category": "POLITICS",
+      "scoring": {
+        "novelty": 8,
+        "civic_significance": 9,
+        "sf_specificity": 7,
+        "uniqueness": 8,
+        "composite": 8.1,
+        "one_line_reason": "Connects surging in-absentia removals in Concord to San Francisco quietly losing both its immigration courts.",
+        "outlets_running_this": "Mission Local, Berkeleyside"
+      },
+      "brief_signal": "missing-context",
+      "angle_statement": "The Concord removals are downstream of a quieter San Francisco story: the city lost both of its immigration courts over the past 18 months.",
+      "tldr": "Concord immigration judges ordered 684 people removed in absentia in June, 42% of everyone scheduled for a mega-hearing. Many were cases San Francisco's two shuttered immigration courts once heard.",
+      "editor_note": "The removals piling up in Concord are downstream of a quieter San Francisco story: the federal government shuttered or shrank the city's two immigration courts over the past 18 months, pushing hearings to a suburban office building most affected residents have never set foot in. Geography is now doing the deporting. A Mission asylum-seeker who misses a mailed notice, or cannot reach Concord by transit on a date suddenly moved up from 2028, risks an in-absentia order that becomes an ICE arrest warrant. The fee to reopen a case jumped from about $100 to more than $1,000, pricing out the unrepresented, who lose 98% of the time. San Francisco spent years branding itself a sanctuary. The court that tested that promise no longer sits within its borders.",
+      "what_to_watch": "Watch whether the Board of Supervisors or the Office of Civic Engagement and Immigrant Affairs responds to the June data showing 71% of Concord no-shows were ordered deported.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 127,
+        "tldr_word_count": 29
+      }
+    },
+    {
+      "id": "kaiser-ai-mental-health-sf-supervisors",
+      "source_url": "https://ww2.kqed.org/news/2026/07/22/unacceptable-san-francisco-officials-question-kaisers-approach-to-ai-in-mental-health/",
+      "source_outlet": "KQED",
+      "source_byline": "KQED",
+      "source_headline": "'Unacceptable': San Francisco Officials Question Kaiser's Approach to AI in Mental Health",
+      "category": "POLITICS",
+      "scoring": {
+        "novelty": 7,
+        "civic_significance": 9,
+        "sf_specificity": 8,
+        "uniqueness": 8,
+        "composite": 8.15,
+        "one_line_reason": "Reframes the hearing around SF's $508M purchasing relationship with Kaiser, which other coverage buries.",
+        "outlets_running_this": "KQED"
+      },
+      "brief_signal": "missing-context",
+      "angle_statement": "San Francisco's pull with Kaiser isn't only moral: the city and its public employers paid Kaiser $508 million last year for the very services clinicians say are failing.",
+      "tldr": "SF supervisors grilled Kaiser over AI in mental-health care after its executives skipped the hearing. City public employers paid Kaiser $508 million last year to cover 39,000-plus workers and retirees.",
+      "editor_note": "San Francisco's pull with Kaiser is not only moral, it is financial: the city, its school district, and other public employers paid Kaiser $508 million last year to cover more than 39,000 workers and retirees. That makes San Francisco a paying customer for the mental-health services clinicians told supervisors are being handed to algorithms and unlicensed staff. The backdrop matters. Kaiser has paid more than $231 million in settlements since 2023 over delayed or denied behavioral care, and its therapists struck for ten weeks in 2022 and one day this year. Executives declined to show up Tuesday, which several supervisors read as an answer in itself. Supervisor Chyanne Chen says she will introduce a resolution next week pressing Kaiser to use AI to assist therapists, not replace them.",
+      "what_to_watch": "Supervisor Chyanne Chen's resolution is expected next week, and Kaiser and the therapists' union are set to begin mediation next month.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 128,
+        "tldr_word_count": 30
+      }
+    },
+    {
+      "id": "parivar-bay-area-trans-immigrant-funding",
+      "source_url": "https://ww2.kqed.org/news/2026/07/22/san-francisco-trans-led-space-fears-closure-9-months-after-opening/",
+      "source_outlet": "KQED",
+      "source_byline": "KQED",
+      "source_headline": "San Francisco Trans-Led Space Fears Closure, 9 Months After Opening",
+      "category": "CULTURE",
+      "scoring": {
+        "novelty": 7,
+        "civic_significance": 8,
+        "sf_specificity": 9,
+        "uniqueness": 9,
+        "composite": 8.4,
+        "one_line_reason": "Only trans-serving group of ~15 shut out of city funding, for a reason tied to its own mission.",
+        "outlets_running_this": "KQED"
+      },
+      "brief_signal": "first-to-connect",
+      "angle_statement": "Parivar Bay Area lost every city dollar while other trans-serving groups were funded, in part because its leaders were consumed by their own immigration emergencies during the budget-advocacy window.",
+      "tldr": "Parivar Bay Area, the only SF group serving South Asian trans immigrants, may close within weeks. It lost all city funding, the sole trans-serving group of about 15 shut out.",
+      "editor_note": "The reason Parivar Bay Area got nothing while every other trans-serving group in the city was funded is its own bitter subplot: during Trans Advocacy Week in April, the exact window for budget lobbying, the leaders best positioned to make Parivar's case were tangled in their own immigration crises. An organization built to steady trans immigrants was knocked flat by the same forces it exists to absorb. Parivar opened downtown last October during Diwali, with Supervisor Rafael Mandelman and mayoral staff in the room. Nine months later its programs have been frozen since April, and it needs $1.1 million, or at least $675,000, to survive. Mayor Lurie's office says it is working with the Board to secure funding. The clock is roughly two weeks.",
+      "what_to_watch": "Whether Mayor Lurie's office and the Board secure supplemental funding before Parivar's stated two-week window to keep its downtown space closes.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 124,
+        "tldr_word_count": 30
+      }
+    },
+    {
+      "id": "fielder-mehko-home-kitchens-street-vendors",
+      "source_url": "https://missionlocal.org/2026/07/the-mission-is-losing-a-plant-store-and-a-anaderia-is-on-the-move/",
+      "source_outlet": "Mission Local",
+      "source_byline": "Mission Local",
+      "source_headline": "Mission Buzz: The Mission is losing a plant store and a panaderia is on the move",
+      "category": "POLITICS",
+      "scoring": {
+        "novelty": 7,
+        "civic_significance": 8,
+        "sf_specificity": 9,
+        "uniqueness": 9,
+        "composite": 8.4,
+        "one_line_reason": "Connects Fielder's MEHKO study request to the March street-vending ordinance squeeze; only Mission Local has it.",
+        "outlets_running_this": "Mission Local"
+      },
+      "brief_signal": "first-to-connect",
+      "angle_statement": "Supervisor Jackie Fielder's request to study legalizing home kitchens answers a squeeze the Board itself created in March, when it required street food vendors to prep in licensed commissary kitchens.",
+      "tldr": "Supervisor Jackie Fielder asked SF's budget analyst to study legalizing home kitchens, a report due in eight weeks. The city's March vending rules pushed street cooks toward costly commissary kitchens.",
+      "editor_note": "Supervisor Jackie Fielder's request to study home-kitchen legalization is a direct reply to a bind the Board created for itself in March, when it required most street vendors selling hot or fresh food to own a pushcart with a washing station and to prep in a licensed commissary kitchen. Vendors, many of them in the Mission, said the rules could put them out of business. Microenterprise Home Kitchen Operation law lets counties authorize small food operations run from home, and Alameda, San Mateo, Contra Costa, Santa Clara, Sonoma, Santa Cruz, and Monterey have already opted in. San Francisco has not. The budget and legislative analyst's review, expected in roughly eight weeks, will price out what adopting it would cost, and whether it offers vendors a legal path the March ordinance foreclosed.",
+      "what_to_watch": "The Budget and Legislative Analyst's cost review of MEHKO adoption is expected in about eight weeks.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 131,
+        "tldr_word_count": 30
+      }
+    },
+    {
+      "id": "lurie-affordability-ai-boom",
+      "source_url": "https://sfstandard.com/2026/07/23/daniel-lurie-affordability-ai-boom-housing-san-francisco/",
+      "source_outlet": "SF Standard",
+      "source_byline": "SF Standard",
+      "source_headline": "Lurie wanted San Francisco to bounce back. Now he's got an affordability crisis",
+      "category": "HOUSING",
+      "scoring": {
+        "novelty": 6,
+        "civic_significance": 9,
+        "sf_specificity": 9,
+        "uniqueness": 7,
+        "composite": 7.85,
+        "one_line_reason": "Names the structural bind: the AI recovery Lurie sought is the affordability crisis he now must solve.",
+        "outlets_running_this": "SF Standard"
+      },
+      "brief_signal": "structural-pattern",
+      "angle_statement": "San Francisco's affordability crisis is not a separate problem from its AI-driven comeback, it is the direct product of it, which is what makes it so hard for Mayor Lurie to solve.",
+      "tldr": "SF's typical home hit $1.4 million in June, up 9.5%, and median rent rose 19% to $3,558. The AI boom reviving downtown is pricing out the workers the recovery needs.",
+      "editor_note": "San Francisco's affordability crisis is not separate from its AI-fueled comeback, it is the bill for it. The same wave of capital refilling downtown offices pushed the typical home to $1.4 million in June and median rent to $3,558, and the mayor who campaigned on recovery now owns the cost of getting one. The math underneath is unforgiving. The city completed 2,832 housing units in 2025 and just 413 so far this year, against a state mandate to plan for more than 80,000 by 2031. Lurie is betting on his Family Zoning Plan, free early childcare, and a November parcel tax for Muni, but even his own chief economist left for Davis. The open question is whether the comeback broadens or hardens into a city only high earners can hold.",
+      "what_to_watch": "Whether Lurie's Family Zoning Plan and the November Muni parcel tax measure move before the housing math worsens.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 130,
+        "tldr_word_count": 30
+      }
+    },
+    {
+      "id": "sf-open-house-frenzy-all-cash",
+      "source_url": "https://sfstandard.com/2026/07/23/sf-real-estate-open-house-frenzy/",
+      "source_outlet": "SF Standard",
+      "source_byline": "SF Standard",
+      "source_headline": "All cash, no contingencies, three days: How SF's tough housing market got even harder",
+      "category": "HOUSING",
+      "scoring": {
+        "novelty": 6,
+        "civic_significance": 8,
+        "sf_specificity": 9,
+        "uniqueness": 7,
+        "composite": 7.55,
+        "one_line_reason": "Ground-level read of the cash-buyer market, though it overlaps the Lurie affordability item.",
+        "outlets_running_this": "SF Standard"
+      },
+      "brief_signal": "structural-pattern",
+      "angle_statement": "The sharpest gauge of San Francisco's housing squeeze isn't City Hall's policy fights, it's a deliberately average Sunset house selling 39% over asking in three days.",
+      "tldr": "A 1,804-square-foot Sunset home listed at $1.785 million sold for $2.473 million, nearly 39% over asking, in three days. Agents report 20 to 50 parties at weekend open houses.",
+      "editor_note": "The sharpest gauge of San Francisco's housing squeeze is not the policy fight at City Hall, it is a plain Sunset house, listed close to the city's median at $1.785 million, drawing a preemptive offer within three days and selling for $2.473 million. Summer is normally the market's slowest stretch. Instead agents describe 20 to 50 parties per open house, all-cash offers with no contingencies, and parents buying outright for adult children while empty-nesters race back into the city. Neighborhoods once considered under the radar, like the Central Sunset, are now bidding wars. One agent's advice to clients, quoted flatly, was to get in now because it will not get better. The result is a market where even average is out of reach, and losing by 30% over asking counts as close.",
+      "what_to_watch": "Whether fall listings ease the crush after summer, or the all-cash, no-contingency premium holds into the slower season.",
+      "audit": {
+        "audit_pass": false,
+        "check_1_recap": "fail",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [
+          "check_1_recap: the note restates the source's core sale figures ($1.785M list, $2.473M sale, three days) and open-house counts, so a reader could substitute it for the article."
+        ],
+        "recommendation": "hold for editor",
+        "editor_note_word_count": 132,
+        "tldr_word_count": 29
+      }
+    },
+    {
+      "id": "downtown-sf-partnership-expansion-jackson-square",
+      "source_url": "https://sfstandard.com/2026/07/22/jackson-square-downtown-sf-partnership/",
+      "source_outlet": "SF Standard",
+      "source_byline": "SF Standard",
+      "source_headline": "It's official: Jackson Square is now downtown",
+      "category": "BUSINESS",
+      "scoring": {
+        "novelty": 7,
+        "civic_significance": 7,
+        "sf_specificity": 9,
+        "uniqueness": 8,
+        "composite": 7.75,
+        "one_line_reason": "Underreported CBD expansion that formalizes downtown's AI-luxury shift and pulls in the Port for the first time.",
+        "outlets_running_this": "SF Standard"
+      },
+      "brief_signal": "underreported",
+      "angle_statement": "Extending the Downtown SF Partnership from 43 to 70 blocks quietly redraws what 'downtown' means, formalizing the AI-and-luxury center of gravity that has drifted toward Jackson Square.",
+      "tldr": "SF's Board expanded the Downtown SF Partnership from 43 to 70 blocks, nearly doubling its budget to $11 million. The Port of SF joined its first benefit district.",
+      "editor_note": "Extending the Downtown SF Partnership from 43 to 70 blocks quietly redraws the map of what counts as downtown, and it formalizes where the money has moved. The enlarged district folds in Jackson Square, now a magnet for AI offices and quiet-luxury retail, where Jony Ive has bought most of a block and Michelin restaurants share streets with Paul Smith and Isabel Marant. Community benefit districts became the city's street-cleaning engines after the pandemic, when tight budgets left gaps, and this one's revenue will roughly double to $11 million. Property owners voted to tax themselves more to get it, and the Port of San Francisco is joining a benefit district for the first time, paying $882,000. City officials hope the 85% approval sets a new goalpost for downtown's other districts.",
+      "what_to_watch": "The expansion takes effect next year; watch whether other downtown benefit districts follow with their own expansions.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 130,
+        "tldr_word_count": 28
+      }
+    },
+    {
+      "id": "huerta-endorses-wiener-chan-labor",
+      "source_url": "https://sfist.com/2026/07/22/wiener-lands-endorsement-from-dolores-huerta-while-chan-focuses-on-united-farm-workers-bid/",
+      "source_outlet": "SFist",
+      "source_byline": "SFist",
+      "source_headline": "Wiener Lands Endorsement From Dolores Huerta While Chan Focuses on United Farm Workers' Bid",
+      "category": "POLITICS",
+      "scoring": {
+        "novelty": 7,
+        "civic_significance": 7,
+        "sf_specificity": 8,
+        "uniqueness": 7,
+        "composite": 7.2,
+        "one_line_reason": "Pushes back on the 'labor splits' read by noting Chan still holds 40-plus unions.",
+        "outlets_running_this": "Mission Local, SFist"
+      },
+      "brief_signal": "missing-context",
+      "angle_statement": "Dolores Huerta's endorsement of Scott Wiener is being read as a labor shakeup, but the institutional labor coalition behind Connie Chan, more than 40 unions, has not moved.",
+      "tldr": "Labor icon Dolores Huerta endorsed Scott Wiener for Nancy Pelosi's House seat, surprising backers of Connie Chan, the race's labor-favored candidate. Chan still holds endorsements from more than 40 unions.",
+      "editor_note": "Dolores Huerta's endorsement of Scott Wiener landed as a labor shakeup, but the institution behind Connie Chan has not budged: Chan still carries more than 40 unions and runs her campaign through a San Francisco labor leader. Huerta is a singular voice, not a bloc. She lives in Bakersfield, makes endorsements independently of the United Farm Workers she cofounded, and has a habit of backing more than one candidate, as when she supported both London Breed and Aaron Peskin in the 2024 mayor's race. Chan's camp is still angling for a co-endorsement and plans to send Huerta its union list. The useful read is not that labor is splitting for Wiener, but that a celebrity endorsement and an organized labor coalition are two different things, and Chan still holds the second.",
+      "what_to_watch": "Whether the United Farm Workers, separate from Huerta, endorses in the race, and whether Huerta adds a co-endorsement of Chan.",
+      "audit": {
+        "audit_pass": true,
+        "check_1_recap": "pass",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [],
+        "recommendation": "auto-publish",
+        "editor_note_word_count": 131,
+        "tldr_word_count": 30
+      }
+    }
+  ]
+}
