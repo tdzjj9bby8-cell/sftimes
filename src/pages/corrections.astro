@@ -4,8 +4,16 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
 // The public corrections log. Add entries here as they happen.
 // Format: { date: 'YYYY-MM-DD', issue: number, story: 'Story title', slug: 'url-slug' (optional, links to article), what: 'What was wrong', points: string[] (optional itemized list), fix: 'What we corrected to' }
+//
+// `kind` separates the two things this log carries. 'correction' (the default)
+// is a factual error we published and fixed. 'note' is a disclosed change to how
+// we work that a reader deserves to see, but that is not us getting a fact
+// wrong. Only corrections count toward the masthead tally, and notes render
+// WHAT CHANGED / WHY instead of the WHAT WE GOT WRONG labels, so the log never
+// overstates how often we have been wrong.
 const corrections: Array<{
   date: string;
+  kind?: 'correction' | 'note';
   issue?: number;
   story: string;
   slug?: string;
@@ -14,6 +22,7 @@ const corrections: Array<{
   fix: string;
 }> = [
   // Example shape, swap in real entries as they happen:
+  // (omit `kind` for a normal correction; set kind: 'note' for a process change)
   // {
   //   date: '2026-05-23',
   //   issue: 56,
@@ -22,6 +31,13 @@ const corrections: Array<{
   //   what: "Original text stated Auntie Lai opened the shop in 1992. She opened it in 1994.",
   //   fix: "Updated body text to read '1994' throughout. Issue archive page corrected on 2026-05-25.",
   // },
+  {
+    date: '2026-07-28',
+    kind: 'note',
+    story: 'Daily Brief, editorial model change',
+    what: 'The Brief moved from editor-reviews-every-item (Path 1, adopted 2026-07-21 after the 2026-07-15 fabrication event) back to auditor-auto-publish (Path 3).',
+    fix: 'The full-body source-fetch guardrail added at pipeline Stage 4 in July closes the specific July 15 failure mode where facts were invented from RSS snippets. Every draft is now written from the full source article body. Items that fail the 5-check firewall audit are still quarantined for editor review before publishing; only audit-passing items auto-publish. Editor reviews weekly for drift.',
+  },
   {
     date: '2026-07-15',
     issue: 5,
@@ -40,13 +56,17 @@ const corrections: Array<{
     fix: 'Root cause: the ad-hoc run bypassed the mandatory full-body source-fetch step in the Brief pipeline playbook. Guardrail added to prevent recurrence. The corrected six-item 2026-07-15 edition is the current authoritative version.',
   },
 ];
+
+// Masthead tally counts real corrections only. Process notes are logged here for
+// transparency but are not errors, so they must not inflate the error count.
+const correctionCount = corrections.filter((c) => c.kind !== 'note').length;
 ---
 <ExhibitionLayout
   title="CORRECTIONS · The Keepers · SF Times"
   description="Every correction we have made, dated and named. The public log."
   active="home"
 >
-  <ExhibitionMasthead slot="masthead" title="CORRECTIONS" subscript={`№${corrections.length} LOGGED`} cutouts={[]} />
+  <ExhibitionMasthead slot="masthead" title="CORRECTIONS" subscript={`№${correctionCount} LOGGED`} cutouts={[]} />
 
   <article class="ex-prose">
     <p class="ex-prose__eyebrow">DATED · NAMED · DESCRIBED · PUBLIC FOREVER</p>
@@ -91,17 +111,23 @@ const corrections: Array<{
       <ul class="corr-list">
         {corrections.map((c) => (
           <li class="corr-item">
-            <p class="corr-item__date">{c.date}{c.issue ? ` · ISSUE №${c.issue}` : ''}</p>
+            <p class="corr-item__date">
+              {c.date}{c.issue ? ` · ISSUE №${c.issue}` : ''}{c.kind === 'note' ? ' · PROCESS NOTE' : ''}
+            </p>
             <h3 class="corr-item__title">
               {c.slug ? <a href={`/stories/${c.slug}`}>{c.story}</a> : c.story}
             </h3>
-            <p class="corr-item__what"><strong>WHAT WE GOT WRONG.</strong> {c.what}</p>
+            <p class="corr-item__what">
+              <strong>{c.kind === 'note' ? 'WHAT CHANGED.' : 'WHAT WE GOT WRONG.'}</strong> {c.what}
+            </p>
             {c.points && (
               <ul class="corr-item__points">
                 {c.points.map((p) => <li>{p}</li>)}
               </ul>
             )}
-            <p class="corr-item__fix"><strong>WHAT WE CORRECTED.</strong> {c.fix}</p>
+            <p class="corr-item__fix">
+              <strong>{c.kind === 'note' ? 'WHY.' : 'WHAT WE CORRECTED.'}</strong> {c.fix}
+            </p>
           </li>
         ))}
       </ul>

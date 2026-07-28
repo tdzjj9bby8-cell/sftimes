@@ -2,33 +2,39 @@
 import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
-// Path 1 dashboard (editor reviews every item).
+// Path 3 dashboard (editor reviews audit-flagged items only).
 //
-// After the 2026-07-15 quarantine event, the Brief moved off the auditor
-// auto-publish model. The Cowork brief-daily task now drafts and audits every
-// candidate and STAGES all of them (audit-passing and audit-failing alike). It
-// publishes nothing. This dashboard is where the editor reviews every drafted
-// item, accepts / rejects / edits each, and publishes the accepted set.
+// As of 2026-07-28 the Brief is back on the auditor auto-publish model. The
+// Cowork brief-daily task drafts and audits every candidate, AUTO-PUBLISHES the
+// items that clear all five firewall checks straight to
+// src/content/briefs/YYYY-MM-DD.md, and stages only the audit-failing items to
+// scripts/queue/YYYY-MM-DD-staged.json. The 2026-07-15 fabrication mode is
+// blocked upstream by the mandatory full-body source-fetch at pipeline Stage 4.
 //
-// One queue. No held-vs-auto split. The audit result on each card is advisory
-// (it tells the editor which items cleared all five firewall checks and which
-// failed, and why), but it does not gate anything: the editor decides.
+// So this queue is the quarantine, not the day's brief. Everything in it failed
+// at least one check. Clean items are already live and never appear here. Most
+// days the queue is empty, which is the intended steady state.
+//
+// The audit result is a hard gate on auto-publish, not advisory. The editor's
+// job here is the exception path: promote (edit and accept) or reject.
 //
 // Data is fetched CLIENT-SIDE from /api/brief/staged on page load. The staging
-// file for "today" only exists after the Cowork task has run, so the page ships
-// static and hydrates: a loading state, then the review queue, or a friendly
-// empty state before the task has run.
+// file for "today" only exists on days the auditor flagged something, so the
+// page ships static and hydrates: a loading state, then the flagged queue, or
+// an all-clear empty state.
 //
 // Page is noindex + robots-disallowed. Intended to sit behind Vercel deployment
 // protection (platform basic auth) in production; the API endpoints additionally
 // honor an optional DASHBOARD_TOKEN bearer gate for direct hits.
 //
-// Publish POSTs the accepted items to /api/brief/publish, which composes the
-// edition markdown and commits it via the GitHub Contents API (Vercel rebuilds).
+// Publish POSTs the promoted items to /api/brief/publish with mode: 'promote',
+// which MERGES them into that day's already-live edition (appending items,
+// preserving the existing edition number) rather than replacing it. Replacing
+// would silently drop the auto-published items off the live brief.
 ---
 <ExhibitionLayout
   title="THE BRIEF · DASHBOARD · INTERNAL"
-  description="Path 1 editor-review model. Review every drafted item before publish."
+  description="Path 3 quarantine review. Audit-flagged items only; clean items auto-publish."
   active="home"
 >
   <meta name="robots" content="noindex, nofollow" slot="head" />
@@ -45,9 +51,9 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       <div class="dash-head__top">
         <div>
           <p class="dash-head__eyebrow"><span id="dateLabel">Loading</span> · <span id="auditState">FETCHING QUEUE</span></p>
-          <h1 class="dash-head__title">Editorial review</h1>
+          <h1 class="dash-head__title">Flagged items review</h1>
           <p class="dash-head__sub">
-            <strong><span id="itemCountHead">0</span> items drafted for review</strong> · Nothing publishes without your approval
+            <strong><span id="itemCountHead">0</span> items flagged by the auditor</strong> · Clean items already auto-published
           </p>
         </div>
         <div class="dash-head__timer-wrap">
@@ -84,11 +90,11 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         <dl class="dash-help__kbds">
           <div class="dash-help__kbd-row">
             <dt><kbd>A</kbd></dt>
-            <dd>Accept the active item (include it in today's brief)</dd>
+            <dd>Promote the active item (add it to today's live brief)</dd>
           </div>
           <div class="dash-help__kbd-row">
             <dt><kbd>R</kbd></dt>
-            <dd>Reject the active item (drop it)</dd>
+            <dd>Reject the active item (it never runs)</dd>
           </div>
           <div class="dash-help__kbd-row">
             <dt><kbd>J</kbd> or <kbd>↓</kbd></dt>
@@ -111,8 +117,8 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
       </section>
 
       <section class="dash-help__section">
-        <h3 class="dash-help__h3">The five firewall checks (advisory)</h3>
-        <p class="dash-help__note">Each card shows whether the AI auditor passed or failed the item on these five checks. The result is a signal, not a gate. You decide what publishes.</p>
+        <h3 class="dash-help__h3">The five firewall checks (hard gate)</h3>
+        <p class="dash-help__note">An item must clear all five to auto-publish. Everything in this queue failed at least one. The card names which. Promoting an item is you overriding the auditor, so read the reasons before you do.</p>
         <ol class="dash-help__checks">
           <li>
             <strong>Recap test.</strong> Could a reader skip the source article and still understand the news from our editor's note alone? If yes, the note crossed into rewrite territory. Tighten it or reject.
@@ -136,19 +142,19 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         <h3 class="dash-help__h3">Audit badges</h3>
         <dl class="dash-help__badges">
           <div class="dash-help__badge-row">
-            <dt><span class="dash-help__pill dash-help__pill--pass">AUDIT PASSED</span></dt>
-            <dd>Item cleared all five firewall checks. Still yours to accept, edit, or reject.</dd>
+            <dt><span class="dash-help__pill dash-help__pill--fail">AUDIT FLAGGED</span></dt>
+            <dd>Item failed one or more of the five checks. Read the auditor reasons, then edit and promote, or reject. This is the only badge you should normally see here.</dd>
           </div>
           <div class="dash-help__badge-row">
-            <dt><span class="dash-help__pill dash-help__pill--fail">AUDIT FLAGGED</span></dt>
-            <dd>Item failed one or more of the five checks. Read the auditor reasons, then edit and accept, or reject.</dd>
+            <dt><span class="dash-help__pill dash-help__pill--pass">AUDIT PASSED</span></dt>
+            <dd>Cleared all five checks. These auto-publish and do not reach this queue. If one shows up here, the task staged it by mistake: check the run report before promoting.</dd>
           </div>
         </dl>
       </section>
 
       <section class="dash-help__section">
-        <h3 class="dash-help__h3">Nothing publishes without you</h3>
-        <p>The Cowork task drafts and audits, then stops. It publishes nothing. Every item in this queue is here because it was drafted, not because it was approved. The brief goes live only when you accept items and hit publish. If you do nothing, nothing ships that day.</p>
+        <h3 class="dash-help__h3">The brief already shipped</h3>
+        <p>The Cowork task drafts, audits, and publishes the clean items on its own each weekday morning. That edition is live before you open this page. Every item in this queue is here because the auditor stopped it, not because it is waiting in line. If you do nothing, the flagged items simply never run and the day's brief stands as published. An empty queue means the auditor cleared everything, which is the normal case.</p>
       </section>
     </div>
   </div>
@@ -159,11 +165,12 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
   <!-- ============ REVIEW QUEUE ============ -->
   <section class="dash-section" id="reviewSection" hidden>
     <div class="dash-section__head">
-      <p class="dash-section__eyebrow">REQUIRES REVIEW</p>
-      <h2 class="dash-section__title">All drafted items</h2>
+      <p class="dash-section__eyebrow">QUARANTINED</p>
+      <h2 class="dash-section__title">Audit-flagged items</h2>
       <p class="dash-section__sub">
-        Every item the Cowork task drafted and audited today. Accept to include it in the brief,
-        reject to drop it. Edit any field inline before you accept. The audit badge is advisory.
+        Items the auditor flagged appear here for your review. Clean items auto-publish and are
+        already live on the site. Review the flagged items to decide whether to promote, edit, or
+        reject. Promoted items are added to today's live edition.
       </p>
     </div>
 
@@ -174,10 +181,10 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
   <section class="dash-publish" id="publishBar" hidden>
     <div class="dash-publish__inner">
       <div>
-        <p class="dash-publish__label">Ready to ship</p>
+        <p class="dash-publish__label">Add to today's brief</p>
         <p class="dash-publish__sub" id="publishMsg">Waiting for today's queue…</p>
       </div>
-      <button class="dash-publish__btn" id="publishBtn" type="button" disabled>PUBLISH ACCEPTED ITEMS</button>
+      <button class="dash-publish__btn" id="publishBtn" type="button" disabled>PROMOTE ACCEPTED ITEMS</button>
     </div>
   </section>
 
@@ -660,7 +667,7 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         article.appendChild(fields);
 
         const actions = el('div', 'cand__actions');
-        const accept = el('button', 'cand__btn cand__btn--accept', 'Accept (A)');
+        const accept = el('button', 'cand__btn cand__btn--accept', 'Promote (A)');
         accept.type = 'button';
         accept.dataset.action = 'accept';
         accept.dataset.id = c.id;
@@ -690,20 +697,20 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
         if (cards.length === 0) {
           publishBtn.disabled = true;
-          publishMsg.textContent = 'No items to review.';
+          publishMsg.textContent = 'Nothing flagged. Today’s brief published without you.';
           return;
         }
 
         if (pending === 0) {
           publishBtn.disabled = accepted === 0;
           if (accepted === 0) {
-            publishMsg.textContent = 'All ' + rejected + ' items rejected. Nothing to publish.';
+            publishMsg.textContent = 'All ' + rejected + ' flagged items rejected. Today’s brief stands as published.';
           } else {
-            publishMsg.textContent = accepted + ' accepted, ' + rejected + ' rejected, 0 pending. Publish the ' + accepted + ' accepted ' + (accepted === 1 ? 'item' : 'items') + '.';
+            publishMsg.textContent = accepted + ' promoted, ' + rejected + ' rejected, 0 pending. Add the ' + accepted + ' promoted ' + (accepted === 1 ? 'item' : 'items') + ' to today’s live edition.';
           }
         } else {
           publishBtn.disabled = true;
-          publishMsg.textContent = accepted + ' accepted, ' + rejected + ' rejected, ' + pending + ' pending. Decide every item to enable publish.';
+          publishMsg.textContent = accepted + ' promoted, ' + rejected + ' rejected, ' + pending + ' pending. Decide every flagged item to enable promote.';
         }
       }
 
@@ -766,10 +773,10 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         });
 
         itemCountHead.textContent = mapped.length;
-        auditStateEl.textContent = mapped.length > 0 ? 'DRAFTED · AWAITING REVIEW' : 'NO ITEMS';
+        auditStateEl.textContent = mapped.length > 0 ? 'FLAGGED · AWAITING REVIEW' : 'ALL CLEAR';
 
         if (mapped.length === 0) {
-          showBanner('No staged queue for this date yet. The Cowork brief-daily task drafts and stages items each morning; check back after it runs, or pass ?date=YYYY-MM-DD to review another day.', false);
+          showBanner('All clear for this date. The auditor flagged nothing, so the Cowork brief-daily task auto-published the full brief and left you no exceptions to review. A staging file only appears on days something fails the audit. Pass ?date=YYYY-MM-DD to check another day.', false);
           return;
         }
         showLoaded();
@@ -876,19 +883,24 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
         });
 
         if (items.length === 0) {
-          publishMsg.textContent = 'No accepted items to publish.';
+          publishMsg.textContent = 'No promoted items to add.';
           return;
         }
 
+        // mode: 'promote' tells /api/brief/publish to MERGE these into the day's
+        // already-live auto-published edition instead of composing a fresh one.
+        // Without it the endpoint would rewrite the edition from this payload
+        // alone and drop every auto-published item off the live brief.
         const payload = {
           date: reviewDate,
           editor: 'Eric',
+          mode: 'promote',
           items: items,
         };
 
-        publishBtn.textContent = 'PUBLISHING…';
+        publishBtn.textContent = 'PROMOTING…';
         publishBtn.disabled = true;
-        publishMsg.textContent = 'Sending ' + items.length + ' accepted items to /api/brief/publish…';
+        publishMsg.textContent = 'Sending ' + items.length + ' promoted items to /api/brief/publish…';
 
         try {
           const resp = await fetch('/api/brief/publish', {
@@ -900,22 +912,26 @@ import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 
           if (resp.ok) {
             const data = await resp.json();
-            publishBtn.textContent = 'PUBLISHED · ' + data.date;
-            publishMsg.textContent = 'Live publish OK. Edition ' + (data.edition || '?') + ', ' + (data.items_accepted || items.length) + ' items shipped' + (data.committed ? ' (committed to main)' : ' (written locally, dev mode)') + '. Review time: ' + fmtTime(elapsed) + '.';
+            publishBtn.textContent = 'PROMOTED · ' + data.date;
+            publishMsg.textContent = (data.merged ? 'Merged into the live edition. ' : 'Published a new edition. ')
+              + 'Edition ' + (data.edition || '?') + ' now carries ' + (data.item_count || '?') + ' items ('
+              + (data.items_accepted || items.length) + ' promoted)'
+              + (data.committed ? ', committed to main' : ', written locally in dev mode')
+              + '. Review time: ' + fmtTime(elapsed) + '.';
           } else if (resp.status === 404 || resp.status === 405) {
             // API not deployed yet: fall back to simulation
-            publishBtn.textContent = 'PUBLISHED · SIMULATED';
-            publishMsg.textContent = 'Simulation mode (no /api/brief/publish endpoint). ' + items.length + ' items would publish. Review time: ' + fmtTime(elapsed) + '.';
+            publishBtn.textContent = 'PROMOTED · SIMULATED';
+            publishMsg.textContent = 'Simulation mode (no /api/brief/publish endpoint). ' + items.length + ' items would be added to today’s edition. Review time: ' + fmtTime(elapsed) + '.';
           } else {
             const err = await resp.text();
-            publishBtn.textContent = 'PUBLISH FAILED';
+            publishBtn.textContent = 'PROMOTE FAILED';
             publishBtn.disabled = false;
-            publishMsg.textContent = 'Publish error: HTTP ' + resp.status + '. ' + err.slice(0, 160);
+            publishMsg.textContent = 'Promote error: HTTP ' + resp.status + '. ' + err.slice(0, 160);
           }
         } catch (e) {
           // Network error: assume API isn't available, fall back to simulation
-          publishBtn.textContent = 'PUBLISHED · SIMULATED';
-          publishMsg.textContent = 'Simulation mode (API unreachable). ' + items.length + ' items would publish. Review time: ' + fmtTime(elapsed) + '.';
+          publishBtn.textContent = 'PROMOTED · SIMULATED';
+          publishMsg.textContent = 'Simulation mode (API unreachable). ' + items.length + ' items would be added to today’s edition. Review time: ' + fmtTime(elapsed) + '.';
         }
       });
 

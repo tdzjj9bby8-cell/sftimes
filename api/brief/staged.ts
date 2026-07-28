@@ -3,9 +3,12 @@
  *
  * Returns today's staged draft queue for the dashboard to render.
  *
- * The Cowork brief-daily task drafts and audits every candidate, then writes
- * them all to scripts/queue/YYYY-MM-DD-staged.json on disk and commits it
- * (BRIEF-COWORK-PLAYBOOK.md Stage 9). This endpoint reads that file directly at
+ * The Cowork brief-daily task drafts and audits every candidate, auto-publishes
+ * the ones that clear all five firewall checks, and writes only the AUDIT-FAILING
+ * items to scripts/queue/YYYY-MM-DD-staged.json on disk, then commits it
+ * (BRIEF-COWORK-PLAYBOOK.md Stage 6b + 9). So this queue is the quarantine, not
+ * the day's brief, and on a clean day the file does not exist at all (the ENOENT
+ * branch below is the normal case). This endpoint reads that file directly at
  * runtime. It replaced a Vercel KV read left over from the pre-Cowork
  * architecture: the task writes to the filesystem, KV was always empty, so the
  * dashboard saw nothing. Vercel bundles the file into the serverless function
@@ -128,7 +131,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         source: 'no-queue-found',
         item_count: 0,
         items: [],
-        hint: `No staged queue for ${dateParam}. The Cowork brief-daily task writes scripts/queue/${dateParam}-staged.json when it runs.`,
+        hint: `Nothing quarantined for ${dateParam}. The Cowork brief-daily task only writes scripts/queue/${dateParam}-staged.json when an item fails the audit, so an absent file means the auditor cleared everything.`,
       });
     }
     // Malformed JSON or read error: degrade to the empty state, never 500 the dashboard.

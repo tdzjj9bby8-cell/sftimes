@@ -1,22 +1,32 @@
 /**
  * /api/brief/publish
  *
- * Editor publish endpoint (Path 1). Called by the /brief-dashboard PUBLISH button.
+ * Editor promote endpoint (Path 3). Called by the /brief-dashboard button.
  *
- * In the editor-review model the dashboard POSTs the accepted items directly,
- * already reviewed and edited by the editor. This endpoint composes the edition
- * markdown straight from that payload and commits it to
- * src/content/briefs/<date>.md via the GitHub Contents API (which triggers a
- * Vercel rebuild). It does NOT read the audited queue or a decisions record from
- * KV: the POST body is the source of truth for what publishes.
+ * Under Path 3 the Cowork task auto-publishes the audit-passing items on its own
+ * and stages only the audit-failing ones. So this endpoint handles the exception
+ * path: the items the editor read and promoted out of quarantine. It does NOT
+ * read the audited queue or a decisions record from KV: the POST body is the
+ * source of truth for what the editor promoted.
+ *
+ * mode 'promote' (the default) MERGES those items into the edition already live
+ * at src/content/briefs/<date>.md, keeping its edition number and every
+ * auto-published item. It composes a fresh edition only when no file exists for
+ * the date, which is the day where nothing cleared the audit. Passing
+ * mode 'replace' overwrites the live edition instead and will drop the
+ * auto-published items, so only send it deliberately.
+ *
+ * Either way the write lands via the GitHub Contents API, which triggers a
+ * Vercel rebuild.
  *
  * Body shape (JSON, posted from /brief-dashboard):
  * {
  *   "date": "2026-07-20",
  *   "editor": "Eric",
- *   "edition": 6,                 // optional; defaults to the next edition number
- *   "intro": "...",               // optional editor intro
- *   "items": [                    // accepted items, edits already applied
+ *   "mode": "promote",            // optional; 'promote' (default) or 'replace'
+ *   "edition": 6,                 // optional; ignored when merging into an existing edition
+ *   "intro": "...",               // optional editor intro, fresh-compose path only
+ *   "items": [                    // promoted items, edits already applied
  *     {
  *       "source_headline": "...", "source_outlet": "...", "source_url": "...",
  *       "source_date": "2026-07-20", "category": "HOUSING", "signal": "structural-pattern",
@@ -44,6 +54,7 @@ interface PublishBody {
   editor?: 'Eric' | 'Nicholas' | 'Daisy';
   edition?: number;
   intro?: string;
+  mode?: 'promote' | 'replace';
   items: PublishItemInput[];
 }
 
@@ -60,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing required field: date' });
   }
   if (!Array.isArray(body.items) || body.items.length === 0) {
-    return res.status(400).json({ error: 'No accepted items to publish' });
+    return res.status(400).json({ error: 'No promoted items to publish' });
   }
 
   try {
@@ -69,6 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       editor: body.editor ?? 'Eric',
       edition: body.edition,
       intro: body.intro,
+      mode: body.mode ?? 'promote',
       items: body.items,
     });
 
@@ -76,7 +88,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       status: 'ok',
       date: body.date,
       edition: result.edition,
-      items_accepted: result.item_count,
+      merged: result.merged,
+      item_count: result.item_count,
+      items_accepted: result.promoted_count,
       committed: result.committed,
       commit_url: result.commitUrl,
       path: result.path,
