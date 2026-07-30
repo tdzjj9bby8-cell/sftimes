@@ -1,0 +1,82 @@
+{
+  "week_id": "2026-W30",
+  "start_date": "2026-07-20",
+  "end_date": "2026-07-26",
+  "editor": "Eric",
+  "generated_by": "brief-weekly-digest Cowork scheduled task",
+  "playbook": "BRIEF-WEEKLY-PLAYBOOK.md",
+  "source_editions": ["2026-07-21"],
+  "run_note": "Task nominally runs Sunday 4PM PT. This execution ran Monday 2026-07-27 10:08 PT, one day past the scheduled slot, so it targeted the just-completed publish week (2026-W30, Mon 2026-07-20 through Sun 2026-07-26) whose Sunday was the prior day. That week has one published edition (2026-07-21, edition 6). The current calendar week 2026-W31 has no published briefs yet.",
+  "intro": "San Francisco spent the week proving it can protect people, and admitting it mostly does not until forced. A West Portal redesign cut collisions 60 percent, but only after a crash killed a family of four. In the same edition, a decade-old rape-kit reporting mandate turned out never to have been followed, the city's earthquake sirens stayed dark into their sixth year, and private donors fast-tracked $6 million for police surveillance the public never budgeted. Money and urgency moved quickly toward watching, slowly toward the safeguards the city already promised.",
+  "ai_disclosure": "This digest is composed with AI assistance from the week's published Brief items, then reviewed and edited by Eric before publish. AI does not write the news. Original reporting is always linked, always credited.",
+  "top_stories": [
+    {
+      "source_headline": "After a family was killed at a West Portal bus stop, the street was redesigned. Did it work?",
+      "source_outlet": "Mission Local",
+      "source_byline": "Mission Local",
+      "source_url": "https://missionlocal.org/2026/07/san-francisco-sfmta-west-portal-safety-project/",
+      "source_date": "2026-07-21",
+      "category": "TRANSIT",
+      "one_line": "SFMTA data showed collisions fell 60 percent around West Portal after the redesign that followed the 2024 crash that killed a family of four, with serious injuries down from 6.7 to 2.7 a year.",
+      "why_it_mattered": "The city got rare, measured proof that its quick-build safety fixes work, and it only built them after four people died at the bus stop. The numbers also undercut the standard objection that slowing cars hurts business: collisions and injuries fell while sales-tax revenue rose."
+    },
+    {
+      "source_headline": "SFPD promised transparency on rape kits. It waited 10 years",
+      "source_outlet": "SF Standard",
+      "source_byline": "Anya Schultz",
+      "source_url": "https://sfstandard.com/2026/07/21/sfpd-rape-kit-investigation-reports/",
+      "source_date": "2026-07-21",
+      "category": "PUBLIC SAFETY",
+      "one_line": "The Police Commission ordered public reporting on every rape kit in 2016, SFPD never complied, and the ten-year lapse surfaced only when The Standard requested the records this year.",
+      "why_it_mattered": "A reform the commission believed it had won a decade earlier simply was not done, and no oversight body noticed for ten years. It fit the city's pattern of issuing policing directives and then leaving compliance unchecked until an outsider asks."
+    },
+    {
+      "source_headline": "Civil Grand Jury concludes San Francisco lacks clear emergency alert strategy",
+      "source_outlet": "ABC7 Bay Area",
+      "source_byline": "KGO Staff",
+      "source_url": "https://abc7news.com/post/san-francisco-outdoor-public-warning-system-civil-grand-jury-concludes-city-lacks-clear-emergency-alert-strategy/19422254/",
+      "source_date": "2026-07-21",
+      "category": "PUBLIC SAFETY",
+      "one_line": "A civil grand jury faulted San Francisco for leaving its 119-siren warning network offline since December 2019, unresolved through two mayors with no replacement plan.",
+      "why_it_mattered": "The story was not a broken siren but five and a half years of governance drift on the city's only mass-notification system, in a city sitting on the Hayward and San Andreas faults and now leaning on opt-in text alerts that reach only residents who signed up."
+    },
+    {
+      "source_headline": "S.F. high-tech police surveillance center gets $3M gift, partly for 'counter drone' tech",
+      "source_outlet": "Mission Local",
+      "source_byline": "Mission Local",
+      "source_url": "https://missionlocal.org/2026/07/san-francisco-police-surveillance-center-drones-salesforce/",
+      "source_date": "2026-07-21",
+      "category": "PUBLIC SAFETY",
+      "one_line": "Salesforce and Ripple co-founder Chris Larsen are each giving $3 million to expand SFPD's Real Time Investigations Center, including undefined counter-drone tech, with the Board of Supervisors holding final say.",
+      "why_it_mattered": "The pattern worth naming was that the city's fastest-growing surveillance program is being built with private checks rather than public budget, routing the expansion around the appropriations fight and the 2019 oversight ordinance meant to force public debate before the city acquires exactly this kind of capability."
+    },
+    {
+      "source_headline": "Dolores Huerta's endorsement of Scott Wiener surprises Connie Chan's allies",
+      "source_outlet": "Mission Local",
+      "source_byline": "Mission Local",
+      "source_url": "https://missionlocal.org/2026/07/dolores-huerta-endorsement-wiener-chan/",
+      "source_date": "2026-07-21",
+      "category": "POLITICS",
+      "one_line": "Labor icon Dolores Huerta endorsed Scott Wiener over Connie Chan, who has built her congressional campaign on labor unity and lists 40 union logos.",
+      "why_it_mattered": "Huerta's pick was a symbolic defection from the labor identity Chan has made central, splitting the movement's iconography from its institutional muscle and turning the endorsement race into a contest of its own."
+    }
+  ],
+  "pattern_of_the_week": {
+    "title": "Cameras fast, safeguards slow",
+    "note": "San Francisco funds watching faster than it funds the safeguards it already promised. The clearest case this week was the Real Time Investigations Center, where Salesforce and Chris Larsen fast-tracked $6 million in private gifts, part of it for counter-drone tech no one will describe, routing the expansion around the normal budget fight. Set that speed against what the city owes the public and has not delivered. The Police Commission ordered public reporting on every rape kit in 2016, and ten years later no one had noticed it was never done, until a reporter asked. The 119-siren earthquake warning network has sat dark since December 2019, into its sixth year, with no funded replacement in a city straddling two faults. Even the week's good news carried the same tell: the West Portal redesign cut collisions 60 percent, real proof the fixes work, but the city built them only after a crash killed a family of four. Two of the week's own editor notes drew the contrast without prompting, pointing from the rape-kit lapse and the silent sirens to the surveillance money moving the other way. The through-line is not that cameras are bad or that donors are villains. It is a question of sequence and who sets it. Private checks buy speed and steer the city toward capabilities the public never voted to prioritize, while the reporting, the sirens, and the street redesigns that protect people wait for a death or an outsider to force them onto the calendar.",
+    "connections": [
+      "SFPD's Real Time Investigations Center drew $6 million in private gifts and a fast track, including counter-drone tech no one will describe.",
+      "The rape-kit reporting the Police Commission ordered in 2016 went undone for ten years, surfacing only when a reporter requested the records.",
+      "The 119-siren earthquake warning network has been offline since December 2019 with no funded replacement plan.",
+      "West Portal proved a redesign could cut collisions 60 percent, but the city built it only after four people died."
+    ]
+  },
+  "coming_up": [
+    "The Board of Supervisors takes the final vote on the $6 million surveillance-center expansion; watch whether any supervisor demands the counter-drone specifics before signing off.",
+    "The Department of Emergency Management's response to the civil grand jury is due within 60 to 90 days, and the test is whether it commits to a funded replacement timeline for the siren network.",
+    "Whether the Police Commission attaches an enforcement mechanism to the 2016 rape-kit reporting mandate this time, rather than renewing it alone.",
+    "Whether SFMTA extends the West Portal treatment to other flagged corridors without waiting for the next fatality, and what the next Vision Zero progress report shows.",
+    "The Chan-Wiener endorsement race, where each union or group defection reads as a proxy; watch whether any of Chan's 40 union endorsers wobble after Dolores Huerta's pick.",
+    "The Department of Managed Health Care's call on whether Kaiser's AI intake triage counts as a timely-access or quality-of-care violation."
+  ]
+}
