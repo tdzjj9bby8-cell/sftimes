@@ -1,0 +1,36 @@
+{
+  "date": "2026-07-30",
+  "generated_by": "brief-daily Cowork task per BRIEF-COWORK-PLAYBOOK.md",
+  "note": "Items flagged by the 5-check firewall audit. Editor review at /brief-dashboard: promote (edit+accept) or reject.",
+  "items": [
+    {
+      "id": "2026-07-30-007",
+      "slug": "workers-walk-out-at-ghirardelli-squares-iconic-shop-over-healthcare-dispute",
+      "category": "BUSINESS",
+      "signal": "underreported",
+      "source_headline": "Workers walk out at Ghirardelli Square’s iconic shop over healthcare dispute",
+      "source_outlet": "SF Standard",
+      "source_byline": "George Kelly",
+      "source_url": "https://sfstandard.com/2026/07/30/sf-ghirardelli-chocolate-workers-strike/",
+      "source_date": "2026-07-30",
+      "composite_score": 7.4,
+      "uniqueness_score": 7,
+      "angle_statement": "The detail that makes this more than a routine contract fight is the surcharge: Ghirardelli adds a 6% healthcare fee to customer bills, and the union says the company won't disclose how much it collects.",
+      "tldr": "About 50 workers at Ghirardelli Square's flagship chocolate shop, SF's only unionized Ghirardelli, began a three-day strike Thursday. The fight centers on a 6% healthcare fee added to customer bills.",
+      "editor_note": "The detail that makes this more than a routine contract fight is the surcharge: Ghirardelli adds a 6% healthcare fee to customer bills, and Unite Here Local 2 says the company will not disclose how much that fee actually collects, even as it moves to shrink the workers' union health coverage. That is the crux, a business charging tourists for worker healthcare while allegedly bargaining to cut it. The flagship shop is the only unionized Ghirardelli in San Francisco, roughly 50 employees, some with 20 and 30 years behind the counter, in a spot tourists treat as a landmark and Mayor Lurie visited on his swearing-in morning. Talks have dragged since May 2025. Watch whether the three-day walkout forces the company to open its books on where the healthcare surcharge actually goes.",
+      "what_to_watch": "Whether the three-day strike pushes Ghirardelli to disclose how much its 6% customer healthcare fee collects, the union's central demand.",
+      "audit": {
+        "audit_pass": false,
+        "check_1_recap": "fail",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [
+          "check_1_recap: TLDR plus editor's note deliver the story's full substance (workforce size, only unionized SF location, three-day strike, the 6% surcharge, non-disclosure, coverage cuts), so a reader could substitute it for the source reporting."
+        ],
+        "recommendation": "hold for editor"
+      }
+    }
+  ]
+}
