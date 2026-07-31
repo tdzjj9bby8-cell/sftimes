@@ -110,18 +110,44 @@ If Stage 6a wrote an edition, or Stage 6b wrote a staging file, or both:
 ```bash
 cd /Users/eric/projects/sftimes/astro
 
-# Stale-lock guard: crashed prior runs leave .lock files behind. Git creates
-# .lock files for index writes (index.lock), HEAD updates (HEAD.lock),
-# per-branch ref updates (refs/heads/*.lock), and packed refs
-# (packed-refs.lock). Remove any stale one ONLY when no git process is
-# running, so a genuinely concurrent operation is never disturbed. Extended
-# 2026-07-30 after HEAD.lock silently blocked commits for two days despite
-# the original index.lock-only guard.
-if ! pgrep -x git >/dev/null 2>&1; then
-  for lock in .git/index.lock .git/HEAD.lock .git/packed-refs.lock .git/refs/heads/*.lock; do
-    [ -f "$lock" ] && { echo "Removing stale lock: $lock"; rm -f "$lock"; }
-  done
+# Stale-lock guard. THIS BLOCK IS MANDATORY. Do not skip it, do not
+# interpret it as optional based on what you see. Run it exactly as written.
+#
+# Background: crashed prior runs leave .git/*.lock files behind. Every
+# subsequent commit fails with "Unable to create index.lock" or similar
+# until the stale lock is removed. This has silently blocked the pipeline
+# multiple times (2026-07-21 index.lock, 2026-07-30 HEAD.lock). The guard
+# below removes any lock that is (a) older than 5 minutes AND (b) not being
+# held by a running git process. Both conditions must be true; either alone
+# is unsafe.
+echo "=== Stale-lock preflight ==="
+ls -la .git/*.lock .git/refs/heads/*.lock 2>&1 | grep -v "No such" || echo "No lock files present"
+
+if pgrep -x git >/dev/null 2>&1; then
+  echo "SKIP guard: a git process is currently running. Not touching locks."
+else
+  # Explicit per-lock cleanup. Each check is standalone so the LLM cannot
+  # accidentally combine or skip any of them.
+  if [ -f .git/index.lock ] && [ $(find .git/index.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/index.lock (older than 5 min, no git running)"
+    rm -f .git/index.lock
+  fi
+  if [ -f .git/HEAD.lock ] && [ $(find .git/HEAD.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/HEAD.lock (older than 5 min, no git running)"
+    rm -f .git/HEAD.lock
+  fi
+  if [ -f .git/packed-refs.lock ] && [ $(find .git/packed-refs.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/packed-refs.lock (older than 5 min, no git running)"
+    rm -f .git/packed-refs.lock
+  fi
+  if [ -f .git/refs/heads/main.lock ] && [ $(find .git/refs/heads/main.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/refs/heads/main.lock (older than 5 min, no git running)"
+    rm -f .git/refs/heads/main.lock
+  fi
 fi
+
+echo "=== After guard ==="
+ls -la .git/*.lock .git/refs/heads/*.lock 2>&1 | grep -v "No such" || echo "No lock files present"
 
 # Commit whatever was written this run. Either or both may exist.
 if [ -f src/content/briefs/YYYY-MM-DD.md ]; then
