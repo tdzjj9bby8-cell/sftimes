@@ -1,0 +1,36 @@
+{
+  "date": "2026-07-31",
+  "generated_by": "brief-daily Cowork task per BRIEF-COWORK-PLAYBOOK.md",
+  "note": "Items flagged by the 5-check firewall audit. Editor review at /brief-dashboard: promote (edit+accept) or reject.",
+  "items": [
+    {
+      "id": "2026-07-31-001",
+      "slug": "all-fresh-market-live-animal-counter-keeps-ingleside-grocer-alive",
+      "category": "FOOD",
+      "signal": "structural-pattern",
+      "source_headline": "Live-Animal Counter Keeps Independent Asian Grocer Going",
+      "source_outlet": "SF Public Press",
+      "source_byline": "Zhe Wu",
+      "source_url": "https://www.sfpublicpress.org/live-animal-counter-keeps-independent-asian-grocer-going/",
+      "source_date": "2026-07-29",
+      "composite_score": 7.5,
+      "uniqueness_score": 9,
+      "angle_statement": "The live-frog counter on Ocean Avenue is really a small-business survival story wearing an animal-welfare headline.",
+      "tldr": "All Fresh Market, an independent grocer on Ingleside's Ocean Avenue, is thriving on kill-to-order live seafood three years after opening. Owner Jimmy Li is expanding to a bigger space nearby.",
+      "editor_note": "The live-frog counter on Ocean Avenue is really a small-business survival story wearing an animal-welfare headline. All Fresh Market is winning the fight independent grocers usually lose to Costco and 99 Ranch by selling the one thing a warehouse chain cannot stock: the encounter with a living animal, chosen and killed to order. That is a durable moat, and it is also the exact practice activists want San Francisco to police harder. The tension the story leaves open is civic, not culinary. San Francisco's Department of Animal Care and Control can cite only violations its officers personally witness, which makes the animal welfare commission's push for more citations mostly aspirational without new staffing. Watch whether that recommendation turns into a funded ordinance this fall, or stays a memo while another Ocean Avenue storefront quietly expands.",
+      "what_to_watch": "Whether the animal welfare commission's recommendation for more citations becomes a funded ordinance this fall, or stays a memo the Department of Animal Care and Control lacks the staff to act on.",
+      "audit": {
+        "audit_pass": false,
+        "check_1_recap": "fail",
+        "check_2_angle": "pass",
+        "check_3_specificity": "pass",
+        "check_4_word_count": "pass",
+        "check_5_voice": "pass",
+        "fail_reasons": [
+          "check_1_recap: The editor's note reassembles the source's core facts (survival against Costco and 99 Ranch, the kill-to-order moat, the enforcement gap at Animal Care and Control, the commission's citation push, the store's expansion) into a self-contained argument, so a reader could substitute the note for the source reporting and still grasp the news. Note leads with a genuine reframe but conveys too much of the actual story. Editor should either thin the note to pure forward-looking framing or reject."
+        ],
+        "recommendation": "hold for editor"
+      }
+    }
+  ]
+}
