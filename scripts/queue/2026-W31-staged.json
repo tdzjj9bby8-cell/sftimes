@@ -1,0 +1,83 @@
+{
+  "week_id": "2026-W31",
+  "start_date": "2026-07-27",
+  "end_date": "2026-08-02",
+  "editor": "Eric",
+  "generated_by": "brief-weekly-digest Cowork scheduled task",
+  "playbook": "BRIEF-WEEKLY-PLAYBOOK.md",
+  "source_editions": ["2026-07-30"],
+  "run_note": "Executed Sunday 2026-08-02 16:05 PT, in the scheduled 4 PM slot, targeting the current ISO week 2026-W31 (Mon 2026-07-27 through Sun 2026-08-02). Published brief editions in the Monday-through-Saturday range: one, edition 8 (2026-07-30), which carried six items. The other files near this date (2026-07-27, 2026-07-31 in scripts/queue) are daily staging artifacts, not published briefs, so they were excluded. Top 5 taken by composite_score. The fifth slot was a 7.6 tie between the Reem's closure (uniqueness 8) and the TPS item (uniqueness 7); it was broken toward Reem's on uniqueness, the heaviest-weighted scoring dimension, and because Reem's permit-clock angle reinforces the week's process pattern. The TPS item is still carried in the pattern-of-the-week and coming-up sections.",
+  "intro": "San Francisco spent the week proving that its slowest machinery is now its loudest political argument. It took nine years and three mayors to open 160 affordable homes at a former Haight Street McDonald's, and a permit clock, not the crash damage, will keep Reem's dark for two months, the exact kind of delay Mayor Lurie's Clean Up City Hall measures point at on their way to concentrating power in his office. The same government that moves slowly to build also moved quietly to withdraw, setting an August date to end the peer counselors on crisis teams while their funding survives and bracing for a September deadline that strips work permits from tens of thousands.",
+  "ai_disclosure": "This digest is composed with AI assistance from the week's published Brief items, then reviewed and edited by Eric before publish. AI does not write the news. Original reporting is always linked, always credited.",
+  "top_stories": [
+    {
+      "source_headline": "San Francisco Opens Affordable Housing at Site of Former Haight Street McDonald’s",
+      "source_outlet": "KQED",
+      "source_byline": "Billy Cruz",
+      "source_url": "https://ww2.kqed.org/news/2026/07/29/san-francisco-opens-affordable-housing-at-site-of-former-haight-street-mcdonalds/",
+      "source_date": "2026-07-29",
+      "category": "HOUSING",
+      "one_line": "The 730 Stanyan affordable complex opened in Haight-Ashbury with 160 units nine years after the project began under Mayor Ed Lee, with studios starting near $600 a month.",
+      "why_it_mattered": "Nine years to deliver 160 homes on a single parcel, in a city the state ordered to plan for 82,000 units by 2031, made the pace the story rather than the ribbon-cutting. The city bought the shuttered Haight Street McDonald's for $15.5 million in a deal Ed Lee closed the day he died, and it took three mayors to open the doors, exactly the kind of delay Lurie's November measures now campaign against."
+    },
+    {
+      "source_headline": "S.F. fire dept. quietly announced it will cut peer counselors from street crisis teams",
+      "source_outlet": "Mission Local",
+      "source_byline": "Annelise Bowers",
+      "source_url": "https://missionlocal.org/2026/07/peer-counselors-cut-from-street-crisis-response/",
+      "source_date": "2026-07-30",
+      "category": "PUBLIC SAFETY",
+      "one_line": "The Fire Department will cut peer counselors from Street Crisis Response teams on Aug. 14, ending a non-uniformed 911 role the city has run since 2020, even though the public-health funding for the positions still exists.",
+      "why_it_mattered": "Because the money appears to still be there, ending the contract read as a choice about who responds, not a budget cut. The peer counselor, someone with lived experience who arrives without a badge, was the part that made the 2020 program different from a paramedic run, and losing it narrows crisis response back toward the uniformed model it was built to replace."
+    },
+    {
+      "source_headline": "Mission High leads California in UC Berkeley admissions. But many don’t graduate",
+      "source_outlet": "SF Standard",
+      "source_byline": "Ezra Wallach",
+      "source_url": "https://sfstandard.com/2026/07/30/mission-high-uc-berkeley-admissions-dropout/",
+      "source_date": "2026-07-30",
+      "category": "CULTURE",
+      "one_line": "Mission High sends the highest share of students to UC Berkeley of any California public high school but ranks near the bottom in retention, with a 61 percent six-year graduation rate.",
+      "why_it_mattered": "The admissions triumph and the retention crisis were one story: Mission became the state's top Berkeley feeder in the same years, since 2020, that the UC dropped the SAT and leaned on GPA and hardship, doubling its acceptance rate to 41.8 percent. The question the celebration skipped was whether an acceptance letter without bridge programs is access or a setup, with Berkeley's first-semester calculus fail rate up from 18.5 to 30.7 percent."
+    },
+    {
+      "source_headline": "SF Mayor Lurie’s ‘Clean Up City Hall’ Measures Qualify For November Ballot",
+      "source_outlet": "SFist",
+      "source_byline": "Leanne Maxwell",
+      "source_url": "https://sfist.com/2026/07/29/sf-mayor-luries-clean-up-city-hall-measures-qualify-for-november-ballot/",
+      "source_date": "2026-07-29",
+      "category": "POLITICS",
+      "one_line": "Three Lurie-backed 'Clean Up City Hall' measures qualified for November's ballot; two expand mayoral authority and the third raises the signatures for a citizen initiative from about 10,600 to 42,500.",
+      "why_it_mattered": "The name did the campaign's work: it sounded like an ethics package, but two of the three measures expanded the mayor's own power over departments, commissioners, and contracts, and the third nearly quadrupled the bar for citizen initiatives. The San Francisco Labor Council and a new Fair Ballot Access group lined up against it, framing the signature threshold as a wall only billionaires and the mayor can clear."
+    },
+    {
+      "source_headline": "Reem’s California on Mission and 25th will close for next two months after hit-and-run",
+      "source_outlet": "Mission Local",
+      "source_byline": "Oscar Palma",
+      "source_url": "https://missionlocal.org/2026/07/reems-will-close-for-next-two-months-after-hit-and-run/",
+      "source_date": "2026-07-30",
+      "category": "FOOD",
+      "one_line": "Reem's California, chef Reem Assil's Arab street-food anchor at Mission and 25th, will close for two months after a June hit-and-run caused up to $200,000 in possible structural damage.",
+      "why_it_mattered": "What stretched a storefront crash into a two-month closure was the city's permit clock: because the crash may have reached the foundation, repairs could require permits that add up to six weeks on top of construction, with insurance not yet committed to covering any of it. Reem's is no ordinary tenant, built from a Mission farmers'-market pop-up through La Cocina into the storefront that opened days before the 2020 lockdown and survived anyway."
+    }
+  ],
+  "pattern_of_the_week": {
+    "title": "The clock became the argument",
+    "note": "This week San Francisco's own slowness stopped being a complaint and became a campaign. It took nine years and three mayors to open 160 homes at 730 Stanyan, on a parcel the city bought the day Ed Lee died. A June hit-and-run at Reem's turned into a two-month closure less because of the damage than because the permit clock can add six weeks to any repair that reaches the foundation. Those timelines are the exact material of Lurie's Clean Up City Hall measures, which qualified for November and answer slow process by moving power toward the mayor: two of the three expand his authority over departments and contracts, and the third nearly quadruples the signatures a citizen initiative needs. The 730 Stanyan note said it plainly, that every project this slow is an argument those measures will make. But the same city that moves slowly to build also moved quietly to withdraw. The Fire Department set an Aug. 14 date to end the peer-counselor role on crisis teams while the funding for it still exists, and a June Supreme Court ruling put a September expiration on work permits for 79,320 Californians on Temporary Protected Status, many of them the Mission service workers the local economy runs on. Read together, the week showed a government slow to deliver what it promised and fast to end what it already had, with the fix on the ballot being less process and more centralized power. November will test whether voters separate the cleanup framing from the transfer underneath.",
+    "connections": [
+      "730 Stanyan took nine years and three mayors to open 160 affordable homes, a timeline its own editor note tied directly to the Clean Up City Hall campaign.",
+      "Reem's faces a two-month closure driven by the city's permit clock rather than the crash damage itself.",
+      "Lurie's three November measures answer slow process by expanding mayoral power and raising the citizen-initiative signature bar to 42,500.",
+      "The Fire Department will end the Street Crisis Response peer-counselor role on Aug. 14 even though the public-health funding survives.",
+      "A June Supreme Court ruling put a September expiration on TPS work permits for 79,320 Californians, many of them Mission service workers."
+    ]
+  },
+  "coming_up": [
+    "Whether 730 Stanyan's nine-year timeline becomes a talking point for Lurie's Clean Up City Hall measures before the November vote.",
+    "The Aug. 14 termination of the Street Crisis Response peer counselors, and whether any supervisor presses the Fire Department on cutting positions that still appear funded.",
+    "The September expiration window for Salvadoran TPS holders, the largest single group, and whether SF legal-defense funding slows the loss of work permits.",
+    "The November vote on the signature-threshold measure, which faces organized opposition from the Labor Council and the new Fair Ballot Access group.",
+    "Reem's Aug. 1 final service day and repair-fund total, and whether city permitting rather than construction ends up setting the reopening date.",
+    "Whether the UC system responds to this year's faculty open letters demanding the SAT and ACT return as admissions factors."
+  ]
+}
