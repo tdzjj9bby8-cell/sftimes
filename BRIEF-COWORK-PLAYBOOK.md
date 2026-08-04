@@ -31,6 +31,70 @@ Before doing anything:
 - The task auto-publishes audit-passing items. It composes the edition markdown, commits it to `src/content/briefs/YYYY-MM-DD.md`, and pushes. Audit-failing items are staged to `scripts/queue/YYYY-MM-DD-staged.json` for editor review at /brief-dashboard. Publishing an edition is the task's job for the clean case; the editor's job for the flagged case. You have full bash access.
 - Output writes directly to the file system (Eric's machine, no Vercel EROFS).
 
+## Stage 0: Preflight (ALWAYS RUNS)
+
+This stage runs unconditionally at the start of every task run, before any
+pipeline work. Its job is repo housekeeping: clear stale git locks that
+crashed prior runs may have left behind, and verify write access. If this
+stage is skipped, subsequent commits may silently fail and the pipeline
+appears to work while producing nothing on the site.
+
+**Why this exists as its own stage:** the stale-lock guard was originally
+inside Stage 9 (commit + push). But on empty-brief days (zero items drafted)
+the task exits at Stage 8 without ever entering Stage 9, so the guard never
+runs. Stale locks then persist across days, silently blocking every
+subsequent fire. This bit us on 2026-07-21, 2026-07-30, and 2026-08-04.
+Preflight moves the guard where it always runs.
+
+```bash
+cd /Users/eric/projects/sftimes/astro
+
+echo "=== Stage 0 preflight: stale-lock check ==="
+ls -la .git/*.lock .git/refs/heads/*.lock 2>&1 | grep -v "No such" || echo "No lock files present"
+
+if pgrep -x git >/dev/null 2>&1; then
+  echo "SKIP guard: a git process is currently running. Not touching locks."
+else
+  # Explicit per-lock cleanup. Each check is standalone so the LLM cannot
+  # accidentally combine or skip any of them. Only clears locks older than
+  # 5 minutes to avoid racing legitimate concurrent operations.
+  if [ -f .git/index.lock ] && [ $(find .git/index.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/index.lock (older than 5 min, no git running)"
+    rm -f .git/index.lock
+  fi
+  if [ -f .git/HEAD.lock ] && [ $(find .git/HEAD.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/HEAD.lock (older than 5 min, no git running)"
+    rm -f .git/HEAD.lock
+  fi
+  if [ -f .git/packed-refs.lock ] && [ $(find .git/packed-refs.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/packed-refs.lock (older than 5 min, no git running)"
+    rm -f .git/packed-refs.lock
+  fi
+  if [ -f .git/refs/heads/main.lock ] && [ $(find .git/refs/heads/main.lock -mmin +5 | wc -l) -gt 0 ]; then
+    echo "Removing stale .git/refs/heads/main.lock (older than 5 min, no git running)"
+    rm -f .git/refs/heads/main.lock
+  fi
+fi
+
+echo "=== After preflight: verify state ==="
+ls -la .git/*.lock .git/refs/heads/*.lock 2>&1 | grep -v "No such" || echo "No lock files present"
+
+# Verify git write access before we spend 30 min on pipeline work
+if ! git status >/dev/null 2>&1; then
+  echo "PREFLIGHT FAILED: git status broken. Aborting task."
+  exit 1
+fi
+
+# Verify remote is reachable (fetch dry-run, no-op if network is fine)
+if ! git fetch --dry-run origin main >/dev/null 2>&1; then
+  echo "PREFLIGHT WARNING: cannot reach origin. Pipeline will still run but push may fail."
+fi
+
+echo "=== Stage 0 preflight complete ==="
+```
+
+If preflight aborts, the task exits. No pipeline work, no commits, no partial state. Report the abort reason in Stage 10.
+
 ## Stage 1: Ingest
 
 Fetch overnight news. Sources (reference `/Users/eric/projects/sftimes/astro/scripts/brief-ingest.ts` for the current authoritative list; if it drifts from what's below, trust brief-ingest.ts):
@@ -110,44 +174,13 @@ If Stage 6a wrote an edition, or Stage 6b wrote a staging file, or both:
 ```bash
 cd /Users/eric/projects/sftimes/astro
 
-# Stale-lock guard. THIS BLOCK IS MANDATORY. Do not skip it, do not
-# interpret it as optional based on what you see. Run it exactly as written.
-#
-# Background: crashed prior runs leave .git/*.lock files behind. Every
-# subsequent commit fails with "Unable to create index.lock" or similar
-# until the stale lock is removed. This has silently blocked the pipeline
-# multiple times (2026-07-21 index.lock, 2026-07-30 HEAD.lock). The guard
-# below removes any lock that is (a) older than 5 minutes AND (b) not being
-# held by a running git process. Both conditions must be true; either alone
-# is unsafe.
-echo "=== Stale-lock preflight ==="
-ls -la .git/*.lock .git/refs/heads/*.lock 2>&1 | grep -v "No such" || echo "No lock files present"
-
-if pgrep -x git >/dev/null 2>&1; then
-  echo "SKIP guard: a git process is currently running. Not touching locks."
-else
-  # Explicit per-lock cleanup. Each check is standalone so the LLM cannot
-  # accidentally combine or skip any of them.
-  if [ -f .git/index.lock ] && [ $(find .git/index.lock -mmin +5 | wc -l) -gt 0 ]; then
-    echo "Removing stale .git/index.lock (older than 5 min, no git running)"
-    rm -f .git/index.lock
-  fi
-  if [ -f .git/HEAD.lock ] && [ $(find .git/HEAD.lock -mmin +5 | wc -l) -gt 0 ]; then
-    echo "Removing stale .git/HEAD.lock (older than 5 min, no git running)"
-    rm -f .git/HEAD.lock
-  fi
-  if [ -f .git/packed-refs.lock ] && [ $(find .git/packed-refs.lock -mmin +5 | wc -l) -gt 0 ]; then
-    echo "Removing stale .git/packed-refs.lock (older than 5 min, no git running)"
-    rm -f .git/packed-refs.lock
-  fi
-  if [ -f .git/refs/heads/main.lock ] && [ $(find .git/refs/heads/main.lock -mmin +5 | wc -l) -gt 0 ]; then
-    echo "Removing stale .git/refs/heads/main.lock (older than 5 min, no git running)"
-    rm -f .git/refs/heads/main.lock
-  fi
-fi
-
-echo "=== After guard ==="
-ls -la .git/*.lock .git/refs/heads/*.lock 2>&1 | grep -v "No such" || echo "No lock files present"
+# Stale-lock guard moved to Stage 0 (Preflight) as of 2026-08-04. Stage 0
+# always runs, even on empty-brief days. If you're seeing a lock here at
+# Stage 9, something has gone wrong: Stage 0 should have cleared it. Log
+# the state and continue; the git commands below will fail loudly if a
+# real lock is still present.
+echo "=== Stage 9: verify locks cleared by preflight ==="
+ls -la .git/*.lock 2>&1 | grep -v "No such" || echo "No lock files (as expected)"
 
 # Commit whatever was written this run. Either or both may exist.
 if [ -f src/content/briefs/YYYY-MM-DD.md ]; then
