@@ -1,0 +1,32 @@
+[
+  {
+    "id": "2026-08-05-S01",
+    "slug": "tenderloin-corner-stores-produce-mandate-mahmood",
+    "category": "POLITICS",
+    "signal": "missing-context",
+    "source_headline": "S.F. supe wants vegetables, fruits in Tenderloin corner stores, but owners are skeptical",
+    "source_outlet": "Mission Local",
+    "source_byline": "Hamza Fahmy",
+    "source_url": "https://missionlocal.org/2026/08/sf-supe-wants-to-add-fresh-produce-to-corner-stores-owners-are-skeptical/",
+    "source_date": "2026-08-05",
+    "composite_score": 7.8,
+    "uniqueness_score": 7,
+    "auto_published": false,
+    "angle_statement": "Mahmood's produce plan is not new: it revives Healthy Retail SF, a 2016 program that converted only 10 stores before fading.",
+    "tldr": "Supervisor Bilal Mahmood wants the Tenderloin's 70 corner stores to sell fresh produce, reviving a 2016 program. Store owners say tobacco and alcohol are what keep them open.",
+    "editor_note": "Mahmood's plan is not new, and that is the part the announcement skips. It revives Healthy Retail SF, the 2016 corner store conversion program that spent roughly $25,000 per store to cut tobacco and alcohol to 20 percent of sales and give produce 35 percent of the shelf. That effort converted just 10 stores citywide, five of them in the Tenderloin, before it faded. The economics that stalled it then have not moved: owners like Kris Lynn at Noors Snacks say produce rots before anyone buys it, and a neighborhood with food banks and a twice-weekly Civic Center farmers market already has cheaper options. A plan built on subsidizing shelves does not answer why the last version of this plan did not stick.",
+    "what_to_watch": "Watch the Board of Supervisors for whether Mahmood attaches a funding figure before the proposal leaves committee this fall.",
+    "audit": {
+      "audit_pass": false,
+      "check_1_recap": "fail",
+      "check_2_angle": "pass",
+      "check_3_specificity": "pass",
+      "check_4_word_count": "pass",
+      "check_5_voice": "pass",
+      "fail_reasons": [
+        "check_1_recap: the editor's note reproduces the source's core owner-skepticism reporting (Kris Lynn, produce spoilage, food banks, Civic Center farmers market) closely enough that a reader could substitute it for the Mission Local article; the angle also largely duplicates the source's own 'owners are skeptical' framing."
+      ],
+      "recommendation": "hold for editor"
+    }
+  }
+]
