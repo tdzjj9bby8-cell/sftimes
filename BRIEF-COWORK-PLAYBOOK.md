@@ -197,7 +197,7 @@ if ! git diff --cached --quiet; then
 - P items cleared 5-check audit and auto-published to /brief/YYYY-MM-DD/
 - F items flagged; staged for editor at /brief-dashboard
 - Auto-produced by scheduled Cowork task per BRIEF-COWORK-PLAYBOOK.md"
-  git push origin main
+  git push origin main || { echo "PUSH FAILED: $?"; exit 2; }
 fi
 ```
 
@@ -250,7 +250,7 @@ If any bash command fails, log the exact error and stop. Do NOT attempt aggressi
 - If RSS fetch fails on all sources: abort. No brief today.
 - If git commit fails on `.git/index.lock` (a prior run crashed mid-commit): the Stage 9 stale-lock guard clears it automatically when no git process is running. If the commit still fails on the lock, a git process really is running: abort and log; do not force-remove the lock.
 - If git commit fails for another reason (e.g., merge conflict from concurrent Eric edit): abort. Log for morning review.
-- If git push fails (e.g., auth): commit locally, log for Eric to push manually.
+- If git push fails: log the exact error, exit with a non-zero status, and include `PUSH FAILED` in the Stage 10 report so the failure is visible. Do NOT treat this as a soft success. The host-side launchd safety net will retry, but the task itself must report the failure loudly. Do not attempt manual recovery from inside the VM.
 - If audit-passing edition markdown composition fails (e.g., LLM output malformed, edition number collision): abort auto-publish for the day, downgrade all items to the staging file (audit result attached), notify editor. Never push a broken edition.
 
 ## Cost expectations
