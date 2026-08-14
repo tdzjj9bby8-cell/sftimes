@@ -13,3 +13,9 @@ package-lock.json
 public/heroes/responsive/
 public/best-of/responsive/
 public/team/responsive/
+
+# Diagnostic probe files (safe to ignore)
+.__*
+__preflight_test
+PROGRESS_PROBE.txt
+scripts/queue/.__*
