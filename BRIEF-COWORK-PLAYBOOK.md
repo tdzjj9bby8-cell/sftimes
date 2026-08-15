@@ -102,11 +102,17 @@ Fetch overnight news. Sources (reference `/Users/eric/projects/sftimes/astro/scr
 - Mission Local: https://missionlocal.org/feed/
 - SF Standard: https://sfstandard.com/feed/
 - SFist: https://sfist.com/feed/
+- ABC7 Bay Area: https://abc7news.com/feed/
 - KQED News: https://ww2.kqed.org/news/feed/
+- NBC Bay Area: https://www.nbcbayarea.com/news/local/feed/
+- Berkeleyside: https://www.berkeleyside.org/feed
+- Eater SF: https://sf.eater.com/rss/index.xml
 - SF Public Press: https://www.sfpublicpress.org/feed/
-- SF Chronicle SF section: https://www.sfchronicle.com/rss/feed/bay-area-news-3.xml
-- NBC Bay Area SF: https://www.nbcbayarea.com/?rss=y&scope=section&sectionname=San%20Francisco
+- The Frisc: https://thefrisc.com/feed/
+- 48 Hills: https://48hills.org/feed/
 - Optional: r/sanfrancisco top posts (last 24h) via https://www.reddit.com/r/sanfrancisco/top.json?t=day (JSON, not RSS)
+
+Removed 2026-08-15 after verification: SF Chronicle (feed 404), SF Examiner (feed 404), Curbed SF (TLS connection failure). KQED moved off `www.kqed.org/news/feed` (404) to the `ww2` host. All four were returning zero silently, which cost roughly a third of the daily candidate pool. Three lists carry these feeds and all three move together: `scripts/brief-ingest.ts` (authoritative), `api/brief/source-health.ts` (liveness pings), and this file. `/brief-dashboard/health` renders the source-health endpoint and will flag a dead feed if anyone checks it.
 
 Use bash `curl` to fetch. Parse feed XML for `<item>` entries. For each item extract: title, link, pubDate, description/summary, source outlet. Deduplicate by URL.
 

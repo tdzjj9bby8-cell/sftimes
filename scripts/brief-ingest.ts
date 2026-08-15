@@ -36,14 +36,13 @@ const RSS_SOURCES: SourceFeed[] = [
   { name: 'SF Standard', url: 'https://sfstandard.com/feed/', hostMustInclude: ['sfstandard.com'] },
   { name: 'SFist', url: 'https://sfist.com/feed/', hostMustInclude: ['sfist.com'] },
   { name: 'ABC7 Bay Area', url: 'https://abc7news.com/feed/', hostMustInclude: ['abc7news.com'] },
-  { name: 'KQED', url: 'https://www.kqed.org/news/feed', hostMustInclude: ['kqed.org'] },
+  { name: 'KQED', url: 'https://ww2.kqed.org/news/feed/', hostMustInclude: ['kqed.org'] },
   { name: 'NBC Bay Area', url: 'https://www.nbcbayarea.com/news/local/feed/', hostMustInclude: ['nbcbayarea.com'] },
   { name: 'Berkeleyside', url: 'https://www.berkeleyside.org/feed', hostMustInclude: ['berkeleyside.org'] },
   { name: 'Eater SF', url: 'https://sf.eater.com/rss/index.xml', hostMustInclude: ['sf.eater.com'] },
-  { name: 'Curbed SF', url: 'https://sf.curbed.com/rss/index.xml', hostMustInclude: ['sf.curbed.com'] },
-  { name: 'SF Chronicle', url: 'https://www.sfchronicle.com/rss/feed/Latest-News-415.php', hostMustInclude: ['sfchronicle.com'] },
-  { name: 'SF Examiner', url: 'https://www.sfexaminer.com/feed/', hostMustInclude: ['sfexaminer.com'] },
   { name: 'SF Public Press', url: 'https://www.sfpublicpress.org/feed/', hostMustInclude: ['sfpublicpress.org'] },
+  { name: 'The Frisc', url: 'https://thefrisc.com/feed/', hostMustInclude: ['thefrisc.com'] },
+  { name: '48 Hills', url: 'https://48hills.org/feed/', hostMustInclude: ['48hills.org'] },
 ];
 
 const REDDIT_SUBS = ['sanfrancisco', 'AskSF', 'bayarea'];
