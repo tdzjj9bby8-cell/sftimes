@@ -1,0 +1,32 @@
+[
+ {
+  "id": "2026-08-15-S01",
+  "slug": "glen-park-relay-attacks-go-unreported",
+  "category": "PUBLIC SAFETY",
+  "signal": "first-to-connect",
+  "source_headline": "The mysterious case of Glen Park's most polite thieves",
+  "source_outlet": "SF Standard",
+  "source_byline": "Jillian D'Onfro",
+  "source_url": "https://sfstandard.com/2026/08/15/relay-attacks-car-break-ins-polite-thieves/",
+  "source_date": "2026-08-15",
+  "composite_score": 8.45,
+  "uniqueness_score": 9,
+  "auto_published": false,
+  "angle_statement": "A car break-in nobody reports does not exist in the data, which is the part of Glen Park's polite-thief story that should worry the city.",
+  "tldr": "Glen Park residents report cars opened by relay attacks that amplify key fob signals. One victim skipped filing a police report because only sunglasses were taken.",
+  "editor_note": "A car break-in nobody reports does not exist in the data, which is the part of Glen Park's polite-thief story that should worry the city. San Francisco has spent two years pointing at falling break-in numbers as proof that bipping is beaten. Relay attacks leave no glass, no damage claim, and in these cases no report at all, because the loss was two pairs of sunglasses and an air compressor. Alex Hao said she skipped the police entirely on the grounds that they had bigger problems. Multiply that instinct across a neighborhood and the crime moves off the books rather than out of the city. Two victims also said their security cameras recorded nothing, which points at signal jamming and means the private surveillance layer misses it too.",
+  "what_to_watch": "Whether SFPD begins tracking relay attacks as a separate category, since it declined to comment on how common they have become.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: the note restates the stolen items, the victim's decision not to file, and the camera failures, so a reader who reads only the note has the substance of the source article and no reason to click through. The underreporting thesis is genuinely additive, but it rides on top of too much retold source detail. Tighten to the data-gap argument and drop the inventory of what was taken."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
