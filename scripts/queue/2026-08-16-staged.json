@@ -1,0 +1,32 @@
+[
+ {
+  "id": "2026-08-16-S01",
+  "slug": "stern-grove-overbooks-free-concerts-past-legal-capacity",
+  "category": "CULTURE",
+  "signal": "missing-context",
+  "source_headline": "Stern Grove shutouts: It's not just you who lost the ticket lottery",
+  "source_outlet": "SF Standard",
+  "source_byline": "Michael McLaughlin",
+  "source_url": "https://sfstandard.com/2026/08/16/stern-grove-festival-tickets-lottery/",
+  "source_date": "2026-08-16",
+  "composite_score": 7.65,
+  "uniqueness_score": 8,
+  "auto_published": false,
+  "angle_statement": "Stern Grove is issuing roughly twice as many tickets as the venue can legally hold, which is how a free concert becomes a thing you can win and still be turned away from.",
+  "tldr": "Stern Grove drew about 100,000 lottery entries per show for a 12,000-capacity meadow. Organizers release 20,000 to 24,000 tickets per concert, betting that most winners will not turn up.",
+  "editor_note": "Stern Grove is issuing roughly twice as many tickets as the venue can legally hold, which is how a free concert becomes a thing you can win and still be turned away from. The fire department caps the meadow at 12,000. Organizers put out 20,000 to 24,000 passes per show on the assumption that most winners skip. At the Suki Waterhouse concert in July that assumption broke and ticket holders waited outside. This is the part the lottery debate keeps missing: the problem is not the distribution method, it is that an 88-year-old free amenity now has demand it was never built for and no plan beyond overbooking. The festival's answer is that this is the fairest available system. That is probably true and still not a solution.",
+  "what_to_watch": "Whether the festival raises its safety cap or trims the ticket overissue before the 2027 season lottery opens.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: in this story the numbers are the news, and the TLDR plus note together deliver four of the source's six headline facts (12,000 capacity, 20,000 to 24,000 tickets released, roughly 100,000 entries per show, the Suki Waterhouse turnaway). A reader who reads only the note has the substance and little reason to click through to The Standard. The overbooking frame is genuinely ours, but it needs to be argued from fewer of the source's figures. Suggested fix: cut the capacity and ticket-release numbers from the note and let the TLDR carry them alone."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
