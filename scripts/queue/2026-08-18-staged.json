@@ -1,0 +1,32 @@
+[
+ {
+  "id": "2026-08-18-S01",
+  "slug": "sf-medicaid-reserve-covers-a-fraction-of-projected-loss",
+  "category": "PUBLIC SAFETY",
+  "signal": "missing-context",
+  "source_headline": "Meet the District 6 candidate: With Medicaid cuts looming, how will S.F. keep providing drug treatment and recovery?",
+  "source_outlet": "Mission Local",
+  "source_byline": "Sarah Hopkins",
+  "source_url": "https://missionlocal.org/2026/08/meet-the-district-6-candidate-with-medicaid-cuts-looming-how-will-s-f-keep-providing-drug-treatment-and-recovery/",
+  "source_date": "2026-08-18",
+  "composite_score": 8.25,
+  "uniqueness_score": 8,
+  "auto_published": false,
+  "angle_statement": "San Francisco has set aside $34 million against a Medicaid hole its own health department estimates at $90 million to $180 million a year.",
+  "tldr": "Supervisor Matt Dorsey says he will work to keep people in drug treatment eligible for Medi-Cal. SF projects losing up to $315 million a year from federal Medicaid cuts.",
+  "editor_note": "San Francisco has set aside $34 million against a Medicaid hole its own health department estimates at $90 million to $180 million a year. That gap is the story, not the candidate questionnaire it turned up in. Dorsey's answer is to connect people in treatment with jobs so they keep Medi-Cal eligibility, which is a workaround for a work requirement, not a funding plan. Meanwhile the Department of Public Health is already cutting $40 million over two years, including contracts for harm reduction and peer counseling, while the city adds treatment beds and people still wait up to four months for a residential slot. Expanding capacity and cutting the payer at the same time is a decision someone is going to have to name out loud.",
+  "what_to_watch": "New Medi-Cal eligibility rules take effect January 2027 and DPH expects the revenue loss from July 2027, with Dorsey chairing the Budget Committee in between.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: the source is a 556-word candidate questionnaire, and the note reproduces nearly all of its factual content (the $34M reserve, the $90-180M DPH estimate, the $315M citywide projection, the $40M in DPH cuts, the four-month residential wait) plus a paraphrase of Dorsey's actual answer. A reader who reads only the note has the entire piece. The arithmetic framing is genuinely ours and worth keeping. Suggested fix: hold the $34M against the $90-180M contrast and cut the $315M and $40M figures, so the note argues from two numbers instead of five."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
