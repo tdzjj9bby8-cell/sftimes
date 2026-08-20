@@ -1,0 +1,62 @@
+[
+ {
+  "id": "2026-08-19-S01",
+  "slug": "openai-anthropic-workers-political-giving-split",
+  "category": "TECH",
+  "signal": "first-to-connect",
+  "source_headline": "OpenAI workers ditched their boss' politics for Anthropic's",
+  "source_outlet": "Mission Local",
+  "source_byline": "Brandon Pho and Kelly Waldron",
+  "source_url": "https://missionlocal.org/2026/08/open-ai-anthropic-donors-elections-safety-regulation/",
+  "source_date": "2026-08-19",
+  "composite_score": 7.95,
+  "uniqueness_score": 9,
+  "auto_published": false,
+  "angle_statement": "HELD BEFORE DRAFTING. See hold reason below.",
+  "tldr": "Not drafted. Mission Local reports OpenAI rank-and-file employees funded the same pro-AI-regulation committees as Anthropic's staff, against $50 million from OpenAI president Greg Brockman.",
+  "editor_note": "Not drafted. This item cleared scoring (composite 7.95, uniqueness 9) and the full-body guardrail (1,195 words), and it is a genuinely strong San Francisco story: a documented political split inside one frontier AI lab, with its employees aligning against their own president and alongside a direct competitor. It was deliberately not drafted pending an editorial decision from Eric, described in the hold reason below.",
+  "what_to_watch": "Federal filings covering July 2026 onward will show whether the OpenAI employee giving pattern persists after the Bores primary.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "not run",
+   "check_2_angle": "not run",
+   "check_3_specificity": "not run",
+   "check_4_word_count": "not run",
+   "check_5_voice": "not run",
+   "fail_reasons": [
+    "NOT AN AUDIT FAILURE. The five firewall checks were not run because the item was held before drafting. Hold reason: conflict of interest. This story reports on Anthropic's political spending and that of its employees. The pipeline that would draft the commentary runs on Anthropic's Claude. Having the vendor's model write published editorial commentary about the vendor's own political activity undercuts the AI disclosure the Brief depends on, and no rule in BRIEF-COWORK-PLAYBOOK.md covers it. Options for the editor: (a) drop the item, (b) Eric drafts the note himself and publishes with a conflict disclosure line, (c) publish an AI-drafted note with an explicit inline disclosure that the drafting model is made by one of the companies covered. Recommend (b)."
+   ],
+   "recommendation": "hold for editor"
+  }
+ },
+ {
+  "id": "2026-08-19-S02",
+  "slug": "pacific-heights-graffiti-crew-is-not-local",
+  "category": "CULTURE",
+  "signal": "missing-context",
+  "source_headline": "Someone tagged a fancy Pacific Heights co-op tower. Even neighbors are kind of impressed",
+  "source_outlet": "SF Standard",
+  "source_byline": "Max Harrison-Caldwell",
+  "source_url": "https://sfstandard.com/2026/08/19/pacific-heights-rappel-graffiti-reactions/",
+  "source_date": "2026-08-19",
+  "composite_score": 7.40,
+  "uniqueness_score": 9,
+  "auto_published": false,
+  "angle_statement": "The crew that rappelled down a Pacific Heights tower is based in Taiwan, which makes this graffiti tourism rather than a local statement.",
+  "tldr": "Two writers from the Taiwan-based EO4 crew rappelled down an art deco co-op on Vallejo Street and painted three-story pieces. They signed them San Fran.",
+  "editor_note": "The crew that rappelled down a Pacific Heights tower is based in Taiwan, which makes this graffiti tourism rather than a local statement. One piece near the roof reads we own ur city now. The writers do not live here, have done the same in Hong Kong, Japan, South Korea, Thailand, and the Philippines, and gave themselves away by writing San Fran, which is a thing no one from here says. That detail changes what the piece is. Pacific Heights read it as a security failure and a bill, since a co-op pays for its own removal to avoid city fines. Neighbors read it as craft. Both responses assume a conversation with San Francisco that was never actually happening.",
+  "what_to_watch": "The co-op has to paint over the pieces at its own cost to avoid city fines, and no arrests have been reported.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: the source runs 542 words and the note delivers most of its substance (who painted it, the Taiwan crew, the rooftop text, the country list, the co-op paying for removal, the split neighbor reaction). A reader who reads only the note has the whole story and no reason to click through. The graffiti-tourism read is genuinely ours. Suggested fix: build the note on the San Fran signature and what it implies, and drop the neighbor reactions and the removal-cost detail entirely."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
