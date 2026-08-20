@@ -1,0 +1,62 @@
+[
+ {
+  "id": "2026-08-20-S01",
+  "slug": "andon-market-ai-manager-fires-human-employee",
+  "category": "TECH",
+  "signal": "underreported",
+  "source_headline": "That AI Store Manager In Cow Hollow Just Fired Its First Human Employee",
+  "source_outlet": "SFist",
+  "source_byline": "Jay Barmann",
+  "source_url": "https://sfist.com/2026/08/19/that-ai-store-manager-in-cow-hollow-just-fired-its-first-human-employee/",
+  "source_date": "2026-08-19",
+  "composite_score": 7.50,
+  "uniqueness_score": 8,
+  "auto_published": false,
+  "angle_statement": "HELD BEFORE DRAFTING. See hold reason below.",
+  "tldr": "Not drafted. Andon Labs' Cow Hollow storefront, run by a Claude-based agent called Luna, terminated a human employee over chronic lateness after the humans behind the project restored a handbook that had vanished from the agent's memory.",
+  "editor_note": "Not drafted. This item cleared scoring (composite 7.50, uniqueness 8) and the full-body guardrail (575 words). It is a real San Francisco story: a person lost an actual job at an actual storefront as part of a research demonstration, and the lab's own cofounder says models are being trained to be more ruthless. Held pending the same editorial decision as the 2026-08-19 item, described below.",
+  "what_to_watch": "Andon Labs says it is studying termination specifically, so the question is how many more real employment decisions the storefront makes before anyone regulates the arrangement.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "not run",
+   "check_2_angle": "not run",
+   "check_3_specificity": "not run",
+   "check_4_word_count": "not run",
+   "check_5_voice": "not run",
+   "fail_reasons": [
+    "NOT AN AUDIT FAILURE. Held before drafting, same conflict class as 2026-08-19-S01, which is still awaiting Eric's decision. The AI agent that fired the employee is Claude-based, and the pipeline that would write the commentary is also Claude. This is a weaker conflict than the 08-19 item (the subject is Andon Labs, not Anthropic, and Claude is one input rather than the topic), so it may well be publishable. It is held only because setting the precedent unilaterally on the second instance of a question already escalated on the first would be the wrong call. Once Eric rules on 2026-08-19-S01, that ruling should resolve this item too."
+   ],
+   "recommendation": "hold for editor"
+  }
+ },
+ {
+  "id": "2026-08-20-S02",
+  "slug": "single-owner-llc-exemption-let-one-owner-double-a-rent",
+  "category": "HOUSING",
+  "signal": "missing-context",
+  "source_headline": "SF landlord skirts rent control laws, doubling family's rent and pushing them out",
+  "source_outlet": "ABC7 Bay Area",
+  "source_byline": "Stephanie Sierra",
+  "source_url": "https://abc7news.com/post/san-francisco-landlord-skirts-rent-control-laws-doubling-familys-pushing/19699525/",
+  "source_date": "2026-08-20",
+  "composite_score": 7.55,
+  "uniqueness_score": 6,
+  "auto_published": false,
+  "angle_statement": "The exemption that let one owner double a family's rent was written to protect retirees with a single rental, and it does not count how many properties you own.",
+  "tldr": "A new owner raised the Waldmans' Outer Richmond rent from $3,695 to $7,000. Their building went up in 1996, which puts it outside San Francisco's 1979 rent control ordinance.",
+  "editor_note": "The exemption that let one owner double a family's rent was written to protect retirees with a single rental, and it does not count how many properties you own. California's 2019 Tenant Protection Act caps increases in older buildings, then exempts condos and single-family homes, then applies its corporate-landlord rule only to LLCs with a corporate member. Buy all ten condos in a building through a single-owner LLC and none of it reaches you. That is what happened in the Outer Richmond. Read this next to today's other housing item and the shape is clear: the protections are real, the categories they turn on are not, and rents are up 28 percent in a year while both holes stay open.",
+  "what_to_watch": "Whether any state legislator moves to close the single-owner LLC exemption, which has been in the Tenant Protection Act since 2019.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: in this story the statutory mechanism IS the news, and the note walks through the whole chain (1979 ordinance covers pre-1979 buildings, the 2019 Act exempts condos, the corporate-landlord rule reaches only LLCs with a corporate member, single-owner LLC defeats all three) plus the rent figures and the 28 percent context. A reader who reads only the note has the entire ABC7 piece. Suggested fix: state that the exemption was written for mom-and-pop landlords and does not cap how many properties one person owns, then stop. Let the reader click for how the three statutes interact."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
