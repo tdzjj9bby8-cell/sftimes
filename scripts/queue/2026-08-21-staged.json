@@ -1,0 +1,32 @@
+[
+ {
+  "id": "2026-08-21-S01",
+  "slug": "311-cancels-the-drug-complaints-it-tells-you-to-file",
+  "category": "PUBLIC SAFETY",
+  "signal": "missing-context",
+  "source_headline": "San Francisco tells residents to report drug use to 311. Then it cancels the complaints",
+  "source_outlet": "SF Standard",
+  "source_byline": "Garrett Leahy",
+  "source_url": "https://sfstandard.com/2026/08/21/sf-311-drug-reports-canceled/",
+  "source_date": "2026-08-21",
+  "composite_score": 9.20,
+  "uniqueness_score": 9,
+  "auto_published": false,
+  "angle_statement": "The city tells you to report drug use to 311, and the way 62 percent of people actually file a 311 report is the one way that does not work.",
+  "tldr": "SolveSF documented 425 drug-use complaints canceled by San Francisco 311 since April 22. Phone reports transfer to police; app reports get closed with a note saying call PD.",
+  "editor_note": "The city tells you to report drug use to 311, and the way 62 percent of people actually file a 311 report is the one way that does not work. That is the whole defect. Call and the dispatcher transfers you to the police non-emergency line. Use the app and the case is closed with a note telling you to do it yourself. Supervisor Bilal Mahmood and the Department of Emergency Management both say 311 is correct, and both are right about the phone and wrong about the app. The data damage compounds: there is no drugs category in the public 311 dataset and complainant notes are redacted, so the canceled reports do not become hot-spot data either. A complaint nobody records is a problem the city cannot see.",
+  "what_to_watch": "The mayor's office says it is talking to four departments about the friction but will not say what changes or when.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: the note walks the source's central mechanism end to end (phone transfers, app cancels, both officials say 311 is correct, the dataset has no drugs category). That mechanism IS the news, so a reader who reads only the note has the story and clicks through only for quotes. This was the day's highest-scoring item at 9.20 and the framing is genuinely ours. Suggested fix: keep the opening indictment about the 62 percent, cite the 425 canceled cases, and stop. Drop the phone-versus-app walkthrough and the dataset paragraph and let the reader go get them."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
