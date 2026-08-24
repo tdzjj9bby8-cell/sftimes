@@ -3,6 +3,8 @@ import ExhibitionLayout from '../../layouts/ExhibitionLayout.astro';
 import NominateKeeperCTA from '../../components/NominateKeeperCTA.astro';
 import AuthorAvatar from '../../components/AuthorAvatar.astro';
 import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * Saturday Profile permalink, text-first hero.
@@ -39,6 +41,15 @@ export async function getStaticPaths() {
 }
 
 const { story: s, more } = Astro.props;
+
+/* Text-first profiles ship without a hero photograph. hero_filename_hint is a
+   required schema field, so it always holds a path; that path may not have a
+   file behind it. Resolve it against public/ before advertising the image in
+   NewsArticle schema, otherwise crawlers get a 404 for the article image. */
+const heroHintBase = (s.data.hero_filename_hint || '').replace(/\.[^.]+$/, '');
+const heroFileExists = heroHintBase
+  ? fs.existsSync(path.resolve(process.cwd(), 'public', `${heroHintBase}.jpg`))
+  : false;
 const { Content } = await s.render();
 const dateLong = s.data.published
   .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -73,7 +84,7 @@ const articleSchema = {
       "height": 60
     }
   },
-  "image": s.data.hero_filename_hint
+  "image": heroFileExists
     ? `https://www.sftimes.com/${s.data.hero_filename_hint.replace(/^\//, '')}`
     : "https://www.sftimes.com/og-image.svg",
   "articleSection": s.data.keeper_type || "Profile",

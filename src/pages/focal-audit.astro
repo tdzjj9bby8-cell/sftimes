@@ -14,10 +14,21 @@ import ExhibitionLayout from '../layouts/ExhibitionLayout.astro';
 import ExhibitionMasthead from '../components/ExhibitionMasthead.astro';
 import Placeholder from '../components/Placeholder.astro';
 import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const stories = (await getCollection('stories')).sort(
   (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
 );
+
+/* This page is a photo QA tool: it walks every hero at its focal setting.
+   Text-first stories have no hero file, so there is nothing to audit and a
+   Placeholder here would emit a data-placeholder marker that halts the
+   production build guard. Skip them. */
+const auditable = stories.filter((s) => {
+  const base = (s.data.hero_filename_hint || '').replace(/\.[^.]+$/, '');
+  return base && fs.existsSync(path.resolve(process.cwd(), 'public', `${base}.jpg`));
+});
 
 // Parse focal "center 25%" or "30% 40%" into x/y percent strings for the crosshair.
 function parseFocal(focal: string): { x: string; y: string } {
@@ -42,13 +53,13 @@ function parseFocal(focal: string): { x: string; y: string } {
   <ExhibitionMasthead slot="masthead" title="FOCAL AUDIT" subscript="DEV TOOL" cutouts={[]} />
 
   <article class="ex-prose">
-    <p class="ex-prose__eyebrow">CROP CHECK · {stories.length} HERO PHOTOS · DEFAULT IS CENTER 25%</p>
+    <p class="ex-prose__eyebrow">CROP CHECK · {auditable.length} HERO PHOTOS · DEFAULT IS CENTER 25%</p>
     <h1 class="ex-prose__title">DOES THE SUBJECT<br>FRAME IN A 4:5 CROP?</h1>
     <p>Each tile below uses the exact crop the homepage grid uses. The red crosshair marks where <code>hero_focal</code> currently points. If the subject is in the frame, leave it. If not, screenshot it, tell Cowork the slug + roughly where the subject sits ("upper-right," "middle-left, eye-level," "70% from left, 30% from top"), and we'll update the frontmatter.</p>
   </article>
 
   <section class="focal-grid">
-    {stories.map((s) => {
+    {auditable.map((s) => {
       const { x, y } = parseFocal(s.data.hero_focal);
       return (
         <article class="focal-card">
