@@ -1,0 +1,32 @@
+[
+ {
+  "id": "2026-08-26-S01",
+  "slug": "jcyc-grant-grew-sevenfold-while-participation-did-not",
+  "category": "POLITICS",
+  "signal": "structural-pattern",
+  "source_headline": "SF nonprofit paid out $5.6M without checking whether anyone did the work",
+  "source_outlet": "SF Standard",
+  "source_byline": "Gabriel Lorenzo Greschler",
+  "source_url": "https://sfstandard.com/2026/08/26/san-francisco-nonprofit-jcyc-japantown-audit/",
+  "source_date": "2026-08-26",
+  "composite_score": 8.75,
+  "uniqueness_score": 9,
+  "auto_published": false,
+  "angle_statement": "The grant went from $1.95 million to $13.3 million in four years while the program stayed far short of the 3,000 young people it promised.",
+  "tldr": "A city controller audit found the Japanese Community Youth Council paid $5.6 million in stipends over five years without documentation that recipients did the work.",
+  "editor_note": "The grant went from $1.95 million to $13.3 million in four years while the program stayed far short of the 3,000 young people it promised. That ratio is the finding. Money scaled almost seven times on a program whose participation did not, and the body meant to oversee it was the Human Rights Commission, whose former executive director was charged with corruption in March. The audit adds a detail worth sitting with: the nonprofit hired that director's sister as program manager at the director's request, then refused to hand over her contract, telling auditors it fell outside the scope. Auditors could not establish what she did. Twenty-seven recommendations followed, and the agency says it agrees with all of them.",
+  "what_to_watch": "Whether the controller pursues the withheld contract, since the audit could not determine the program manager's role without it.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: the source runs 581 words and the note reproduces nearly all of its substance (the grant growth from $1.95M to $13.3M, the 3,000-participant shortfall, HRC oversight and the Davis corruption charge, the sister hired at Davis's request, the withheld contract, the 27 recommendations). A reader who reads only the note has the entire audit story. The seven-times-the-money-for-the-same-participation framing is genuinely ours. Suggested fix: argue from the two numbers that carry it, $1.95M to $13.3M against a 3,000 promise never met, and cut the Davis backstory and the recommendation count so the reader goes to The Standard for them."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
