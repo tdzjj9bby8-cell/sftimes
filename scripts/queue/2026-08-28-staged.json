@@ -1,0 +1,32 @@
+[
+ {
+  "id": "2026-08-28-S01",
+  "slug": "prop-g-safety-claim-and-the-district-4-data",
+  "category": "TRANSIT",
+  "signal": "missing-context",
+  "source_headline": "Sunset Buzz: Prop. G supporters say they want safer streets. Pedestrian safety group was 'horrified'",
+  "source_outlet": "Mission Local",
+  "source_byline": "Junyao Yang",
+  "source_url": "https://missionlocal.org/2026/08/sf-sunset-buzz-prop-g-safer-streets/",
+  "source_date": "2026-08-27",
+  "composite_score": 7.95,
+  "uniqueness_score": 8,
+  "auto_published": false,
+  "angle_statement": "The Yes on G campaign says traffic injuries rose 34 percent in the Sunset, and city data for District 4 does not show an increase since the Great Highway closed.",
+  "tldr": "Prop. G would return cars to the Great Highway on weekdays. Its campaign signs borrow pedestrian crossing iconography, which Walk SF called a misappropriation of safety symbolism.",
+  "editor_note": "The Yes on G campaign says traffic injuries rose 34 percent in the Sunset, and city data for District 4 does not show an increase since the Great Highway closed. That is the part to hold onto, because the campaign has rebuilt its whole visual argument around safety. Gone are the black and yellow signs from the Prop. K fight and the Engardio recall. In their place is something shaped like a pedestrian crossing sign reading safe streets and great parks. Walk SF, which opposes the measure, called it deceptive and asked in what world adding vehicle traffic makes pedestrians safer. The campaign's answer is that frustrated drivers rerouted through the avenues speed, which is an argument about where the danger moves, not whether it drops.",
+  "what_to_watch": "Prop. G is on the November ballot, the third Great Highway vote in three years after Prop. K and the Engardio recall.",
+  "audit": {
+   "audit_pass": false,
+   "check_1_recap": "fail",
+   "check_2_angle": "pass",
+   "check_3_specificity": "pass",
+   "check_4_word_count": "pass",
+   "check_5_voice": "pass",
+   "fail_reasons": [
+    "check_1_recap: the Prop. G section of this roundup column runs roughly 400 words and the note reproduces essentially all of it (the 34 percent claim, the District 4 data contradiction, the sign redesign, the Walk SF quote, and the campaign's rebuttal). A reader who reads only the note has the entire item. The claim-versus-city-data contrast is the strongest thing here and it is ours to make. Suggested fix: lead on the 34 percent claim against the District 4 data and stop there, dropping the sign-design history and both quotes so the reader goes to Mission Local for them."
+   ],
+   "recommendation": "hold for editor"
+  }
+ }
+]
