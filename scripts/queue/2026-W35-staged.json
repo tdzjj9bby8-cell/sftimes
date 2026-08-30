@@ -1,0 +1,85 @@
+{
+  "week_id": "2026-W35",
+  "start_date": "2026-08-24",
+  "end_date": "2026-08-30",
+  "editor": "Eric",
+  "generated_by": "brief-weekly-digest Cowork scheduled task",
+  "playbook": "BRIEF-WEEKLY-PLAYBOOK.md",
+  "source_editions": ["2026-08-26", "2026-08-28"],
+  "run_note": "Executed Sunday 2026-08-30 at 16:05 PT, targeting ISO week 2026-W35 (Mon 2026-08-24 through Sun 2026-08-30). Published brief editions inside the Monday-through-Saturday window: two, editions 16 and 17 (2026-08-26, 2026-08-28), carrying 9 auto-published items in total. No edition published Monday 2026-08-24, Tuesday 2026-08-25, Thursday 2026-08-27 or Saturday 2026-08-29, so this is a light week against W34's four editions and 18 items. Items flagged for editor review are not present in the published markdown and were not considered. Ranking key applied to break ties at 9.20 and 9.05: composite_score descending, then uniqueness_score descending, then source_date descending, then item id ascending. The 9.20 pair (2026-08-26-001, 2026-08-26-002) tied on all three keys and was ordered by item id. All source_headline, source_outlet, source_byline, source_url and source_date values are copied verbatim from the daily brief frontmatter. Nothing published, nothing pushed, no file written under src/content/weeklies/.",
+  "intro": "San Francisco spent the week running into the places where accountability is formally out of reach. The city cannot be sued over the Market Street streetcar tracks that killed Yebin Kim on August 7, because the tracks were designed correctly and SFMTA holds design immunity. Tetra Tech will pay $97 million over a falsified shipyard cleanup and the more than 300 homeowners who bought on that land recover nothing, because a 1957 law written for the atomic age does not cover purely financial claims. Two editions, nine items, and in most of them the record that finally forced a decision came from outside the institution that should have been keeping it.",
+  "ai_disclosure": "This digest is composed with AI assistance from the week's published Brief items, then reviewed and edited by Eric before publish. AI does not write the news. Original reporting is always linked, always credited.",
+  "top_stories": [
+    {
+      "source_headline": "San Francisco Airport Contractor Exports Facial Data to Federal Agencies, Critics Charge",
+      "source_outlet": "SF Public Press",
+      "source_byline": "Rosie Bultman",
+      "source_url": "https://www.sfpublicpress.org/san-francisco-airport-contractor-exports-facial-data-to-federal-agencies-critics-charge/",
+      "source_date": "2026-08-26",
+      "category": "TECH",
+      "one_line": "SFO contracted SITA for facial recognition at three terminals in December 2024 and extended the deal in June to about $9.8 million over three years, under terms that require transmission to Customs and Border Protection.",
+      "why_it_mattered": "San Francisco paid roughly $2 million a year for a system whose contract requires it to send faces to CBP, in a city with a sanctuary ordinance. The airport's answer was that it does not own the technology, which was true and beside the point, because the contract it signed specified the transmission, and the Board of Supervisors had passed an ordinance the month before reducing surveillance oversight of departments including the airport."
+    },
+    {
+      "source_headline": "Survey says one third of respondents in San Francisco jails report 'serious injury'",
+      "source_outlet": "Mission Local",
+      "source_byline": "Frankie Solinsky Duryea",
+      "source_url": "https://missionlocal.org/2026/08/sf-jail-survey-serious-injury/",
+      "source_date": "2026-08-26",
+      "category": "PUBLIC SAFETY",
+      "one_line": "About 500 of the 1,200 people held in San Francisco's jails answered the first survey of its kind, and nearly a third alleged serious injury inside, primarily by deputies or by other people held there.",
+      "why_it_mattered": "The sheriff's office was right that the responses were self-reported and unverified, and it was also the second finding this summer pointing the same way, after a civil grand jury reported two months ago that the jails were at a breaking point on overcrowding, understaffing and transparency. The gap was the number not to skip: 53 percent of women reported feeling unsafe against 37 percent of men, landing while 20 women sue the city over a recorded mass strip-search."
+    },
+    {
+      "source_headline": "Cyclists have crashed on Market Street's rail tracks for 130 years. Why can't SF fix them?",
+      "source_outlet": "SF Standard",
+      "source_byline": "Garrett Leahy",
+      "source_url": "https://sfstandard.com/2026/08/28/market-street-cyclist-safety-hazard/",
+      "source_date": "2026-08-28",
+      "category": "TRANSIT",
+      "one_line": "Yebin Kim died on August 7 when her scooter wheel caught a streetcar track at Market and Powell, on a hazard a cyclist first reported on Market Street in 1894.",
+      "why_it_mattered": "The city could not be sued over the tracks because they were designed correctly, and SFMTA's design immunity closes the usual mechanism for forcing a fix on infrastructure that cleared a proper approval process. What was left was engineering, and the flangeway fillers being tested in Basel and Cologne are fragile, wear dangerous, and cost more than the city has put behind them. Mark Heryer died the same way in 2015, and injury lawyers say they field about two calls a month."
+    },
+    {
+      "source_headline": "Owner of S.F.'s rodent-infested Alice Griffith housing complex to pay $9M settlement",
+      "source_outlet": "Mission Local",
+      "source_byline": "Marina Newman",
+      "source_url": "https://missionlocal.org/2026/08/alice-griffith-city-attorney-settlement/",
+      "source_date": "2026-08-26",
+      "category": "HOUSING",
+      "one_line": "McCormack Baron Salazar will pay $9 million over conditions at the Bayview's Alice Griffith Apartments, split into $3 million in penalties, $3 million to the SFPUC, and $3 million in repairs.",
+      "why_it_mattered": "David Chiu credited a four-month Mission Local investigation with surfacing information his own office did not have, which is a plain statement about what local reporting still does. The settlement is the first code enforcement agreement in city history requiring a landlord to invest in the property rather than only pay penalties, and it lands against the owners' position through the past year, when the John Stewart Company told a Board hearing it could not fix the elevators because tenants had failed to pay rent."
+    },
+    {
+      "source_headline": "Former Navy Contractor to Pay $97 Million Settlement Over Hunters Point Shipyard Cleanup",
+      "source_outlet": "SFist",
+      "source_byline": "Leanne Maxwell",
+      "source_url": "https://sfist.com/2026/08/26/former-navy-contractor-to-pay-97-million-in-botched-hunters-point-shipyard-cleanup/",
+      "source_date": "2026-08-26",
+      "category": "POLITICS",
+      "one_line": "Tetra Tech will pay $97 million over its Hunters Point Shipyard cleanup, $57 million to the Justice Department and $40 million tied to Superfund costs.",
+      "why_it_mattered": "Almost none of the $97 million reaches the people who bought houses on the land. More than 300 Parcel A homeowners sued, and a federal judge dismissed the case earlier this month on the ground that a 1957 law shielding the nuclear industry does not cover claims that are purely financial, so the statute written to make atomic development possible became the reason residents recover nothing from a falsified radiological cleanup that a Navy review found about 48 percent suspect."
+    }
+  ],
+  "pattern_of_the_week": {
+    "title": "Nobody inside was counting",
+    "note": "Seven of the week's nine items describe an institution that cannot be held to account by its own machinery, and a record that exists only because someone outside it kept one. SFMTA holds design immunity on the Market Street tracks, so the count of what those tracks have done comes from injury lawyers estimating two calls a month and from advocates reading crash numbers, 53 last year against 60 in 2019 on roughly a quarter fewer riders. The sheriff's office has never surveyed the people in its jails, so the first survey of that population came from outside, and the office's response was that the answers are self-reported and unverified. The City Attorney said he learned the details of Alice Griffith from a four-month Mission Local investigation rather than from any city inspection file. A 1957 nuclear liability law is why 300 shipyard homeowners have no claim, and the falsification numbers came from a Navy review and an EPA letter written after the fact.\n\nThe pattern holds where the exemption is quieter. The airport says it does not own the facial recognition system, and the group pressing for signs telling travelers their faces go to CBP is the Identity Project, not a city body. Roughly half of July's record 900 immigration arrests in Northern California never appear in detention records, because 20,804 people are on monitors instead, and the dataset showing it is a newsroom's, which ICE disputes. The Democratic Party's judicial commission ran an investigation, asked the accuser to recount an assault, then found it lacked jurisdiction hours before the endorsement vote. In every case the accountability exists on paper somewhere. It just does not reach the thing that happened, and the people doing the counting are not on the payroll.",
+    "connections": [
+      "Design immunity on the Market Street tracks, where the only running tally of harm is kept by injury lawyers and advocates rather than by SFMTA.",
+      "The first survey of San Francisco's jail population, run from outside the sheriff's office, which then called the results unverified.",
+      "A City Attorney crediting a four-month Mission Local investigation with the Alice Griffith facts his own office did not have.",
+      "A 1957 nuclear liability law that leaves 300 Parcel A homeowners with no claim on a $97 million fraud settlement.",
+      "An airport that says it does not own the facial recognition it pays $2 million a year for, and a federal program whose growth is visible only in a newsroom's dataset of 20,804 people on monitors."
+    ]
+  },
+  "coming_up": [
+    "The Recreation and Park Commission's Capital Committee takes up the Art Agnos Plaza and Sue Bierman Commons naming Wednesday, September 2, with construction on the $40 million park due to start late this year.",
+    "An injunction gives McCormack Baron Salazar 30 days to complete emergency habitability and life-safety repairs at Alice Griffith, where 50 units are listed as uninhabitable.",
+    "No funded fix is scheduled for the Market Street tracks, and advocates blame a compromised version of the pre-pandemic Market Street redesign.",
+    "The Parcel A homeowners' dismissal is appealable, and the $40 million tied to Superfund costs funds a shipyard cleanup that is still not finished.",
+    "SFO's SITA contract runs through June 2029, and the Identity Project is pressing the airport commission to post signs telling travelers their faces go to CBP.",
+    "Whether the jail survey runs again is the test, because observers say a repeat across several years is what would make conditions trackable over time.",
+    "The Bay Area transit tax reaches November voters unchanged after the registrar's August 28 printing deadline passed, and the Committee for Affordable Bay Area Transit says it will keep fighting the measure.",
+    "The District 8 race runs through November with Manny Yekutiel on party mailers citywide."
+  ]
+}
