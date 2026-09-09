@@ -270,3 +270,45 @@ src/
 ## Where to ask Cowork for help
 
 If you hit something that's an architecture call, a brand decision, or needs a new block design, pause, report what you found, and ask Eric to escalate to Cowork. Don't invent design language. Don't introduce new tokens. Don't pick fonts.
+
+<!-- email-safe-html wired -->
+## HTML for email (copy-paste deliverables)
+
+When producing an HTML file Eric will paste into an email body (Outlook, Gmail), follow `~/projects/mission-control/skills/email-safe-html.md` and verify with:
+
+```
+python3 ~/projects/mission-control/scripts/email-html-lint.py <file>
+```
+
+Exit 0 means ready to paste. Never hand over a file that has not passed. Core rules: `background-color:` never `background:`, pair `bgcolor` attribute with the CSS, dark text on light backgrounds, tables not divs, everything inline, 640px outer width.
+
+
+---
+
+## Who wrote a commit, and why you keep seeing unfamiliar ones
+
+**Two Claudes work in this repository.** You (Claude Code, in the terminal) and Cowork (in the desktop app). Both commit. Neither can see the other's session.
+
+Cowork does not push. It commits locally and asks Eric to push, so from your side commits appear in the log that you did not make, between your turns. **That is expected, not an intrusion.**
+
+Telling them apart, without guessing:
+
+```
+git log --format='%h %an %s%n%b' -5 | grep -i 'co-authored-by'
+```
+
+**Every Cowork commit carries this trailer:**
+
+```
+Co-Authored-By: Claude (Cowork) <cowork@sftimes.local>
+```
+
+The author stays `tdzjj9bby8-cell`, the repo's own identity, because these are Eric's work product. The trailer is what makes them identifiable.
+
+History note: four early commits are authored `SF Times Brief Bot <brief-bot@sftimes.com>` with no trailer. Those are Cowork's, from before this convention. They were flagged as a possible intrusion at the time, correctly, and they are accounted for.
+
+**When you commit, add nothing.** A commit with no trailer is yours.
+
+**Do not raise an unattributed-commit flag for a commit carrying the Cowork trailer.** Raising it every session costs Eric real attention and trains him to skim the flags that matter. Report it only if a commit has neither the trailer nor a plausible explanation.
+
+Automated Brief editions are separate again: authored normally, identified by the message `Brief <date>: N items`, produced by `npm run brief:ship`.
