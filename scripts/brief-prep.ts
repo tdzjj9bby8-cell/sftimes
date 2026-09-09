@@ -50,6 +50,7 @@ import { existsSync } from 'node:fs';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { ingest, getSourceHealth, interleaveByOutlet, type Candidate } from './brief-ingest.js';
 import { fetchArticleBody, MIN_BODY_WORDS } from './lib/fetch-article.js';
+import { isLikelyOutOfRegion, mentionsBayArea } from './lib/geo-filter.js';
 import {
   MIN_HEALTHY_SOURCES,
   MIN_ITEMS_TO_PUBLISH,
@@ -110,9 +111,16 @@ export interface PreparedPacket {
   edition_date: string;
   prepared_at: string;
   sources: { total: number; healthy: number; failed: number; failed_names: string[] };
-  counts: { ingested: number; deduped_out: number; fetch_attempted: number; ready: number; dropped: number };
+  counts: {
+    ingested: number; deduped_out: number; fetch_attempted: number;
+    ready: number; dropped: number; out_of_region: number; unplaced: number;
+  };
   ready: PreparedCandidate[];
   dropped: DroppedCandidate[];
+  /** Screened out on the headline before any download. */
+  out_of_region: DroppedCandidate[];
+  /** Retrieved in full but naming no Bay Area place. Editor's call. */
+  unplaced: PreparedCandidate[];
   /** Candidates never attempted, kept for the record so the packet can honestly
    *  say what was in the field and what was merely not reached. */
   not_attempted: Array<Pick<Candidate, 'id' | 'source_outlet' | 'original_headline' | 'source_url'>>;
@@ -209,6 +217,11 @@ export async function prep(argv: string[] = []): Promise<number> {
   // count, an invented quotation and an invented dollar figure on 2026-07-15.
   const ready: PreparedCandidate[] = [];
   const dropped: DroppedCandidate[] = [];
+  const outOfRegion: DroppedCandidate[] = [];
+  /** Fetched successfully but names no Bay Area place. Kept and shown to the
+   *  editor separately rather than deleted: a statewide story can carry real
+   *  local consequence without naming a city, and that call is editorial. */
+  const unplaced: PreparedCandidate[] = [];
   let attempted = 0;
 
   for (const c of ordered) {
@@ -217,6 +230,28 @@ export async function prep(argv: string[] = []): Promise<number> {
       console.warn(`[prep] Reached the ${MAX_FETCH_ATTEMPTS}-attempt fetch cap.`);
       break;
     }
+
+    // ---- OUT-OF-REGION SCREEN, BEFORE THE DOWNLOAD ----
+    // Several outlets here are local front-ends on national content networks,
+    // so the host filter in ingest passes their wire copy. On 2026-09-09 four
+    // of roughly fourteen packet slots went to a Texas public defender, a
+    // Georgia homicide, UK air traffic control and a Pennsylvania university
+    // gift. Each had already cost a full download and a slot the editor had to
+    // read. Screening on the headline costs nothing and happens first.
+    const geo = isLikelyOutOfRegion(c.original_headline ?? '', c.original_dek ?? '');
+    if (geo.outOfRegion) {
+      console.log(`[prep] SKIP ${c.id} (${c.source_outlet}): out of region, ${geo.reason}`);
+      outOfRegion.push({
+        id: c.id,
+        source_outlet: c.source_outlet,
+        source_url: c.source_url,
+        original_headline: c.original_headline,
+        reason: geo.reason ?? 'out of region',
+        word_count: 0,
+      });
+      continue;
+    }
+
     attempted++;
 
     const fetched = await fetchArticleBody(c.source_url);
@@ -236,13 +271,21 @@ export async function prep(argv: string[] = []): Promise<number> {
       continue;
     }
 
-    console.log(`[prep] OK   ${c.id} (${c.source_outlet}): ${fetched.wordCount}w`);
-    ready.push({
+    const prepared: PreparedCandidate = {
       ...c,
       source_body: fetched.text,
       source_body_word_count: fetched.wordCount,
       final_url: fetched.finalUrl,
-    });
+    };
+
+    if (!mentionsBayArea(fetched.text)) {
+      console.log(`[prep] ?    ${c.id} (${c.source_outlet}): ${fetched.wordCount}w, names no Bay Area place`);
+      unplaced.push(prepared);
+      continue;
+    }
+
+    console.log(`[prep] OK   ${c.id} (${c.source_outlet}): ${fetched.wordCount}w`);
+    ready.push(prepared);
   }
 
   const notAttempted = ordered.slice(attempted).map((c) => ({
@@ -284,9 +327,13 @@ export async function prep(argv: string[] = []): Promise<number> {
       fetch_attempted: attempted,
       ready: ready.length,
       dropped: dropped.length,
+      out_of_region: outOfRegion.length,
+      unplaced: unplaced.length,
     },
     ready,
     dropped,
+    out_of_region: outOfRegion,
+    unplaced,
     not_attempted: notAttempted,
   };
 
@@ -302,6 +349,8 @@ export async function prep(argv: string[] = []): Promise<number> {
   console.log(`Candidates        : ${candidates.length} (${removed.length} deduped out)`);
   console.log(`Bodies fetched    : ${ready.length} of ${attempted} attempted`);
   console.log(`Dropped, no body  : ${dropped.length}`);
+  console.log(`Skipped, off-map  : ${outOfRegion.length}`);
+  console.log(`Fetched, unplaced : ${unplaced.length}`);
   console.log(`Outlets in packet : ${[...new Set(ready.map((r) => r.source_outlet))].join(', ')}`);
   console.log(`Regions in packet : ${formatRegionSpread(ready)}`);
   console.log(`Work packet       : ${packetPath}`);
@@ -447,6 +496,45 @@ export function renderWorkPacket(p: PreparedPacket): string {
     lines.push('</article>');
     lines.push('');
   });
+
+  if (p.unplaced.length) {
+    lines.push('---');
+    lines.push('');
+    lines.push(`## Possibly not Bay Area (${p.unplaced.length})`);
+    lines.push('');
+    lines.push('These were retrieved in full but name no Bay Area place anywhere in the body. Usually that means wire copy from elsewhere. Occasionally it means a statewide or federal story with real local consequence, which IS ours. **You decide.** They are drafted from exactly like any other candidate; they are separated here only so the main list stays clean.');
+    lines.push('');
+    p.unplaced.forEach((c, i) => {
+      lines.push(`### U${i + 1}. ${c.original_headline}`);
+      lines.push('');
+      lines.push(`- **id**: \`${c.id}\``);
+      lines.push(`- **outlet**: ${c.source_outlet}${c.region ? ` (${c.region})` : ''}`);
+      lines.push(`- **byline**: ${c.source_byline || '(none given)'}`);
+      lines.push(`- **published**: ${c.published_at}`);
+      lines.push(`- **url**: ${c.source_url}`);
+      lines.push(`- **body**: ${c.source_body_word_count} words, retrieved in full`);
+      lines.push('');
+      lines.push('<article>');
+      lines.push('');
+      lines.push(c.source_body);
+      lines.push('');
+      lines.push('</article>');
+      lines.push('');
+    });
+  }
+
+  if (p.out_of_region.length) {
+    lines.push('---');
+    lines.push('');
+    lines.push(`## Screened out as off-map (${p.out_of_region.length})`);
+    lines.push('');
+    lines.push('Not downloaded. Their headlines named a place outside California with no Bay Area reference. Listed so the screen is auditable, not as material.');
+    lines.push('');
+    for (const d of p.out_of_region) {
+      lines.push(`- ${d.source_outlet}: ${d.original_headline} (${d.reason})`);
+    }
+    lines.push('');
+  }
 
   if (p.dropped.length) {
     lines.push('---');
