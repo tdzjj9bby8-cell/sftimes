@@ -1,5 +1,6 @@
 ---
-description: Write and publish today's SF Times Daily Brief, end to end.
+name: brief
+description: Write and publish today's SF Times Daily Brief end to end. Use when Eric types /brief or asks to run, write, or publish the Daily Brief.
 ---
 
 Publish today's SF Times Daily Brief. Do the whole job. Do not stop to ask me anything.
