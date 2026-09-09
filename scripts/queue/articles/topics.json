@@ -1,0 +1,247 @@
+{
+  "_readme": "Subjects for SF Times features. status: open | researching | drafted | published | dropped. The morning task takes the lowest-numbered open subjects. A subject that fails the source-quality floor is marked dropped with a reason, never silently retried, so the same dead end is not researched twice.",
+  "updated": "2026-09-09",
+  "topics": [
+    {
+      "n": 1,
+      "subject": "Kevin Chan / Golden Gate Fortune Cookie Factory, Ross Alley",
+      "note": "the last operation in Chinatown still folding fortune cookies by hand, one at a time, in a tiny alley shop.",
+      "slug": "kevin-chan-golden-gate-fortune-cookie-factory-ro",
+      "status": "dropped",
+      "published": null,
+      "dropped_reason": "Researched 2026-09-09. Every retrievable source was travel-guide or listicle content; zero load-bearing. Needs real reporting or a primary source before it can be revisited."
+    },
+    {
+      "n": 2,
+      "subject": "SF Neon (Randall Ann Homan & Al Barna)",
+      "note": "the two people documenting and saving the city's vanishing neon signs before the last of them go dark.",
+      "slug": "sf-neon-randall-ann-homan-al-barna",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 3,
+      "subject": "The caretaker of the San Francisco Columbarium",
+      "note": "who restored the domed Neptune Society building and can tell you the story inside almost every niche.",
+      "slug": "the-caretaker-of-the-san-francisco-columbarium",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 4,
+      "subject": "Dan Zelinsky / Mus\u00e9e M\u00e9canique",
+      "note": "keeper of one of the world's largest collections of working antique coin-operated arcade machines, at Fisherman's Wharf.",
+      "slug": "dan-zelinsky-mus-e-m-canique",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 5,
+      "subject": "The cable car bell-ringers",
+      "note": "the grip operators who compete in the annual Cable Car Bell Ringing Contest, and what the craft of ringing actually is.",
+      "slug": "the-cable-car-bell-ringers",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 6,
+      "subject": "Aileen Barr, Colette Crutcher & the 16th Avenue Tiled Steps volunteers",
+      "note": "the mosaic artists and neighbors who turned a staircase into one of the city's most-photographed public artworks, and who maintain it.",
+      "slug": "aileen-barr-colette-crutcher-the-16th-avenue-til",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 7,
+      "subject": "The Guerrilla Grafters",
+      "note": "activists quietly grafting fruit-bearing branches onto San Francisco's ornamental city trees so the sidewalks feed people.",
+      "slug": "the-guerrilla-grafters",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 8,
+      "subject": "The Prelinger Library",
+      "note": "Rick and Megan Prelinger's open, browsable private archive of American ephemera in SoMa, organized by geography, free to anyone.",
+      "slug": "the-prelinger-library",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 9,
+      "subject": "The Bay Area's community fridge network",
+      "note": "the volunteer-run \"town fridges\" that became a mutual-aid movement, and the people who keep them stocked.",
+      "slug": "the-bay-area-s-community-fridge-network",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 10,
+      "subject": "The Free Farm Stand / urban agriculture in the Mission",
+      "note": "free-produce initiatives and the volunteers growing and giving away food in the city.",
+      "slug": "the-free-farm-stand-urban-agriculture-in-the-mis",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 11,
+      "subject": "The tool-lending libraries of Oakland and Berkeley",
+      "note": "borrow a table saw like a library book, one of the oldest such programs in the country.",
+      "slug": "the-tool-lending-libraries-of-oakland-and-berkel",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 12,
+      "subject": "Friends of the Urban Forest",
+      "note": "the volunteer movement planting and defending San Francisco's street trees, block by block.",
+      "slug": "friends-of-the-urban-forest",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 13,
+      "subject": "The Marine Mammal Center, Marin Headlands",
+      "note": "the hospital that rescues and rehabs seals and sea lions across 600 miles of California coast, mostly on volunteer labor.",
+      "slug": "the-marine-mammal-center-marin-headlands",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 14,
+      "subject": "826 Valencia & the Pirate Supply Store",
+      "note": "the youth writing nonprofit hidden behind a joke storefront, and how the gag funds the tutoring.",
+      "slug": "826-valencia-the-pirate-supply-store",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 15,
+      "subject": "Creativity Explored / NIAD",
+      "note": "the studios giving artists with developmental disabilities a real professional practice and gallery career.",
+      "slug": "creativity-explored-niad",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 16,
+      "subject": "Glide or St. Anthony's",
+      "note": "the free-meals institutions of the Tenderloin, the scale of what they serve, and who keeps the kitchens running.",
+      "slug": "glide-or-st-anthony-s",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 17,
+      "subject": "Larkin Street Youth Services",
+      "note": "the organization catching San Francisco's homeless and runaway young people, and how the model works.",
+      "slug": "larkin-street-youth-services",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 18,
+      "subject": "Roots Community Health Center, Oakland",
+      "note": "Dr. Noha Aboelata's model for Black community health and street medicine in the East Bay.",
+      "slug": "roots-community-health-center-oakland",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 19,
+      "subject": "The Mission mural movement",
+      "note": "Precita Eyes, Balmy Alley, Clarion Alley, and the muralists keeping the city's most political public-art tradition alive.",
+      "slug": "the-mission-mural-movement",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 20,
+      "subject": "D'Arcy Drollinger, SF's Drag Laureate & Oasis",
+      "note": "the nation's first official city drag laureate and the drag renaissance behind the appointment.",
+      "slug": "d-arcy-drollinger-sf-s-drag-laureate-oasis",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 21,
+      "subject": "Carnaval San Francisco",
+      "note": "the Mission's decades-old Latin and Caribbean street festival, its origins, and the organizers who sustain it.",
+      "slug": "carnaval-san-francisco",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 22,
+      "subject": "Bay Area lowrider culture",
+      "note": "the Mission cruising tradition, its suppression and revival, and the clubs carrying it forward.",
+      "slug": "bay-area-lowrider-culture",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 23,
+      "subject": "City Lights and the living Beat legacy",
+      "note": "the bookstore-as-institution after Ferlinghetti, run now by Elaine Katzenberger, and why it still matters.",
+      "slug": "city-lights-and-the-living-beat-legacy",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 24,
+      "subject": "The Bay's turntablism and hip-hop lineage",
+      "note": "from Invisibl Skratch Piklz to hyphy, the region's outsized influence and who carries it now.",
+      "slug": "the-bay-s-turntablism-and-hip-hop-lineage",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 25,
+      "subject": "Audium",
+      "note": "Stan Shaff's sound-sculpture theater, 176 speakers in total darkness, running near Sutro since the 1970s.",
+      "slug": "audium",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 26,
+      "subject": "The Wave Organ",
+      "note": "the tide-powered acoustic sculpture on a jetty in the bay, and the physics and history behind it.",
+      "slug": "the-wave-organ",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 27,
+      "subject": "The Institute of Illegal Images (Mark McCloud)",
+      "note": "the world's largest archive of LSD blotter art, treated as a serious folk-art collection, in a Mission Victorian.",
+      "slug": "the-institute-of-illegal-images-mark-mccloud",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 28,
+      "subject": "The Camera Obscura at Ocean Beach",
+      "note": "the \"Giant Camera\" projecting the live sea onto a disc, a Cliff House survivor and its keepers.",
+      "slug": "the-camera-obscura-at-ocean-beach",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 29,
+      "subject": "The Seward Street Slides",
+      "note": "the concrete slides a teenager designed in the 1970s, still ridden on flattened cardboard today.",
+      "slug": "the-seward-street-slides",
+      "status": "open",
+      "published": null
+    },
+    {
+      "n": 30,
+      "subject": "The Interval / Long Now Foundation",
+      "note": "the 10,000-year clock, Brian Eno's involvement, and long-term thinking as a Bay Area cultural project, at Fort Mason.",
+      "slug": "the-interval-long-now-foundation",
+      "status": "open",
+      "published": null
+    }
+  ]
+}

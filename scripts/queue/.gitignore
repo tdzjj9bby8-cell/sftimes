@@ -15,3 +15,10 @@ audit-log/*.json
 
 # Keep this gitignore tracked so the directory exists.
 !.gitignore
+
+# Research packets hold the FULL TEXT of other outlets' articles, fetched so the
+# firewall can verify a feature against them. Working evidence for one piece,
+# not source. topics.json IS tracked: it is the editorial record of what has
+# been researched, published and dropped.
+articles/*.json
+!articles/topics.json

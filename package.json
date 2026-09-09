@@ -26,7 +26,9 @@
     "brief:ingest": "tsx scripts/brief-ingest.ts",
     "brief:ai": "tsx scripts/brief-ai.ts",
     "brief:publish": "tsx scripts/brief-publish.ts",
-    "brief:check": "node --env-file-if-exists=.env.local scripts/check-brief-pipeline.mjs"
+    "brief:check": "node --env-file-if-exists=.env.local scripts/check-brief-pipeline.mjs",
+    "article:prep": "tsx scripts/article-prep.ts",
+    "article:publish": "tsx scripts/article-publish.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
