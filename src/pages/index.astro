@@ -78,7 +78,7 @@ function briefReadingTime(text: string): string {
 }
 
 const sortedBriefItems = latestBrief
-  ? [...latestBrief.data.items].sort((a, b) => b.composite_score - a.composite_score)
+  ? [...latestBrief.data.items].sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0))
   : [];
 
 // Hero = top item by composite. Strip = items 2-4 below the hero.

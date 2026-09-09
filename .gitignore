@@ -19,3 +19,13 @@ public/team/responsive/
 __preflight_test
 PROGRESS_PROBE.txt
 scripts/queue/.__*
+
+# Supervised review-only output. Never committed; uploaded as a CI artifact.
+review-edition-*.md
+
+# Daily working files for the manual publishing path. Both are regenerated
+# every morning by `npm run brief:prep` and the editor pass. Committing them
+# would put a full copy of other newsrooms' article text in this repository.
+brief-workpacket.md
+brief-drafts.json
+brief-drafts.*.json

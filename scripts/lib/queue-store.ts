@@ -34,7 +34,17 @@ import path from 'node:path';
 
 /** The queue payloads the pipeline hands between stages, plus the audit-log
  *  written at publish time. All persist in KV (prod) or the filesystem (dev). */
-export type QueueKind = 'ingested' | 'audited' | 'staged' | 'decisions' | 'published' | 'audit-log';
+export type QueueKind =
+  | 'ingested'
+  | 'audited'
+  | 'staged'
+  | 'decisions'
+  | 'published'
+  | 'audit-log'
+  /** Output of brief-prep.ts on the subscription path: candidates with their
+   *  real fetched article bodies attached, waiting for an editor agent to
+   *  draft from. Written before any judgment is applied. */
+  | 'prepared';
 
 /** Optional per-call override of the local-dev queue directory. Ignored in KV mode. */
 interface StoreOpts {

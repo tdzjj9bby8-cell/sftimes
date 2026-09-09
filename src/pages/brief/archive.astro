@@ -40,7 +40,7 @@ function shortDate(d: Date): string {
 
 // Compute per-edition summary data
 const editions = sortedBriefs.map((brief) => {
-  const sortedItems = [...brief.data.items].sort((a, b) => b.composite_score - a.composite_score);
+  const sortedItems = [...brief.data.items].sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0));
   return {
     date: brief.data.date,
     dateString: formatDate(brief.data.date),

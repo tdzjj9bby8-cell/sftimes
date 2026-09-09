@@ -39,11 +39,20 @@
  *   GOOGLE_INDEXING_API_KEY  (optional, used for Indexing API ping)
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { AuditedItem, BriefSignal, Category } from './brief-ai.js';
 import { getQueue, putQueue, kvEnabled } from './lib/queue-store.js';
+import { sfDateString, resolveEditionDate, dateArgFrom, sfDateToInstant } from './lib/sf-date.js';
+import { validateBatch, canonicalUrl } from './lib/editorial-firewall.js';
+import {
+  removeNearDuplicates,
+  enforceSourceDiversity,
+  orderForEdition,
+  evaluateQualityFloor,
+  MIN_HEALTHY_SOURCES,
+} from './lib/editorial-quality.js';
 
 // ============ CONFIG ============
 
@@ -85,13 +94,40 @@ interface RunOpts {
   contentDir?: string;
   skipDeploy?: boolean;
   dryRun?: boolean;
+  /** Explicit YYYY-MM-DD edition date. Wins over runDate. */
+  editionDate?: string;
+  /** Bypass the idempotency gate. Only for a deliberate republish of a day
+   *  whose edition file was removed on purpose. Never set this in automation. */
+  force?: boolean;
+  /** Feed-health context from the ingest stage, used by the quality floor. */
+  healthySources?: number;
+  totalSources?: number;
+  /** How this edition was produced, in reader-facing language. Defaults to the
+   *  automated-path statement; the manual path passes its own, because the two
+   *  processes are genuinely different and the disclosure is an accuracy claim
+   *  rather than boilerplate. */
+  aiDisclosure?: string;
 }
 
 export async function publish(opts: RunOpts = {}): Promise<string> {
   const runDate = opts.runDate ?? new Date();
   const queueDir = opts.queueDir ?? path.join(process.cwd(), 'scripts', 'queue');
   const contentDir = opts.contentDir ?? CONTENT_DIR_DEFAULT;
-  const dateString = runDate.toISOString().slice(0, 10);
+  // San Francisco calendar date, never the runner's UTC date.
+  const dateString = opts.editionDate ?? sfDateString(runDate);
+
+  // ---- IDEMPOTENCY GATE ----
+  // The published edition file in the content collection is the source of
+  // truth. If it already exists, this date has shipped and a second run must
+  // not compose a new edition, bump the edition number, or overwrite good
+  // content. Reruns are expected: the workflow can be retried, and a manual
+  // dispatch may race a scheduled run.
+  const existingPath = path.join(contentDir, `${dateString}.md`);
+  if (!opts.force && existsSync(existingPath)) {
+    console.log(`[publish] Edition ${dateString} already exists at ${existingPath}. Nothing to do.`);
+    console.log('[publish] IDEMPOTENT_SKIP');
+    return await readFile(existingPath, 'utf-8');
+  }
 
   console.log(`[publish] Loading audited queue for ${dateString} (${kvEnabled() ? 'KV' : 'filesystem'})`);
   const audited = await getQueue<AuditedItem[]>(dateString, 'audited', { baseDir: queueDir });
@@ -119,27 +155,117 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
     (decisions?.accepted_held ?? []).includes(a.id) && a.audit
   );
 
-  const final = [...autoBatch, ...acceptedHeld];
+  const selected = [...autoBatch, ...acceptedHeld];
+
+  // ---- DETERMINISTIC EDITORIAL FIREWALL ----
+  // The model auditor checks craft. This checks facts. Every asserted number
+  // and quotation must be traceable to the fetched source body, the source must
+  // be real and retrieved, and the story must not already have run. Items that
+  // fail are removed, never repaired. See scripts/lib/editorial-firewall.ts.
+  const priorUrls = await collectPublishedSourceUrls(contentDir, dateString);
+  const firewall = validateBatch(selected as any[], {
+    publishedSourceUrls: priorUrls,
+    editionDate: dateString,
+  });
+
+  for (const r of firewall.removed) {
+    const id = (r.item as AuditedItem).id;
+    const outlet = (r.item as AuditedItem).source_outlet;
+    console.warn(`[publish] FIREWALL REMOVED ${id} (${outlet}):`);
+    for (const v of r.violations) console.warn(`[publish]   [${v.check}] ${v.detail}`);
+  }
+
+  if (firewall.blockEdition) {
+    throw new Error('Editorial firewall raised a block_edition violation. Refusing to publish.');
+  }
+
+  const verified = firewall.kept as AuditedItem[];
+
+  console.log(
+    `[publish] Firewall: ${verified.length} passed, ${firewall.removed.length} removed of ${selected.length} selected`
+  );
+
+  // ---- EDITORIAL QUALITY: duplicates, then diversity, then ordering ----
+  // Accuracy is not sufficiency. Six true items about the same event from the
+  // same outlet is a technically-correct failure of the product.
+  const deduped = removeNearDuplicates(verified as any[]);
+  for (const r of deduped.removed) {
+    console.warn(
+      `[publish] NEAR-DUPLICATE removed ${(r.item as AuditedItem).id} (similarity ${r.similarity} vs ${r.duplicateOf})`
+    );
+  }
+
+  const diverse = enforceSourceDiversity(deduped.kept as any[]);
+  for (const r of diverse.removed) {
+    console.warn(`[publish] DIVERSITY removed ${(r.item as AuditedItem).id}: ${r.reason}`);
+  }
+
+  const final = orderForEdition(diverse.kept as any[]) as AuditedItem[];
+
+  // ---- EDITORIAL QUALITY FLOOR ----
+  const floor = evaluateQualityFloor({
+    itemCount: final.length,
+    // Source health is evaluated upstream in brief-run.ts, which knows the feed
+    // results. Publishing on its own passes neutral values so a direct
+    // brief-publish invocation is not blocked by data it cannot see.
+    healthySources: opts.healthySources ?? MIN_HEALTHY_SOURCES,
+    totalSources: opts.totalSources ?? MIN_HEALTHY_SOURCES,
+    outletCounts: diverse.outletCounts,
+    pipelineErrors: 0,
+    candidatesIngested: audited.length,
+  });
+
+  if (!floor.publish) {
+    for (const r of floor.reasons) console.error(`[publish] QUALITY FLOOR: ${r}`);
+    throw new Error(`Empty brief: quality floor not met. ${floor.reasons.join(' ')}`);
+  }
+
+  console.log(
+    `[publish] Quality: ${deduped.removed.length} near-duplicates, ${diverse.removed.length} over-concentration, outlets ${JSON.stringify(diverse.outletCounts)}`
+  );
 
   if (final.length === 0) {
-    console.error(`[publish] No items to publish. Aborting.`);
+    console.error(`[publish] No items survived the editorial gates. Aborting.`);
     throw new Error('Empty brief: refusing to publish a zero-item edition');
   }
 
-  console.log(`[publish] Final brief: ${autoBatch.length} auto + ${acceptedHeld.length} accepted held = ${final.length} items`);
+  console.log(`[publish] Final brief: ${autoBatch.length} auto + ${acceptedHeld.length} accepted held, ${final.length} after firewall`);
 
   // Compose the content collection markdown
   const editor = decisions?.editor ?? 'Eric';
   const edition = decisions?.edition ?? (await nextEdition(contentDir));
   const intro = decisions?.intro;
   const markdown = composeMarkdown({
-    date: runDate,
+    // Derive the composition date FROM the resolved edition date, never from
+    // the ambient clock. `runDate` is whatever moment the process started, and
+    // any run after 5pm Pacific is already tomorrow in UTC, so passing it here
+    // wrote a frontmatter date one day ahead of the file it was being written
+    // to. That is the same off-by-one the rest of the pipeline was hardened
+    // against; this was the last place still trusting `new Date()`.
+    //
+    // Caught by validateComposedEdition below rather than by a reader, which
+    // is what that check is for.
+    date: sfDateToInstant(dateString),
     edition,
     editor,
     intro,
     items: final,
     edits: decisions?.edits ?? {},
+    aiDisclosure: opts.aiDisclosure ?? AI_DISCLOSURE_AUTOPUBLISH,
   });
+
+  // ---- STRUCTURAL VALIDATION BEFORE ANYTHING IS WRITTEN ----
+  // The Astro build happens on Vercel after the push, so malformed frontmatter
+  // fails there, not here. Validating now converts a silent stale-site incident
+  // into a loud run failure.
+  const structure = validateComposedEdition(markdown, dateString);
+  if (!structure.valid) {
+    for (const e of structure.errors) console.error(`[publish] MALFORMED EDITION: ${e}`);
+    throw new Error(
+      `Composed edition failed structural validation (${structure.errors.length} error(s)). Refusing to write or push.`
+    );
+  }
+  console.log('[publish] Composed edition passed structural validation.');
 
   if (opts.dryRun) {
     console.log('=== DRY RUN ===');
@@ -188,7 +314,7 @@ export async function publish(opts: RunOpts = {}): Promise<string> {
     // A GitHub commit already triggers Vercel's rebuild; only hit the deploy
     // hook on the local/webhook path where nothing was pushed.
     if (!deployedViaCommit) await triggerDeploy();
-    await pingIndexingApis(runDate, final);
+    await pingIndexingApis(dateString, final);
   }
 
   console.log(`[publish] OK ${dateString}`);
@@ -425,14 +551,30 @@ export const AI_DISCLOSURE_AUTOPUBLISH =
 export const AI_DISCLOSURE_EDITOR_PROMOTED =
   "Produced by a scheduled Cowork task using Claude Sonnet reasoning on the editor's personal subscription. No item in this edition cleared the automated 5-check firewall audit; every one was quarantined, then read, edited, and promoted by the editor before publishing. Full pipeline at /brief/methodology.";
 
+/** The manual subscription path (brief-prep -> editor agent -> brief-assemble).
+ *
+ *  Written separately because the other two variants describe a second AI
+ *  auditing the first, and on this path that is not what happens: the checks
+ *  are deterministic code reading the fetched article, and a human approves the
+ *  edition before it ships. Describing the process inaccurately would be the
+ *  same category of error the firewall exists to prevent, so the disclosure
+ *  gets the same care as the copy. */
+export const AI_DISCLOSURE_SUBSCRIPTION =
+  "Drafted with AI assistance from the full text of each linked article, on the editor's personal subscription. Every figure, quotation and attribution was then checked automatically against that article text by deterministic code, not by another AI; items that failed were removed, not rewritten. The editor read and approved this edition before it published. AI does not write the news. Original reporting is always linked and always credited. Full pipeline at /brief/methodology.";
+
 const VALID_CATEGORIES = ['TRANSIT', 'HOUSING', 'FOOD', 'POLITICS', 'TECH', 'CULTURE', 'ARTS', 'BUSINESS', 'PUBLIC SAFETY', 'OPENINGS', 'CLOSINGS', 'WEATHER', 'SPORTS'];
 const VALID_SIGNALS = ['first-to-connect', 'underreported', 'missing-context', 'structural-pattern'];
 
 function sanitizeCategory(c?: string): string {
-  return c && VALID_CATEGORIES.includes(c) ? c : 'POLITICS';
+  // Normalize before matching: models return trailing whitespace, lowercase,
+  // and stray punctuation. Falling back to POLITICS on a recoverable value
+  // would mislabel real items, so trim and upcase first.
+  const norm = String(c ?? '').trim().toUpperCase().replace(/[^A-Z ]/g, '');
+  return VALID_CATEGORIES.includes(norm) ? norm : 'POLITICS';
 }
 function sanitizeSignal(s?: string): string {
-  return s && VALID_SIGNALS.includes(s) ? s : 'underreported';
+  const norm = String(s ?? '').trim().toLowerCase();
+  return VALID_SIGNALS.includes(norm) ? norm : 'underreported';
 }
 function clampUniqueness(n: unknown): number {
   const v = Math.round(Number(n));
@@ -507,6 +649,11 @@ interface ComposeArgs {
   intro?: string;
   items: AuditedItem[];
   edits: Record<string, ItemEdits>;
+  /** Reader-facing description of how this edition was produced. Required
+   *  rather than defaulted: the content schema has a default, and relying on it
+   *  is how an edition ends up carrying a description of a process that is no
+   *  longer the one that made it. */
+  aiDisclosure: string;
 }
 
 function composeMarkdown(args: ComposeArgs): string {
@@ -524,6 +671,7 @@ function composeMarkdown(args: ComposeArgs): string {
     lines.push('intro: |');
     for (const line of args.intro.split('\n')) lines.push(`  ${line}`);
   }
+  lines.push(`ai_disclosure: ${yamlString(args.aiDisclosure)}`);
   lines.push('items:');
   lines.push(itemsYaml);
   lines.push('---');
@@ -545,16 +693,36 @@ function composeItemYaml(item: AuditedItem, edits: ItemEdits | undefined, briefD
   const indent = '  ';
   const lines: string[] = [];
   lines.push(`${indent}- id: ${briefDate}-${item.id.slice(1, 4)}`);
-  lines.push(`${indent}  slug: ${slug}`);
-  lines.push(`${indent}  category: ${item.category ?? 'POLITICS'}`);
-  lines.push(`${indent}  signal: ${draft.brief_signal ?? 'underreported'}`);
+  // A slug that normalizes to empty would emit `slug:` with no value and fail
+  // the content-collection schema at build time, on Vercel, after the push.
+  lines.push(`${indent}  slug: ${slug || `item-${item.id.slice(1, 7)}`}`);
+  // category and signal are Zod enums in src/content/config.ts. Writing a raw
+  // model response here (a stray "TRANSPORTATION", or trailing whitespace) is
+  // the single most likely way to push content that breaks the Astro build:
+  // the workflow goes green, the push succeeds, and the site quietly stops
+  // updating. Always sanitize to a known-valid enum value.
+  lines.push(`${indent}  category: ${sanitizeCategory(item.category)}`);
+  lines.push(`${indent}  signal: ${sanitizeSignal(draft.brief_signal)}`);
   lines.push(`${indent}  source_headline: ${yamlString(item.original_headline)}`);
   lines.push(`${indent}  source_outlet: ${yamlString(item.source_outlet)}`);
   lines.push(`${indent}  source_byline: ${yamlString(item.source_byline)}`);
   lines.push(`${indent}  source_url: ${yamlString(item.source_url)}`);
-  lines.push(`${indent}  source_date: ${item.published_at.slice(0, 10)}`);
-  lines.push(`${indent}  composite_score: ${item.scoring?.composite ?? 0}`);
-  lines.push(`${indent}  uniqueness_score: ${item.scoring?.uniqueness ?? 0}`);
+  // published_at can be absent or malformed on a sparse feed. An empty value
+  // here emits `source_date:` and fails the schema's date coercion.
+  const sourceDate = /^\d{4}-\d{2}-\d{2}/.test(item.published_at ?? '')
+    ? item.published_at.slice(0, 10)
+    : briefDate;
+  lines.push(`${indent}  source_date: ${sourceDate}`);
+  // Scores are OMITTED, not zeroed, when no scoring model ran. On the manual
+  // path an editor picked the item from the article text and there is no score
+  // to record. Writing 0 was both untrue and invalid: the schema requires
+  // uniqueness to be 1-10, so a zero passed the composed-edition check and then
+  // failed the Astro build, which is precisely the silent-stale-site failure
+  // the build-before-push step exists to catch. Absent is the honest value.
+  const composite = safeNumber(item.scoring?.composite);
+  const uniqueness = safeNumber(item.scoring?.uniqueness);
+  if (composite > 0) lines.push(`${indent}  composite_score: ${composite}`);
+  if (uniqueness > 0) lines.push(`${indent}  uniqueness_score: ${clampUniqueness(uniqueness)}`);
   lines.push(`${indent}  auto_published: ${item.audit?.audit_pass && !item.audit.spot_check}`);
   lines.push(`${indent}  angle_statement: ${yamlString(angle)}`);
   lines.push(`${indent}  tldr: ${yamlString(tldr)}`);
@@ -565,8 +733,18 @@ function composeItemYaml(item: AuditedItem, edits: ItemEdits | undefined, briefD
 }
 
 function yamlString(s: string): string {
-  // Always quote with double quotes and escape internal double quotes + backslashes.
-  return `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  // Always quote with double quotes and escape internal double quotes +
+  // backslashes. Newlines are collapsed: a raw newline inside a double-quoted
+  // scalar produces YAML that either fails to parse or silently reflows, and
+  // every field using this helper is a single-line field.
+  const flat = String(s ?? '').replace(/[\r\n]+/g, ' ').trim();
+  return `"${flat.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
+/** Guard against NaN/Infinity reaching the frontmatter as a bare token. */
+function safeNumber(n: unknown, fallback = 0): number {
+  const v = typeof n === 'number' ? n : Number(n);
+  return Number.isFinite(v) ? v : fallback;
 }
 
 function slugify(s: string): string {
@@ -582,6 +760,134 @@ export async function nextEdition(contentDir: string): Promise<number> {
   const { readdir } = await import('node:fs/promises');
   const files = await readdir(contentDir);
   return files.filter((f) => f.endsWith('.md')).length + 1;
+}
+
+// ============ COMPOSED-EDITION VALIDATION ============
+
+/**
+ * Structurally validate the composed markdown BEFORE it is written or pushed.
+ *
+ * WHY THIS MATTERS MORE THAN IT LOOKS
+ * The Astro build runs on Vercel, AFTER the push. So malformed frontmatter
+ * does not fail here, it fails there: the workflow goes green, the commit
+ * lands, and the site silently stops updating while serving the previous
+ * edition. That is the exact "successful Action, unsuccessful publication"
+ * failure. Catching it pre-push turns a silent stale-site incident into a
+ * loud, actionable run failure.
+ *
+ * Intentionally a lightweight structural check, not a YAML parser dependency.
+ */
+export function validateComposedEdition(
+  markdown: string,
+  expectedDate: string
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (!markdown.startsWith('---\n')) {
+    errors.push('Markdown does not begin with a frontmatter fence.');
+    return { valid: false, errors };
+  }
+  const end = markdown.indexOf('\n---', 4);
+  if (end < 0) {
+    errors.push('Frontmatter fence is not closed.');
+    return { valid: false, errors };
+  }
+  const fm = markdown.slice(4, end);
+
+  // Required top-level fields.
+  if (!new RegExp(`^date:\\s*${expectedDate}\\s*$`, 'm').test(fm)) {
+    errors.push(`Frontmatter date is missing or does not equal ${expectedDate}.`);
+  }
+  if (!/^edition:\s*\d+\s*$/m.test(fm)) errors.push('Frontmatter edition is missing or not a number.');
+  if (!/^editor:\s*\S+/m.test(fm)) errors.push('Frontmatter editor is missing.');
+  if (!/^items:\s*$/m.test(fm)) errors.push('Frontmatter items block is missing.');
+
+  // Per-item structural checks.
+  const ids = fm.match(/^\s*- id:\s*\S+/gm) ?? [];
+  if (ids.length === 0) errors.push('Edition contains zero items.');
+
+  const categories = fm.match(/^\s*category:\s*(.+)$/gm) ?? [];
+  for (const c of categories) {
+    const val = c.split(':').slice(1).join(':').trim();
+    if (!VALID_CATEGORIES.includes(val)) errors.push(`Invalid category "${val}" would fail the content schema.`);
+  }
+  const signals = fm.match(/^\s*signal:\s*(.+)$/gm) ?? [];
+  for (const s of signals) {
+    const val = s.split(':').slice(1).join(':').trim();
+    if (!VALID_SIGNALS.includes(val)) errors.push(`Invalid signal "${val}" would fail the content schema.`);
+  }
+
+  // Empty required string fields emit `field:` with nothing after it.
+  for (const field of ['slug', 'source_headline', 'source_outlet', 'source_url', 'tldr', 'angle_statement']) {
+    const empties = fm.match(new RegExp(`^\\s*${field}:\\s*(""|'')?\\s*$`, 'gm')) ?? [];
+    if (empties.length) errors.push(`${empties.length} item(s) have an empty ${field}.`);
+  }
+
+  // Counts must line up, otherwise an item is half-written.
+  const slugs = (fm.match(/^\s*slug:\s*\S+/gm) ?? []).length;
+  const urls = (fm.match(/^\s*source_url:\s*\S+/gm) ?? []).length;
+  if (ids.length !== slugs || ids.length !== urls) {
+    errors.push(`Partial item detected: ${ids.length} ids, ${slugs} slugs, ${urls} source_urls.`);
+  }
+
+  // Numeric fields must satisfy the content schema's RANGES, not merely be
+  // numbers. A uniqueness_score of 0 is a number, passed every check above,
+  // and then failed the Astro build with "must be greater than or equal to 1".
+  // The build-before-push step caught it, which is what that step is for, but
+  // this validator exists so a schema break is a loud failure HERE rather than
+  // a red build after the content has already been composed.
+  for (const m of fm.matchAll(/^\s*uniqueness_score:\s*(\S+)\s*$/gm)) {
+    const n = Number(m[1]);
+    if (!Number.isInteger(n) || n < 1 || n > 10) {
+      errors.push(`uniqueness_score "${m[1]}" is outside the schema's 1-10 integer range. Omit the field when no scoring model ran.`);
+    }
+  }
+  for (const m of fm.matchAll(/^\s*composite_score:\s*(\S+)\s*$/gm)) {
+    if (!Number.isFinite(Number(m[1]))) {
+      errors.push(`composite_score "${m[1]}" is not a number.`);
+    }
+  }
+
+  // Every source_url must be a real http(s) URL, so no broken links ship.
+  for (const m of fm.matchAll(/^\s*source_url:\s*"?([^"\n]+)"?\s*$/gm)) {
+    const u = (m[1] ?? '').trim();
+    if (!/^https?:\/\/\S+$/.test(u)) errors.push(`Malformed source_url: "${u.slice(0, 80)}"`);
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+// ============ DUPLICATE-STORY GUARD ============
+
+/**
+ * Collect every source URL already used in a published edition, so the same
+ * story cannot run twice across days. Reads the content collection directly,
+ * which is the durable record. Excludes the edition currently being built.
+ *
+ * Failure here is non-fatal: an unreadable content dir degrades to "no known
+ * prior URLs" rather than blocking publication, because the duplicate check is
+ * a quality guard, not a safety guard.
+ */
+async function collectPublishedSourceUrls(
+  contentDir: string,
+  excludeDate: string
+): Promise<Set<string>> {
+  const urls = new Set<string>();
+  try {
+    if (!existsSync(contentDir)) return urls;
+    const files = (await readdir(contentDir)).filter(
+      (f) => f.endsWith('.md') && f !== `${excludeDate}.md`
+    );
+    for (const f of files) {
+      const raw = await readFile(path.join(contentDir, f), 'utf-8');
+      for (const m of raw.matchAll(/source_url:\s*["']?(\S+?)["']?\s*$/gm)) {
+        if (m[1]) urls.add(canonicalUrl(m[1]));
+      }
+    }
+  } catch (err) {
+    console.warn(`[publish] Could not scan prior editions for duplicates: ${String(err).slice(0, 120)}`);
+  }
+  return urls;
 }
 
 // ============ AUDIT LOG ============
@@ -671,8 +977,9 @@ async function triggerDeploy() {
   console.log('[publish] Vercel deploy triggered');
 }
 
-async function pingIndexingApis(runDate: Date, items: AuditedItem[]) {
-  const dateString = runDate.toISOString().slice(0, 10);
+async function pingIndexingApis(dateString: string, items: AuditedItem[]) {
+  // dateString is the San Francisco edition date passed in by the caller. Never
+  // recompute it here: a UTC-derived date would ping URLs that do not exist.
   const urls = [
     `${SITE_ORIGIN}/brief/`,
     `${SITE_ORIGIN}/brief/${dateString}/`,
@@ -705,11 +1012,14 @@ async function pingIndexingApis(runDate: Date, items: AuditedItem[]) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
-  const dateArg = args.find((a) => a.startsWith('--date='))?.slice(7);
-  const skipDeploy = args.includes('--skip-deploy');
-  const dryRun = args.includes('--dry-run');
-  const runDate = dateArg ? new Date(dateArg + 'T08:00:00Z') : new Date();
-  publish({ runDate, skipDeploy, dryRun }).catch((err) => {
+  const editionDate = resolveEditionDate(dateArgFrom(args));
+  publish({
+    editionDate,
+    runDate: sfDateToInstant(editionDate),
+    skipDeploy: args.includes('--skip-deploy'),
+    dryRun: args.includes('--dry-run'),
+    force: args.includes('--force'),
+  }).catch((err) => {
     console.error('[publish] FATAL', err);
     process.exit(1);
   });

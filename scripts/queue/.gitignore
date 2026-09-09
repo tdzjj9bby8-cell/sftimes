@@ -8,5 +8,10 @@
 *-decisions.json
 audit-log/*.json
 
+# Output of brief-prep.ts. Holds the FULL TEXT of other newsrooms' articles,
+# fetched so the firewall can verify drafted claims against them. It is working
+# evidence for one day's run, not source, and must never be committed.
+*-prepared.json
+
 # Keep this gitignore tracked so the directory exists.
 !.gitignore

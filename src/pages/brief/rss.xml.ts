@@ -21,7 +21,7 @@ export async function GET(context: { site?: URL } & Record<string, unknown>) {
   const sortedBriefs = [...briefs].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   const items = sortedBriefs.flatMap((brief) => {
     const dateString = brief.data.date.toISOString().slice(0, 10);
-    const sortedItems = [...brief.data.items].sort((a, b) => b.composite_score - a.composite_score);
+    const sortedItems = [...brief.data.items].sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0));
     return sortedItems.map((item) => ({
       title: `${item.category} · ${item.source_headline}`,
       description: `${item.tldr}\n\n${item.angle_statement}`,

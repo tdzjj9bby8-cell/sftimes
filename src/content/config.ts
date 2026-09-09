@@ -148,10 +148,22 @@ const briefs = defineCollection({
         editor_note: z.string(),
         /** One-line forward-looking note (the next decision date or vote). */
         what_to_watch: z.string(),
-        /** Composite score from the primary AI pass scoring prompt. */
-        composite_score: z.number(),
-        /** Uniqueness score from the primary AI pass. */
-        uniqueness_score: z.number().int().min(1).max(10),
+        /**
+         * Composite score from the AI scoring pass.
+         *
+         * OPTIONAL, because on the manual publishing path no scoring model
+         * runs: an editor selects the items directly from the fetched article
+         * text. There is no score to record, and inventing one to satisfy a
+         * schema would put a fabricated number in the published record of a
+         * publication whose whole pipeline exists to keep fabricated numbers
+         * out. Absent is the truthful value.
+         *
+         * Every consumer already coalesces with `?? 0` for sorting.
+         */
+        composite_score: z.number().optional(),
+        /** Uniqueness score from the AI scoring pass. Optional for the same
+         *  reason as composite_score. */
+        uniqueness_score: z.number().int().min(1).max(10).optional(),
         /** True if this item was auto-published (auditor passed all 5 checks).
          *  False if Eric manually accepted it after the auditor flagged it. */
         auto_published: z.boolean().default(true),

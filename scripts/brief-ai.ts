@@ -3,17 +3,22 @@
  *
  * Stages 2 and 3 of the Brief pipeline (BRIEF-MASTER-PLAN.md sections 6.2 and 6.2.5).
  *
- * Reads scripts/queue/<date>-ingested.json from the ingest step. For each
- * candidate runs four sequential Claude Haiku calls:
+ * Reads scripts/queue/<date>-ingested.json from the ingest step and runs a
+ * two-pass model pipeline designed so the expensive calls only touch stories
+ * that can actually reach the edition:
  *
- *   1. Scoring (prompt 7.1): novelty/civic/SF-specificity/uniqueness.
- *      Auto-reject if composite < 7.0 OR uniqueness < 6.
- *   2. Category (prompt 7.2): one tag from the 13-value taxonomy.
- *   3. Brief-worthy check + TLDR + editor's note (prompt 7.3): three
- *      yes/no questions, then draft TLDR (25-30w) and editor's note
- *      (100-150w starting with explicit angle statement).
- *   4. Auditor (prompt 7.4): five firewall checks. If all pass, item is
- *      auto-publish eligible. If any fail, item is held for editor.
+ *   PASS 1, every candidate (cheap, no article body):
+ *     Scoring (prompt 7.1). Auto-reject if composite < 7.0 OR uniqueness < 6.
+ *
+ *   COST GATE: survivors are ranked and only the top MAX_DRAFTS_PER_RUN
+ *   continue. Everything below is deferred, not drafted.
+ *
+ *   PASS 2, selected candidates only (expensive, carries the full body):
+ *     a. Full-article fetch. Failure here drops the item before any further
+ *        model call, so an unreachable article costs zero extra tokens.
+ *     b. Brief-worthy check + TLDR + editor's note + CATEGORY (prompt 7.3).
+ *        Category is returned by this call rather than a separate request.
+ *     c. Auditor (prompt 7.4): six checks including source fidelity.
  *
  * Random 10% of audit-passing items are still held as drift-detection
  * spot-check (master plan section 6.2.5).
@@ -21,19 +26,33 @@
  * Writes scripts/queue/<date>-audited.json which is consumed by the
  * dashboard (brief-dashboard.astro) and the publish handler (brief-publish.ts).
  *
- * Runs at 5:30 AM PT via Vercel cron (vercel.json). Locally:
- *   npm run brief:ai -- --date 2026-06-14
+ * Invoked by scripts/brief-run.ts, which CI schedules. Locally:
+ *   npm run brief:ai -- --date=2026-06-14
  *
  * Dependencies: @anthropic-ai/sdk
  * Env: ANTHROPIC_API_KEY (set in Vercel env or .env.local)
  *
- * Cost model: see BRIEF-COST-MODEL.md. Roughly $0.40-$0.80 per day at
- * 40-60 candidates.
+ * Cost: measured 2026-09 at $0.05 to $0.13 per run (Haiku 4.5, $1/MTok in,
+ * $5/MTok out). Every run is metered against a hard ceiling (BRIEF_MAX_USD)
+ * that aborts the run rather than overspending. See BRIEF-AUTOMATION.md.
  */
 
 import path from 'node:path';
 import type { Candidate } from './brief-ingest.js';
 import { getQueue, putQueue, kvEnabled } from './lib/queue-store.js';
+import { fetchArticleBody, MIN_BODY_WORDS } from './lib/fetch-article.js';
+import { sfDateString, resolveEditionDate, dateArgFrom, sfDateToInstant } from './lib/sf-date.js';
+import {
+  newUsage,
+  recordUsage,
+  resolveMaxUsd,
+  estimateCost,
+  formatUsage,
+  BudgetExceededError,
+  DEFAULT_MAX_USD,
+  type Usage,
+} from './lib/token-budget.js';
+import { contentTokens, jaccard, dedupeByHeadline } from './lib/editorial-quality.js';
 
 // ============ TYPES ============
 
@@ -57,6 +76,10 @@ export interface ScoringResult {
 export interface DraftResult {
   brief_worthy: boolean;
   reject_reason?: string;
+  /** Taxonomy tag. Returned by the draft call rather than a separate request:
+   *  the draft call already has the full article, so asking for the category
+   *  there is better-informed AND removes one API round trip per item. */
+  category?: Category;
   brief_signal?: BriefSignal;
   angle_statement?: string;
   tldr?: string;
@@ -71,6 +94,10 @@ export interface AuditResult {
   check_3_specificity: 'pass' | 'fail';
   check_4_word_count: 'pass' | 'fail';
   check_5_voice: 'pass' | 'fail';
+  /** Source-fidelity check. Added after the 2026-07-15 fabrication incident:
+   *  every asserted fact must appear in the fetched article body. Optional in
+   *  the type so historical audited queues still parse. */
+  check_6_source_fidelity?: 'pass' | 'fail';
   fail_reasons: string[];
   recommendation: 'auto-publish' | 'hold for editor';
   spot_check?: boolean; // true if held for random spot-check rather than audit failure
@@ -82,8 +109,16 @@ export interface AuditedItem extends Candidate {
   draft: DraftResult;
   audit?: AuditResult;
   /** Why this candidate was dropped before the auditor. Filled by the pipeline
-   *  when the scoring filter or brief-worthy check rejects the item. */
+   *  when the scoring filter, the source-fetch guardrail, or the brief-worthy
+   *  check rejects the item. */
   drop_reason?: string;
+  /** The REAL full article body, fetched before drafting. Attached so the
+   *  editorial firewall can verify every drafted claim against it at publish
+   *  time. Absence of this field means the item was never safe to draft. */
+  source_body?: string;
+  source_body_word_count?: number;
+  /** Populated when the full-article fetch failed, for the run log. */
+  source_fetch_reason?: string;
 }
 
 // ============ CONFIG ============
@@ -94,6 +129,27 @@ const SPOT_CHECK_RATE = 0.10; // 10% per master plan section 6.2.5
 // Hard reject thresholds from prompt 7.1
 const COMPOSITE_MIN = 7.0;
 const UNIQUENESS_MIN = 6;
+
+/**
+ * Maximum items that receive the expensive draft + audit pair.
+ *
+ * Those two calls each carry the full article body and together cost roughly
+ * 20x a scoring call. An edition publishes about five or six items after the
+ * firewall, deduper, and diversity cap have taken their share, so drafting far
+ * beyond this is money spent on output that gets discarded.
+ *
+ * Ten leaves comfortable headroom above a typical published edition. This is a
+ * cost control, not a quality compromise: the cap selects the highest-scoring
+ * candidates, which are the same ones an unbounded run would have published.
+ */
+const MAX_DRAFTS_PER_RUN = Number(process.env.BRIEF_MAX_DRAFTS ?? 10);
+
+/**
+ * Headline-similarity threshold for the free pre-AI dedupe pass.
+ * Higher than the post-draft threshold because we only have headlines here,
+ * and a false merge at this stage silently costs us a story.
+ */
+const PRE_AI_DUPLICATE_THRESHOLD = 0.6;
 
 // ============ CLAUDE CLIENT ============
 
@@ -110,13 +166,31 @@ async function getClient() {
   }
 }
 
-async function callClaude(prompt: string, maxTokens = 1500): Promise<string> {
+/** Per-run token accounting. Reset at the start of each aiPass. */
+let runUsage: Usage = newUsage();
+let runLimitUsd: number = DEFAULT_MAX_USD;
+
+export function getRunUsage(): Usage {
+  return runUsage;
+}
+
+async function callClaude(prompt: string, maxTokens = 1500, stage = 'other'): Promise<string> {
   const client = await getClient();
   const resp = await client.messages.create({
     model: MODEL,
     max_tokens: maxTokens,
     messages: [{ role: 'user', content: prompt }],
   });
+  // Record the REAL billed usage from the response, then enforce the ceiling.
+  // recordUsage throws BudgetExceededError once the cap is crossed, which
+  // aborts the run rather than letting spend continue unbounded.
+  recordUsage(
+    runUsage,
+    stage,
+    resp.usage?.input_tokens ?? 0,
+    resp.usage?.output_tokens ?? 0,
+    runLimitUsd
+  );
   const text = resp.content?.[0]?.text ?? '';
   return text.trim();
 }
@@ -169,22 +243,16 @@ Source URL: ${c.source_url}
 Source first paragraph: ${c.first_paragraph ?? '(none)'}`;
 }
 
-function categoryPrompt(c: Candidate): string {
-  return `You are tagging an SF Times brief item with one category from a fixed taxonomy.
-
-Categories: Transit, Housing, Food, Politics, Tech, Culture, Arts, Business, Public safety, Openings, Closings, Weather, Sports.
-
-Pick the single best fit. If the story spans two categories, pick the one that matches the primary newsworthy hook.
-
-Return just the category name in ALL CAPS, no other text.
-
-Headline: ${c.original_headline}
-Dek: ${c.original_dek}
-First paragraph: ${c.first_paragraph ?? '(none)'}`;
-}
-
-function draftPrompt(c: Candidate, scoring: ScoringResult): string {
+function draftPrompt(c: Candidate, scoring: ScoringResult, sourceBody: string): string {
   return `You are deciding whether this story belongs in SF Times' daily Brief and, if so, drafting the TLDR and editor's note.
+
+GROUNDING RULE (absolute, overrides everything below)
+You have the full text of the source article. Every factual claim you write must
+come from that text. Do not add numbers, vote counts, dates, names, quotations,
+or events that are not in it. Do not infer a figure you did not read. If you
+cannot write a meaningful editor's note using only what is in the article plus
+genuinely general SF context, return brief_worthy: false. Inventing a plausible
+detail is the single worst failure you can produce here.
 
 STEP 1. THE BRIEF-WORTHY CHECK (mandatory, run before drafting anything else)
 
@@ -219,7 +287,13 @@ STEP 3. EDITOR'S NOTE (100 to 150 words, in SF Times voice)
 
 If as you draft you realize you do not have the specific knowledge to write meaningful backstory, this story does NOT belong in the Brief. Return brief_worthy: false with reject_reason "Insufficient editorial knowledge for value-add."
 
-STEP 4. BRIEF SIGNAL (pick exactly one)
+STEP 4. CATEGORY (pick exactly one)
+
+Choose the single best fit from this fixed taxonomy, matching the primary
+newsworthy hook: TRANSIT, HOUSING, FOOD, POLITICS, TECH, CULTURE, ARTS,
+BUSINESS, PUBLIC SAFETY, OPENINGS, CLOSINGS, WEATHER, SPORTS.
+
+STEP 5. BRIEF SIGNAL (pick exactly one)
 
 - "first-to-connect": We are first to make the connection between this and another story.
 - "underreported": Other outlets have this but at low depth.
@@ -229,6 +303,7 @@ STEP 4. BRIEF SIGNAL (pick exactly one)
 Return JSON only:
 {
   "brief_worthy": true,
+  "category": "<one taxonomy value from STEP 4, ALL CAPS>",
   "brief_signal": "<one of the four above>",
   "angle_statement": "<one sentence stating the editorial angle>",
   "tldr": "<25-30 word TLDR>",
@@ -241,12 +316,16 @@ Source article:
 - Outlet: ${c.source_outlet}
 - Byline: ${c.source_byline}
 - Dek: ${c.original_dek}
-- Full available text: ${c.first_paragraph ?? '(none)'}
 - Source URL: ${c.source_url}
-- Other outlets likely running this: ${scoring.outlets_running_this}`;
+- Other outlets likely running this: ${scoring.outlets_running_this}
+
+FULL ARTICLE TEXT (this is the complete fetched body, not a summary):
+"""
+${sourceBody}
+"""`;
 }
 
-function auditorPrompt(c: Candidate, draft: DraftResult): string {
+function auditorPrompt(c: Candidate, draft: DraftResult, sourceBody: string): string {
   return `You are auditing a draft Brief item against the editorial firewall rules. Your job is to catch failures BEFORE publish so that nothing slips through to readers that violates SF Times' standards.
 
 Run all five checks. Be strict. False negatives are worse than false positives.
@@ -273,20 +352,32 @@ If generic → fail. If SF Times voice → pass.
 
 Return JSON only:
 {
-  "audit_pass": <true if all 5 checks pass, false otherwise>,
+  "audit_pass": <true if ALL SIX checks pass, false otherwise>,
   "check_1_recap": "pass" | "fail",
   "check_2_angle": "pass" | "fail",
   "check_3_specificity": "pass" | "fail",
   "check_4_word_count": "pass" | "fail",
   "check_5_voice": "pass" | "fail",
+  "check_6_source_fidelity": "pass" | "fail",
   "fail_reasons": [<one-line explanation for each failed check>],
   "recommendation": "auto-publish" | "hold for editor"
 }
 
+CHECK 6: Source-fidelity test (added after the 2026-07-15 fabrication incident)
+Compare every factual assertion in the TLDR and editor's note against the FULL
+ARTICLE TEXT below. Flag any number, vote count, date, name, institution, or
+quotation that does not appear in that text. If you find even one unsupported
+factual assertion, the item fails. Editorial context about San Francisco that
+is general knowledge is acceptable; specific invented facts are not.
+
 Source materials:
 - Source URL: ${c.source_url}
 - Source headline: ${c.original_headline}
-- Source first paragraph: ${c.first_paragraph ?? '(none)'}
+
+FULL ARTICLE TEXT (ground truth for CHECK 6):
+"""
+${sourceBody}
+"""
 
 Draft to audit:
 - Brief signal: ${draft.brief_signal}
@@ -299,34 +390,68 @@ Draft to audit:
 // ============ PROMPT RUNNERS ============
 
 export async function runScoring(c: Candidate): Promise<ScoringResult> {
-  const text = await callClaude(scoringPrompt(c), 400);
+  const text = await callClaude(scoringPrompt(c), 400, 'scoring');
   return parseJson<ScoringResult>(text);
 }
 
-export async function runCategory(c: Candidate): Promise<Category> {
-  const text = await callClaude(categoryPrompt(c), 50);
-  const cleaned = text.trim().replace(/[^A-Z ]/gi, '').toUpperCase();
-  return cleaned as Category;
-}
+// runCategory was removed: the category is now returned by the draft call,
+// which already carries the full article. That eliminated one API round trip
+// per drafted item at no cost to quality.
 
-export async function runDraft(c: Candidate, scoring: ScoringResult): Promise<DraftResult> {
-  const text = await callClaude(draftPrompt(c, scoring), 1200);
+export async function runDraft(
+  c: Candidate,
+  scoring: ScoringResult,
+  sourceBody: string
+): Promise<DraftResult> {
+  if (!sourceBody || !sourceBody.trim()) {
+    throw new Error('runDraft called without a source body. Drafting without the full article is forbidden.');
+  }
+  const text = await callClaude(draftPrompt(c, scoring, sourceBody), 1200, 'draft');
   return parseJson<DraftResult>(text);
 }
 
-export async function runAuditor(c: Candidate, draft: DraftResult): Promise<AuditResult> {
-  const text = await callClaude(auditorPrompt(c, draft), 500);
+export async function runAuditor(
+  c: Candidate,
+  draft: DraftResult,
+  sourceBody: string
+): Promise<AuditResult> {
+  if (!sourceBody || !sourceBody.trim()) {
+    throw new Error('runAuditor called without a source body. The source-fidelity check requires it.');
+  }
+  const text = await callClaude(auditorPrompt(c, draft, sourceBody), 600, 'audit');
   return parseJson<AuditResult>(text);
 }
 
 // ============ ORCHESTRATION ============
 
+/**
+ * Free, deterministic dedupe on headlines BEFORE any model call.
+ *
+ * Ingest already dedupes by URL and title cosine. This is a second cheap pass
+ * with a different metric, because every duplicate removed here is a scoring
+ * call we never pay for. Threshold is deliberately high: at this stage we only
+ * have headlines, and wrongly merging two stories costs us real coverage.
+ *
+ * The implementation now lives in lib/editorial-quality.ts as dedupeByHeadline,
+ * so the subscription publishing path (brief-prep.ts) can use the same logic
+ * without importing this module and its Anthropic client. This wrapper is kept
+ * so existing callers and their tests are untouched.
+ */
+export function preAiDedupe(candidates: Candidate[]): {
+  kept: Candidate[];
+  removed: Candidate[];
+} {
+  return dedupeByHeadline(candidates);
+}
+
 export async function processCandidates(candidates: Candidate[]): Promise<AuditedItem[]> {
   const results: AuditedItem[] = [];
 
+  // ---- PASS 1: score everything (the cheap call) ----
+  const scored: Array<{ c: Candidate; scoring: ScoringResult }> = [];
+
   for (const c of candidates) {
     try {
-      // Step A: scoring
       const scoring = await runScoring(c);
       if (scoring.composite < COMPOSITE_MIN || scoring.uniqueness < UNIQUENESS_MIN) {
         results.push({
@@ -337,32 +462,117 @@ export async function processCandidates(candidates: Candidate[]): Promise<Audite
         });
         continue;
       }
+      scored.push({ c, scoring });
+    } catch (err) {
+      if (err instanceof BudgetExceededError) throw err;
+      console.error(`[ai] FAIL scoring ${c.id} (${c.source_outlet})`, err);
+      results.push({
+        ...c,
+        scoring: { novelty: 0, civic_significance: 0, sf_specificity: 0, uniqueness: 0, composite: 0, one_line_reason: 'AI pass failed', outlets_running_this: '' },
+        draft: { brief_worthy: false, reject_reason: `Pipeline error: ${String(err).slice(0, 100)}` },
+        drop_reason: 'pipeline_error',
+      });
+    }
+  }
 
-      // Step B: category (parallel-safe with C but we serialize for cost predictability)
-      const category = await runCategory(c);
+  // ---- COST GATE: only the best candidates get the expensive calls ----
+  // Drafting and auditing cost roughly 20x a scoring call because both carry
+  // the full article body. An edition publishes about five or six items, so
+  // drafting every survivor spends real money on work that the firewall, the
+  // deduper, and the diversity cap will discard. Take the top N by composite.
+  //
+  // This is a cost control, not a quality compromise: we are choosing the
+  // highest-scoring candidates, which is the same set an unbounded run would
+  // have published from.
+  scored.sort((a, b) => b.scoring.composite - a.scoring.composite);
+  const selected = scored.slice(0, MAX_DRAFTS_PER_RUN);
+  const deferred = scored.slice(MAX_DRAFTS_PER_RUN);
 
-      // Step C: brief-worthy + draft
-      const draft = await runDraft(c, scoring);
+  for (const { c, scoring } of deferred) {
+    results.push({
+      ...c,
+      scoring,
+      draft: {
+        brief_worthy: false,
+        reject_reason: `Not in the top ${MAX_DRAFTS_PER_RUN} by composite score for this run.`,
+      },
+      drop_reason: 'draft_cap',
+    });
+  }
+  if (deferred.length) {
+    console.log(
+      `[ai] Draft cap: ${selected.length} of ${scored.length} survivors sent to drafting (${deferred.length} deferred, saving ~${deferred.length * 2} calls)`
+    );
+  }
+
+  // ---- PASS 2: fetch, draft, audit (the expensive calls) ----
+  for (const { c, scoring } of selected) {
+    try {
+      // FULL ARTICLE FETCH. Mandatory guardrail, no exceptions.
+      // Deliberately BEFORE any further model call: a candidate whose article
+      // cannot be retrieved must not cost a single additional token.
+      //
+      // BRIEF-COWORK-PLAYBOOK.md Stage 4 has required this since the
+      // 2026-07-15 quarantine event, but the requirement previously lived only
+      // in the agent-executed playbook, never in this code path. Drafting from
+      // the RSS snippet is what produced invented vote counts and an invented
+      // court case. If we cannot read the real article, we do not draft it.
+      const fetched = await fetchArticleBody(c.source_url);
+      if (!fetched.ok) {
+        console.warn(
+          `[ai] DROP ${c.id} (${c.source_outlet}): source fetch failed - ${fetched.reason} (${fetched.wordCount}w, floor ${MIN_BODY_WORDS})`
+        );
+        results.push({
+          ...c,
+          scoring,
+          draft: {
+            brief_worthy: false,
+            reject_reason: `Source article unavailable or too short to draft from (${fetched.reason}, ${fetched.wordCount} words).`,
+          },
+          drop_reason: 'source_fetch_failed',
+          source_fetch_reason: `${fetched.reason}: ${fetched.detail ?? ''}`.trim(),
+        });
+        continue;
+      }
+
+      // Step C: brief-worthy + draft, grounded in the REAL body.
+      const draft = await runDraft(c, scoring, fetched.text);
       if (!draft.brief_worthy) {
         results.push({
           ...c,
           scoring,
-          category,
+          category: draft.category,
           draft,
+          source_body: fetched.text,
+          source_body_word_count: fetched.wordCount,
           drop_reason: 'brief_worthy_check',
         });
         continue;
       }
 
-      // Step D: auditor pass (Stage 3, master plan section 6.2.5)
-      const audit = await runAuditor(c, draft);
+      // Step D: auditor pass (Stage 3, master plan section 6.2.5), also
+      // grounded in the real body so it can run the source-fidelity check.
+      const audit = await runAuditor(c, draft, fetched.text);
 
       // Random spot-check: even if audit_pass, promote a small percentage to held.
       const spotCheck = audit.audit_pass && Math.random() < SPOT_CHECK_RATE;
       if (spotCheck) audit.spot_check = true;
 
-      results.push({ ...c, scoring, category, draft, audit });
+      results.push({
+        ...c,
+        scoring,
+        category: draft.category,
+        draft,
+        audit,
+        // Carried forward so the deterministic editorial firewall can verify
+        // every drafted claim against the real source at publish time.
+        source_body: fetched.text,
+        source_body_word_count: fetched.wordCount,
+      });
     } catch (err) {
+      // A budget stop must abort the whole run, never degrade into a per-item
+      // failure that looks like an ordinary bad article.
+      if (err instanceof BudgetExceededError) throw err;
       console.error(`[ai] FAIL ${c.id} (${c.source_outlet})`, err);
       results.push({
         ...c,
@@ -382,30 +592,61 @@ interface RunOpts {
   runDate?: Date;
   inputDir?: string;
   outputDir?: string;
+  /** Explicit YYYY-MM-DD edition date. Wins over runDate. Used by the
+   *  orchestrator and by manual reruns so every stage agrees on the date. */
+  editionDate?: string;
 }
 
 export async function aiPass(opts: RunOpts = {}): Promise<AuditedItem[]> {
   const runDate = opts.runDate ?? new Date();
   const inputDir = opts.inputDir ?? path.join(process.cwd(), 'scripts', 'queue');
   const outputDir = opts.outputDir ?? inputDir;
-  const dateString = runDate.toISOString().slice(0, 10);
+  // Edition date is always the San Francisco calendar date, never the runner's
+  // UTC date. GitHub runners are UTC; without this the edition would file under
+  // the wrong day on any run after ~4 PM PT.
+  const dateString = opts.editionDate ?? sfDateString(runDate);
 
   console.log(`[ai] Loading candidates for ${dateString} (${kvEnabled() ? 'KV' : 'filesystem'})`);
   const candidates = await getQueue<Candidate[]>(dateString, 'ingested', { baseDir: inputDir });
   if (!candidates || candidates.length === 0) {
     throw new Error(`No ingested queue for ${dateString}. Run brief-ingest for that date first.`);
   }
-  console.log(`[ai] Processing ${candidates.length} candidates against ${MODEL}`);
+  // Reset per-run accounting and arm the ceiling before any call is made.
+  runUsage = newUsage();
+  runLimitUsd = resolveMaxUsd();
+  console.log(`[ai] Budget ceiling: $${runLimitUsd.toFixed(2)} per run (BRIEF_MAX_USD)`);
 
-  const results = await processCandidates(candidates);
+  // Free dedupe before we spend anything.
+  const pre = preAiDedupe(candidates);
+  if (pre.removed.length) {
+    console.log(
+      `[ai] Pre-AI dedupe removed ${pre.removed.length} duplicate headline(s), saving that many scoring calls`
+    );
+  }
+  console.log(`[ai] Processing ${pre.kept.length} candidates against ${MODEL}`);
+
+  let results: AuditedItem[];
+  try {
+    results = await processCandidates(pre.kept);
+  } catch (err) {
+    if (err instanceof BudgetExceededError) {
+      console.error(`[ai] BUDGET STOP: ${err.message}`);
+      for (const line of formatUsage(runUsage, runLimitUsd)) console.error(`[ai] ${line}`);
+    }
+    throw err;
+  }
+
+  for (const line of formatUsage(runUsage, runLimitUsd)) console.log(`[ai] ${line}`);
 
   const auditPassing = results.filter((r) => r.audit?.audit_pass && !r.audit?.spot_check);
   const held = results.filter((r) => r.audit && (!r.audit.audit_pass || r.audit.spot_check));
   const dropped = results.filter((r) => !r.audit);
+  const fetchFailed = results.filter((r) => r.drop_reason === 'source_fetch_failed');
 
   console.log(`[ai] Auto-publishing: ${auditPassing.length}`);
   console.log(`[ai] Held for editor: ${held.length}`);
   console.log(`[ai] Dropped: ${dropped.length}`);
+  console.log(`[ai] Dropped at full-article guardrail: ${fetchFailed.length} (floor ${MIN_BODY_WORDS} words)`);
 
   await putQueue(dateString, 'audited', results, { baseDir: outputDir });
   console.log(`[ai] Wrote ${results.length} audited records for ${dateString}`);
@@ -416,10 +657,8 @@ export async function aiPass(opts: RunOpts = {}): Promise<AuditedItem[]> {
 // ============ CLI ============
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const args = process.argv.slice(2);
-  const dateArg = args.find((a) => a.startsWith('--date='))?.slice(7);
-  const runDate = dateArg ? new Date(dateArg + 'T08:00:00Z') : new Date();
-  aiPass({ runDate }).catch((err) => {
+  const editionDate = resolveEditionDate(dateArgFrom(process.argv.slice(2)));
+  aiPass({ editionDate, runDate: sfDateToInstant(editionDate) }).catch((err) => {
     console.error('[ai] FATAL', err);
     process.exit(1);
   });

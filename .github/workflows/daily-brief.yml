@@ -1,0 +1,278 @@
+name: Daily Brief (API path, dormant)
+
+# ---------------------------------------------------------------------------
+# DORMANT. THE SCHEDULE IS DELIBERATELY DISABLED.
+#
+# This workflow publishes the Brief without a human trigger, but it does so by
+# calling the Anthropic API for scoring, drafting and auditing. SF Times does
+# not buy API credit: editorial judgment comes from Claude Code on the
+# operator's machine, under his subscription.
+#
+# The live path is therefore MANUAL and local:
+#
+#   npm run brief:prep                        gates, ingest, fetch real bodies
+#   [Claude Code drafts from brief-workpacket.md into brief-drafts.json]
+#   npm run brief:assemble -- --review-only   every gate, publishes nothing
+#   npm run brief:assemble                    publishes
+#
+# Neither of those stages makes a model call, so every safeguard in this
+# repository still runs on the manual path. See BRIEF-DAILY-PLAYBOOK.md.
+#
+# This file is kept, working and unmodified in substance, because the only
+# thing standing between here and unattended weekday publishing is an API key.
+# Re-enabling is: set the ANTHROPIC_API_KEY secret, uncomment the schedule.
+# Nothing else needs to change. Deleting it would throw that away.
+#
+# brief-watchdog.yml IS still scheduled. It makes no model calls and needs no
+# key, so it verifies the live site every weekday morning regardless of how the
+# edition got there. On the manual path it is the thing that catches the days
+# the operator did not fire the prompt.
+#
+# ---------------------------------------------------------------------------
+#
+# WHY A FRESH-CHECKOUT RUNNER SOLVES THE OLD FAILURE
+# The previous automation ran inside a long-lived virtualized environment whose
+# filesystem refused to let git clean up its own lock files. A single crashed
+# run left a stale .git/index.lock behind, and every subsequent run failed
+# silently for days. Guards that deleted lock files were treating the symptom.
+#
+# A GitHub-hosted runner gets a brand new filesystem and a fresh clone on every
+# run. There is no persistent .git directory, so a stale lock from a prior run
+# cannot exist. The failure class is designed out rather than defended against.
+#
+# CONCURRENCY
+# Only one publication job may run at a time. A manual dispatch that races the
+# schedule will queue, not collide. Combined with the idempotency gate in
+# brief-run.ts, a second run for an already-published date exits safely.
+# ---------------------------------------------------------------------------
+
+on:
+  # SCHEDULE DISABLED. Every run of this workflow spends API credit, and this
+  # publication has none configured. A cron here without a funded
+  # ANTHROPIC_API_KEY would fail every weekday at 06:07 and train the operator
+  # to ignore the failure emails, which is worse than no automation at all.
+  #
+  # To re-enable unattended publishing, add the ANTHROPIC_API_KEY secret and
+  # uncomment these three lines. Nothing else in this file needs to change.
+  #
+  # schedule:
+  #   # 13:07 UTC = 06:07 PDT (summer) and 05:07 PST (winter). A single UTC
+  #   # entry rather than two seasonal ones: the EDITION DATE is always computed
+  #   # in America/Los_Angeles inside the code, so the winter hour shift cannot
+  #   # cause an off-by-one, and the exact minute matters far less than running
+  #   # before the reading day.
+  #   - cron: '7 13 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Edition date (YYYY-MM-DD). Blank = today in San Francisco.'
+        required: false
+        type: string
+      dry_run:
+        description: 'Stop before composition. Publishes nothing. Cheapest check.'
+        required: false
+        type: boolean
+        default: false
+      review_only:
+        description: 'SUPERVISED: compose a real edition through every editorial gate, publish nothing, upload it for review'
+        required: false
+        type: boolean
+        default: false
+      force:
+        description: 'Republish a date whose edition file was deliberately removed'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: daily-brief-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Generate, validate and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # NOTE: the Astro app IS the git repository root (the repo is
+    # tdzjj9bby8-cell/sftimes checked out with package.json at top level).
+    # There is deliberately no working-directory override here.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history is unnecessary; a shallow clone is faster and the
+          # duplicate-story guard reads the working tree, not history.
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run the Daily Brief pipeline
+        id: brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Intentionally NOT setting KV_REST_API_* here. On a fresh runner the
+          # filesystem queue is correct and simpler: all stages run in one
+          # process, so there is no cross-invocation state to share.
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          # Hard per-run spend ceiling. The run aborts mid-flight if it is
+          # crossed, rather than continuing to spend. A normal run measures
+          # $0.05 to $0.17, so 0.35 is roughly double the heaviest expected day.
+          # Set as a repository VARIABLE (not a secret) so it is visible.
+          BRIEF_MAX_USD: ${{ vars.BRIEF_MAX_USD || '0.35' }}
+          # Cap on items receiving the expensive draft+audit pair.
+          BRIEF_MAX_DRAFTS: ${{ vars.BRIEF_MAX_DRAFTS || '10' }}
+        run: |
+          set -euo pipefail
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.review_only }}" = "true" ]; then ARGS="$ARGS --review-only"; fi
+          if [ "${{ inputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
+          # The pipeline commits nothing itself. It writes the edition file and
+          # publication-status.json to the working tree; the commit step below
+          # is the only thing that touches git.
+          npx tsx scripts/brief-run.ts $ARGS --skip-deploy
+
+      - name: Read run outcome
+        id: outcome
+        run: |
+          if [ -f publication-status.json ]; then
+            echo "status=$(node -p "require('./publication-status.json').final_status")" >> $GITHUB_OUTPUT
+            echo "result=$(node -p "require('./publication-status.json').outcome")" >> $GITHUB_OUTPUT
+            echo "edition=$(node -p "require('./publication-status.json').edition_date")" >> $GITHUB_OUTPUT
+          else
+            echo "status=red" >> $GITHUB_OUTPUT
+            echo "result=no_status_file" >> $GITHUB_OUTPUT
+            echo "edition=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish the review edition to the job summary
+        # A supervised run is only useful if reading the output is frictionless.
+        # This puts the composed edition and the real cost directly in the
+        # GitHub run page, so no download is needed to review it.
+        if: steps.outcome.outputs.result == 'review_only'
+        run: |
+          EDITION="${{ steps.outcome.outputs.edition }}"
+          {
+            echo "## Review edition $EDITION (NOT published)"
+            echo ""
+            echo "### Run report"
+            echo '```json'
+            node -p "JSON.stringify(require('./publication-status.json'),null,2)"
+            echo '```'
+            echo ""
+            echo "### Composed edition"
+            echo '```markdown'
+            cat "review-edition-$EDITION.md"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the review edition
+        if: steps.outcome.outputs.result == 'review_only'
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-edition-${{ steps.outcome.outputs.edition }}
+          path: review-edition-*.md
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Build the site before pushing
+        # THE MOST IMPORTANT GUARD IN THIS WORKFLOW.
+        # Vercel builds AFTER the push. Without this step, an edition with
+        # malformed frontmatter pushes cleanly, the Action goes green, the
+        # Vercel build fails, and the site silently keeps serving yesterday.
+        # Building here proves the content compiles before it can ever reach
+        # the repository. If this fails, nothing is pushed.
+        if: steps.outcome.outputs.result == 'published'
+        run: npx astro build
+
+      - name: Commit and push the edition
+        # Only when something was actually published. A dry run, a weekend
+        # skip, an idempotent skip, or an empty day must not create a commit.
+        if: steps.outcome.outputs.result == 'published'
+        run: |
+          set -euo pipefail
+          git config user.name  "SF Times Brief Bot"
+          git config user.email "brief-bot@sftimes.com"
+          git add src/content/briefs/ scripts/queue/ publication-status.json
+          if git diff --cached --quiet; then
+            echo "Nothing staged. Not committing."
+            exit 0
+          fi
+          git commit -m "Brief ${{ steps.outcome.outputs.edition }}: automated weekday edition"
+          # Rebase before pushing: a human commit may have landed since checkout.
+          # This is the only git contention point in the whole workflow, and it
+          # is sequential within a single job on a private filesystem.
+          git pull --rebase --autostash origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Verify the edition is actually live
+        # Requirement: a job is not successful because a script exited 0. After
+        # pushing we wait for Vercel to build and deploy, then verify the real
+        # public URL. This closes the window where the Action is green and the
+        # deploy silently failed. The watchdog is the later backstop; this is
+        # the same-run check.
+        if: steps.outcome.outputs.result == 'published'
+        run: |
+          set -uo pipefail
+          echo "Waiting for Vercel to build and deploy..."
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            sleep 30
+            if npx tsx scripts/brief-watchdog.ts --date=${{ steps.outcome.outputs.edition }} >/dev/null 2>&1; then
+              echo "Verified live on attempt $attempt."
+              npx tsx scripts/brief-watchdog.ts --date=${{ steps.outcome.outputs.edition }}
+              exit 0
+            fi
+            echo "Not live yet (attempt $attempt of 10)."
+          done
+          echo "::error title=Publication not verified::Pushed successfully but ${{ steps.outcome.outputs.edition }} is not live after 5 minutes."
+          npx tsx scripts/brief-watchdog.ts --date=${{ steps.outcome.outputs.edition }} || true
+          exit 1
+
+      - name: Upload run status artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: publication-status-${{ steps.outcome.outputs.edition }}
+          path: publication-status.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Fail the job on a red run
+        if: steps.outcome.outputs.status == 'red'
+        run: |
+          echo "::error title=Daily Brief failed::Edition ${{ steps.outcome.outputs.edition }} ended ${{ steps.outcome.outputs.result }}"
+          exit 1
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        run: |
+          MSG="SF Times Daily Brief FAILED
+          Edition: ${{ steps.outcome.outputs.edition }}
+          Stage: publication pipeline
+          Outcome: ${{ steps.outcome.outputs.result }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "$MSG"
+          if [ -n "${ALERT_WEBHOOK_URL:-}" ]; then
+            # Generic JSON webhook. Works with Slack and Discord incoming
+            # webhooks as-is; both accept a {"text": ...} / {"content": ...} body.
+            curl -sS -X POST -H 'Content-Type: application/json' \
+              -d "$(node -e 'const m=process.argv[1];console.log(JSON.stringify({text:m,content:m}))' "$MSG")" \
+              "$ALERT_WEBHOOK_URL" || echo "Alert webhook post failed (non-fatal)."
+          else
+            echo "ALERT_WEBHOOK_URL not configured. GitHub will still email the workflow failure."
+          fi

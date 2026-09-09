@@ -62,8 +62,14 @@ const longDate = brief.data.date
   })
   .toUpperCase();
 
-// Sort items by composite, highest first
-const sortedItems = [...brief.data.items].sort((a, b) => b.composite_score - a.composite_score);
+// Sort items by composite, highest first.
+// On editions produced by the manual path there are no composite scores, so
+// this is a stable no-op and the edition keeps the running order the editor
+// gave it. The eyebrow below is worded from `hasScores` for that reason: a
+// label reading "HIGHEST COMPOSITE" over an edition with no scores is a small
+// false claim, and this publication does not get to make small false claims.
+const sortedItems = [...brief.data.items].sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0));
+const hasScores = brief.data.items.some((i) => typeof i.composite_score === 'number');
 const leadItem = sortedItems[0];
 const restItems = sortedItems.slice(1);
 
@@ -147,7 +153,7 @@ const collectionSchema = {
 
   <!-- LEAD STORY ============ -->
   <section class="brief-lead" data-category={leadItem.category}>
-    <p class="brief-lead__eyebrow">LEAD STORY · HIGHEST COMPOSITE</p>
+    <p class="brief-lead__eyebrow">LEAD STORY{hasScores ? ' · HIGHEST COMPOSITE' : ''}</p>
     <a class={`brief-lead__card brief-lead__card--${leadItem.signal}`} href={`/brief/${dateString}/${leadItem.slug}/`}>
       <header class="brief-lead__head">
         <div class="brief-lead__tags">

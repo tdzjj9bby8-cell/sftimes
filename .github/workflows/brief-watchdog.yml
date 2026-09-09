@@ -1,0 +1,108 @@
+name: Brief Watchdog
+
+# ---------------------------------------------------------------------------
+# Independently verifies that today's edition actually reached readers.
+#
+# WHY THIS IS A SEPARATE WORKFLOW
+# The publishing job cannot be the thing that certifies its own success. It can
+# exit 0 while the push silently failed, the Vercel build broke, or the site
+# served a stale page. Every incident this publication has had was of that
+# shape: everything "succeeded" and nothing was live.
+#
+# This job never imports the pipeline and never reads the queue. It fetches the
+# public site and asks the reader's question: is today's Brief there?
+#
+# THIS IS THE ONLY SCHEDULED WORKFLOW, AND THAT IS DELIBERATE.
+# Publishing is manual: the operator fires the daily prompt in Claude Code (see
+# BRIEF-DAILY-PLAYBOOK.md). This job makes no model calls and needs no API key,
+# so it can be scheduled when the publishing job cannot. On the manual path its
+# real function is broader than verifying a deploy: it catches the mornings the
+# prompt was never fired at all. That converts the publication's worst failure
+# mode, days of silent staleness nobody notices, into an alert by 11am.
+# ---------------------------------------------------------------------------
+
+on:
+  schedule:
+    # 18:07 UTC = 11:07 PDT / 10:07 PST. Late enough in the morning that a
+    # manual run has had a fair chance to happen, early enough that the day is
+    # still recoverable.
+    - cron: '7 18 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Edition date to verify (YYYY-MM-DD). Blank = today in San Francisco.'
+        required: false
+        type: string
+
+concurrency:
+  group: brief-watchdog
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify today's edition is live
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the live site
+        id: check
+        run: |
+          set -o pipefail
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="--date=${{ inputs.date }}"; fi
+          set +e
+          npx tsx scripts/brief-watchdog.ts $ARGS | tee watchdog.log
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          set -e
+          {
+            echo "result=$(grep -oP '(?<=^WATCHDOG_RESULT=).*' watchdog.log | tail -1)"
+            echo "edition=$(grep -oP '(?<=^WATCHDOG_EDITION=).*' watchdog.log | tail -1)"
+            echo "failed=$(grep -oP '(?<=^WATCHDOG_FAILED=).*' watchdog.log | tail -1)"
+          } >> $GITHUB_OUTPUT
+
+      - name: Alert when the edition is missing
+        if: steps.check.outputs.result == 'unhealthy' || steps.check.outputs.result == 'error'
+        env:
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        run: |
+          MSG="SF Times Daily Brief MISSING
+          Edition: ${{ steps.check.outputs.edition }}
+          Stage: publication verification
+          Reason: expected edition was not found on the live site
+          Failed checks: ${{ steps.check.outputs.failed }}
+          Most likely cause: the daily prompt has not been run yet today.
+          Fix: open Claude Code in ~/projects/sftimes/astro and run the prompt in BRIEF-DAILY-PLAYBOOK.md
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "$MSG"
+          if [ -n "${ALERT_WEBHOOK_URL:-}" ]; then
+            curl -sS -X POST -H 'Content-Type: application/json' \
+              -d "$(node -e 'const m=process.argv[1];console.log(JSON.stringify({text:m,content:m}))' "$MSG")" \
+              "$ALERT_WEBHOOK_URL" || echo "Alert webhook post failed (non-fatal)."
+          else
+            echo "ALERT_WEBHOOK_URL not configured. GitHub will still email this job failure."
+          fi
+
+      - name: Fail the job when unhealthy
+        if: steps.check.outputs.exit_code != '0'
+        run: |
+          echo "::error title=Brief missing::Edition ${{ steps.check.outputs.edition }} failed: ${{ steps.check.outputs.failed }}"
+          exit 1
