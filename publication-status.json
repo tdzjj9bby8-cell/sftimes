@@ -1,16 +1,16 @@
 {
-  "edition_date": "2026-09-08",
-  "run_started": "2026-09-09T00:51:22.764Z",
+  "edition_date": "2026-09-09",
+  "run_started": "2026-09-09T16:17:41.190Z",
   "final_status": "green",
   "outcome": "published",
   "dry_run": false,
   "counts": {
-    "ingested": 206,
-    "dropped_source_fetch": 35,
-    "drafted": 7,
-    "audit_passed": 7,
-    "published_items": 7,
-    "firewall_removed": 0
+    "ingested": 223,
+    "dropped_source_fetch": 25,
+    "drafted": 6,
+    "audit_passed": 6,
+    "published_items": 4,
+    "firewall_removed": 2
   },
   "notes": [
     "Subscription path: drafting done by an editor agent, no API calls in this process."
@@ -21,10 +21,10 @@
     "failed": 0,
     "failed_names": []
   },
-  "generation_completed": "2026-09-09T00:51:22.769Z",
-  "validation_completed": "2026-09-09T00:51:22.794Z",
-  "publication_completed": "2026-09-09T00:51:22.794Z",
-  "live_url": "https://www.sftimes.com/brief/2026-09-08/",
-  "run_finished": "2026-09-09T00:51:22.794Z",
+  "generation_completed": "2026-09-09T16:17:41.193Z",
+  "validation_completed": "2026-09-09T16:17:41.205Z",
+  "publication_completed": "2026-09-09T16:17:41.205Z",
+  "live_url": "https://www.sftimes.com/brief/2026-09-09/",
+  "run_finished": "2026-09-09T16:17:41.205Z",
   "runtime_seconds": 0
 }
