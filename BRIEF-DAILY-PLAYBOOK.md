@@ -95,6 +95,18 @@ npm run brief:ship      publishes
 
 ---
 
+## Who commits what
+
+This repo has a configured git identity (`tdzjj9bby8-cell`). **Anything working in it should use that identity and not override it.**
+
+A Cowork session once passed `-c user.name="SF Times Brief Bot"` on every commit. The commits were legitimate, but they appeared in the log as an unknown automated author with write access to `main`, and the next Claude Code session correctly flagged it as a possible intrusion. A false security alarm is expensive: it costs real attention, and it teaches you to ignore the next one.
+
+So: commit as the repo identity. Note the assist in the message body if it matters. `brief:ship` already does this correctly — it runs a plain `git commit`, so daily editions are authored normally and identified by their message, `Brief <date>: N items`.
+
+The four `SF Times Brief Bot` commits in the history are from that session and are accounted for.
+
+---
+
 ## Other commands
 
 | Command | What it does |
