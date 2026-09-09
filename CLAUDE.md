@@ -305,7 +305,19 @@ Co-Authored-By: Claude (Cowork) <cowork@sftimes.local>
 
 The author stays `tdzjj9bby8-cell`, the repo's own identity, because these are Eric's work product. The trailer is what makes them identifiable.
 
-History note: four early commits are authored `SF Times Brief Bot <brief-bot@sftimes.com>` with no trailer. Those are Cowork's, from before this convention. They were flagged as a possible intrusion at the time, correctly, and they are accounted for.
+**History note — the convention starts at `ed2e385`.** Seven earlier Cowork commits predate it and carry no trailer, so the check is only reliable going forward. Claude Code flagged this correctly. The full list, so nothing is left unexplained:
+
+| Commit | Author as recorded | Why it looks odd |
+|---|---|---|
+| `103c2f1` | SF Times Brief Bot | Cowork overrode the repo identity |
+| `9b19223` | SF Times Brief Bot | same |
+| `12cf560` | SF Times Brief Bot | same |
+| `533ee8b` | SF Times Brief Bot | same |
+| `8714b23` | tdzjj9bby8-cell | Cowork, identity fixed but no trailer yet |
+| `9daf8fb` | tdzjj9bby8-cell | same |
+| `79c61ad` | tdzjj9bby8-cell | same |
+
+Everything else in the history before `ed2e385` is Eric's or Claude Code's.
 
 **When you commit, add nothing.** A commit with no trailer is yours.
 
