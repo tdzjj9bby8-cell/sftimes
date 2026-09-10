@@ -1,6 +1,6 @@
 {
-  "_readme": "Subjects for SF Times features. status: open | researching | drafted | published | dropped. The morning task takes the lowest-numbered open subjects. A subject that fails the source-quality floor is marked dropped with a reason, never silently retried, so the same dead end is not researched twice.",
-  "updated": "2026-09-09",
+  "_readme": "Subjects for SF Times features. status: open | drafted | published | dropped. A subject moves out of 'open' ONLY when there is a result: a written draft, a publication, or a recorded reason for dropping it. Never mark a subject claimed before the work is done. The first scheduled run did exactly that, crashed, and orphaned two subjects that would then have been skipped forever because nothing ever resets them.",
+  "updated": "2026-09-10",
   "topics": [
     {
       "n": 1,
