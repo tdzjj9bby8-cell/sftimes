@@ -29,3 +29,17 @@ review-edition-*.md
 brief-workpacket.md
 brief-drafts.json
 brief-drafts.*.json
+
+# Run record for the most recent Brief run. Deliberately NOT committed: a
+# committed copy can never be accurate. At commit time the edition is composed
+# and not yet live; by the time it is live, the commit has been made. The
+# durable record that an edition shipped is the edition file plus the live site.
+publication-status.json
+
+# Feature drafting working files. article-review/ holds rendered review copies
+# for the editor; the draft JSON carries its paragraph-to-source mapping and
+# lives beside its research packet, which is gitignored for the same reason.
+article-draft.json
+article-draft-*.json
+article-workpacket.md
+article-review/

@@ -119,7 +119,7 @@ Co-Authored-By: Claude (Cowork) <cowork@sftimes.local>
 - **Two feature drafts are waiting for Eric's approval** in `article-review/`: SF Neon, and the San Francisco Columbarium caretaker. Topics 2 and 3 are marked `drafted`. Nobody has read them yet.
 - **Topic queue:** 27 open, 2 drafted, 1 dropped. Topic 1 (fortune cookie factory) was dropped for having no load-bearing sources; do not retry it without new reporting.
 - **Feeds:** 31 of 32 healthy; NBC Bay Area was down on 09-11. Watch whether that persists.
-- **Tests:** 50, all passing. `npm run brief:test`. Run after touching anything in `scripts/lib/`.
+- **Tests:** 52, all passing. `npm run brief:test`. Run after touching anything in `scripts/lib/`.
 
 ---
 
@@ -141,6 +141,7 @@ Each has a regression test.
 | `publication-status.json` recorded `published` with a `live_url` at the compose step | An edition that was never pushed reported itself live; the false green propagated into this document |
 | The above was fixed in `brief-assemble.ts` and left standing in `brief-run.ts` | A defect fixed on the watched path and left on the unwatched one buys confidence without coverage |
 | `article-draft.json` is one fixed filename | Drafting two features back to back destroyed the first draft's source mapping |
+| `publication-status.json` was committed | A snapshot of a mid-flight process can never be accurate at commit time. Three commits in this history claim an edition was live when it had not been pushed. Now gitignored: local run state, not a record |
 
 **The pattern worth internalizing:** most of these were false positives, not missed fabrications. A check that fires on correct work does not make the publication safer. It teaches the operator to override it.
 

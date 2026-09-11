@@ -108,7 +108,17 @@ fi
 # ---- 3. COMMIT ----
 echo ""
 echo "[3/5] Committing"
-git add src/content/briefs/ scripts/queue/ publication-status.json
+# publication-status.json is deliberately NOT committed. A committed copy can
+# never be accurate: at commit time the edition is composed and not yet live,
+# and by the time it IS live the commit has been made. Under the old code the
+# committed copy claimed 'published' with a live_url about an edition that had
+# not been pushed; under the new code it would claim 'composed' about editions
+# that are live. Both are records asserting something untrue, which is the
+# exact class of error this pipeline exists to prevent.
+#
+# It is local operational state, like the queue files. The durable record that
+# an edition shipped is the edition file in this repo plus the live site.
+git add src/content/briefs/ scripts/queue/
 if git diff --cached --quiet; then
   echo "Nothing staged. The edition may already be committed."
 else

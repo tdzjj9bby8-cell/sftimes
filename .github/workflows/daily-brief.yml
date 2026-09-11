@@ -206,7 +206,7 @@ jobs:
           set -euo pipefail
           git config user.name  "SF Times Brief Bot"
           git config user.email "brief-bot@sftimes.com"
-          git add src/content/briefs/ scripts/queue/ publication-status.json
+          git add src/content/briefs/ scripts/queue/
           if git diff --cached --quiet; then
             echo "Nothing staged. Not committing."
             exit 0

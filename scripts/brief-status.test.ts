@@ -133,3 +133,34 @@ test('the workflow promotes to published only after the watchdog confirms', () =
     'nothing before the watchdog confirmation may record published'
   );
 });
+
+// ---- THE COMMITTED RECORD ----
+//
+// publication-status.json must not be staged by either publishing path. A
+// committed copy can never be accurate: at commit time the edition is composed
+// and not yet live, and by the time it IS live the commit is already made.
+// Under the old code the committed copies claimed 'published' with a live_url
+// about editions that had not been pushed; three such commits are in this
+// history. Under the new code they would claim 'composed' about editions that
+// are live. Both directions are a committed record asserting something untrue.
+
+test('neither publishing path stages publication-status.json', () => {
+  for (const [name, src] of [['brief-ship.sh', ship], ['daily-brief.yml', workflow]] as const) {
+    const staged = src.split('\n').filter((l) => /^\s*git add /.test(l));
+    for (const line of staged) {
+      assert.equal(
+        line.includes('publication-status.json'),
+        false,
+        `${name} stages publication-status.json: ${line.trim()}`
+      );
+    }
+  }
+});
+
+test('publication-status.json is gitignored', () => {
+  const ignore = readFileSync(path.join(root, '.gitignore'), 'utf8');
+  assert.ok(
+    /^publication-status\.json$/m.test(ignore),
+    'publication-status.json must be gitignored; it is local run state'
+  );
+});
