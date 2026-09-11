@@ -195,13 +195,13 @@ jobs:
         # Vercel build fails, and the site silently keeps serving yesterday.
         # Building here proves the content compiles before it can ever reach
         # the repository. If this fails, nothing is pushed.
-        if: steps.outcome.outputs.result == 'published'
+        if: steps.outcome.outputs.result == 'composed'
         run: npx astro build
 
       - name: Commit and push the edition
         # Only when something was actually published. A dry run, a weekend
         # skip, an idempotent skip, or an empty day must not create a commit.
-        if: steps.outcome.outputs.result == 'published'
+        if: steps.outcome.outputs.result == 'composed'
         run: |
           set -euo pipefail
           git config user.name  "SF Times Brief Bot"
@@ -224,7 +224,7 @@ jobs:
         # public URL. This closes the window where the Action is green and the
         # deploy silently failed. The watchdog is the later backstop; this is
         # the same-run check.
-        if: steps.outcome.outputs.result == 'published'
+        if: steps.outcome.outputs.result == 'composed'
         run: |
           set -uo pipefail
           echo "Waiting for Vercel to build and deploy..."
@@ -233,11 +233,29 @@ jobs:
             if npx tsx scripts/brief-watchdog.ts --date=${{ steps.outcome.outputs.edition }} >/dev/null 2>&1; then
               echo "Verified live on attempt $attempt."
               npx tsx scripts/brief-watchdog.ts --date=${{ steps.outcome.outputs.edition }}
+              # ONLY NOW is the edition published. The watchdog just fetched the
+              # real public URL and got a 200 with the right date and real items
+              # on the page. This is the single point in the unattended path
+              # entitled to write 'published' and a live_url, because it is the
+              # only point where either has been tested. On this path nobody is
+              # reading a terminal, so this file is the whole report.
+              node -e '
+                const fs = require("fs");
+                const s = JSON.parse(fs.readFileSync("publication-status.json", "utf8"));
+                s.outcome = "published";
+                s.final_status = "green";
+                s.publication_completed = new Date().toISOString();
+                s.verification_completed = new Date().toISOString();
+                s.live_url = "https://www.sftimes.com/brief/" + process.argv[1] + "/";
+                s.notes.push("Verified live by the watchdog against the public URL.");
+                fs.writeFileSync("publication-status.json", JSON.stringify(s, null, 2) + "\n");
+              ' "${{ steps.outcome.outputs.edition }}"
               exit 0
             fi
             echo "Not live yet (attempt $attempt of 10)."
           done
           echo "::error title=Publication not verified::Pushed successfully but ${{ steps.outcome.outputs.edition }} is not live after 5 minutes."
+          echo "publication-status.json still reads 'composed', not 'published', which is accurate."
           npx tsx scripts/brief-watchdog.ts --date=${{ steps.outcome.outputs.edition }} || true
           exit 1
 

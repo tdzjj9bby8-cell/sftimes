@@ -279,11 +279,25 @@ export async function run(argv: string[] = []): Promise<number> {
       healthySources: health.healthy,
       totalSources: health.total,
     });
+    // ---- COMPOSED, NOT PUBLISHED ----
+    // Identical treatment to brief-assemble.ts, for identical reasons, and it
+    // matters MORE here. This is the unattended path: the workflow commits and
+    // pushes AFTER this function returns, and nobody is watching a terminal at
+    // 06:07. On that path the status file is the only signal a human will ever
+    // see, so a status file that says green/published/live_url before anything
+    // has been pushed is not a cosmetic inaccuracy, it is the entire report.
+    //
+    // Claude Code caught that the 2026-09-11 fix patched assemble and left this
+    // standing. A defect fixed on the path you are watching and left on the
+    // path you are not is worse than not fixing it at all, because it buys the
+    // confidence without the coverage.
+    //
+    // The workflow's post-push verification step promotes this to 'published'
+    // with a live_url, after the watchdog confirms a 200 on the real URL.
     status.validation_completed = new Date().toISOString();
-    status.publication_completed = new Date().toISOString();
-    status.live_url = `https://sftimes.com/brief/${editionDate}/`;
     status.final_status = 'green';
-    status.outcome = 'published';
+    status.outcome = 'composed';
+    status.notes.push('Composed and written to the content collection. NOT published: not committed, not pushed, not verified live.');
 
     // Count what actually shipped, from the composed edition rather than from
     // intent, so the report reflects the artifact and not the plan.
