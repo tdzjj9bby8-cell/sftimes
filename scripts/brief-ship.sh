@@ -81,7 +81,13 @@ case "$OUTCOME" in
     echo "$EDITION has already been published. Nothing to do."
     exit 0
     ;;
-  published) ;;
+  composed) ;;
+  published)
+    # A previous ship already verified this edition live. Nothing to redo.
+    echo ""
+    echo "$EDITION is already recorded as published and verified. Nothing to do."
+    exit 0
+    ;;
   *)
     echo ""
     echo "STOPPED: run ended '$OUTCOME'. Nothing was pushed."
@@ -138,6 +144,22 @@ for attempt in $(seq 1 12); do
   if npx tsx scripts/brief-watchdog.ts --date="$EDITION" >/dev/null 2>&1; then
     echo ""
     npx tsx scripts/brief-watchdog.ts --date="$EDITION"
+    # ---- ONLY NOW IS IT PUBLISHED ----
+    # The watchdog just fetched the real public URL and got a 200 with the
+    # right date and real items on the page. This is the only point in the
+    # whole pipeline entitled to write outcome 'published' and a live_url,
+    # because it is the only point where either claim has been tested.
+    node -e '
+      const fs = require("fs");
+      const p = "publication-status.json";
+      const s = JSON.parse(fs.readFileSync(p, "utf8"));
+      s.outcome = "published";
+      s.final_status = "green";
+      s.verification_completed = new Date().toISOString();
+      s.live_url = "https://www.sftimes.com/brief/" + process.argv[1] + "/";
+      s.notes.push("Verified live by the watchdog against the public URL.");
+      fs.writeFileSync(p, JSON.stringify(s, null, 2) + "\n");
+    ' "$EDITION"
     echo ""
     echo "=============================================="
     echo " LIVE: https://www.sftimes.com/brief/$EDITION/"
@@ -150,5 +172,6 @@ done
 echo ""
 echo "STOPPED: pushed successfully, but $EDITION is not live after four minutes."
 echo "The content is safely in the repository. Check the Vercel deployment log."
+echo "publication-status.json still reads 'composed', not 'published', which is accurate."
 npx tsx scripts/brief-watchdog.ts --date="$EDITION" || true
 exit 1

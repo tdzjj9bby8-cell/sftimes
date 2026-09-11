@@ -1,6 +1,6 @@
 {
   "_readme": "Subjects for SF Times features. status: open | drafted | published | dropped. A subject moves out of 'open' ONLY when there is a result: a written draft, a publication, or a recorded reason for dropping it. Never mark a subject claimed before the work is done. The first scheduled run did exactly that, crashed, and orphaned two subjects that would then have been skipped forever because nothing ever resets them.",
-  "updated": "2026-09-10",
+  "updated": "2026-09-11",
   "topics": [
     {
       "n": 1,
@@ -16,7 +16,7 @@
       "subject": "SF Neon (Randall Ann Homan & Al Barna)",
       "note": "the two people documenting and saving the city's vanishing neon signs before the last of them go dark.",
       "slug": "sf-neon-randall-ann-homan-al-barna",
-      "status": "open",
+      "status": "drafted",
       "published": null
     },
     {
@@ -24,14 +24,14 @@
       "subject": "The caretaker of the San Francisco Columbarium",
       "note": "who restored the domed Neptune Society building and can tell you the story inside almost every niche.",
       "slug": "the-caretaker-of-the-san-francisco-columbarium",
-      "status": "open",
+      "status": "drafted",
       "published": null
     },
     {
       "n": 4,
       "subject": "Dan Zelinsky / Mus\u00e9e M\u00e9canique",
       "note": "keeper of one of the world's largest collections of working antique coin-operated arcade machines, at Fisherman's Wharf.",
-      "slug": "dan-zelinsky-mus-e-m-canique",
+      "slug": "dan-zelinsky-musee-mecanique",
       "status": "open",
       "published": null
     },
@@ -71,7 +71,7 @@
       "n": 9,
       "subject": "The Bay Area's community fridge network",
       "note": "the volunteer-run \"town fridges\" that became a mutual-aid movement, and the people who keep them stocked.",
-      "slug": "the-bay-area-s-community-fridge-network",
+      "slug": "the-bay-areas-community-fridge-network",
       "status": "open",
       "published": null
     },
@@ -127,7 +127,7 @@
       "n": 16,
       "subject": "Glide or St. Anthony's",
       "note": "the free-meals institutions of the Tenderloin, the scale of what they serve, and who keeps the kitchens running.",
-      "slug": "glide-or-st-anthony-s",
+      "slug": "glide-or-st-anthonys",
       "status": "open",
       "published": null
     },
@@ -159,7 +159,7 @@
       "n": 20,
       "subject": "D'Arcy Drollinger, SF's Drag Laureate & Oasis",
       "note": "the nation's first official city drag laureate and the drag renaissance behind the appointment.",
-      "slug": "d-arcy-drollinger-sf-s-drag-laureate-oasis",
+      "slug": "darcy-drollinger-sfs-drag-laureate-oasis",
       "status": "open",
       "published": null
     },
@@ -191,7 +191,7 @@
       "n": 24,
       "subject": "The Bay's turntablism and hip-hop lineage",
       "note": "from Invisibl Skratch Piklz to hyphy, the region's outsized influence and who carries it now.",
-      "slug": "the-bay-s-turntablism-and-hip-hop-lineage",
+      "slug": "the-bays-turntablism-and-hip-hop-lineage",
       "status": "open",
       "published": null
     },

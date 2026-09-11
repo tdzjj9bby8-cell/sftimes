@@ -188,10 +188,35 @@ export async function articlePublish(argv: string[] = []): Promise<number> {
   // publication rests on not blurring that line.
   fm.push('---');
   fm.push('');
-  fm.push('**How this was reported.** This article was assembled from published public sources, listed below, rather than from original interviews by SF Times. Every quotation appears in one of them. Drafted with AI assistance and checked automatically against the full text of each source before publication.');
+  // Sources the paragraphs ACTUALLY cite, separated from those merely fetched.
+  //
+  // This block used to list every source in the research packet under a heading
+  // reading "How this was reported". On the first two real features that meant
+  // crediting Wikipedia and a funeral-industry blog for a Columbarium piece
+  // built on four newsroom sources, and the subject's own site for a piece that
+  // never drew on it. Nothing was fabricated and every quotation was still
+  // traceable, but a reader auditing the piece against Wikipedia would find
+  // nothing there, and the padding was drawn from exactly the supporting tier
+  // the source-quality gate exists to keep from carrying a piece.
+  //
+  // Transparency about everything consulted is worth keeping. Implying it was
+  // all load-bearing is not. So: two lists, honestly labelled.
+  const citedIds = new Set(draft.paragraphs.flatMap((p) => p.source_ids ?? []));
+  const drawnOn = sources.filter((s) => citedIds.has(s.id));
+  const alsoRead = sources.filter((s) => !citedIds.has(s.id));
+
+  fm.push('**How this was reported.** This article was assembled from published public sources rather than from original interviews by SF Times. Every quotation appears in one of the sources drawn on below. Drafted with AI assistance and checked automatically against the full text of each source before publication.');
   fm.push('');
-  for (const s of sources) fm.push(`- [${s.outlet}](${s.url})`);
+  fm.push('Sources drawn on:');
   fm.push('');
+  for (const s of drawnOn) fm.push(`- [${s.outlet}](${s.url})`);
+  fm.push('');
+  if (alsoRead.length) {
+    fm.push('Also consulted, but not drawn on for any passage above:');
+    fm.push('');
+    for (const s of alsoRead) fm.push(`- [${s.outlet}](${s.url})`);
+    fm.push('');
+  }
 
   const markdown = fm.join('\n');
 
@@ -202,6 +227,19 @@ export async function articlePublish(argv: string[] = []): Promise<number> {
     console.error('[article-publish] Refusing to write. This would break the Astro build.');
     return 1;
   }
+
+  // ---- PRESERVE THE DRAFT ALONGSIDE ITS PACKET ----
+  // article-draft.json is a single fixed filename, so drafting a second article
+  // overwrites the first. That is fine while a piece is in flight and wrong the
+  // moment it is not: on 2026-09-11 two features were drafted back to back and
+  // neither draft survived, so neither review copy could be regenerated when
+  // the sourcing footer changed. The prose was intact in the rendered markdown;
+  // the paragraph-to-source mapping, which is the safety primitive, was gone.
+  //
+  // Keeping it next to the packet means a review copy can always be rebuilt
+  // from the same evidence it was checked against.
+  if (!existsSync(QUEUE_DIR)) await mkdir(QUEUE_DIR, { recursive: true });
+  await writeFile(path.join(QUEUE_DIR, `${slug}.draft.json`), JSON.stringify(draft, null, 2), 'utf-8');
 
   if (review) {
     if (!existsSync(REVIEW_DIR)) await mkdir(REVIEW_DIR, { recursive: true });

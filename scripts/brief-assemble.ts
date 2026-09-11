@@ -354,10 +354,29 @@ export async function assemble(argv: string[] = []): Promise<number> {
       return 0;
     }
 
-    status.publication_completed = new Date().toISOString();
+    // ---- THE EDITION IS COMPOSED. IT IS NOT PUBLISHED. ----
+    // This stage writes a file to the working tree. Nothing has been committed,
+    // pushed, or built, and no reader can see anything.
+    //
+    // This used to record outcome 'published' and a live_url here, and on
+    // 2026-09-11 that produced exactly the failure this project exists to
+    // prevent. The edition cleared every gate, got committed, and the push
+    // never happened. The status file said green/published with a live_url
+    // that returned 404. The terminal line below was accurate and scrolled
+    // away; the JSON persisted, and a handoff doc written hours later read the
+    // status file and reported the edition as live. A false green propagated
+    // into documentation.
+    //
+    // "Done means verified" is the rule this repository states for the site.
+    // It has to apply to the repository's own records first. A field named
+    // live_url is a claim about the public internet, and nothing here has
+    // touched the public internet, so nothing here may write it.
+    //
+    // brief-ship.sh promotes this to 'published' with a live_url only after
+    // the watchdog confirms a 200.
     status.final_status = 'green';
-    status.outcome = 'published';
-    status.live_url = `https://www.sftimes.com/brief/${editionDate}/`;
+    status.outcome = 'composed';
+    status.notes.push('Composed and written to the content collection. NOT published: not committed, not pushed, not verified live.');
     await writeStatus(status);
     console.log('');
     console.log('[assemble] Edition written. It is NOT live until it is committed, pushed, and Vercel rebuilds.');

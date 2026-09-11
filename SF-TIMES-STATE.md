@@ -113,8 +113,9 @@ Co-Authored-By: Claude (Cowork) <cowork@sftimes.local>
 
 ## State as of 2026-09-11
 
-- **Editions live:** 2026-09-08, 09-09, 09-11. 09-10 was missed and deliberately not backfilled — publishing yesterday's news under yesterday's date today would be dating something that did not happen.
-- **3 commits committed locally, not pushed.** Eric runs `git push origin main`.
+- **Editions live and verified:** 2026-09-08, 09-09, 09-11. 09-10 was missed and deliberately not backfilled — publishing yesterday's news under yesterday's date today would be dating something that did not happen.
+
+  An earlier version of this line claimed 09-11 was live when it was not. It had been composed and committed and never pushed, and `publication-status.json` said `published` with a `live_url` that returned 404, because the status file recorded that at the assemble step. **Never report an edition as live from the status file alone.** Run `npm run brief:watchdog -- --date=<date>` and read the result. That hole is now closed in code, but the habit is the real protection.
 - **Two feature drafts are waiting for Eric's approval** in `article-review/`: SF Neon, and the San Francisco Columbarium caretaker. Topics 2 and 3 are marked `drafted`. Nobody has read them yet.
 - **Topic queue:** 27 open, 2 drafted, 1 dropped. Topic 1 (fortune cookie factory) was dropped for having no load-bearing sources; do not retry it without new reporting.
 - **Feeds:** 31 of 32 healthy; NBC Bay Area was down on 09-11. Watch whether that persists.
